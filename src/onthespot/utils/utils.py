@@ -9,6 +9,7 @@ from .spotify import search_by_term
 import subprocess
 import asyncio
 import traceback
+import json
 
 if platform.system() == "Windows":
     from winsdk.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
@@ -242,20 +243,23 @@ def get_url_data(url):
 
 
 def get_now_playing_local(session):
+    def get_track_url():
+        url = "https://api.spotify.com/v1/me/player/currently-playing"
+        access_token = session.tokens().get("user-read-currently-playing")
+        resp = requests.get(url, headers={"Authorization": "Bearer %s" % access_token}, params={})
+        json_data = resp.json()
+        return json_data['item']['external_urls']['spotify']
     global media_tracker_last_query
     if platform.system() == "Linux":
         logger.debug("Linux detected ! Use playerctl to get current track information..")
         try:
-            playerctl_out = subprocess.check_output(["playerctl", "-p", "spotify", "metadata"])
+            playerctl_out = subprocess.check_output(["playerctl", "-p", "spotify", "metadata", "xesam:url"])
         except subprocess.CalledProcessError:
-            logger.debug("Spotify not running..")
-            return ""
-        found = re.search(r"((spotify xesam:url).*https:\/\/open.spotify.*\n)", playerctl_out.decode())
-        if found:
-            spotify_url = found.group(1).replace("spotify xesam:url", "").strip()
+            logger.debug("Spotify not running. Fetching track via api..")
+            spotify_url = get_track_url()
             return spotify_url
-        else:
-            return ""
+        spotify_url = playerctl_out.decode()
+        return spotify_url
     elif platform.system() == "Windows":
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -283,15 +287,21 @@ def get_now_playing_local(session):
                     logger.debug(f"Spotify now playing {link}")
                     return link
                 except (KeyError, IndexError):
-                    return ""
+                    logger.debug("KeyError. Fetching track via api..")
+                    spotify_url = get_track_url()
+                    return spotify_url
             else:
-                logger.debug(f"No result for currently playing track")
-                return ""
+                logger.debug("No result for currently playing track. Fetching track via api..")
+                spotify_url = get_track_url()
+                return spotify_url
         else:
-            return ""
+            logger.debug("Event loop failed. Fetching track via api..")
+            spotify_url = get_track_url()
+            return spotify_url
     else:
-        logger.debug("Unsupported platform for auto download !")
-        return ""
+        logger.debug("Unsupported platform for auto download. Fetching track via api..")
+        spotify_url = get_track_url()
+        return spotify_url
 
 
 def name_by_from_sdata(d_key: str, item: dict):
