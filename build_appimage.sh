@@ -40,9 +40,26 @@ rm OnTheSpot.AppDir/python3.12.3.desktop
 cp ../src/onthespot/resources/icon.svg OnTheSpot.AppDir/casual_onthespot.svg
 cp ../src/onthespot/resources/org.eu.casualsnek.onthespot.desktop OnTheSpot.AppDir/org.eu.casualsnek.onthespot.desktop
 
-echo '#!/bin/bash;
-HERE="$(dirname "$(readlink -f "${0}")")";
-exec python3 "${HERE}/src/portable.py";' > OnTheSpot.AppDir/AppRun
+echo '#! /bin/bash
+
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+# Export PATH
+export PATH=$HERE/usr/bin:$PATH;
+
+# Resolve the calling command (preserving symbolic links).
+export APPIMAGE_COMMAND=$(command -v -- "$ARGV0")
+
+# Export TCl/Tk
+export TCL_LIBRARY="${APPDIR}/usr/share/tcltk/tcl8.6"
+export TK_LIBRARY="${APPDIR}/usr/share/tcltk/tk8.6"
+export TKPATH="${TK_LIBRARY}"
+
+# Export SSL certificate
+export SSL_CERT_FILE="${APPDIR}/opt/_internal/certs.pem"
+
+# Call OnTheSpot
+"$HERE/opt/python3.12/bin/python3.12" "-m" "onthespot" "$@"' > OnTheSpot.AppDir/AppRun
 chmod +x OnTheSpot.AppDir/AppRun
 
 echo ' '
@@ -66,7 +83,6 @@ echo " => Build OnTheSpot Appimage"
 ./appimagetool-x86_64.AppImage --appimage-extract
 squashfs-root/AppRun OnTheSpot.AppDir
 mv OnTheSpot-x86_64.AppImage ../dist/OnTheSpot-x86_64.AppImage
-chmod +x ../dist/OnTheSpot-x86_64.AppImage
 
 
 echo " => Done "
