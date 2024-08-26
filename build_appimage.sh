@@ -66,5 +66,7 @@ echo " => Build OnTheSpot Appimage"
 ./appimagetool-x86_64.AppImage --appimage-extract
 squashfs-root/AppRun OnTheSpot.AppDir
 mv OnTheSpot-x86_64.AppImage ../dist/OnTheSpot-x86_64.AppImage
+chmod +x ../dist/OnTheSpot-x86_64.AppImage
+
 
 echo " => Done "
