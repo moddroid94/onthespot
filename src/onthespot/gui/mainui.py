@@ -1,6 +1,7 @@
 import os
 import queue
 import time
+import threading
 import uuid
 from PyQt5 import uic, QtNetwork, QtGui
 from PyQt5.QtCore import QThread, QDir
@@ -9,6 +10,7 @@ from ..exceptions import EmptySearchResultException
 from ..utils.spotify import search_by_term, get_thumbnail
 from ..utils.utils import name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session
 from ..worker import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
+from ..worker.zeroconf import new_session
 from .dl_progressbtn import DownloadActionsButtons
 from .minidialog import MiniDialog
 from ..otsconfig import config
@@ -558,40 +560,11 @@ class MainWindow(QMainWindow):
 
     def __add_account(self):
         logger.info('Add account clicked ')
-        if self.inp_login_username.text().strip() in [user[0] for user in config.get('accounts')]:
-            self.__splash_dialog.run(
-                'The account "{}" is already added !'.format(self.inp_login_username.text().strip()))
-            logger.warning('Account already exists ' + self.inp_login_username.text().strip())
-        if self.inp_login_username.text().strip() != '' and self.inp_login_password.text() != '':
-            logger.debug('Credentials are not empty !')
-            uuid_uniq = str(uuid.uuid4())
-            login = login_user(self.inp_login_username.text().strip(), self.inp_login_password.text(),
-                               os.path.join(os.path.expanduser('~'), '.cache', 'casualOnTheSpot', 'sessions'), uuid_uniq)
-            if login[0]:
-                # Save to config and add to session list then refresh tables
-                cfg_copy = config.get('accounts').copy()
-                new_user = [
-                    self.inp_login_username.text().strip(),
-                    login[3],
-                    int(time.time()),
-                    login[4],
-                ]
-                cfg_copy.append(new_user)
-                config.set_('accounts', cfg_copy)
-                config.update()
-                session_pool[login[4]] = login[1]
-                self.__splash_dialog.run('Logged in successfully ! \n')
-                logger.info(f"Account {self.inp_login_username.text().strip()} added successfully")
-                self.__users.append([self.inp_login_username.text().strip(), 'Premium' if login[3] else 'Free', 'OK',
-                                     login[4]])
-                self.__generate_users_table(self.__users)
-                self.__rebuild_threads()
-            else:
-                logger.error(f"Account add failed for : {self.inp_login_username.text().strip()}")
-                self.__splash_dialog.run('Login failed ! Probably invalid username or password.')
-        else:
-            logger.info('Credentials are empty >-< ')
-            self.__splash_dialog.run('Please enter username/password to log in !')
+        self.btn_login_add.setText("Waiting...")
+        login = threading.Thread(target=new_session)
+        login.daemon = True
+        login.start()
+        self.__splash_dialog.run("Login Service Started...\nSelect 'OnTheSpot' under devices in the Spotify Desktop App.")
 
     def __get_search_results(self):
         search_term = self.inp_search_term.text().strip()
