@@ -23,26 +23,24 @@ def new_session():
                     logging.info("Account already exists")
                     return
                 else:
+                    try:
+                        os.mkdir(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'))
+                    except FileExistsError:
+                        logging.info("The sessions directory already exists.")
                     uuid_uniq = str(uuid.uuid4())
                     session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'),
                                          f"ots_login_{uuid_uniq}.json")
-
                     os.rename("credentials.json", session_json_path)
-
-
                     cfg_copy = config.get('accounts').copy()
-
                     new_user = [
                         zs._ZeroconfServer__session.username(),
                         "true",
                         int(time.time()),
                         uuid_uniq,
                     ]
-
                     cfg_copy.append(new_user)
                     config.set_('accounts', cfg_copy)
                     config.update()
-
                     logging.info("Config updated, restarting...")
                     os.execl(sys.executable, sys.executable, * sys.argv)
 
