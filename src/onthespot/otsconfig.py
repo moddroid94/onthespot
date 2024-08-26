@@ -65,7 +65,6 @@ class Config:
             with open(self.__cfg_path, "w") as cf:
                 cf.write(json.dumps(self.__template_data, indent=4))
             self.__config = self.__template_data
-        self.__run_migration()
         print('Config version: ', self.__config['version'])
         try:
             os.makedirs(self.get("download_root"), exist_ok=True)
@@ -147,31 +146,6 @@ class Config:
         with open(self.__cfg_path, "w") as cf:
             cf.write(json.dumps(self.__template_data, indent=4))
         self.__config = self.__template_data
-
-    def __run_migration(self):
-        while self.get('version') < self.version:
-            # Migrate v0.4 to v0.5
-            if self.get('version') == 0.4:
-                print('Curent Config version : ', 0.4)
-                accounts = self.__config['accounts'].copy()
-                new_accounts = []
-                for account in accounts:
-                    # Assign UUID
-                    acc_uuid = str(uuid.uuid4())
-                    session_dir = os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions')
-                    new_accounts.append([account[0], account[1], account[2], acc_uuid])
-                    # Move saved sessions
-                    try:
-                        os.rename(
-                            os.path.join(session_dir, f"{account[0]}_GUZpotifylogin.json"),
-                            os.path.join(session_dir, f"ots_login_{acc_uuid}.json")
-                        )
-                    except:
-                        print('Sessions could not be moved')
-                self.set_('accounts', new_accounts)
-                self.set_('version', 0.5)
-                print('Config migrated to version : ', 0.5)
-                self.update()
 
 
 config = Config()
