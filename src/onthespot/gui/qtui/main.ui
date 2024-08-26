@@ -879,7 +879,7 @@
               <item>
                <widget class="QCheckBox" name="inp_enable_spot_watch">
                 <property name="text">
-                 <string>Mirror Spotify Playback</string>
+                 <string>Mirror Playback</string>
                 </property>
                </widget>
               </item>
