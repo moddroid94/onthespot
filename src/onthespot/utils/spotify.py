@@ -64,7 +64,6 @@ def get_track_lyrics(session, track_id, metadata, forced_synced):
             lyrics.append(f'[ar:{artist}]')
             lyrics.append(f'[al:{album}]')
             lyrics.append(f'[by:{lyrics_json["provider"]}]')
-            lyrics.append(f'[ve:{config.version}]')
             if round((l_ms/1000)/60) < 10:
                 digit="0"
             else:
