@@ -1,9 +1,7 @@
-![Logo](src/onthespot/resources/icon.png)
-
-# OnTheSpot
+# OnTheSpot <img src="src/onthespot/resources/icon.svg" width="40" height="32">
 
 qt based music downloader written in python.
-![2024-08-26_15-58](https://github.com/user-attachments/assets/ee8f1d08-6833-4673-976b-89e4f43968f9)
+<img src="https://github.com/user-attachments/assets/ee8f1d08-6833-4673-976b-89e4f43968f9">
 
 
 # 1. Installing/launching application:
