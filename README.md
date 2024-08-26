@@ -3,31 +3,21 @@
 # Onthespot
 
 qt based music downloader written in python.
+![2024-08-26_15-58](https://github.com/user-attachments/assets/ee8f1d08-6833-4673-976b-89e4f43968f9)
 
-![Screenshot](https://i.imgur.com/C4V94gy.png)
 
 # 1. Installing/launching application:
-## 1.1. Launch without installing - from source
-
-Make sure [ffmpeg](https://ffmpeg.org/), [python3](https://www.python.org/downloads) and [Git](https://git-scm.com/downloads) are installed and available on your `$PATH`. If you are on windows, you also need to install the [Microsoft C++ build tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and restart your computer before starting the build process.
-  1. Download or Clone the repo ```git clone https://github.com/casualsnek/onthespot```
-  1. Navigate to the onthespot directory ```cd onthespot```
-  1. Install the package ```pip install -r requirements.txt```
-  1. Navigate to source directory ```cd src```
-  1. Launch the application with ```python3 portable.py```
-
-## 1.2. Launch with installing - from source
-
-The requirements are the same as "Launching without installing" above.
-
-1. Download or Clone the repo ```git clone https://github.com/casualsnek/onthespot```
-1. Navigate to the onthespot directory ```cd onthespot```
-1. Build the package ```python -m build```
-1. Install the package ```pip install ./dist/*.whl```
-1. Launch the application with ```onthespot_gui```
-
-## 1.3. Using portable prebuilt binaries
+## 1.1. Using portable prebuilt binaries
 ### On Linux
+#### Appimage
+It is recommended that you run `OnTheSpot` as an appimage as ffmpeg and python dependencies are prebundled.
+
+```
+wget https://github.com/justin025/onthespot/releases/download/v0.6/OnTheSpot-0.6-x86_64.AppImage
+chmod +x OnTheSpot-0.6-x86_64.AppImage
+./OnTheSpot-0.6-x86_64.AppImage
+```
+
 #### Arch Linux
 `onthespot` is available for arch linux and arch linux based distributions in arch user repository (aur) as [onthespot-git](https://aur.archlinux.org/packages/onthespot-git).
 
@@ -38,25 +28,31 @@ For eg: using yay
 yay -Sy onthespot-git
 ```
 
-#### Other Distributions
-Download Latest 'onthespot_linux' from the release section and execute with
- ```
- chmod +x onthespot_linux
- ./onethespot_linux
- ```
-### On Windows
-Download Latest 'onthespot_win_ffm.exe' or 'onthespot_win.exe' from the Release section and execute by double-clicking the downloaded file.
+#### Gentoo
+Create a local overlay and add the files contained in distros/gentoo, then run the command below.
+```
+emerge onthespot
+```
 
-The binaries with filename ending with '_ffm' have ffmpeg bundled and should not require manual installation.
+## 1.2. Launch without installing - from source
 
-If you are using binaries that does not bundle ffmpeg and downloads gets stuck at 99% with ```Converting``` on progress text, you are missing ffmpeg ! Please install it by following the instructions below
+Make sure [ffmpeg](https://ffmpeg.org/), [python3](https://www.python.org/downloads), and [Git](https://git-scm.com/downloads) are installed and available on your `$PATH`. If you are on windows, you also need to install the [Microsoft C++ build tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and restart your computer before starting the build process.
+  1. Download or Clone the repo ```git clone https://github.com/casualsnek/onthespot```
+  1. Navigate to the onthespot directory ```cd onthespot```
+  1. Install the package ```pip install -r requirements.txt```
+  1. Navigate to source directory ```cd src```
+  1. Launch the application with ```python3 portable.py```
 
-#### Installing ffmpeg in windows
-- Open Windows Explorer and Navigate to ```C:\``` Drive and make a folder name ```ffmpeg``` there
-- Download ffmpeg zip from [https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z) then copy the ``bin`` folder from zip to ```C:\ffmpeg```
-- Open CMD as administrator and run the command: ```setx /m PATH "C:\ffmpeg\bin;%PATH%"```
+## 1.3. Launch with installing - from source
 
-Now the application should work as expected.
+The requirements are the same as "Launching without installing" above.
+
+1. Download or Clone the repo ```git clone https://github.com/casualsnek/onthespot```
+1. Navigate to the onthespot directory ```cd onthespot```
+1. Build the package ```python -m build```
+1. Install the package ```pip install ./dist/*.whl```
+1. Launch the application with ```onthespot_gui```
+
 
 # 2. Building/packaging manually
 Building or packaging on any OS requires Git, Python3 and Pip installed. Make sure you have them installed !
@@ -67,13 +63,11 @@ Open terminal emulator and run the following command to clone the repository and
 ```bash
 git clone https://github.com/casualsnek/onthespot
 cd onthespot
+./build_appimage.sh
 ```
-If you want builds with ffmpeg embedded download ffmpeg binaries for your os from [Here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z). 
-Create a new directory named 'ffbin_nix' in repository root directory. Copy three files 'ffmpeg', 'ffprobe', 'ffplay' from downloaded archive to just created 'ffbin_nix' directory then run;
-```bash
-bash ./build_linux.sh
-```
-After the command completes, you should have a 'dist' directory in repository root containing built 'onthespot_linux' binary.
+If you want builds with ffmpeg embedded download ffmpeg binaries for your os from [Here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z).
+The script will prompt you to add the binaries to 'OnTheSpot.AppDir/usr/bin', ffmpeg, ffprobe, and ffplay are required for onthespot properly parse songs.
+After the command completes, you should have a 'dist' directory in repository root containing built 'OnTheSpot-x86_64.AppImage' binary.
 
 ### 2.1.2. On Windows
 
@@ -154,7 +148,7 @@ The download status and progress can be viewed by navigating to the 'Progress' t
 - **Max search results**              : The number of items to show in search result for each type of media. Example: setting it to '1' shows one result for artist, album, track and playlist resulting in 4 total search results.
 - **Raw media download**              : Downloads files (they will be .ogg) to disk without converting to set media format, it also disables metadata writing and thumbnail embedding.
 - **Force premium**                   : Use this if your premium accounts shows FREE in accounts table, this applies to all added accounts so it's not recommeded to use with a combination of free and premium accounts. Don't use if account isn't premium.
-- **Enable desktop app play to download** : Enabling will automatically download songs you play on spotify desktop application. (Supported: Linux/Windows)
+- **Mirror Playback** : Enabling will automatically download songs you play in the spotify app.
 - **Show/Hide Advanced Configuration**: Enable/Disables the Advanced configuration tab.
 - **Save setting**: Saves/Applies the settings
 
@@ -224,6 +218,8 @@ Do not include '.' in it. This setting will be ignored while using the raw media
 Decode error: If you are receiving this error, your account might have gotten restricted. Wait some time or try a different account. The application may crash frequently as there is no proper exception handling yet. You can help by opening a new issue with the error message displayed in your console window after the application misbehaves.
  
 # 6. Contributing/Supporting
-You can write code to include additional feature or bug fixes or make a issue regarding bugs and features or just spread the work about the application :)
-If you want to support financially, you can visit [Here](https://github.com/casualsnek/casualsnek) and support through open collective or BTC
-If you like the project, show your support by giving it a star :) !
+You can write code to include additional feature or bug fixes or make a issue regarding bugs and features or just spread the work about the application. You can donate via BTC or XMR at the addresses below:
+
+BTC: bc1qm4747q4s0ypef4x4uknmwkc9pjffnstyapejdk
+
+XMR: 8BQ8wpaG22UGtkkFSaPRL97P731MbkYKmCiHmqJonMrDesFjKjdfThUF23iXE1aCtZfuWrv9nY26v7ecyKfBBaT1R1ooNXY
