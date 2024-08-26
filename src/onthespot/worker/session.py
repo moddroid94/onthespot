@@ -24,7 +24,7 @@ class LoadSessions(QObject):
             self.progress.emit(f'Attempting to create session for:\n{account[0]}  [{c}/{t}] ', True)
             time.sleep(0.2)
             login = login_user(account[0], "",
-                               os.path.join(os.path.expanduser('~'), '.cache', 'casualOnTheSpot', 'sessions'), account[3])
+                               os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'), account[3])
             logged_in = False
             if login is not None:
                 if login[0]:

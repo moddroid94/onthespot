@@ -143,7 +143,7 @@ class Config:
             cf.write(json.dumps(self.__config, indent=4))
 
     def rollback(self):
-        shutil.rmtree(os.path.join(os.path.expanduser("~"), ".cache", "casualOnTheSpot", "sessions"))
+        shutil.rmtree(os.path.join(os.path.expanduser("~"), ".config", "casualOnTheSpot", "sessions"))
         with open(self.__cfg_path, "w") as cf:
             cf.write(json.dumps(self.__template_data, indent=4))
         self.__config = self.__template_data
@@ -158,7 +158,7 @@ class Config:
                 for account in accounts:
                     # Assign UUID
                     acc_uuid = str(uuid.uuid4())
-                    session_dir = os.path.join(os.path.expanduser('~'), '.cache', 'casualOnTheSpot', 'sessions')
+                    session_dir = os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions')
                     new_accounts.append([account[0], account[1], account[2], acc_uuid])
                     # Move saved sessions
                     try:

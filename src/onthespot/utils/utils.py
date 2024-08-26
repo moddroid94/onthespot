@@ -21,7 +21,7 @@ media_tracker_last_query = ''
 def re_init_session(session_pool: dict, session_uuid: str, wait_connectivity: bool = False,
                     connectivity_test_url: str = 'https://spotify.com', timeout=60) -> bool:
     start = int(time.time())
-    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.cache', 'casualOnTheSpot', 'sessions'),
+    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'),
                                      f"ots_login_{session_uuid}.json")
     if not os.path.isfile(session_json_path):
         return False

@@ -24,7 +24,7 @@ def new_session():
                     return
                 else:
                     uuid_uniq = str(uuid.uuid4())
-                    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.cache', 'casualOnTheSpot', 'sessions'),
+                    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'),
                                          f"ots_login_{uuid_uniq}.json")
 
                     os.rename("credentials.json", session_json_path)
