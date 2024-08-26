@@ -1,6 +1,6 @@
 ![Logo](src/onthespot/resources/icon.png)
 
-# Onthespot
+# OnTheSpot
 
 qt based music downloader written in python.
 ![2024-08-26_15-58](https://github.com/user-attachments/assets/ee8f1d08-6833-4673-976b-89e4f43968f9)
@@ -61,7 +61,7 @@ Building or packaging on any OS requires Git, Python3 and Pip installed. Make su
 ### 2.1.1 On Linux/nix
 Open terminal emulator and run the following command to clone the repository and build.
 ```bash
-git clone https://github.com/casualsnek/onthespot
+git clone https://github.com/justin025/onthespot.git
 cd onthespot
 ./build_appimage.sh
 ```
