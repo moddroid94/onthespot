@@ -1,0 +1,413 @@
+From 329729bedea303d1206e0a77843e238e2488cb50 Mon Sep 17 00:00:00 2001
+From: fatsolko <den2434358@mail.ru>
+Date: Sun, 23 Jun 2024 20:11:06 +0200
+Subject: [PATCH 1/7] add dark mode
+
+---
+ src/onthespot/gui/mainui.py                   | 29 ++++++++++
+ src/onthespot/gui/minidialog.py               | 28 ++++++++++
+ src/onthespot/gui/qtui/main.ui                |  7 +++
+ src/onthespot/otsconfig.py                    |  3 +-
+ .../resources/main_window_dark_theme.qss      | 55 +++++++++++++++++++
+ .../resources/mini_dialog_dark_theme.qss      | 19 +++++++
+ 6 files changed, 140 insertions(+), 1 deletion(-)
+ create mode 100644 src/onthespot/resources/main_window_dark_theme.qss
+ create mode 100644 src/onthespot/resources/mini_dialog_dark_theme.qss
+
+diff --git a/src/onthespot/gui/mainui.py b/src/onthespot/gui/mainui.py
+index 80748e0..7e7aa56 100644
+--- a/src/onthespot/gui/mainui.py
++++ b/src/onthespot/gui/mainui.py
+@@ -136,10 +136,38 @@ def __init__(self, _dialog, start_url=''):
+         self.__media_parser_worker.enqueue.connect(self.__add_item_to_downloads)
+         self.__media_parser_thread.start()
+ 
++        # Create path to dark_theme
++        self.dark_theme_path = os.path.join(config.app_root,'resources', 'main_window_dark_theme.qss')
++        # Create button and add to the interface
++        self.toggle_theme_button.clicked.connect(self.toggle_theme)
++        # Set theme from config
++        self.theme = config.get("theme")
++        if self.theme == "Dark":
++          with open(self.dark_theme_path, 'r') as f:
++              dark_theme = f.read()
++              self.setStyleSheet(dark_theme)
++        logger.info(f"Set theme {self.theme}!")
++
+         # Set the table header properties
+         self.set_table_props()
+         logger.info("Main window init completed !")
+ 
++    def load_dark_theme(self):
++        with open(self.dark_theme_path, 'r') as f:
++            dark_theme = f.read()
++            self.setStyleSheet(dark_theme)
++        self.theme = "Dark"
++
++    def load_light_theme(self):
++        self.setStyleSheet("")  # set empty style for light theme
++        self.theme = "Light"
++
++    def toggle_theme(self):
++        if self.theme == "Light":
++            self.load_dark_theme()
++        elif self.theme == "Dark":
++            self.load_light_theme()
++
+     def bind_button_inputs(self):
+         # Connect button click signals
+         self.btn_search.clicked.connect(self.__get_search_results)
+@@ -495,6 +523,7 @@ def __update_config(self):
+         config.set_('max_retries', self.inp_max_retries.value())
+         config.set_('disable_bulk_dl_notices', self.inp_disable_bulk_popup.isChecked())
+         config.set_('playlist_track_force_album_dir', self.inp_force_track_dir.isChecked())
++        config.set_('theme', self.theme)
+         if 0 < self.inp_max_search_results.value() <= 50:
+             config.set_('max_search_results', self.inp_max_search_results.value())
+         else:
+diff --git a/src/onthespot/gui/minidialog.py b/src/onthespot/gui/minidialog.py
+index ad3d271..44ae2be 100644
+--- a/src/onthespot/gui/minidialog.py
++++ b/src/onthespot/gui/minidialog.py
+@@ -1,7 +1,9 @@
+ import os
+ from PyQt5 import uic
+ from PyQt5.QtWidgets import QDialog
++from PyQt5.QtCore import Qt
+ from ..runtimedata import get_logger
++from ..otsconfig import config
+ 
+ logger = get_logger('gui.minidialog')
+ 
+@@ -14,6 +16,32 @@ def __init__(self, parent=None):
+         self.btn_close.clicked.connect(self.hide)
+         logger.debug('Dialog item is ready..')
+ 
++        # Set theme
++        self.dark_theme_path = os.path.join(config.app_root,'resources', 'mini_dialog_dark_theme.qss')
++        self.setWindowFlags(Qt.FramelessWindowHint)
++        self.theme = config.get("theme")
++        if self.theme == "Dark":
++          with open(self.dark_theme_path, 'r') as f:
++              dark_theme = f.read()
++              self.setStyleSheet(dark_theme)
++        self.setStyleSheet(config.get("theme"))
++
++        def load_dark_theme(self):
++            with open(self.dark_theme_path, 'r') as f:
++                dark_theme = f.read()
++                self.setStyleSheet(dark_theme)
++            self.theme = "Dark"
++
++        def load_light_theme(self):
++            self.setStyleSheet("")  # set empty style for light theme
++            self.theme = "Light"
++
++        def toggle_theme(self):
++            if self.theme == "Light":
++                self.load_dark_theme()
++            elif self.theme == "Dark":
++                self.load_light_theme()
++
+     def run(self, content, btn_hidden=False):
+         if btn_hidden:
+             self.btn_close.hide()
+diff --git a/src/onthespot/gui/qtui/main.ui b/src/onthespot/gui/qtui/main.ui
+index 4a7dd70..b31661d 100644
+--- a/src/onthespot/gui/qtui/main.ui
++++ b/src/onthespot/gui/qtui/main.ui
+@@ -909,6 +909,13 @@
+                    </property>
+                   </widget>
+                  </item>
++                 <item>
++                  <widget class="QPushButton" name="toggle_theme_button">
++                   <property name="text">
++                    <string>Dark/Light theme</string>
++                   </property>
++                  </widget>
++                 </item>
+                 </layout>
+                </widget>
+               </item>
+diff --git a/src/onthespot/otsconfig.py b/src/onthespot/otsconfig.py
+index 6020148..c71e1f7 100755
+--- a/src/onthespot/otsconfig.py
++++ b/src/onthespot/otsconfig.py
+@@ -44,7 +44,8 @@ def __init__(self, cfg_path=None):
+             "show_search_thumbnails": 1, # Show thumbnails in search view
+             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
+             "metadata_seperator": ";", # Seperator used for metadata fields that have multiple values
+-            "accounts": [] # Saved account information
++            "accounts": [], # Saved account information
++            "theme": "Light" # Light\Dark
+         }
+         if os.path.isfile(self.__cfg_path):
+             self.__config = json.load(open(cfg_path, "r"))
+diff --git a/src/onthespot/resources/main_window_dark_theme.qss b/src/onthespot/resources/main_window_dark_theme.qss
+new file mode 100644
+index 0000000..5394cd5
+--- /dev/null
++++ b/src/onthespot/resources/main_window_dark_theme.qss
+@@ -0,0 +1,55 @@
++QWidget {
++   background-color: #333;
++   color: #ccc;
++}
++QPushButton {
++   background-color: #555;
++   color: white;
++   border: 1px solid #444;
++   border-radius: 5px;
++   padding: 5px;
++}
++QPushButton:hover {
++   background-color: #666;
++   color: white;
++}
++QLineEdit {
++   background-color: #222;
++   color: #aaa;
++   border: 1px solid #444;
++}
++QTableWidget {
++   background-color: #333;
++   color: #ccc;
++}
++QTableWidget QHeaderView::section {
++   background-color: #666;
++   color: #ccc;
++}
++QTabWidget::pane {
++   border-top: 2px solid #555;
++}
++QTabBar::tab {
++   background: #333;
++   color: #ccc;
++   padding: 3px;
++   border: 1px solid #444;
++   border-bottom-color: #333;
++   padding-left: 14px;
++   padding-right: 14px;
++}
++QTabBar::tab:selected, QTabBar::tab:hover {
++   background: #555;
++   color: #fff;
++}
++QTabBar::tab:selected {
++   border-color: #666;
++   border-bottom-color: #555;
++}
++QTableWidget QHeaderView::section:first {
++    background-color: #666;
++    color: #ccc;
++}
++QTableCornerButton::section {
++    background-color: #666;
++}
+\ No newline at end of file
+diff --git a/src/onthespot/resources/mini_dialog_dark_theme.qss b/src/onthespot/resources/mini_dialog_dark_theme.qss
+new file mode 100644
+index 0000000..43a7009
+--- /dev/null
++++ b/src/onthespot/resources/mini_dialog_dark_theme.qss
+@@ -0,0 +1,19 @@
++QDialog {
++   background-color: #222;
++   color: white;
++}
++QPushButton {
++   background-color: #555;
++   color: white;
++   border-radius: 5px;
++   padding: 5px;
++   border: 1px solid #fff;
++}
++QPushButton:hover {
++   background-color: #666;
++   color: white;
++}
++QLabel {
++   color: white;
++   font-size: 14px;
++}
+
+From 7a9cdf03d2fb9d5e8e28db87eac45035cfaa8137 Mon Sep 17 00:00:00 2001
+From: fatsolko <den2434358@mail.ru>
+Date: Mon, 24 Jun 2024 08:06:42 +0200
+Subject: [PATCH 2/7] del extra line
+
+---
+ src/onthespot/gui/minidialog.py | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/onthespot/gui/minidialog.py b/src/onthespot/gui/minidialog.py
+index 44ae2be..3a71fc0 100644
+--- a/src/onthespot/gui/minidialog.py
++++ b/src/onthespot/gui/minidialog.py
+@@ -24,7 +24,6 @@ def __init__(self, parent=None):
+           with open(self.dark_theme_path, 'r') as f:
+               dark_theme = f.read()
+               self.setStyleSheet(dark_theme)
+-        self.setStyleSheet(config.get("theme"))
+ 
+         def load_dark_theme(self):
+             with open(self.dark_theme_path, 'r') as f:
+
+From 23a3890bfd7d252d755b1b20e2c92e0647790ddf Mon Sep 17 00:00:00 2001
+From: fatsolko <den2434358@mail.ru>
+Date: Mon, 24 Jun 2024 14:15:11 +0200
+Subject: [PATCH 3/7] build win fix
+
+---
+ build_winC2.bat | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/build_winC2.bat b/build_winC2.bat
+index 76df33e..23b1203 100755
+--- a/build_winC2.bat
++++ b/build_winC2.bat
+@@ -8,10 +8,10 @@ pip install winsdk
+ pip install -r requirements.txt
+ if exist ffbin_win\ffmpeg.exe (
+     echo =^> Found 'ffbin_win' directory and ffmpeg binary.. Using ffmpeg binary append mode
+-    pyinstaller --onefile --noconfirm --add-data="src/onthespot/gui/qtui/*.ui;onthespot/gui/qtui" --add-data="src/onthespot/resources/*.png;onthespot/resources" --add-binary="ffbin_win/*.exe;onthespot/bin/ffmpeg" --paths="src/onthespot" --name="onthespot_win_ffm" --icon="src/onthespot/resources/icon.png" src\portable.py
++    pyinstaller --onefile --noconfirm --add-data="src/onthespot/resources/*.qss;onthespot/resources" --add-data="src/onthespot/gui/qtui/*.ui;onthespot/gui/qtui" --add-data="src/onthespot/resources/*.png;onthespot/resources" --add-binary="ffbin_win/*.exe;onthespot/bin/ffmpeg" --paths="src/onthespot" --name="onthespot_win_ffm" --icon="src/onthespot/resources/icon.png" src\portable.py
+ ) else (
+     echo  =^> Building to use ffmpeg binary from system...
+-    pyinstaller --onefile --noconfirm --add-data="src/onthespot/gui/qtui/*.ui;onthespot/gui/qtui" --add-data="src/onthespot/resources/*.png;onthespot/resources" --paths="src/onthespot" --name="onthespot_win" --icon="src/onthespot/resources/icon.png" src\portable.py
++    pyinstaller --onefile --noconfirm --add-data="src/onthespot/resources/*.qss;onthespot/resources" --add-data="src/onthespot/gui/qtui/*.ui;onthespot/gui/qtui" --add-data="src/onthespot/resources/*.png;onthespot/resources" --paths="src/onthespot" --name="onthespot_win" --icon="src/onthespot/resources/icon.png" src\portable.py
+ )
+ echo  =^> Cleaning..
+ if exist onthespot_win.spec (
+
+From 269ff2110b5e02352391a819b00585439cd08975 Mon Sep 17 00:00:00 2001
+From: fatsolko <den2434358@mail.ru>
+Date: Mon, 24 Jun 2024 14:17:07 +0200
+Subject: [PATCH 4/7] build mac fix
+
+---
+ build_mac.sh | 2 ++
+ setup.cfg    | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/build_mac.sh b/build_mac.sh
+index e367ceb..6fc35bf 100755
+--- a/build_mac.sh
++++ b/build_mac.sh
+@@ -33,6 +33,7 @@ if [ -f "ffbin_mac/ffmpeg" ]; then
+     pyinstaller --windowed \
+                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
+                 --add-data="src/onthespot/resources/*.png:onthespot/resources" \
++                --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
+                 --add-binary="ffbin_mac/*:onthespot/bin/ffmpeg" \
+                 --paths="src/onthespot" \
+                 --name="onthespot_mac_ffm" \
+@@ -43,6 +44,7 @@ else
+     pyinstaller --windowed \
+                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
+                 --add-data="src/onthespot/resources/*.png:onthespot/resources" \
++                --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
+                 --paths="src/onthespot" \
+                 --name="onthespot_mac" \
+                 --icon="src/onthespot/resources/icon.png" \
+diff --git a/setup.cfg b/setup.cfg
+index 743e59d..c32dc0d 100644
+--- a/setup.cfg
++++ b/setup.cfg
+@@ -25,4 +25,4 @@ console_scripts =
+ where=src
+ 
+ [options.package_data]
+-* = *.ui, *.png, *.desktop
++* = *.ui, *.png, *.desktop, *.qss
+
+From 9940ee786c4325c6b29e2869d3973c7f94aa19c4 Mon Sep 17 00:00:00 2001
+From: fatsolko <den2434358@mail.ru>
+Date: Mon, 24 Jun 2024 14:17:47 +0200
+Subject: [PATCH 5/7] build linux fix
+
+---
+ build_linux.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/build_linux.sh b/build_linux.sh
+index c9e80ca..14d81c0 100755
+--- a/build_linux.sh
++++ b/build_linux.sh
+@@ -32,6 +32,7 @@ if [ -f "ffbin_nix/ffmpeg" ]; then
+     pyinstaller --onefile \
+                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
+                 --add-data="src/onthespot/resources/*.png:onthespot/resources" \
++                --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
+                 --add-binary="ffbin_nix/*:onthespot/bin/ffmpeg" \
+                 --paths="src/onthespot" \
+                 --name="onthespot_linux_ffm" \
+@@ -42,6 +43,7 @@ else
+     pyinstaller --onefile \
+                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
+                 --add-data="src/onthespot/resources/*.png:onthespot/resources" \
++                --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
+                 --paths="src/onthespot" \
+                 --name="onthespot_linux" \
+                 --icon="src/onthespot/resources/icon.png" \
+
+From 5b1bb05db709c1fc71fa5b9b56be7e0a69c0db4a Mon Sep 17 00:00:00 2001
+From: fatsolko <den2434358@mail.ru>
+Date: Mon, 24 Jun 2024 15:59:44 +0200
+Subject: [PATCH 6/7] fix click on button
+
+---
+ src/onthespot/resources/main_window_dark_theme.qss | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/onthespot/resources/main_window_dark_theme.qss b/src/onthespot/resources/main_window_dark_theme.qss
+index 5394cd5..53445cb 100644
+--- a/src/onthespot/resources/main_window_dark_theme.qss
++++ b/src/onthespot/resources/main_window_dark_theme.qss
+@@ -13,6 +13,10 @@ QPushButton:hover {
+    background-color: #666;
+    color: white;
+ }
++QPushButton:pressed {
++   background-color: #777;
++   color: white;
++}
+ QLineEdit {
+    background-color: #222;
+    color: #aaa;
+
+From 34916f7d48045b04a323b23799a372db667d0754 Mon Sep 17 00:00:00 2001
+From: fatsolko <den2434358@mail.ru>
+Date: Thu, 11 Jul 2024 10:37:51 +0200
+Subject: [PATCH 7/7] swap buttons
+
+---
+ src/onthespot/gui/qtui/main.ui | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/onthespot/gui/qtui/main.ui b/src/onthespot/gui/qtui/main.ui
+index b31661d..9c42d26 100644
+--- a/src/onthespot/gui/qtui/main.ui
++++ b/src/onthespot/gui/qtui/main.ui
+@@ -903,16 +903,16 @@
+                   </widget>
+                  </item>
+                  <item>
+-                  <widget class="QPushButton" name="btn_save_config">
++                  <widget class="QPushButton" name="toggle_theme_button">
+                    <property name="text">
+-                    <string>Save settings</string>
++                    <string>Dark/Light theme</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+-                  <widget class="QPushButton" name="toggle_theme_button">
++                  <widget class="QPushButton" name="btn_save_config">
+                    <property name="text">
+-                    <string>Dark/Light theme</string>
++                    <string>Save settings</string>
+                    </property>
+                   </widget>
+                  </item>
