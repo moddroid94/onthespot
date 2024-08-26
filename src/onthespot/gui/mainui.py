@@ -561,6 +561,7 @@ class MainWindow(QMainWindow):
     def __add_account(self):
         logger.info('Add account clicked ')
         self.btn_login_add.setText("Waiting...")
+        self.btn_login_add.setDisabled(True)
         login = threading.Thread(target=new_session)
         login.daemon = True
         login.start()

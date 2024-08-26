@@ -9,18 +9,18 @@ from ..otsconfig import config
 
 def new_session():
     zs = ZeroconfServer.Builder().set_device_name("OnTheSpot").create()
-    logging.warning("Transfer playback from desktop client to librespot-python via Spotify Connect in order to store session")
+    logging.info("Transfer playback from desktop client to librespot-python via Spotify Connect in order to store session")
 
     while True:
         time.sleep(1)
         if zs._ZeroconfServer__session:
-            logging.warning(f"Grabbed {zs._ZeroconfServer__session} for {zs._ZeroconfServer__session.username()}")
+            logging.info(f"Grabbed {zs._ZeroconfServer__session} for {zs._ZeroconfServer__session.username()}")
 
             if pathlib.Path("credentials.json").exists():
-                logging.warning("Session stored in credentials.json. Now you can Ctrl+C")
+                logging.info("Session stored in credentials.json.")
 
                 if {zs._ZeroconfServer__session.username()} in [user[0] for user in config.get('accounts')]:
-                    logging.warning("Account already exists")
+                    logging.info("Account already exists")
                     return
                 else:
                     uuid_uniq = str(uuid.uuid4())
@@ -43,6 +43,7 @@ def new_session():
                     config.set_('accounts', cfg_copy)
                     config.update()
 
+                    logging.info("Config updated, restarting...")
                     os.execl(sys.executable, sys.executable, * sys.argv)
 
                 return

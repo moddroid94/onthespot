@@ -40,7 +40,7 @@
        <string notr="true">QTabWidget::pane { border: 0; }</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -864,6 +864,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
                <widget class="QCheckBox" name="inp_raw_download">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Skip injecting metadata, album cover, and file conversion&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Raw Media Download</string>
                 </property>
@@ -878,6 +881,9 @@
               </item>
               <item>
                <widget class="QCheckBox" name="inp_enable_spot_watch">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mirror playback on your Spotify account&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Mirror Playback</string>
                 </property>
@@ -1388,6 +1394,9 @@
                 <layout class="QHBoxLayout" name="horizontalLayout_33">
                  <item>
                   <widget class="QCheckBox" name="inp_enable_lyrics">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A premium account is required to download lyrics&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="layoutDirection">
                     <enum>Qt::RightToLeft</enum>
                    </property>
