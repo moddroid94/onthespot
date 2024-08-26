@@ -37,7 +37,7 @@ emerge onthespot
 ## 1.2. Launch without installing - from source
 
 Make sure [ffmpeg](https://ffmpeg.org/), [python3](https://www.python.org/downloads), and [Git](https://git-scm.com/downloads) are installed and available on your `$PATH`. If you are on windows, you also need to install the [Microsoft C++ build tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) and restart your computer before starting the build process.
-  1. Download or Clone the repo ```git clone https://github.com/casualsnek/onthespot```
+  1. Download or Clone the repo ```git clone https://github.com/justin025/onthespot```
   1. Navigate to the onthespot directory ```cd onthespot```
   1. Install the package ```pip install -r requirements.txt```
   1. Navigate to source directory ```cd src```
@@ -47,7 +47,7 @@ Make sure [ffmpeg](https://ffmpeg.org/), [python3](https://www.python.org/downlo
 
 The requirements are the same as "Launching without installing" above.
 
-1. Download or Clone the repo ```git clone https://github.com/casualsnek/onthespot```
+1. Download or Clone the repo ```git clone https://github.com/justin025/onthespot```
 1. Navigate to the onthespot directory ```cd onthespot```
 1. Build the package ```python -m build```
 1. Install the package ```pip install ./dist/*.whl```
@@ -61,7 +61,7 @@ Building or packaging on any OS requires Git, Python3 and Pip installed. Make su
 ### 2.1.1 On Linux/nix
 Open terminal emulator and run the following command to clone the repository and build.
 ```bash
-git clone https://github.com/justin025/onthespot.git
+git clone https://github.com/justin025/onthespot
 cd onthespot
 ./build_appimage.sh
 ```
@@ -73,7 +73,7 @@ After the command completes, you should have a 'dist' directory in repository ro
 
 Open cmd and run the following command to clone the repository and build.
 ```cmd
-git clone https://github.com/casualsnek/onthespot
+git clone https://github.com/justin025/onthespot
 cd onthespot
 ```
 If you do not have git installed you can also download the Project source zip from github, extract it and open cmd on repository root.
@@ -91,7 +91,7 @@ After the command completes, you should have a 'dist' directory in repository ro
 
 Open terminal emulator and run the following command to clone the repository and build.
 ```bash
-git clone https://github.com/casualsnek/onthespot
+git clone https://github.com/justin025/onthespot
 cd onthespot
 ```
 
@@ -109,7 +109,7 @@ Make sure you have set up tools installed !
 
 Open terminal emulator and run the following command to clone the repository and build.
 ```bash
-git clone https://github.com/casualsnek/onthespot
+git clone https://github.com/justin025/onthespot
 cd onthespot
 python -m build
 ```
