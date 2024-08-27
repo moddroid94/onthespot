@@ -6,6 +6,14 @@ qt based music downloader written in python.
 
 # 1. Installing/launching application:
 ## 1.1. Using portable prebuilt binaries
+### On Windows
+Download the latest exe from the Release section and execute by double-clicking the downloaded file.
+
+### On MacOS
+Download the latest dmg from the Release section, double click it and drag OnTheSpot into the Applications folder.
+
+If you receive an error you may need to open the Applications folder, right click OnTheSpot and click Open. The error should be removed, if not feel free to open an issue
+
 ### On Linux
 #### Appimage
 It is recommended that you run `OnTheSpot` as an appimage as ffmpeg and python dependencies are prebundled.
@@ -14,6 +22,16 @@ It is recommended that you run `OnTheSpot` as an appimage as ffmpeg and python d
 wget https://github.com/justin025/onthespot/releases/download/v0.6/OnTheSpot-0.6-x86_64.AppImage
 chmod +x OnTheSpot-0.6-x86_64.AppImage
 ./OnTheSpot-0.6-x86_64.AppImage
+```
+
+#### Binary
+The binary also bundles ffmpeg by default. Download and run it with the commands below.
+
+```
+wget https://github.com/justin025/onthespot/releases/download/v0.6/OnTheSpot-0.6-x86_64.tar.gz
+gzip -d OnTheSpot-0.6-x86_64.tar.gz
+chmod +x onthespot
+./onthespot
 ```
 
 #### Arch Linux
@@ -61,11 +79,11 @@ Open terminal emulator and run the following command to clone the repository and
 ```bash
 git clone https://github.com/justin025/onthespot
 cd onthespot
-./build_appimage.sh
+./build_linux.sh
 ```
 If you want builds with ffmpeg embedded download ffmpeg binaries for your os from [Here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z).
 The script will prompt you to add the binaries to 'OnTheSpot.AppDir/usr/bin', ffmpeg, ffprobe, and ffplay are required for onthespot properly parse songs.
-After the command completes, you should have a 'dist' directory in repository root containing built 'OnTheSpot-x86_64.AppImage' binary.
+After the command completes, you should have a 'dist' directory in repository root containing built 'onthespot_linux' binary.
 
 ### 2.1.2. On Windows
 
