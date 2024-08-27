@@ -31,6 +31,8 @@ pip install -r requirements.txt
 if [ -f "ffbin_mac/ffmpeg" ]; then
     echo " => Found 'ffbin_mac' directory and ffmpeg binary.. Using ffmpeg binary append mode "
     pyinstaller --windowed \
+                --hidden-import="zeroconf._utils.ipaddress" \
+                --hidden-import="zeroconf._handlers.answers" \
                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
                 --add-data="src/onthespot/resources/*.png:onthespot/resources" \
                 --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
@@ -42,6 +44,8 @@ if [ -f "ffbin_mac/ffmpeg" ]; then
 else
     echo " => Building to use ffmpeg binary from system... "
     pyinstaller --windowed \
+                --hidden-import="zeroconf._utils.ipaddress" \
+                --hidden-import="zeroconf._handlers.answers" \
                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
                 --add-data="src/onthespot/resources/*.png:onthespot/resources" \
                 --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
