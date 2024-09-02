@@ -1,4 +1,3 @@
-import logging
 import os
 import pathlib
 import sys
@@ -6,42 +5,49 @@ import time
 import uuid
 from librespot.zeroconf import ZeroconfServer
 from ..otsconfig import config
+from ..runtimedata import get_logger
+
+logger = get_logger("worker.session")
 
 def new_session():
-    zs = ZeroconfServer.Builder().set_device_name("OnTheSpot").create()
-    logging.info("Transfer playback from desktop client to librespot-python via Spotify Connect in order to store session")
+    try:
+        os.mkdir(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'))
+    except FileExistsError:
+        logger.info("The sessions directory already exists.")
+
+    uuid_uniq = str(uuid.uuid4())
+    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'),
+                 f"ots_login_{uuid_uniq}.json")
+
+    CLIENT_ID: str = "65b708073fc0480ea92a077233ca87bd"
+    ZeroconfServer._ZeroconfServer__default_get_info_fields['clientID'] = CLIENT_ID
+    zs_builder = ZeroconfServer.Builder()
+    zs_builder.device_name = 'OnTheSpot'
+    zs_builder.conf.stored_credentials_file = session_json_path
+    zs = zs_builder.create()
+    logger.info("Zeroconf login service started")
 
     while True:
         time.sleep(1)
-        if zs._ZeroconfServer__session:
-            logging.info(f"Grabbed {zs._ZeroconfServer__session} for {zs._ZeroconfServer__session.username()}")
+        if zs.has_valid_session():
+            logger.info(f"Grabbed {zs._ZeroconfServer__session} for {zs._ZeroconfServer__session.username()}")
 
-            if pathlib.Path("credentials.json").exists():
-                logging.info("Session stored in credentials.json.")
-
-                if {zs._ZeroconfServer__session.username()} in [user[0] for user in config.get('accounts')]:
-                    logging.info("Account already exists")
-                    return
-                else:
-                    try:
-                        os.mkdir(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'))
-                    except FileExistsError:
-                        logging.info("The sessions directory already exists.")
-                    uuid_uniq = str(uuid.uuid4())
-                    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'),
-                                         f"ots_login_{uuid_uniq}.json")
-                    os.rename("credentials.json", session_json_path)
-                    cfg_copy = config.get('accounts').copy()
-                    new_user = [
-                        zs._ZeroconfServer__session.username(),
-                        "true",
-                        int(time.time()),
-                        uuid_uniq,
-                    ]
-                    cfg_copy.append(new_user)
-                    config.set_('accounts', cfg_copy)
-                    config.update()
-                    logging.info("Config updated, restarting...")
-                    os.execl(sys.executable, sys.executable, * sys.argv)
+            if {zs._ZeroconfServer__session.username()} in [user[0] for user in config.get('accounts')]:
+                logger.info("Account already exists")
+                return
+            else:
+                cfg_copy = config.get('accounts').copy()
+                new_user = [
+                    zs._ZeroconfServer__session.username(),
+                    "true",
+                    int(time.time()),
+                    uuid_uniq,
+                ]
+                zs.close()
+                cfg_copy.append(new_user)
+                config.set_('accounts', cfg_copy)
+                config.update()
+                logger.info("Config updated, restarting...")
+                os.execl(sys.executable, sys.executable, * sys.argv)
 
                 return
