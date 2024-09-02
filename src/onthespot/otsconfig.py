@@ -13,11 +13,11 @@ class Config:
         self.__cfg_path = cfg_path
         self.platform = platform.system()
         self.ext_ = ".exe" if self.platform == "Windows" else ""
-        self.version = 0.6
+        self.version = 0.6.1
         self.session_uuid = str(uuid.uuid4())
         print('OTS Version : ', self.version)
         self.__template_data = {
-            "version": 0.6, # Application version
+            "version": 0.6.1, # Application version
             "max_threads": 1, # Maximum number of thread we can spawn
             "parsing_acc_sn": 1, # Serial number of account that will be used for parsing links
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
