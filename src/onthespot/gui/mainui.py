@@ -83,7 +83,9 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(config.app_root, 'resources', 'icon.png')
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(QtGui.QIcon(icon_path))
-        self.start_url = start_url
+        # Breaks zeroconf login because of dirty restart
+        #self.start_url = start_url
+        self.start_url = ""
         self.inp_session_uuid.setText(config.session_uuid)
         logger.info(f"Initialising main window, logging session : {config.session_uuid}")
         self.group_search_items.hide()

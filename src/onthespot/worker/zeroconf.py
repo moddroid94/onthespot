@@ -49,5 +49,4 @@ def new_session():
                 config.update()
                 logger.info("Config updated, restarting...")
                 os.execl(sys.executable, sys.executable, * sys.argv)
-
                 return
