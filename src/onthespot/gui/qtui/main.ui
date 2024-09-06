@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>985</width>
-    <height>697</height>
+    <height>696</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -283,7 +283,7 @@
            <item>
             <widget class="QLabel" name="lb_tmp_dl_root">
              <property name="text">
-              <string>Temporary Download Path :</string>
+              <string>Temporary Download Path</string>
              </property>
             </widget>
            </item>
@@ -405,7 +405,7 @@
               <item>
                <widget class="QPushButton" name="btn_search_download_tracks">
                 <property name="text">
-                 <string>All tracks</string>
+                 <string>All Tracks</string>
                 </property>
                </widget>
               </item>
@@ -522,7 +522,7 @@
            <item>
             <widget class="QPushButton" name="btn_progress_clear_complete">
              <property name="text">
-              <string>Clear completed/cancelled items</string>
+              <string>Clear Completed/Cancelled Items</string>
              </property>
             </widget>
            </item>
@@ -536,7 +536,7 @@
            <item>
             <widget class="QPushButton" name="btn_progress_retry_all">
              <property name="text">
-              <string>Retry all failed</string>
+              <string>Retry Failed</string>
              </property>
             </widget>
            </item>
@@ -986,7 +986,7 @@
               </size>
              </property>
              <property name="title">
-              <string>Add new account to pool</string>
+              <string/>
              </property>
              <property name="flat">
               <bool>false</bool>
@@ -995,7 +995,7 @@
               <item>
                <widget class="QPushButton" name="btn_login_add">
                 <property name="text">
-                 <string>Add account</string>
+                 <string>Add Account</string>
                 </property>
                </widget>
               </item>
@@ -1492,7 +1492,7 @@
               <string notr="true">background-color: rgba(255, 0, 0, 100);</string>
              </property>
              <property name="text">
-              <string>Reset config to default</string>
+              <string>Reset Settings</string>
              </property>
             </widget>
            </item>
@@ -1505,7 +1505,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Save configuration</string>
+              <string>Apply Settings</string>
              </property>
             </widget>
            </item>
