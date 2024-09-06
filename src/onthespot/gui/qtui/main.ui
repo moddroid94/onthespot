@@ -1177,7 +1177,7 @@
                     <enum>Qt::RightToLeft</enum>
                    </property>
                    <property name="text">
-                    <string>Disable bulk downoad notice popups</string>
+                    <string>Disable bulk download notice popups</string>
                    </property>
                   </widget>
                  </item>
