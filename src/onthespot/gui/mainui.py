@@ -332,9 +332,7 @@ class MainWindow(QMainWindow):
                 'media_type': item['dl_params']['media_type'],
                 'media_id': item['item_id'],
                 'extra_paths': item['dl_params']['extra_paths'],
-                'force_album_format': config.get('playlist_track_force_album_dir'),
                 'extra_path_as_root': item['dl_params']['extra_path_as_root'],
-                'force_album_after_extra_path_as_root': item['dl_params']['force_album_after_extra_path_as_root'],
                 'm3u_filename': '',
                 'playlist_name': item['dl_params'].get('playlist_name', ''),
                 'playlist_owner': item['dl_params'].get('playlist_owner', ''),
@@ -465,8 +463,7 @@ class MainWindow(QMainWindow):
         self.inp_max_retries.setValue(config.get("max_retries"))
         self.inp_chunk_size.setValue(config.get("chunk_size"))
         self.inp_media_format.setText(config.get("media_format"))
-        self.inp_track_formatter.setText(config.get("track_name_formatter"))
-        self.inp_alb_formatter.setText(config.get("album_name_formatter"))
+        self.inp_track_formatter.setText(config.get("track_path_formatter"))
         self.inp_playlist_name_formatter.setText(config.get("playlist_name_formatter"))
         self.inp_max_recdl_delay.setValue(config.get("recoverable_fail_wait_delay"))
         self.inp_dl_endskip.setValue(config.get("dl_end_padding_bytes"))
@@ -486,10 +483,6 @@ class MainWindow(QMainWindow):
             self.inp_disable_bulk_popup.setChecked(True)
         else:
             self.inp_disable_bulk_popup.setChecked(False)
-        if config.get("playlist_track_force_album_dir"):
-            self.inp_force_track_dir.setChecked(True)
-        else:
-            self.inp_force_track_dir.setChecked(False)
         if config.get("inp_enable_lyrics"):
             self.inp_enable_lyrics.setChecked(True)
         else:
@@ -517,8 +510,7 @@ class MainWindow(QMainWindow):
         else:
             config.set_('parsing_acc_sn', self.inp_parsing_acc_sn.value())
         config.set_('download_root', self.inp_download_root.text())
-        config.set_('track_name_formatter', self.inp_track_formatter.text())
-        config.set_('album_name_formatter', self.inp_alb_formatter.text())
+        config.set_('track_path_formatter', self.inp_track_formatter.text())
         config.set_('playlist_name_formatter', self.inp_playlist_name_formatter.text())
         config.set_('download_delay', self.inp_download_delay.value())
         config.set_('chunk_size', self.inp_chunk_size.value())
@@ -526,7 +518,6 @@ class MainWindow(QMainWindow):
         config.set_('dl_end_padding_bytes', self.inp_dl_endskip.value())
         config.set_('max_retries', self.inp_max_retries.value())
         config.set_('disable_bulk_dl_notices', self.inp_disable_bulk_popup.isChecked())
-        config.set_('playlist_track_force_album_dir', self.inp_force_track_dir.isChecked())
         config.set_('theme', self.theme)
         if 0 < self.inp_max_search_results.value() <= 50:
             config.set_('max_search_results', self.inp_max_search_results.value())
@@ -758,7 +749,6 @@ class MainWindow(QMainWindow):
                     os.makedirs(os.path.abspath(tmp_dl_val), exist_ok=True)
                 queue_item['data']['dl_path'] = tmp_dl_val
                 queue_item['data']['dl_path_is_root'] = True
-                queue_item['data']['force_album_after_extra_path_as_root'] = self.inp_force_album_after_extra_path_as_root.isChecked()
             except:
                 logger.error('Temp dl path cannot be created !')
         logger.info('Prepared media for parsing, adding to PQP queue !')

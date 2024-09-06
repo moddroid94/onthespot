@@ -22,11 +22,9 @@ class Config:
             "parsing_acc_sn": 1, # Serial number of account that will be used for parsing links
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
             "download_delay": 5, # Seconds to wait before next download
-            "track_name_formatter": "{artist} - {album} - {name}", # Track name format string
-            "album_name_formatter": "{artist}" + os.path.sep + "[{rel_year}] {album}", # Album name format string
+            "track_path_formatter": "{artist}" + os.path.sep + "[{rel_year}] {album}" + os.path.sep + "{name}", # Track name format string
             "playlist_name_formatter": "MyPlaylists" + os.path.sep + "{name} by {owner}", # Playlist name format string
-            "playlist_track_force_album_dir": 1, # Use album directory format for tracks
-            "watch_bg_for_spotify": 0, # Detect songs playing on spotify desktop client and automatically download the,
+            "watch_bg_for_spotify": 0, # Detect and download songs playing on spotify client,
             "dl_end_padding_bytes": 167,
             "max_retries": 3, # Number of times to retry before giving up on download
             "max_search_results": 10, # Number of search results to display of each type

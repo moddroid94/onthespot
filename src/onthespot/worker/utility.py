@@ -81,7 +81,6 @@ class ParsingQueueProcessor(QObject):
                         'playlist_name': enqueue_part_cfg.get('playlist_name', ''),
                         'playlist_owner': enqueue_part_cfg.get('playlist_owner', ''),
                         'playlist_desc': enqueue_part_cfg.get('playlist_desc', ''),
-                        'force_album_after_extra_path_as_root': enqueue_part_cfg.get('force_album_after_extra_path_as_root', False),
                     }
                 }
             )
@@ -99,8 +98,7 @@ class ParsingQueueProcessor(QObject):
                 enqueue_part_cfg = {
                         'extra_paths': item['data'].get('dl_path', ''),
                         'extra_path_as_root': item['data'].get('dl_path_is_root', False),
-                        'force_album_after_extra_path_as_root': item['data'].get('force_album_after_extra_path_as_root', False)
-                }                
+                }
                 if item['media_type'] == 'album':
                     artist, album_release_date, album_name, total_tracks = get_album_name(session, item['media_id'])
                     item_name = item['data'].get('media_title', album_name)
@@ -154,7 +152,6 @@ class ParsingQueueProcessor(QObject):
                                     'media_type': 'episode',
                                     'extra_paths': item['data'].get('dl_path', ''),
                                     'extra_path_as_root': item['data'].get('dl_path_is_root', False),
-                                    'force_album_after_extra_path_as_root': enqueue_part_cfg.get('force_album_after_extra_path_as_root', False)
                                 }
                             }
                         )
@@ -176,7 +173,6 @@ class ParsingQueueProcessor(QObject):
                                 'media_type': 'episode',
                                 'extra_paths': item['data'].get('dl_path', ''),
                                 'extra_path_as_root': item['data'].get('dl_path_is_root', False),
-                                'force_album_after_extra_path_as_root': enqueue_part_cfg.get('force_album_after_extra_path_as_root', False)
                             }
                         }
                     )

@@ -30,8 +30,8 @@ class DownloadWorker(QObject):
     __last_cancelled = False
     __stopped = False
 
-    def download_track(self, session, track_id_str, extra_paths="", force_album_format=False, extra_path_as_root=False,
-                       force_album_after_extra_path_as_root=False, playlist_name='', playlist_owner='', playlist_desc=''):
+    def download_track(self, session, track_id_str, extra_paths="", extra_path_as_root=False,
+                       playlist_name='', playlist_owner='', playlist_desc=''):
         trk_track_id_str = track_id_str
         self.logger.debug(
             f"Downloading track by id '{track_id_str}', extra_paths: '{extra_paths}', "
@@ -51,19 +51,7 @@ class DownloadWorker(QObject):
         try:
             song_info = get_song_info(session, track_id_str)
             _artist = song_info['artists'][0]
-            album_root_formatter = os.path.join(config.get("album_name_formatter").format(
-                    artist=_artist,
-                    rel_year=song_info['release_year'],
-                    album=song_info['album_name'],
-                    genre=song_info['genre'][0] if len(song_info['genre']) > 0 else 'unknown',
-                    label=song_info['label'],
-                    trackcount=song_info['total_tracks'],
-                    playlist_name=playlist_name,
-                    playlist_owner=playlist_owner,
-                    playlist_desc=playlist_desc
-                )
-                )
-            song_name = config.get("track_name_formatter").format(
+            song_name = config.get("track_path_formatter").format(
                 artist=_artist,
                 album=song_info['album_name'],
                 name=song_info['name'],
@@ -88,11 +76,7 @@ class DownloadWorker(QObject):
             dl_root = os.path.abspath(extra_paths) if extra_path_as_root else config.get("download_root")
             # If extra path as root is enabled, extra path is already set as DL root, unset it
             extra_paths = '' if extra_path_as_root else extra_paths.strip()
-
-            if ( not extra_path_as_root and force_album_format ) or ( extra_path_as_root and force_album_after_extra_path_as_root ):
-                filename = os.path.join(dl_root, extra_paths, album_root_formatter, song_name)
-            else:
-                filename = os.path.join(dl_root, extra_paths, song_name)
+            filename = os.path.join(dl_root, extra_paths, song_name)
         except Exception:
             self.logger.error(
                 f"Metadata fetching failed for track by id '{trk_track_id_str}', {traceback.format_exc()}")
@@ -347,12 +331,10 @@ class DownloadWorker(QObject):
                             session=session_pool[self.__session_uuid],
                             track_id_str=item['media_id'],
                             extra_paths=item['extra_paths'],
-                            force_album_format=item['force_album_format'],
                             extra_path_as_root=item['extra_path_as_root'],
                             playlist_name=item['playlist_name'],
                             playlist_owner=item['playlist_owner'],
                             playlist_desc=item['playlist_desc'],
-                            force_album_after_extra_path_as_root=item['force_album_after_extra_path_as_root']
                         )
                     elif item['media_type'] == "episode":
                         status = self.download_episode(
