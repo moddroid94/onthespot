@@ -747,7 +747,7 @@
                     <item>
                      <widget class="QLabel" name="lb_download_delay">
                       <property name="text">
-                       <string>Download delay</string>
+                       <string>Download Delay</string>
                       </property>
                      </widget>
                     </item>
