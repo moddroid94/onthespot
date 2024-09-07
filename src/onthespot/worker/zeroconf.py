@@ -11,12 +11,12 @@ logger = get_logger("worker.session")
 
 def new_session():
     try:
-        os.mkdir(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'))
+        os.mkdir(os.path.join(os.path.expanduser('~'), '.config', 'OnTheSpot', 'sessions'))
     except FileExistsError:
         logger.info("The sessions directory already exists.")
 
     uuid_uniq = str(uuid.uuid4())
-    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'casualOnTheSpot', 'sessions'),
+    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'OnTheSpot', 'sessions'),
                  f"ots_login_{uuid_uniq}.json")
 
     CLIENT_ID: str = "65b708073fc0480ea92a077233ca87bd"
