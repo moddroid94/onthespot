@@ -34,7 +34,7 @@ def cache_dir():
 class Config:
     def __init__(self, cfg_path=None):
         if cfg_path is None or not os.path.isfile(cfg_path):
-            cfg_path = os.path.join(config_dir(), "OnTheSpot", "config.json")
+            cfg_path = os.path.join(config_dir(), "onthespot", "config.json")
         self.__cfg_path = cfg_path
         self.platform = platform.system()
         self.ext_ = ".exe" if self.platform == "Windows" else ""
@@ -119,8 +119,8 @@ class Config:
             print('Attempting to use system ffmpeg binary !')
             self.set_('_ffmpeg_bin_path', os.path.abspath(which('ffmpeg')) if which('ffmpeg') else 'ffmpeg' + self.ext_)
         print("Using ffmpeg binary at: ", self.get('_ffmpeg_bin_path'))
-        self.set_('_log_file', os.path.join(cache_dir(), "OnTheSpot", "logs", self.session_uuid, "onthespot.log"))
-        self.set_('_cache_dir', os.path.join(cache_dir(), "OnTheSpot"))
+        self.set_('_log_file', os.path.join(cache_dir(), "onthespot", "logs", self.session_uuid, "onthespot.log"))
+        self.set_('_cache_dir', os.path.join(cache_dir(), "onthespot"))
         try:
             os.makedirs(
                 os.path.dirname(self.get("_log_file")), exist_ok=True
@@ -165,7 +165,7 @@ class Config:
             cf.write(json.dumps(self.__config, indent=4))
 
     def rollback(self):
-        shutil.rmtree(os.path.join(config_dir(), "OnTheSpot", "sessions"))
+        shutil.rmtree(os.path.join(config_dir(), "onthespot", "sessions"))
         with open(self.__cfg_path, "w") as cf:
             cf.write(json.dumps(self.__template_data, indent=4))
         self.__config = self.__template_data

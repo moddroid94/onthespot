@@ -391,7 +391,7 @@ class MainWindow(QMainWindow):
         for account in config.get('accounts'):
             if account[3] == account_uuid:
                 removed = remove_user(account[0],
-                                      os.path.join(config_dir(), "OnTheSpot", "sessions"),
+                                      os.path.join(config_dir(), "onthespot", "sessions"),
                                       config, account_uuid, thread_pool, session_pool)
                 if removed:
                     self.tbl_sessions.removeRow(index.row())
