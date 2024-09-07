@@ -13,7 +13,7 @@ from ..worker import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayList
 from ..worker.zeroconf import new_session
 from .dl_progressbtn import DownloadActionsButtons
 from .minidialog import MiniDialog
-from ..otsconfig import config
+from ..otsconfig import config_dir, config
 from ..runtimedata import get_logger, download_queue, downloads_status, downloaded_data, failed_downloads, cancel_list, \
     session_pool, thread_pool
 from .thumb_listitem import LabelWithThumb
@@ -391,7 +391,7 @@ class MainWindow(QMainWindow):
         for account in config.get('accounts'):
             if account[3] == account_uuid:
                 removed = remove_user(account[0],
-                                      os.path.join(os.path.expanduser("~"), ".config", "casualOnTheSpot", "sessions"),
+                                      os.path.join(config_dir(), "casualOnTheSpot", "sessions"),
                                       config, account_uuid, thread_pool, session_pool)
                 if removed:
                     self.tbl_sessions.removeRow(index.row())

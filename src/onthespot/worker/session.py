@@ -1,7 +1,7 @@
 import os
 import time
 from PyQt5.QtCore import QObject, pyqtSignal
-from ..otsconfig import config
+from ..otsconfig import config_dir, config
 from ..runtimedata import session_pool, get_logger
 from ..utils.utils import login_user
 
@@ -24,7 +24,7 @@ class LoadSessions(QObject):
             self.progress.emit(f'Attempting to create session for:\n{account[0]}  [{c}/{t}] ', True)
             time.sleep(0.2)
             login = login_user(account[0], "",
-                               os.path.join(os.path.expanduser('~'), '.config', 'OnTheSpot', 'sessions'), account[3])
+                               os.path.join(config_dir(), 'OnTheSpot', 'sessions'), account[3])
             logged_in = False
             if login is not None:
                 if login[0]:

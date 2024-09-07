@@ -4,19 +4,19 @@ import sys
 import time
 import uuid
 from librespot.zeroconf import ZeroconfServer
-from ..otsconfig import config
+from ..otsconfig import config_dir, config
 from ..runtimedata import get_logger
 
 logger = get_logger("worker.session")
 
 def new_session():
     try:
-        os.mkdir(os.path.join(os.path.expanduser('~'), '.config', 'OnTheSpot', 'sessions'))
+        os.mkdir(os.path.join(config_dir(), 'OnTheSpot', 'sessions'))
     except FileExistsError:
         logger.info("The sessions directory already exists.")
 
     uuid_uniq = str(uuid.uuid4())
-    session_json_path = os.path.join(os.path.join(os.path.expanduser('~'), '.config', 'OnTheSpot', 'sessions'),
+    session_json_path = os.path.join(os.path.join(config_dir(), 'OnTheSpot', 'sessions'),
                  f"ots_login_{uuid_uniq}.json")
 
     CLIENT_ID: str = "65b708073fc0480ea92a077233ca87bd"

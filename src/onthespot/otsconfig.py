@@ -5,11 +5,36 @@ import shutil
 from shutil import which
 import uuid
 
+def config_dir():
+    if platform.system() == "Windows":
+        if 'APPDATA' in os.environ:
+            return os.environ["APPDATA"]
+        elif 'LOCALAPPDATA' in os.environ:
+            return os.environ["LOCALAPPDATA"]
+        else:
+            return os.path.join(os.path.expanduser("~"), ".config")
+    else:
+        if 'XDG_CONFIG_HOME' in os.environ:
+            return os.environ["XDG_CONFIG_HOME"]
+        else:
+            return os.path.join(os.path.expanduser("~"), ".config")
+
+def cache_dir():
+    if platform.system() == "Windows":
+        if 'TEMP' in os.environ:
+            return os.environ["TEMP"]
+        else:
+            return os.path.join(os.path.expanduser("~"), ".cache")
+    else:
+        if 'XDG_CACHE_HOME' in os.environ:
+            return os.environ["XDG_CACHE_HOME"]
+        else:
+            return os.path.join(os.path.expanduser("~"), ".cache")
 
 class Config:
     def __init__(self, cfg_path=None):
         if cfg_path is None or not os.path.isfile(cfg_path):
-            cfg_path = os.path.join(os.path.expanduser("~"), ".config", "OnTheSpot", "config.json")
+            cfg_path = os.path.join(config_dir(), "OnTheSpot", "config.json")
         self.__cfg_path = cfg_path
         self.platform = platform.system()
         self.ext_ = ".exe" if self.platform == "Windows" else ""
@@ -94,8 +119,8 @@ class Config:
             print('Attempting to use system ffmpeg binary !')
             self.set_('_ffmpeg_bin_path', os.path.abspath(which('ffmpeg')) if which('ffmpeg') else 'ffmpeg' + self.ext_)
         print("Using ffmpeg binary at: ", self.get('_ffmpeg_bin_path'))
-        self.set_('_log_file', os.path.join(os.path.expanduser("~"), ".cache", "OnTheSpot", "logs", self.session_uuid, "onthespot.log"))
-        self.set_('_cache_dir', os.path.join(os.path.expanduser("~"), ".cache", "OnTheSpot"))
+        self.set_('_log_file', os.path.join(cache_dir(), "OnTheSpot", "logs", self.session_uuid, "onthespot.log"))
+        self.set_('_cache_dir', os.path.join(cache_dir(), "OnTheSpot"))
         try:
             os.makedirs(
                 os.path.dirname(self.get("_log_file")), exist_ok=True
@@ -140,7 +165,7 @@ class Config:
             cf.write(json.dumps(self.__config, indent=4))
 
     def rollback(self):
-        shutil.rmtree(os.path.join(os.path.expanduser("~"), ".config", "OnTheSpot", "sessions"))
+        shutil.rmtree(os.path.join(config_dir(), "OnTheSpot", "sessions"))
         with open(self.__cfg_path, "w") as cf:
             cf.write(json.dumps(self.__template_data, indent=4))
         self.__config = self.__template_data
