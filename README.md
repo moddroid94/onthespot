@@ -67,7 +67,7 @@ The requirements are the same as "Launching without installing" above.
 1. Navigate to the onthespot directory ```cd onthespot```
 1. Build the package ```python -m build```
 1. Install the package ```pip install ./dist/*.whl```
-1. Launch the application with ```onthespot_gui```
+1. Launch the application with ```onthespot```
 
 
 # 2. Building/packaging manually
@@ -129,7 +129,7 @@ git clone https://github.com/justin025/onthespot
 cd onthespot
 python -m build
 ```
-This will create a dist directory containing .whl file that can now be installed with pip, the application can be launched with the command ```onthespot_gui``` or ```python3 -m onthespot``` after installing !
+This will create a dist directory containing .whl file that can now be installed with pip, the application can be launched with the command ```onthespot``` or ```python3 -m onthespot``` after installing !
 
 **NOTE :** If you are packaging onthespot for distribution, copy ```src/onthespot/resources/icon.svg``` to either ```/usr/share/icons/hicolor/scalable/apps/casual_onthespot.svg``` or ```$HOME/.local/share/icons/hicolor/scalable/apps/casual_onthespot.svg```, and ``` src/onthespot/resources/org.eu.casualsnek.onthespot.desktop``` to either ```/usr/share/applications/org.eu.casualsnek.onthespot.desktop``` or ```$HOME/.local/share/applications/org.eu.casualsnek.onthespot.desktop```. This allows application to be better integrated to desktop environments !
 
