@@ -40,7 +40,7 @@
        <string notr="true">QTabWidget::pane { border: 0; }</string>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -438,9 +438,9 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="progress">
+      <widget class="QWidget" name="downloads">
        <attribute name="title">
-        <string>Progress</string>
+        <string>Downloads</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
