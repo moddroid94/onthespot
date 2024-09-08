@@ -12,15 +12,15 @@ class DownloadActionsButtons(QWidget):
         self.__id = dl_id
         self.cancel_btn = cancel_btn
         self.remove_btn = remove_btn
-        self.locate_btn = locate_btn
         self.play_btn = play_btn
+        self.locate_btn = locate_btn
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         cancel_btn.clicked.connect(self.cancel_item)
         remove_btn.clicked.connect(self.retry_item)
-        locate_btn.clicked.connect(self.locate_file)
         play_btn.clicked.connect(self.play_file)
+        locate_btn.clicked.connect(self.locate_file)
         layout.addWidget(pbar)
         layout.addWidget(cancel_btn)
         layout.addWidget(remove_btn)
@@ -52,4 +52,3 @@ class DownloadActionsButtons(QWidget):
             self.remove_btn.hide()
             download_queue.put(failed_downloads[self.__id])
             self.cancel_btn.show()
-
