@@ -50,13 +50,13 @@ def re_init_session(session_pool: dict, session_uuid: str, wait_connectivity: bo
 
 
 def login_user(username: str, password: str, login_data_dir: str, uuid: str) -> list:
-    logger.info(f"logging in user '{username[:4]}****@****.***'")
+    logger.info(f"logging in user '{username[:4]}*******'")
     # Check the username and if pickled session file exists load the session and append
     # Returns: [Success: Bool, Session: Session, SessionJsonFile: str, premium: Bool]
     session_json_path = os.path.join(login_data_dir, f"ots_login_{uuid}.json")
     os.makedirs(os.path.dirname(session_json_path), exist_ok=True)
     if os.path.isfile(session_json_path):
-        logger.info(f"Session file exists for user, attempting to use it '{username[:4]}****@****.***'")
+        logger.info(f"Session file exists for user, attempting to use it '{username[:4]}*******'")
         logger.debug("Restoring user session")
         # Session exists try loading it
         try:
@@ -67,30 +67,18 @@ def login_user(username: str, password: str, login_data_dir: str, uuid: str) -> 
             session = Session.Builder(conf=config).stored_file(session_json_path).create()
             logger.debug("Session created")
             premium = True if session.get_user_attribute("type") == "premium" else False
-            logger.info(f"Login successful for user '{username[:4]}****@****.***'")
+            logger.info(f"Login successful for user '{username[:4]}*******'")
             return [True, session, session_json_path, premium, uuid]
         except (RuntimeError, Session.SpotifyAuthenticationException):
-            logger.error(f"Failed logging in user '{username[:4]}****@****.***', invalid credentials")
+            logger.error(f"Failed logging in user '{username[:4]}*******', invalid credentials")
         except Exception as e:
-            logger.error(f"Failed logging in user '{username[:4]}****@****.***', unexpected error ! : {str(e)}; {traceback.format_exc()}")
-            return [False, None, "", False, uuid]
-    else:
-        logger.info(f"Session file does not exist user '{username[:4]}****@****.***', attempting login with uname/pass")
-        try:
-            logger.info(f"logging in user '{username[:4]}****@****.***'")
-            config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
-            session = Session.Builder(conf=config).user_pass(username, password).create()
-            premium = True if session.get_user_attribute("type") == "premium" else False
-            logger.info(f"Login successful for user '{username[:4]}****@****.***'")
-            return [True, session, session_json_path, premium, uuid]
-        except (RuntimeError, Session.SpotifyAuthenticationException):
-            logger.error(f"Failed logging in user '{username[:4]}****@****.***', unexpected error !")
+            logger.error(f"Failed logging in user '{username[:4]}*******', unexpected error ! : {str(e)}; {traceback.format_exc()}")
             return [False, None, "", False, uuid]
 
 
 def remove_user(username: str, login_data_dir: str, config, session_uuid: str, thread_pool: dict,
                 session_pool: dict) -> bool:
-    logger.info(f"Removing user '{username[:4]}****@****.***' from saved entries, uuid {session_uuid}")
+    logger.info(f"Removing user '{username[:4]}*******' from saved entries, uuid {session_uuid}")
     # Try to stop the thread using this account
     if session_uuid in thread_pool.keys():
         thread_pool[session_uuid][0].stop()
@@ -117,7 +105,7 @@ def remove_user(username: str, login_data_dir: str, config, session_uuid: str, t
             removed = True
             break
     if removed:
-        logger.info(f"Saved Account user '{username[:4]}****@****.***' found and removed, uuid: {session_uuid}")
+        logger.info(f"Saved Account user '{username[:4]}*******' found and removed, uuid: {session_uuid}")
         config.set_("accounts", accounts_copy)
         config.update()
     return removed
