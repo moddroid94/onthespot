@@ -1,27 +1,41 @@
+import platform
 import os
+import subprocess
 from PyQt5.QtWidgets import QHBoxLayout, QWidget
 from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue
 from showinfm import show_in_file_manager
 
 
 class DownloadActionsButtons(QWidget):
-    def __init__(self, dl_id, pbar, cancel_btn, remove_btn, locate_btn, parent=None):
+    def __init__(self, dl_id, pbar, cancel_btn, remove_btn, play_btn, locate_btn, parent=None):
         super(DownloadActionsButtons, self).__init__(parent)
         self.__id = dl_id
         self.cancel_btn = cancel_btn
         self.remove_btn = remove_btn
         self.locate_btn = locate_btn
+        self.play_btn = play_btn
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         cancel_btn.clicked.connect(self.cancel_item)
         remove_btn.clicked.connect(self.retry_item)
         locate_btn.clicked.connect(self.locate_file)
+        play_btn.clicked.connect(self.play_file)
         layout.addWidget(pbar)
         layout.addWidget(cancel_btn)
         layout.addWidget(remove_btn)
+        layout.addWidget(play_btn)
         layout.addWidget(locate_btn)
         self.setLayout(layout)
+
+    def play_file (self):
+        file_path = os.path.abspath(downloaded_data[self.__id]['media_path'])
+        if platform.system() == 'Windows':
+            os.startfile(file_path)
+        elif platform.system() == 'Darwin':  # For MacOS
+            subprocess.call(['open', file_path])
+        else:  # For Linux and other Unix-like systems
+            subprocess.run(['xdg-open', file_path])
 
     def locate_file(self):
         if self.__id in downloaded_data:
@@ -38,3 +52,4 @@ class DownloadActionsButtons(QWidget):
             self.remove_btn.hide()
             download_queue.put(failed_downloads[self.__id])
             self.cancel_btn.show()
+

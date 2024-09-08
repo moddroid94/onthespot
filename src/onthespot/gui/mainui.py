@@ -5,6 +5,7 @@ import threading
 import uuid
 from PyQt5 import uic, QtNetwork, QtGui
 from PyQt5.QtCore import QThread, QDir
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
 from ..utils.spotify import search_by_term, get_thumbnail
@@ -42,6 +43,7 @@ def dl_progress_update(data):
             if percent >= 100:
                 downloads_status[media_id]['btn']['cancel'].hide()
                 downloads_status[media_id]['btn']['retry'].hide()
+                downloads_status[media_id]['btn']['play'].show()
                 downloads_status[media_id]['btn']['locate'].show()
                 downloaded_data[media_id] = {
                     'media_path': data[3],
@@ -313,20 +315,33 @@ class MainWindow(QMainWindow):
             return None
         pbar = QProgressBar()
         pbar.setValue(0)
-        cancel_btn = QPushButton()
-        retry_btn = QPushButton()
-        locate_btn = QPushButton()
-        retry_btn.setText('Retry')
-        cancel_btn.setText('Cancel')
-        locate_btn.setText('Locate')
-        retry_btn.hide()
-        locate_btn.hide()
         pbar.setMinimumHeight(30)
-        retry_btn.setMinimumHeight(30)
+        cancel_btn = QPushButton()
+        # cancel_btn.setText('Cancel')
+        cancel_ico = QIcon(os.path.join(config.app_root, 'resources', 'stop.png'))
+        cancel_btn.setIcon(cancel_ico)
         cancel_btn.setMinimumHeight(30)
+        retry_btn = QPushButton()
+        #retry_btn.setText('Retry')
+        retry_ico = QIcon(os.path.join(config.app_root, 'resources', 'retry.png'))
+        retry_btn.setIcon(retry_ico)
+        retry_btn.setMinimumHeight(30)
+        retry_btn.hide()
+        play_btn = QPushButton()
+        #play_btn.setText('Play')
+        play_ico = QIcon(os.path.join(config.app_root, 'resources', 'play.png'))
+        play_btn.setIcon(play_ico)
+        play_btn.setMinimumHeight(30)
+        play_btn.hide()
+        locate_btn = QPushButton()
+        #locate_btn.setText('Locate')
+        locate_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.svg'))
+        locate_btn.setIcon(locate_ico)
+        locate_btn.setMinimumHeight(30)
+        locate_btn.hide()
         status = QLabel(self.tbl_dl_progress)
         status.setText("Waiting")
-        actions = DownloadActionsButtons(item['item_id'], pbar, cancel_btn, retry_btn, locate_btn)
+        actions = DownloadActionsButtons(item['item_id'], pbar, cancel_btn, retry_btn, play_btn, locate_btn)
         download_queue.put(
             {
                 'media_type': item['dl_params']['media_type'],
@@ -346,6 +361,7 @@ class MainWindow(QMainWindow):
             "btn": {
                 "cancel": cancel_btn,
                 "retry": retry_btn,
+                "play": play_btn,
                 "locate": locate_btn
             }
         }
