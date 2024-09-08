@@ -335,7 +335,7 @@ class MainWindow(QMainWindow):
         play_btn.hide()
         locate_btn = QPushButton()
         #locate_btn.setText('Locate')
-        locate_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.svg'))
+        locate_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
         locate_btn.setIcon(locate_ico)
         locate_btn.setMinimumHeight(30)
         locate_btn.hide()
