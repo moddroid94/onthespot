@@ -6,7 +6,7 @@ from librespot.core import Session
 import re
 from ..otsconfig import config_dir
 from ..runtimedata import get_logger
-from .spotify import search_by_term
+from .spotify import search_by_term, get_currently_playing_url
 import subprocess
 import asyncio
 import traceback
@@ -232,16 +232,6 @@ def get_url_data(url):
 
 
 def get_now_playing_local(session):
-    def get_track_url():
-        url = "https://api.spotify.com/v1/me/player/currently-playing"
-        access_token = session.tokens().get("user-read-currently-playing")
-        resp = requests.get(url, headers={"Authorization": "Bearer %s" % access_token}, params={})
-        if resp.status_code == 200:
-            json_data = resp.json()
-            return json_data['item']['external_urls']['spotify']
-        else:
-            return ""
-
     global media_tracker_last_query
     if platform.system() == "Linux":
         logger.debug("Linux detected ! Use playerctl to get current track information..")
@@ -249,7 +239,7 @@ def get_now_playing_local(session):
             playerctl_out = subprocess.check_output(["playerctl", "-p", "spotify", "metadata", "xesam:url"])
         except subprocess.CalledProcessError:
             logger.debug("Spotify not running. Fetching track via api..")
-            return get_track_url()
+            return get_currently_playing_url(session)
         spotify_url = playerctl_out.decode()
         return spotify_url
     elif platform.system() == "Windows":
@@ -280,16 +270,16 @@ def get_now_playing_local(session):
                     return link
                 except (KeyError, IndexError):
                     logger.debug("KeyError. Fetching track via api..")
-                    return get_track_url()
+                    return get_currently_playing_url(session)
             else:
                 logger.debug("No result for currently playing track. Fetching track via api..")
-                return get_track_url()
+                return get_currently_playing_url(session)
         else:
             logger.debug("Event loop failed. Fetching track via api..")
-            return get_track_url()
+            return get_currently_playing_url(session)
     else:
         logger.debug("Unsupported platform for auto download. Fetching track via api..")
-        return get_track_url()
+        return get_currently_playing_url(session)
 
 
 

@@ -18,6 +18,50 @@ from librespot.audio.decoders import AudioQuality
 logger = get_logger("spotutils")
 requests.adapters.DEFAULT_RETRIES = 10
 
+def check_if_media_in_library(session, media_id, media_type):
+    if media_type == 'track' or media_type == 'episode':
+        access_token = session.tokens().get("user-library-read")
+        url = f'https://api.spotify.com/v1/me/{media_type}s/contains?ids={media_id}'
+        headers = {
+        'Authorization': f'Bearer {access_token}'
+        }
+        saved = requests.get(url, headers=headers)
+        if saved.json() == [True]:
+            return True
+        else:
+            return False
+    else:
+        logger.info(f"Unable to check if media is in library, unknown type; id: {media_id} type: {media_type}'")
+        return
+
+def save_media_to_library(session, media_id, media_type):
+    if media_type == 'track' or media_type == 'episode':
+        access_token = session.tokens().get("user-library-modify")
+        url = f'https://api.spotify.com/v1/me/{media_type}s?ids={media_id}'
+        headers = {
+        'Authorization': f'Bearer {access_token}'
+        }
+        saved = requests.put(url, headers=headers)
+
+def remove_media_from_library(session, media_id, media_type):
+    if media_type == 'track' or media_type == 'episode':
+        access_token = session.tokens().get("user-library-modify")
+        url = f'https://api.spotify.com/v1/me/{media_type}s?ids={media_id}'
+        headers = {
+        'Authorization': f'Bearer {access_token}'
+        }
+        saved = requests.delete(url, headers=headers)
+
+def get_currently_playing_url(session):
+    url = "https://api.spotify.com/v1/me/player/currently-playing"
+    access_token = session.tokens().get("user-read-currently-playing")
+    resp = requests.get(url, headers={"Authorization": "Bearer %s" % access_token}, params={})
+    if resp.status_code == 200:
+        json_data = resp.json()
+        return json_data['item']['external_urls']['spotify']
+    else:
+        return ""
+
 def get_artist_albums(session, artist_id):
     logger.info(f"Get albums for artist by id '{artist_id}'")
     access_token = session.tokens().get("user-read-email")

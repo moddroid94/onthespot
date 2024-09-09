@@ -43,6 +43,7 @@ def dl_progress_update(data):
             if percent >= 100:
                 downloads_status[media_id]['btn']['cancel'].hide()
                 downloads_status[media_id]['btn']['retry'].hide()
+                downloads_status[media_id]['btn']['save'].show()
                 downloads_status[media_id]['btn']['play'].show()
                 downloads_status[media_id]['btn']['locate'].show()
                 downloaded_data[media_id] = {
@@ -327,6 +328,10 @@ class MainWindow(QMainWindow):
         retry_btn.setIcon(retry_ico)
         retry_btn.setMinimumHeight(30)
         retry_btn.hide()
+        save_btn = QPushButton()
+        #save_btn.setText('Save')
+        save_btn.setMinimumHeight(30)
+        save_btn.hide()
         play_btn = QPushButton()
         #play_btn.setText('Play')
         play_ico = QIcon(os.path.join(config.app_root, 'resources', 'play.png'))
@@ -341,7 +346,7 @@ class MainWindow(QMainWindow):
         locate_btn.hide()
         status = QLabel(self.tbl_dl_progress)
         status.setText("Waiting")
-        actions = DownloadActionsButtons(item['item_id'], pbar, cancel_btn, retry_btn, play_btn, locate_btn)
+        actions = DownloadActionsButtons(item['item_id'], item['dl_params']['media_type'], pbar, cancel_btn, retry_btn, save_btn, play_btn, locate_btn)
         download_queue.put(
             {
                 'media_type': item['dl_params']['media_type'],
@@ -361,6 +366,7 @@ class MainWindow(QMainWindow):
             "btn": {
                 "cancel": cancel_btn,
                 "retry": retry_btn,
+                "save": save_btn,
                 "play": play_btn,
                 "locate": locate_btn
             }
