@@ -67,8 +67,11 @@ class Config:
             "show_search_thumbnails": 1, # Show thumbnails in search view
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
             "metadata_seperator": ";", # Seperator used for metadata fields that have multiple values
-            "accounts": [], # Saved account information
-            "theme": "Light" # Light\Dark
+            "download_save_btn": False, # Add save button to downloads
+            "download_play_btn": True, # Add play button to downloads
+            "download_locate_btn": True, # Add locate button to downloads
+            "theme": "Light", # Light\Dark
+            "accounts": [] # Saved account information
         }
         if os.path.isfile(self.__cfg_path):
             self.__config = json.load(open(cfg_path, "r"))

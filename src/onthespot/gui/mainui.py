@@ -43,9 +43,12 @@ def dl_progress_update(data):
             if percent >= 100:
                 downloads_status[media_id]['btn']['cancel'].hide()
                 downloads_status[media_id]['btn']['retry'].hide()
-                downloads_status[media_id]['btn']['save'].show()
-                downloads_status[media_id]['btn']['play'].show()
-                downloads_status[media_id]['btn']['locate'].show()
+                if config.get("download_save_btn"):
+                    downloads_status[media_id]['btn']['save'].show()
+                if config.get("download_play_btn"):
+                    downloads_status[media_id]['btn']['play'].show()
+                if config.get("download_locate_btn"):
+                    downloads_status[media_id]['btn']['locate'].show()
                 downloaded_data[media_id] = {
                     'media_path': data[3],
                     'media_name': data[4]
@@ -321,27 +324,34 @@ class MainWindow(QMainWindow):
         # cancel_btn.setText('Cancel')
         cancel_ico = QIcon(os.path.join(config.app_root, 'resources', 'stop.png'))
         cancel_btn.setIcon(cancel_ico)
+        cancel_btn.setToolTip('Cancel')
         cancel_btn.setMinimumHeight(30)
         retry_btn = QPushButton()
         #retry_btn.setText('Retry')
         retry_ico = QIcon(os.path.join(config.app_root, 'resources', 'retry.png'))
         retry_btn.setIcon(retry_ico)
+        retry_btn.setToolTip('Retry')
         retry_btn.setMinimumHeight(30)
         retry_btn.hide()
         save_btn = QPushButton()
         #save_btn.setText('Save')
+        #save_ico = QIcon(os.path.join(config.app_root, 'resources', 'filled-heart.png'))
+        #save_btn.setIcon(save_ico)
+        save_btn.setToolTip('Save')
         save_btn.setMinimumHeight(30)
         save_btn.hide()
         play_btn = QPushButton()
         #play_btn.setText('Play')
         play_ico = QIcon(os.path.join(config.app_root, 'resources', 'play.png'))
         play_btn.setIcon(play_ico)
+        play_btn.setToolTip('Play')
         play_btn.setMinimumHeight(30)
         play_btn.hide()
         locate_btn = QPushButton()
         #locate_btn.setText('Locate')
         locate_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
         locate_btn.setIcon(locate_ico)
+        locate_btn.setToolTip('Locate')
         locate_btn.setMinimumHeight(30)
         locate_btn.hide()
         status = QLabel(self.tbl_dl_progress)
@@ -489,6 +499,18 @@ class MainWindow(QMainWindow):
         self.inp_playlist_name_formatter.setText(config.get("playlist_name_formatter"))
         self.inp_max_recdl_delay.setValue(config.get("recoverable_fail_wait_delay"))
         self.inp_dl_endskip.setValue(config.get("dl_end_padding_bytes"))
+        if config.get("download_save_btn"):
+            self.inp_download_save_btn.setChecked(True)
+        else:
+            self.inp_download_save_btn.setChecked(False)
+        if config.get("download_play_btn"):
+            self.inp_download_play_btn.setChecked(True)
+        else:
+            self.inp_download_play_btn.setChecked(False)
+        if config.get("download_locate_btn"):
+            self.inp_download_locate_btn.setChecked(True)
+        else:
+            self.inp_download_locate_btn.setChecked(False)
         if config.get("force_raw"):
             self.inp_raw_download.setChecked(True)
         else:
@@ -550,6 +572,18 @@ class MainWindow(QMainWindow):
             config.set_('force_raw', True)
         else:
             config.set_('force_raw', False)
+        if self.inp_download_save_btn.isChecked():
+            config.set_('download_save_btn', True)
+        else:
+            config.set_('download_save_btn', False)
+        if self.inp_download_play_btn.isChecked():
+            config.set_('download_play_btn', True)
+        else:
+            config.set_('download_play_btn', False)
+        if self.inp_download_locate_btn.isChecked():
+            config.set_('download_locate_btn', True)
+        else:
+            config.set_('download_locate_btn', False)
         if self.inp_force_premium.isChecked():
             config.set_('force_premium', True)
         else:
