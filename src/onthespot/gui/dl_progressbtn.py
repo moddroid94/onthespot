@@ -1,17 +1,14 @@
 import platform
 import os
 import subprocess
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QHBoxLayout, QWidget
-from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue
+from ..otsconfig import config
+from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue, session_pool, get_logger
+from ..utils.spotify import check_if_media_in_library, save_media_to_library, remove_media_from_library
 from showinfm import show_in_file_manager
 
-from ..utils.spotify import check_if_media_in_library, save_media_to_library, remove_media_from_library
-from ..otsconfig import config
-from ..runtimedata import session_pool, get_logger
-from PyQt5.QtGui import QIcon
-
 logger = get_logger("worker.utility")
-
 
 class DownloadActionsButtons(QWidget):
     def __init__(self, dl_id, media_type, pbar, cancel_btn, remove_btn, save_btn, play_btn, locate_btn, parent=None):
@@ -45,9 +42,11 @@ class DownloadActionsButtons(QWidget):
             save_ico = QIcon(os.path.join(config.app_root, 'resources', 'filled-heart.png'))
             save_btn.setIcon(save_ico)
             self.in_library = True
-        else:
+        elif not in_library:
             save_ico = QIcon(os.path.join(config.app_root, 'resources', 'empty-heart.png'))
             save_btn.setIcon(save_ico)
+        else:
+            logger.info(f"Unable to determine if song is in library, value: {in_library}")
 
     def save_item (self):
         if self.in_library:
