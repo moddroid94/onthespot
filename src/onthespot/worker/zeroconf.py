@@ -13,7 +13,7 @@ def new_session():
     try:
         os.mkdir(os.path.join(config_dir(), 'onthespot', 'sessions'))
     except FileExistsError:
-        logger.info("The sessions directory already exists.")
+        logger.info("The session directory already exists.")
 
     uuid_uniq = str(uuid.uuid4())
     session_json_path = os.path.join(os.path.join(config_dir(), 'onthespot', 'sessions'),
@@ -23,6 +23,7 @@ def new_session():
     ZeroconfServer._ZeroconfServer__default_get_info_fields['clientID'] = CLIENT_ID
     zs_builder = ZeroconfServer.Builder()
     zs_builder.device_name = 'OnTheSpot'
+    zs_builder.device_type = Connect.DeviceType.COMPUTER
     zs_builder.conf.stored_credentials_file = session_json_path
     zs = zs_builder.create()
     logger.info("Zeroconf login service started")
