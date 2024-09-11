@@ -82,7 +82,7 @@ cd onthespot
 ./build_linux.sh
 ```
 If you want builds with ffmpeg embedded download ffmpeg binaries for your os from [Here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z).
-The script will prompt you to add the binaries to 'OnTheSpot.AppDir/usr/bin', ffmpeg, ffprobe, and ffplay are required for onthespot properly parse songs.
+The script will prompt you to add the binaries to 'OnTheSpot.AppDir/usr/bin', ffmpeg and ffplay are required for onthespot properly parse songs.
 After the command completes, you should have a 'dist' directory in repository root containing built 'onthespot_linux' binary.
 
 ### 2.1.2. On Windows
@@ -94,7 +94,7 @@ cd onthespot
 ```
 If you do not have git installed you can also download the Project source zip from github, extract it and open cmd on repository root.
 If you want builds with ffmpeg embedded download ffmpeg binaries for your os from [Here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z). 
-Create a new directory named 'ffbin_win' in repository root directory. Copy three files 'ffmpeg.exe', 'ffprobe.exe', 'ffplay.exe' from downloaded archive to just created 'ffbin_win' directory then run;
+Create a new directory named 'ffbin_win' in repository root directory. Copy'ffmpeg.exe' and 'ffplay.exe' from downloaded archive to just created 'ffbin_win' directory then run;
 ```cmd
 build_winC1.bat
 build_winC2.bat
@@ -112,7 +112,7 @@ cd onthespot
 ```
 
 If you want builds with ffmpeg embedded download ffmpeg binaries for your os from [Here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z).
-Create a new directory named 'ffbin_mac' in repository root directory. Copy three files 'ffmpeg', 'ffprobe', 'ffplay' from the downloaded archive to the newly created 'ffbin_mac' directory then run:
+Create a new directory named 'ffbin_mac' in repository root directory. Copy 'ffmpeg' and 'ffplay' from the downloaded archive to the newly created 'ffbin_mac' directory then run:
 ```bash
 ./build_mac.sh
 ```

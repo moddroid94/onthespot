@@ -63,7 +63,7 @@ export SSL_CERT_FILE="${APPDIR}/opt/_internal/certs.pem"
 chmod +x OnTheSpot.AppDir/AppRun
 
 echo ' '
-echo ' # ffmpeg, ffprobe, and ffplay need to be manually added to OnTheSpot.AppDir/usr/bin.'
+echo ' # ffmpeg and ffplay need to be manually added to OnTheSpot.AppDir/usr/bin.'
 echo ' # Make sure to run chmod +x on each, binaries can be found here:'
 echo ' # https://johnvansickle.com/ffmpeg/'
 echo ' '
