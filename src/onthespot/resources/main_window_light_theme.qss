@@ -1,3 +1,2 @@
-QPushButton {
-   padding: 4px;
+QWidget {
 }
