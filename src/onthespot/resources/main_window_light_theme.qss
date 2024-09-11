@@ -1,0 +1,3 @@
+QPushButton {
+   padding: 4px;
+}

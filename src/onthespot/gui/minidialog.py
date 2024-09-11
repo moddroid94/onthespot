@@ -18,12 +18,17 @@ class MiniDialog(QDialog):
 
         # Set theme
         self.dark_theme_path = os.path.join(config.app_root,'resources', 'mini_dialog_dark_theme.qss')
+        self.light_theme_path = os.path.join(config.app_root,'resources', 'mini_dialog_light_theme.qss')
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.theme = config.get("theme")
         if self.theme == "Dark":
           with open(self.dark_theme_path, 'r') as f:
               dark_theme = f.read()
               self.setStyleSheet(dark_theme)
+        elif self.theme == "Light":
+          with open(self.light_theme_path, 'r') as f:
+              light_theme = f.read()
+              self.setStyleSheet(light_theme)
 
         def load_dark_theme(self):
             with open(self.dark_theme_path, 'r') as f:
@@ -32,8 +37,10 @@ class MiniDialog(QDialog):
             self.theme = "Dark"
 
         def load_light_theme(self):
-            self.setStyleSheet("")  # set empty style for light theme
-            self.theme = "Light"
+            with open(self.light_theme_path, 'r') as f:
+                light_theme = f.read()
+                self.setStyleSheet(light_theme)
+            self.theme = "Dark"
 
         def toggle_theme(self):
             if self.theme == "Light":

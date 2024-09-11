@@ -159,6 +159,7 @@ class MainWindow(QMainWindow):
 
         # Create path to dark_theme
         self.dark_theme_path = os.path.join(config.app_root,'resources', 'main_window_dark_theme.qss')
+        self.light_theme_path = os.path.join(config.app_root,'resources', 'main_window_light_theme.qss')
         # Create button and add to the interface
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
         # Set theme from config
@@ -167,6 +168,10 @@ class MainWindow(QMainWindow):
           with open(self.dark_theme_path, 'r') as f:
               dark_theme = f.read()
               self.setStyleSheet(dark_theme)
+        elif self.theme == "Light":
+          with open(self.light_theme_path, 'r') as f:
+              light_theme = f.read()
+              self.setStyleSheet(light_theme)
         logger.info(f"Set theme {self.theme}!")
 
         # Set the table header properties
@@ -180,7 +185,9 @@ class MainWindow(QMainWindow):
         self.theme = "Dark"
 
     def load_light_theme(self):
-        self.setStyleSheet("")  # set empty style for light theme
+        with open(self.light_theme_path, 'r') as f:
+            light_theme = f.read()
+            self.setStyleSheet(light_theme)
         self.theme = "Light"
 
     def toggle_theme(self):
@@ -717,9 +724,9 @@ class MainWindow(QMainWindow):
 
     def __insert_search_result_row(self, btn_text, item_name, item_by, item_type, queue_data):
         btn = QPushButton(self.tbl_search_results)
-        #btn.setText(btn_text.strip())
-        download_icon = QIcon(os.path.join(config.app_root, 'resources', 'download.png'))
-        btn.setIcon(download_icon)
+        btn.setText(btn_text.strip())
+        #download_icon = QIcon(os.path.join(config.app_root, 'resources', 'download.png'))
+        #btn.setIcon(download_icon)
 
         btn.clicked.connect(lambda x, q_data=queue_data: self.__send_to_pqp(q_data))
         btn.setMinimumHeight(30)
