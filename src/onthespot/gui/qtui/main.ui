@@ -290,6 +290,13 @@
            <item>
             <widget class="QLineEdit" name="inp_tmp_dl_root"/>
            </item>
+           <item>
+            <widget class="QPushButton" name="btn_download_tmp_browse">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
@@ -680,7 +687,7 @@
                     <item>
                      <widget class="QLabel" name="lb_download_root">
                       <property name="text">
-                       <string>Download Location</string>
+                       <string>Download Path</string>
                       </property>
                      </widget>
                     </item>

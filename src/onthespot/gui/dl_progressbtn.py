@@ -72,9 +72,9 @@ class DownloadActionsButtons(QWidget):
         if platform.system() == 'Windows':
             os.startfile(file_path)
         elif platform.system() == 'Darwin':  # For MacOS
-            subprocess.call(['open', file_path])
+            subprocess.Popen(['open', file_path])
         else:  # For Linux and other Unix-like systems
-            subprocess.run(['xdg-open', file_path])
+            subprocess.Popen(['xdg-open', file_path])
 
     def locate_file(self):
         if self.__id in downloaded_data:

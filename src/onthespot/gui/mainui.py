@@ -91,6 +91,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QtGui.QIcon(icon_path))
         folder_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
         self.btn_download_root_browse.setIcon(folder_ico)
+        self.btn_download_tmp_browse.setIcon(folder_ico)
         # Breaks zeroconf login because of dirty restart
         #self.start_url = start_url
         self.start_url = ""
@@ -194,6 +195,7 @@ class MainWindow(QMainWindow):
         self.btn_progress_retry_all.clicked.connect(retry_all_failed_downloads)
         self.btn_progress_cancel_all.clicked.connect(cancel_all_downloads)
         self.btn_download_root_browse.clicked.connect(self.__select_dir)
+        self.btn_download_tmp_browse.clicked.connect(self.__select_tmp_dir)
         self.inp_search_term.returnPressed.connect(self.__get_search_results)
         self.btn_search_download_tracks.clicked.connect(lambda x, cat="tracks": self.__mass_action_dl(cat))
         self.btn_search_download_albums.clicked.connect(lambda x, cat="albums": self.__mass_action_dl(cat))
@@ -291,6 +293,11 @@ class MainWindow(QMainWindow):
         dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
         if dir_path.strip() != '':
             self.inp_download_root.setText(QDir.toNativeSeparators(dir_path))
+
+    def __select_tmp_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
+        if dir_path.strip() != '':
+            self.inp_tmp_dl_root.setText(QDir.toNativeSeparators(dir_path))
 
     def __toggle_advanced(self):
         self.__advanced_visible = False if self.__advanced_visible else True
