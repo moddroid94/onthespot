@@ -1,7 +1,5 @@
 #!/bin/bash
 
-PV=0.6.2
-
 echo "========= OnTheSpot Appimage Build Script ==========="
 
 
@@ -32,7 +30,7 @@ build/OnTheSpot.AppDir/AppRun -m build
 echo " => Prepare OnTheSpot Appimage"
 cd build
 OnTheSpot.AppDir/AppRun -m pip install -r ../requirements.txt
-OnTheSpot.AppDir/AppRun -m pip install ../dist/onthespot-$PV-py3-none-any.whl
+OnTheSpot.AppDir/AppRun -m pip install ../dist/onthespot-*-py3-none-any.whl
 
 rm OnTheSpot.AppDir/AppRun
 rm OnTheSpot.AppDir/.DirIcon
