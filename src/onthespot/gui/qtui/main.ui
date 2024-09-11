@@ -126,7 +126,7 @@
               <item>
                <widget class="QPushButton" name="btn_search">
                 <property name="text">
-                 <string>Search</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -139,7 +139,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>↓</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -886,13 +886,6 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_9">
                  <item>
-                  <widget class="QPushButton" name="btn_toggle_advanced">
-                   <property name="text">
-                    <string>Toggle Advanced Settings</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <widget class="QPushButton" name="toggle_theme_button">
                    <property name="text">
                     <string>Dark/Light Theme</string>
@@ -900,9 +893,16 @@
                   </widget>
                  </item>
                  <item>
+                  <widget class="QPushButton" name="btn_toggle_advanced">
+                   <property name="text">
+                    <string>Advanced Settings</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QPushButton" name="btn_save_config">
                    <property name="text">
-                    <string>Apply Settings</string>
+                    <string> Save Settings</string>
                    </property>
                   </widget>
                  </item>
@@ -1542,7 +1542,7 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QPushButton" name="btn_seset_config">
+            <widget class="QPushButton" name="btn_reset_config">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -1553,7 +1553,7 @@
               <string notr="true">background-color: rgba(255, 0, 0, 100);</string>
              </property>
              <property name="text">
-              <string>Reset Settings</string>
+              <string> Reset Settings</string>
              </property>
             </widget>
            </item>
@@ -1566,7 +1566,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Apply Settings</string>
+              <string> Save Settings</string>
              </property>
             </widget>
            </item>

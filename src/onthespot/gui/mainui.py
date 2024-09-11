@@ -6,7 +6,7 @@ import uuid
 from PyQt5 import uic, QtNetwork, QtGui
 from PyQt5.QtCore import QThread, QDir
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
 from ..utils.spotify import search_by_term, get_thumbnail
 from ..utils.utils import name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session
@@ -87,12 +87,20 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.path = os.path.dirname(os.path.realpath(__file__))
         icon_path = os.path.join(config.app_root, 'resources', 'icon.png')
+        QApplication.setStyle("fusion")
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(QtGui.QIcon(icon_path))
-        folder_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
-        self.btn_download_root_browse.setIcon(folder_ico)
-        self.btn_download_tmp_browse.setIcon(folder_ico)
-        # Breaks zeroconf login because of dirty restart
+        save_icon = QIcon(os.path.join(config.app_root, 'resources', 'save.png'))
+        self.btn_save_config.setIcon(save_icon)
+        folder_icon = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
+        self.btn_download_root_browse.setIcon(folder_icon)
+        self.btn_download_tmp_browse.setIcon(folder_icon)
+        search_icon = QIcon(os.path.join(config.app_root, 'resources', 'search.png'))
+        self.btn_search.setIcon(search_icon)
+        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'collapse_down.png'))
+        self.btn_search_filter_toggle.setIcon(collapse_down_icon)
+
+       # Breaks zeroconf login because of dirty restart
         #self.start_url = start_url
         self.start_url = ""
         self.inp_session_uuid.setText(config.session_uuid)
@@ -183,11 +191,14 @@ class MainWindow(QMainWindow):
 
     def bind_button_inputs(self):
         # Connect button click signals
+        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'collapse_down.png'))
+        collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'collapse_up.png'))
+
         self.btn_search.clicked.connect(self.__get_search_results)
 
         self.btn_login_add.clicked.connect(self.__add_account)
         self.btn_save_config.clicked.connect(self.__update_config)
-        self.btn_seset_config.clicked.connect(self.reset_app_config)
+        self.btn_reset_config.clicked.connect(self.reset_app_config)
 
         self.btn_search_download_all.clicked.connect(lambda x, cat="all": self.__mass_action_dl(cat))
         self.btn_save_adv_config.clicked.connect(self.__update_config)
@@ -203,7 +214,7 @@ class MainWindow(QMainWindow):
         self.btn_progress_clear_complete.clicked.connect(self.rem_complete_from_table)
         self.btn_search_download_playlists.clicked.connect(lambda x, cat="playlists": self.__mass_action_dl(cat))
         self.btn_search_filter_toggle.clicked.connect(lambda toggle: self.group_search_items.show() if self.group_search_items.isHidden() else self.group_search_items.hide())
-        self.btn_search_filter_toggle.clicked.connect(lambda switch: self.btn_search_filter_toggle.setText("↓") if self.group_search_items.isHidden() else self.btn_search_filter_toggle.setText("↑"))
+        self.btn_search_filter_toggle.clicked.connect(lambda switch: self.btn_search_filter_toggle.setIcon(collapse_down_icon) if self.group_search_items.isHidden() else self.btn_search_filter_toggle.setIcon(collapse_up_icon))
         # Connect checkbox state change signals
         self.inp_create_playlists.stateChanged.connect(self.__m3u_maker_set)
         self.inp_enable_spot_watch.stateChanged.connect(self.__media_watcher_set)
@@ -331,35 +342,35 @@ class MainWindow(QMainWindow):
         pbar.setMinimumHeight(30)
         cancel_btn = QPushButton()
         # cancel_btn.setText('Cancel')
-        cancel_ico = QIcon(os.path.join(config.app_root, 'resources', 'stop.png'))
-        cancel_btn.setIcon(cancel_ico)
+        cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'stop.png'))
+        cancel_btn.setIcon(cancel_icon)
         cancel_btn.setToolTip('Cancel')
         cancel_btn.setMinimumHeight(30)
         retry_btn = QPushButton()
         #retry_btn.setText('Retry')
-        retry_ico = QIcon(os.path.join(config.app_root, 'resources', 'retry.png'))
-        retry_btn.setIcon(retry_ico)
+        retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'retry.png'))
+        retry_btn.setIcon(retry_icon)
         retry_btn.setToolTip('Retry')
         retry_btn.setMinimumHeight(30)
         retry_btn.hide()
         save_btn = QPushButton()
         #save_btn.setText('Save')
-        #save_ico = QIcon(os.path.join(config.app_root, 'resources', 'filled-heart.png'))
-        #save_btn.setIcon(save_ico)
+        #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'filled-heart.png'))
+        #save_btn.setIcon(save_icon)
         save_btn.setToolTip('Save')
         save_btn.setMinimumHeight(30)
         save_btn.hide()
         play_btn = QPushButton()
         #play_btn.setText('Play')
-        play_ico = QIcon(os.path.join(config.app_root, 'resources', 'play.png'))
-        play_btn.setIcon(play_ico)
+        play_icon = QIcon(os.path.join(config.app_root, 'resources', 'play.png'))
+        play_btn.setIcon(play_icon)
         play_btn.setToolTip('Play')
         play_btn.setMinimumHeight(30)
         play_btn.hide()
         locate_btn = QPushButton()
         #locate_btn.setText('Locate')
-        locate_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
-        locate_btn.setIcon(locate_ico)
+        locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
+        locate_btn.setIcon(locate_icon)
         locate_btn.setToolTip('Locate')
         locate_btn.setMinimumHeight(30)
         locate_btn.hide()
@@ -706,7 +717,10 @@ class MainWindow(QMainWindow):
 
     def __insert_search_result_row(self, btn_text, item_name, item_by, item_type, queue_data):
         btn = QPushButton(self.tbl_search_results)
-        btn.setText(btn_text.strip())
+        #btn.setText(btn_text.strip())
+        download_icon = QIcon(os.path.join(config.app_root, 'resources', 'download.png'))
+        btn.setIcon(download_icon)
+
         btn.clicked.connect(lambda x, q_data=queue_data: self.__send_to_pqp(q_data))
         btn.setMinimumHeight(30)
 
