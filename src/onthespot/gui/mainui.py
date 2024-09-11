@@ -89,6 +89,8 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(config.app_root, 'resources', 'icon.png')
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(QtGui.QIcon(icon_path))
+        folder_ico = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
+        self.btn_download_root_browse.setIcon(folder_ico)
         # Breaks zeroconf login because of dirty restart
         #self.start_url = start_url
         self.start_url = ""

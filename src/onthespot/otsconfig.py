@@ -70,7 +70,7 @@ class Config:
             "download_save_btn": False, # Add save button to downloads
             "download_play_btn": True, # Add play button to downloads
             "download_locate_btn": True, # Add locate button to downloads
-            "theme": "Light", # Light\Dark
+            "theme": "Dark", # Light\Dark
             "accounts": [] # Saved account information
         }
         if os.path.isfile(self.__cfg_path):
