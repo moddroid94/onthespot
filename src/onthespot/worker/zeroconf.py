@@ -23,7 +23,6 @@ def new_session():
     ZeroconfServer._ZeroconfServer__default_get_info_fields['clientID'] = CLIENT_ID
     zs_builder = ZeroconfServer.Builder()
     zs_builder.device_name = 'OnTheSpot'
-    zs_builder.device_type = Connect.DeviceType.COMPUTER
     zs_builder.conf.stored_credentials_file = session_json_path
     zs = zs_builder.create()
     logger.info("Zeroconf login service started")
