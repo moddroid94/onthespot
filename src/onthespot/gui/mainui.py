@@ -32,10 +32,15 @@ def dl_progress_update(data):
             if status.lower() in ['failed', 'cancelled', 'unavailable']:
                 downloads_status[media_id]["btn"]['cancel'].hide()
                 if status.lower() != "unavailable":
+                    if config.get("download_copy_btn"):
+                        downloads_status[media_id]['btn']['copy'].show()
                     downloads_status[media_id]["btn"]['retry'].show()
             if 'downloading' == status.lower():
-                downloads_status[media_id]["btn"]['cancel'].show()
                 downloads_status[media_id]["btn"]['retry'].hide()
+                downloads_status[media_id]["btn"]['copy'].hide()
+                if config.get("download_copy_btn"):
+                    downloads_status[media_id]['btn']['copy'].show()
+                downloads_status[media_id]["btn"]['cancel'].show()
             downloads_status[media_id]["status_label"].setText(status)
             logger.debug(f"Updating status text for download item '{media_id}' to '{status}'")
         if progress is not None:
@@ -43,6 +48,8 @@ def dl_progress_update(data):
             if percent >= 100:
                 downloads_status[media_id]['btn']['cancel'].hide()
                 downloads_status[media_id]['btn']['retry'].hide()
+                if config.get("download_copy_btn"):
+                    downloads_status[media_id]['btn']['copy'].show()
                 if config.get("download_save_btn"):
                     downloads_status[media_id]['btn']['save'].show()
                 if config.get("download_play_btn"):
@@ -347,6 +354,13 @@ class MainWindow(QMainWindow):
         pbar = QProgressBar()
         pbar.setValue(0)
         pbar.setMinimumHeight(30)
+        copy_btn = QPushButton()
+        #copy_btn.setText('Retry')
+        copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'link.png'))
+        copy_btn.setIcon(copy_icon)
+        copy_btn.setToolTip('Copy')
+        copy_btn.setMinimumHeight(30)
+        copy_btn.hide()
         cancel_btn = QPushButton()
         # cancel_btn.setText('Cancel')
         cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'stop.png'))
@@ -383,7 +397,7 @@ class MainWindow(QMainWindow):
         locate_btn.hide()
         status = QLabel(self.tbl_dl_progress)
         status.setText("Waiting")
-        actions = DownloadActionsButtons(item['item_id'], item['dl_params']['media_type'], pbar, cancel_btn, retry_btn, save_btn, play_btn, locate_btn)
+        actions = DownloadActionsButtons(item['item_id'], item['dl_params']['media_type'], pbar, copy_btn, cancel_btn, retry_btn, save_btn, play_btn, locate_btn)
         download_queue.put(
             {
                 'media_type': item['dl_params']['media_type'],
@@ -401,6 +415,7 @@ class MainWindow(QMainWindow):
             "status_label": status,
             "progress_bar": pbar,
             "btn": {
+                "copy": copy_btn,
                 "cancel": cancel_btn,
                 "retry": retry_btn,
                 "save": save_btn,
@@ -526,6 +541,10 @@ class MainWindow(QMainWindow):
         self.inp_playlist_name_formatter.setText(config.get("playlist_name_formatter"))
         self.inp_max_recdl_delay.setValue(config.get("recoverable_fail_wait_delay"))
         self.inp_dl_endskip.setValue(config.get("dl_end_padding_bytes"))
+        if config.get("download_copy_btn"):
+            self.inp_download_copy_btn.setChecked(True)
+        else:
+            self.inp_download_copy_btn.setChecked(False)
         if config.get("download_save_btn"):
             self.inp_download_save_btn.setChecked(True)
         else:
@@ -599,6 +618,10 @@ class MainWindow(QMainWindow):
             config.set_('force_raw', True)
         else:
             config.set_('force_raw', False)
+        if self.inp_download_copy_btn.isChecked():
+            config.set_('download_copy_btn', True)
+        else:
+            config.set_('download_copy_btn', False)
         if self.inp_download_save_btn.isChecked():
             config.set_('download_save_btn', True)
         else:

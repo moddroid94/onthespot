@@ -1,6 +1,7 @@
 import platform
 import os
 import subprocess
+import pyperclip
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QHBoxLayout, QWidget
 from ..otsconfig import config
@@ -12,12 +13,13 @@ logger = get_logger("worker.utility")
 
 
 class DownloadActionsButtons(QWidget):
-    def __init__(self, dl_id, media_type, pbar, cancel_btn, remove_btn, save_btn, play_btn, locate_btn, parent=None):
+    def __init__(self, dl_id, media_type, pbar, copy_btn, cancel_btn, remove_btn, save_btn, play_btn, locate_btn, parent=None):
         super(DownloadActionsButtons, self).__init__(parent)
         self.__id = dl_id
         self.media_type = media_type
         self.cancel_btn = cancel_btn
         self.remove_btn = remove_btn
+        self.copy_btn = copy_btn
         self.save_btn = save_btn
         self.play_btn = play_btn
         self.locate_btn = locate_btn
@@ -26,10 +28,12 @@ class DownloadActionsButtons(QWidget):
         layout.setSpacing(0)
         cancel_btn.clicked.connect(self.cancel_item)
         remove_btn.clicked.connect(self.retry_item)
+        copy_btn.clicked.connect(self.copy_link)
         save_btn.clicked.connect(self.save_item)
         play_btn.clicked.connect(self.play_file)
         locate_btn.clicked.connect(self.locate_file)
         layout.addWidget(pbar)
+        layout.addWidget(copy_btn)
         layout.addWidget(cancel_btn)
         layout.addWidget(remove_btn)
         layout.addWidget(save_btn)
@@ -50,6 +54,20 @@ class DownloadActionsButtons(QWidget):
                 self.in_library = False
             else:
                 logger.info(f"Unable to determine if song is in library, value: {in_library}")
+
+    def copy_link (self):
+        pyperclip.copy(f"https://open.spotify.com/{self.media_type}/{self.__id}")
+
+    def cancel_item(self):
+        cancel_list[self.__id] = {}
+        self.cancel_btn.hide()
+
+    def retry_item(self):
+        if self.__id in failed_downloads:
+            downloads_status[self.__id]["status_label"].setText("Waiting")
+            self.remove_btn.hide()
+            download_queue.put(failed_downloads[self.__id])
+            self.cancel_btn.show()
 
     def save_item (self):
         if self.in_library:
@@ -80,14 +98,3 @@ class DownloadActionsButtons(QWidget):
         if self.__id in downloaded_data:
             if downloaded_data[self.__id].get('media_path', None):
                 show_in_file_manager(os.path.abspath(downloaded_data[self.__id]['media_path']))
-
-    def cancel_item(self):
-        cancel_list[self.__id] = {}
-        self.cancel_btn.hide()
-
-    def retry_item(self):
-        if self.__id in failed_downloads:
-            downloads_status[self.__id]["status_label"].setText("Waiting")
-            self.remove_btn.hide()
-            download_queue.put(failed_downloads[self.__id])
-            self.cancel_btn.show()
