@@ -4,7 +4,7 @@ import time
 import threading
 import uuid
 from PyQt5 import uic, QtNetwork, QtGui
-from PyQt5.QtCore import QThread, QDir
+from PyQt5.QtCore import QThread, QDir, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
@@ -37,7 +37,6 @@ def dl_progress_update(data):
                     downloads_status[media_id]["btn"]['retry'].show()
             if 'downloading' == status.lower():
                 downloads_status[media_id]["btn"]['retry'].hide()
-                downloads_status[media_id]["btn"]['copy'].hide()
                 if config.get("download_copy_btn"):
                     downloads_status[media_id]['btn']['copy'].show()
                 downloads_status[media_id]["btn"]['cancel'].show()
@@ -95,6 +94,7 @@ class MainWindow(QMainWindow):
         self.path = os.path.dirname(os.path.realpath(__file__))
         icon_path = os.path.join(config.app_root, 'resources', 'icon.png')
         QApplication.setStyle("fusion")
+        QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(QtGui.QIcon(icon_path))
         save_icon = QIcon(os.path.join(config.app_root, 'resources', 'save.png'))

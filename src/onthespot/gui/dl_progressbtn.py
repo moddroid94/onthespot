@@ -17,18 +17,18 @@ class DownloadActionsButtons(QWidget):
         super(DownloadActionsButtons, self).__init__(parent)
         self.__id = dl_id
         self.media_type = media_type
+        self.copy_btn = copy_btn
         self.cancel_btn = cancel_btn
         self.remove_btn = remove_btn
-        self.copy_btn = copy_btn
         self.save_btn = save_btn
         self.play_btn = play_btn
         self.locate_btn = locate_btn
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+        copy_btn.clicked.connect(self.copy_link)
         cancel_btn.clicked.connect(self.cancel_item)
         remove_btn.clicked.connect(self.retry_item)
-        copy_btn.clicked.connect(self.copy_link)
         save_btn.clicked.connect(self.save_item)
         play_btn.clicked.connect(self.play_file)
         locate_btn.clicked.connect(self.locate_file)
