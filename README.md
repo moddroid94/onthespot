@@ -1,8 +1,7 @@
 # OnTheSpot <img src="src/onthespot/resources/icon.svg" width="40" height="32">
 
 qt based music downloader written in python.
-<img src="https://github.com/user-attachments/assets/ee8f1d08-6833-4673-976b-89e4f43968f9">
-
+<img src="https://github.com/user-attachments/assets/41657b8b-2b80-4fe4-afe7-ef8bacab5991">
 
 # 1. Installing/launching application:
 ## 1.1. Using portable prebuilt binaries
@@ -19,17 +18,17 @@ If you receive an error you may need to open the Applications folder, right clic
 It is recommended that you run `OnTheSpot` as an appimage as ffmpeg and python dependencies are prebundled.
 
 ```
-wget https://github.com/justin025/onthespot/releases/download/v0.6/OnTheSpot-0.6-x86_64.AppImage
-chmod +x OnTheSpot-0.6-x86_64.AppImage
-./OnTheSpot-0.6-x86_64.AppImage
+wget https://github.com/justin025/onthespot/releases/latest/download/OnTheSpot-x86_64.AppImage
+chmod +x OnTheSpot-x86_64.AppImage
+./OnTheSpot-x86_64.AppImage
 ```
 
 #### Binary
 The binary also bundles ffmpeg by default. Download and run it with the commands below.
 
 ```
-wget https://github.com/justin025/onthespot/releases/download/v0.6/OnTheSpot-0.6-x86_64.tar.gz
-gzip -d OnTheSpot-0.6-x86_64.tar.gz
+wget https://github.com/justin025/onthespot/releases/latest/download/OnTheSpot-x86_64.tar.gz
+gzip -d OnTheSpot-x86_64.tar.gz
 chmod +x onthespot
 ./onthespot
 ```
