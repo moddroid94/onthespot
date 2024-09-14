@@ -45,6 +45,11 @@
         <translation> Tema escuro</translation>
     </message>
     <message>
+        <location filename="gui/mainui.py" line="350"/>
+        <source>Warning: Downloading lyrics is a premium feature.</source>
+        <translation type="unfinished">Aviso: É necessária uma conta premium para descarregar as letras</translation>
+    </message>
+    <message>
         <location filename="gui/mainui.py" line="485"/>
         <source>Account {0} was removed successfully.</source>
         <translation type="unfinished">Conta removida com sucesso.</translation>
