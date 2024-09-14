@@ -229,6 +229,7 @@ class MainWindow(QMainWindow):
         self.btn_search_download_all.clicked.connect(lambda x, cat="all": self.__mass_action_dl(cat))
         self.btn_save_adv_config.clicked.connect(self.__update_config)
         self.btn_toggle_advanced.clicked.connect(self.__toggle_advanced)
+        self.inp_enable_lyrics.clicked.connect(self.__enable_lyrics)
         self.btn_progress_retry_all.clicked.connect(retry_all_failed_downloads)
         self.btn_progress_cancel_all.clicked.connect(cancel_all_downloads)
         self.btn_download_root_browse.clicked.connect(self.__select_dir)
@@ -343,6 +344,10 @@ class MainWindow(QMainWindow):
             self.group_temp_dl_root.hide()
         else:
             self.group_temp_dl_root.show()
+
+    def __enable_lyrics(self):
+        if self.inp_enable_lyrics.isChecked() == True and user[1].lower() == "free":
+            self.__splash_dialog.run(self.tr("Warning: Downloading lyrics is a premium feature."))
 
     def __add_item_to_downloads(self, item):
         # Create progress status
