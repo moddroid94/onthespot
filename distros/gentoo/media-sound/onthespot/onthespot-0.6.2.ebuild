@@ -56,5 +56,5 @@ src_install() {
 	distutils-r1_src_install
 
 	domenu "${S}"/src/onthespot/resources/org.eu.casualsnek.onthespot.desktop
-	newicon -s 256 "${S}"/src/onthespot/resources/icon.svg casual_onthespot.svg
+	newicon -s 256 "${S}"/src/onthespot/resources/onthespot.svg onthespot.svg
 }

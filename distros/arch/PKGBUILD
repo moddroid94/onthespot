@@ -30,6 +30,6 @@ package() {
   install -dm 755 "$pkgdir/usr/share/icons/hicolor/"{256x256,scalable}"/apps/"
   install -Dm 644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
   install -Dm 644 "src/onthespot/resources/org.eu.casualsnek.onthespot.desktop" "$pkgdir/usr/share/applications/"
-  install -Dm 644 "src/onthespot/resources/icon.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/casual_onthespot.svg"
-  install -Dm 644 "src/onthespot/resources/icon.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/casual_onthespot.png"
+  install -Dm 644 "src/onthespot/resources/icons/onthespot.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/onthespot.svg"
+  install -Dm 644 "src/onthespot/resources/icons/onthespot.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/onthespot.png"
 }
