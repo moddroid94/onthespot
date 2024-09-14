@@ -15,17 +15,20 @@
     </message>
     <message>
         <location filename="worker/session.py" line="24"/>
-        <source>Attempting to create session...</source>
+        <source>Attempting to create session for
+{0}...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/session.py" line="32"/>
-        <source>Session created!</source>
+        <source>Session created for
+{0}!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/session.py" line="38"/>
-        <source>Failed to create session.</source>
+        <source>Failed to create session for
+{0}.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -43,13 +46,13 @@
     </message>
     <message>
         <location filename="gui/mainui.py" line="485"/>
-        <source>Account was removed successfully.</source>
-        <translation>Conta removida com sucesso.</translation>
+        <source>Account {0} was removed successfully.</source>
+        <translation type="unfinished">Conta removida com sucesso.</translation>
     </message>
     <message>
         <location filename="gui/mainui.py" line="487"/>
-        <source>Something went wrong while removing account.</source>
-        <translation>Deu algum problema ao remover a conta.</translation>
+        <source>Something went wrong while removing account {0}.</source>
+        <translation type="unfinished">Deu algum problema ao remover a conta.</translation>
     </message>
     <message>
         <location filename="gui/mainui.py" line="498"/>
@@ -104,8 +107,8 @@ Selecione 'OnTheSpot' em dispositivos na aplicação Spotify para computador.</t
     </message>
     <message>
         <location filename="gui/mainui.py" line="756"/>
-        <source>The media is being parsed and will be added to download queue shortly.</source>
-        <translation>A mídia está a ser analisada e será adicionada à fila de download em breve.</translation>
+        <source>The {0} is being parsed and will be added to download queue shortly.</source>
+        <translation type="unfinished">A mídia está a ser analisada e será adicionada à fila de download em breve.</translation>
     </message>
     <message>
         <location filename="gui/mainui.py" line="826"/>
@@ -472,12 +475,12 @@ Selecione 'OnTheSpot' em dispositivos na aplicação Spotify para computador.</t
     <name>ParsingQueueProcessor</name>
     <message>
         <location filename="worker/utility.py" line="115"/>
-        <source>Added album to download queue !</source>
+        <source>Added album {0} to download queue !</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/utility.py" line="119"/>
-        <source>All albums are being parsed and will be added to download queue soon!</source>
+        <source>All albums by {0} are being parsed and will be added to download queue soon!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -487,33 +490,43 @@ Selecione 'OnTheSpot' em dispositivos na aplicação Spotify para computador.</t
     </message>
     <message>
         <location filename="worker/utility.py" line="155"/>
-        <source>Added show to download queue!</source>
+        <source>Added show {0} to download queue!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/utility.py" line="160"/>
-        <source>Adding episode to download queue !</source>
+        <source>Adding episode {episode_name} to download queue !</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/utility.py" line="176"/>
-        <source>Added episode to download queue!</source>
+        <source>Added {0} to download queue!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/utility.py" line="182"/>
-        <source>Tracks in playlist are being parsed 
+        <source>Tracks in playlist &apos;{0}&apos; are being parsed 
  and will be added to download queue shortly!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/utility.py" line="212"/>
-        <source>Adding track to download queue !</source>
+        <source>Adding track &apos;{0}&apos; to download queue !</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="worker/utility.py" line="222"/>
-        <source>Added track to download queue !</source>
+        <source>Added track &apos;{0}&apos; to download queue !</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="worker/utility.py" line="106"/>
+        <source>Tracks in album {0} is being parsed and will be added to download queue shortly !</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="worker/utility.py" line="129"/>
+        <source>Added tracks by artist &apos;{0}&apos; to download queue !</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

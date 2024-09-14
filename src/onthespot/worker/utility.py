@@ -104,19 +104,19 @@ class ParsingQueueProcessor(QObject):
                     item_name = item['data'].get('media_title', album_name)
                     if not item['data'].get('hide_dialogs', False):
                         self.progress.emit(
-                            f'Tracks in album "{item_name}" is being parsed and will be added to download queue shortly !'
-                        )
+                            self.tr('Tracks in album {0} is being parsed and will be added to download queue shortly !'
+                        ).format(item_name))
                     tracks = get_album_tracks(session, item['media_id'])
                     logger.info("Passing control to track downloader.py for album tracks downloading !!")
                     self.enqueue_tracks(tracks, enqueue_part_cfg=enqueue_part_cfg,
                                         log_id=f'{album_name}:{item["media_id"]}',
                                         item_type=f"Album [{album_release_date}][{album_name}]")
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Added album to download queue !"))
+                        self.progress.emit(self.tr("Added album {0} to download queue !").format(album_name))
                 elif item['media_type'] == 'artist':
                     item_name = item['data'].get('media_title', 'the artist')
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("All albums are being parsed and will be added to download queue soon!"))
+                        self.progress.emit(self.tr("All albums by {0} are being parsed and will be added to download queue soon!").format(item_name))
                     albums = get_artist_albums(session, item['media_id'])
                     for album_id in albums:
                         artist, album_release_date, album_name, total_tracks = get_album_name(session, album_id)
@@ -126,7 +126,7 @@ class ParsingQueueProcessor(QObject):
                         self.enqueue_tracks(tracks, enqueue_part_cfg=enqueue_part_cfg,
                                             log_id=f'{artist}:{item["media_id"]}', item_type=f"Artist [{item_name}]")
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(f"Added tracks by artist '{item_name}' to download queue !")
+                        self.progress.emit(self.tr("Added tracks by artist '{0}' to download queue !").format(item_name))
                 elif item['media_type'] == 'podcast':
                     show_name = ''
                     if not item['data'].get('hide_dialogs', False):
@@ -152,12 +152,12 @@ class ParsingQueueProcessor(QObject):
                             }
                         )
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Added show to download queue!"))
+                        self.progress.emit(self.tr("Added show {0} to download queue!").format(show_name))
                 elif item['media_type'] == 'episode':
                     podcast_name, episode_name, thumbnail, release_date, total_episodes, artist = get_episode_info(session, item['media_id'])
                     logger.info(f"PQP parsing podcast episode : {episode_name}:{item['media_id']}")
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Adding episode to download queue !"))
+                        self.progress.emit(self.tr("Adding episode {episode_name} to download queue !").format(episode_name))
                     # TODO: Use new enqueue method
                     self.enqueue.emit(
                         {
@@ -173,13 +173,13 @@ class ParsingQueueProcessor(QObject):
                         }
                     )
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Added episode to download queue!"))
+                        self.progress.emit(self.tr("Added {0} to download queue!").format(podcast_name))
                 elif item['media_type'] == "playlist":
                     enable_m3u = config.get('create_m3u_playlists', False)
                     name, owner, description, url = get_playlist_data(session, item["media_id"])
                     item_name = item['data'].get('media_title', name)
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Tracks in playlist are being parsed \n and will be added to download queue shortly!"))
+                        self.progress.emit(self.tr("Tracks in playlist '{0}' are being parsed \n and will be added to download queue shortly!").format(item_name))
                     playlist_songs = get_tracks_from_playlist(session,
                                                               item['media_id'])
                     enqueue_part_cfg.update({
@@ -209,7 +209,7 @@ class ParsingQueueProcessor(QObject):
                     song_info = get_song_info(session, item['media_id'])
                     name = song_info['name']
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Adding track to download queue !"))
+                        self.progress.emit(self.tr("Adding track '{0}' to download queue !").format(name))
                     track_obj = {
                         'id': item['media_id'],
                         'name': song_info['name'],
@@ -219,7 +219,7 @@ class ParsingQueueProcessor(QObject):
                     self.enqueue_tracks([track_obj], enqueue_part_cfg=enqueue_part_cfg,
                                         log_id=f'{name}:{item["media_id"]}', item_type="Track")
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Added track to download queue !"))
+                        self.progress.emit(self.tr("Added track '{0}' to download queue !").format(name))
                 logger.info('Finished parsing this item !')
             except (OSError, queue.Empty, MaxRetryError, NewConnectionError, ConnectionError):
                 # Internet disconnected ?

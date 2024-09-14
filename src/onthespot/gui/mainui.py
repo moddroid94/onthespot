@@ -482,9 +482,9 @@ class MainWindow(QMainWindow):
                 if removed:
                     self.tbl_sessions.removeRow(index.row())
                     self.__users = [user for user in self.__users if user[3] != account_uuid]
-                    self.__splash_dialog.run(self.tr("Account was removed successfully."))
+                    self.__splash_dialog.run(self.tr("Account {0} was removed successfully.").format(account[0]))
                 else:
-                    self.__splash_dialog.run(self.tr("Something went wrong while removing account."))
+                    self.__splash_dialog.run(self.tr("Something went wrong while removing account {0}.").format(account[0]))
 
     def __generate_users_table(self, userdata):
 
@@ -753,7 +753,7 @@ class MainWindow(QMainWindow):
         self.__send_to_pqp(queue_item)
         logger.info(f'URL "{url}" added to parsing queue')
         if not hide_dialog:
-            self.__splash_dialog.run(self.tr("The media is being parsed and will be added to download queue shortly."))
+            self.__splash_dialog.run(self.tr("The {0} is being parsed and will be added to download queue shortly.").format(media_type.title()))
         return True
 
     def __insert_search_result_row(self, btn_text, item_name, item_by, item_type, queue_data):
