@@ -34,12 +34,12 @@ if [ -f "ffbin_mac/ffmpeg" ]; then
                 --hidden-import="zeroconf._utils.ipaddress" \
                 --hidden-import="zeroconf._handlers.answers" \
                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
-                --add-data="src/onthespot/resources/*.png:onthespot/resources" \
-                --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
+                --add-data="src/onthespot/resources/icons/*.png:onthespot/resources/icons" \
+                --add-data="src/onthespot/resources/themes/*.qss:onthespot/resources/themes" \
                 --add-binary="ffbin_mac/*:onthespot/bin/ffmpeg" \
                 --paths="src/onthespot" \
                 --name="onthespot_mac_ffm" \
-                --icon="src/onthespot/resources/icon.png" \
+                --icon="src/onthespot/resources/onthespot.png" \
                 src/portable.py
 else
     echo " => Building to use ffmpeg binary from system... "
@@ -47,11 +47,11 @@ else
                 --hidden-import="zeroconf._utils.ipaddress" \
                 --hidden-import="zeroconf._handlers.answers" \
                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
-                --add-data="src/onthespot/resources/*.png:onthespot/resources" \
-                --add-data="src/onthespot/resources/*.qss:onthespot/resources" \
+                --add-data="src/onthespot/resources/icons/*.png:onthespot/resources/icons" \
+                --add-data="src/onthespot/resources/themes/*.qss:onthespot/resources/themes" \
                 --paths="src/onthespot" \
                 --name="onthespot_mac" \
-                --icon="src/onthespot/resources/icon.png" \
+                --icon="src/onthespot/resources/onthespot.png" \
                 src/portable.py
 fi
 echo " => Setting executable permissions.. "

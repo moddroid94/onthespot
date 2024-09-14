@@ -45,11 +45,11 @@ class DownloadActionsButtons(QWidget):
             self.session = session_pool[selected_uuid]
             in_library = check_if_media_in_library(self.session, self.__id, self.media_type)
             if in_library:
-                save_icon = QIcon(os.path.join(config.app_root, 'resources', 'filled-heart.png'))
+                save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled-heart.png'))
                 save_btn.setIcon(save_icon)
                 self.in_library = True
             elif not in_library:
-                save_icon = QIcon(os.path.join(config.app_root, 'resources', 'empty-heart.png'))
+                save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'empty-heart.png'))
                 save_btn.setIcon(save_icon)
                 self.in_library = False
             else:
@@ -72,13 +72,13 @@ class DownloadActionsButtons(QWidget):
     def save_item (self):
         if self.in_library:
             remove_media_from_library(self.session, self.__id, self.media_type)
-            save_icon = QIcon(os.path.join(config.app_root, 'resources', 'empty-heart.png'))
+            save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'empty-heart.png'))
             self.save_btn.setIcon(save_icon)
             self.in_library = False
             logger.info(f"Song removed from spotify library")
         elif not self.in_library:
             save_media_to_library(self.session, self.__id, self.media_type)
-            save_icon = QIcon(os.path.join(config.app_root, 'resources', 'filled-heart.png'))
+            save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled-heart.png'))
             self.save_btn.setIcon(save_icon)
             self.in_library = True
             logger.info(f"Song saved to spotify library")

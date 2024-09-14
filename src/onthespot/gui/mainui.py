@@ -4,7 +4,7 @@ import time
 import threading
 import uuid
 from PyQt5 import uic, QtNetwork, QtGui
-from PyQt5.QtCore import QThread, QDir, Qt
+from PyQt5.QtCore import QThread, QDir, Qt, QTranslator
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
@@ -92,19 +92,19 @@ class MainWindow(QMainWindow):
     def __init__(self, _dialog, start_url=''):
         super(MainWindow, self).__init__()
         self.path = os.path.dirname(os.path.realpath(__file__))
-        icon_path = os.path.join(config.app_root, 'resources', 'icon.png')
+        icon_path = os.path.join(config.app_root, 'resources', 'icons', 'onthespot.png')
         QApplication.setStyle("fusion")
         QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(QtGui.QIcon(icon_path))
-        save_icon = QIcon(os.path.join(config.app_root, 'resources', 'save.png'))
+        save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'save.png'))
         self.btn_save_config.setIcon(save_icon)
-        folder_icon = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
+        folder_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
         self.btn_download_root_browse.setIcon(folder_icon)
         self.btn_download_tmp_browse.setIcon(folder_icon)
-        search_icon = QIcon(os.path.join(config.app_root, 'resources', 'search.png'))
+        search_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'search.png'))
         self.btn_search.setIcon(search_icon)
-        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'collapse_down.png'))
+        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
         self.btn_search_filter_toggle.setIcon(collapse_down_icon)
 
        # Breaks zeroconf login because of dirty restart
@@ -165,17 +165,23 @@ class MainWindow(QMainWindow):
         self.__media_parser_thread.start()
 
         # Create path to dark_theme
-        self.dark_theme_path = os.path.join(config.app_root,'resources', 'main_window_dark_theme.qss')
-        self.light_theme_path = os.path.join(config.app_root,'resources', 'main_window_light_theme.qss')
+        self.dark_theme_path = os.path.join(config.app_root,'resources', 'themes', 'main_window_dark_theme.qss')
+        self.light_theme_path = os.path.join(config.app_root,'resources', 'themes', 'main_window_light_theme.qss')
         # Create button and add to the interface
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
         # Set theme from config
         self.theme = config.get("theme")
         if self.theme == "Dark":
+          theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'light.png'))
+          self.toggle_theme_button.setIcon(theme_icon)
+          self.toggle_theme_button.setText(self.tr(" Light Theme"))
           with open(self.dark_theme_path, 'r') as f:
               dark_theme = f.read()
               self.setStyleSheet(dark_theme)
         elif self.theme == "Light":
+          theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'dark.png'))
+          self.toggle_theme_button.setIcon(theme_icon)
+          self.toggle_theme_button.setText(self.tr(" Dark Theme"))
           with open(self.light_theme_path, 'r') as f:
               light_theme = f.read()
               self.setStyleSheet(light_theme)
@@ -186,12 +192,18 @@ class MainWindow(QMainWindow):
         logger.info("Main window init completed !")
 
     def load_dark_theme(self):
+        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'light.png'))
+        self.toggle_theme_button.setIcon(theme_icon)
+        self.toggle_theme_button.setText(self.tr(" Light Theme"))
         with open(self.dark_theme_path, 'r') as f:
             dark_theme = f.read()
             self.setStyleSheet(dark_theme)
         self.theme = "Dark"
 
     def load_light_theme(self):
+        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'dark.png'))
+        self.toggle_theme_button.setIcon(theme_icon)
+        self.toggle_theme_button.setText(self.tr(" Dark Theme"))
         with open(self.light_theme_path, 'r') as f:
             light_theme = f.read()
             self.setStyleSheet(light_theme)
@@ -205,8 +217,8 @@ class MainWindow(QMainWindow):
 
     def bind_button_inputs(self):
         # Connect button click signals
-        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'collapse_down.png'))
-        collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'collapse_up.png'))
+        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
+        collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
 
         self.btn_search.clicked.connect(self.__get_search_results)
 
@@ -356,41 +368,41 @@ class MainWindow(QMainWindow):
         pbar.setMinimumHeight(30)
         copy_btn = QPushButton()
         #copy_btn.setText('Retry')
-        copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'link.png'))
+        copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
         copy_btn.setIcon(copy_icon)
         copy_btn.setToolTip('Copy')
         copy_btn.setMinimumHeight(30)
         copy_btn.hide()
         cancel_btn = QPushButton()
         # cancel_btn.setText('Cancel')
-        cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'stop.png'))
+        cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
         cancel_btn.setIcon(cancel_icon)
         cancel_btn.setToolTip('Cancel')
         cancel_btn.setMinimumHeight(30)
         retry_btn = QPushButton()
         #retry_btn.setText('Retry')
-        retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'retry.png'))
+        retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
         retry_btn.setIcon(retry_icon)
         retry_btn.setToolTip('Retry')
         retry_btn.setMinimumHeight(30)
         retry_btn.hide()
         save_btn = QPushButton()
         #save_btn.setText('Save')
-        #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'filled-heart.png'))
+        #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled-heart.png'))
         #save_btn.setIcon(save_icon)
         save_btn.setToolTip('Save')
         save_btn.setMinimumHeight(30)
         save_btn.hide()
         play_btn = QPushButton()
         #play_btn.setText('Play')
-        play_icon = QIcon(os.path.join(config.app_root, 'resources', 'play.png'))
+        play_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'play.png'))
         play_btn.setIcon(play_icon)
         play_btn.setToolTip('Play')
         play_btn.setMinimumHeight(30)
         play_btn.hide()
         locate_btn = QPushButton()
         #locate_btn.setText('Locate')
-        locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'folder.png'))
+        locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
         locate_btn.setIcon(locate_icon)
         locate_btn.setToolTip('Locate')
         locate_btn.setMinimumHeight(30)
@@ -470,11 +482,9 @@ class MainWindow(QMainWindow):
                 if removed:
                     self.tbl_sessions.removeRow(index.row())
                     self.__users = [user for user in self.__users if user[3] != account_uuid]
-                    self.__splash_dialog.run(
-                        "Account '{}' was removed successfully!\n".format(account[0]))
+                    self.__splash_dialog.run(self.tr("Account was removed successfully."))
                 else:
-                    self.__splash_dialog.run(
-                        "Something went wrong while removing account with username '{}' !".format(account[0]))
+                    self.__splash_dialog.run(self.tr("Something went wrong while removing account."))
 
     def __generate_users_table(self, userdata):
 
@@ -485,7 +495,7 @@ class MainWindow(QMainWindow):
         for user in userdata:
             sn = sn + 1
             btn = QPushButton(self.tbl_sessions)
-            btn.setText(" Remove ")
+            btn.setText(self.tr(" Remove "))
             btn.clicked.connect(lambda x, account_uuid=user[3]: self.__user_table_remove_click(account_uuid))
             btn.setMinimumHeight(30)
             rows = self.tbl_sessions.rowCount()
@@ -526,9 +536,10 @@ class MainWindow(QMainWindow):
                 logger.debug(f'Session {session_uuid} not used, resource busy !')
         if len(session_pool) == 0:
             # Display notice that no session is available and threads are not built
-            self.__splash_dialog.run("No session available for , login to at least one account !")
+            self.__splash_dialog.run(self.tr("No session available, login with at least one account."))
 
     def __fill_configs(self):
+        self.inp_language.setCurrentIndex(config.get("language_index"))
         self.inp_max_threads.setValue(config.get("max_threads"))
         self.inp_parsing_acc_sn.setValue(config.get("parsing_acc_sn"))
         self.inp_download_root.setText(config.get("download_root"))
@@ -589,10 +600,11 @@ class MainWindow(QMainWindow):
         logger.info('Config filled to UI')
 
     def __update_config(self):
+        if config.get('language_index') != self.inp_language.currentIndex():
+            self.__splash_dialog.run(self.tr("Language changed. \n Application needs to be restarted for changes to take effect."))
+        config.set_('language_index', self.inp_language.currentIndex())
         if config.get('max_threads') != self.inp_max_threads.value():
-            self.__splash_dialog.run(
-                'Thread config was changed ! \n Application needs to be restarted for changes to take effect.'
-            )
+            self.__splash_dialog.run(self.tr("Thread config was changed. \n Application needs to be restarted for changes to take effect."))
         config.set_('max_threads', self.inp_max_threads.value())
         if self.inp_parsing_acc_sn.value() > len(session_pool):
             config.set_('parsing_acc_sn', 1)
@@ -659,18 +671,18 @@ class MainWindow(QMainWindow):
 
     def __add_account(self):
         logger.info('Add account clicked ')
-        self.btn_login_add.setText("Waiting...")
+        self.btn_login_add.setText(self.tr("Waiting..."))
         self.btn_login_add.setDisabled(True)
         login = threading.Thread(target=new_session)
         login.daemon = True
         login.start()
-        self.__splash_dialog.run("Login Service Started...\nSelect 'OnTheSpot' under devices in the Spotify Desktop App.")
+        self.__splash_dialog.run(self.tr("Login Service Started...\nSelect 'OnTheSpot' under devices in the Spotify Desktop App."))
 
     def __get_search_results(self):
         search_term = self.inp_search_term.text().strip()
         results = None
         if len(session_pool) <= 0:
-            self.__splash_dialog.run('You need to login to at least one account to use this feature !')
+            self.__splash_dialog.run(self.tr("You need to login to at least one account to use this feature."))
             return None
         if search_term.startswith('https://'):
             logger.info(f"Search clicked with value with url {search_term}")
@@ -714,7 +726,7 @@ class MainWindow(QMainWindow):
             self.__last_search_data = []
             while self.tbl_search_results.rowCount() > 0:
                 self.tbl_search_results.removeRow(0)
-            self.__splash_dialog.run(f"No result found for term '{search_term}' !")
+            self.__splash_dialog.run(self.tr("No results found."))
             return None
 
     def __download_by_url(self, url=None, hide_dialog=False):
@@ -723,12 +735,12 @@ class MainWindow(QMainWindow):
         if media_type is None:
             logger.error(f"The type of url could not be determined ! URL: {url}")
             if not hide_dialog:
-                self.__splash_dialog.run('Unable to determine the type of URL !')
+                self.__splash_dialog.run(self.tr("Unable to parse inputted URL."))
             return False
         if len(session_pool) <= 0:
             logger.error('User needs to be logged in to download from url')
             if not hide_dialog:
-                self.__splash_dialog.run('You need to login to at least one account to use this feature !')
+                self.__splash_dialog.run(self.tr("You need to login to at least one account to use this feature."))
             return False
         queue_item = {
             "media_type": media_type,
@@ -741,15 +753,14 @@ class MainWindow(QMainWindow):
         self.__send_to_pqp(queue_item)
         logger.info(f'URL "{url}" added to parsing queue')
         if not hide_dialog:
-            self.__splash_dialog.run(
-                f"The {media_type.title()} is being parsed and will be added to download queue shortly !")
+            self.__splash_dialog.run(self.tr("The media is being parsed and will be added to download queue shortly."))
         return True
 
     def __insert_search_result_row(self, btn_text, item_name, item_by, item_type, queue_data):
         btn = QPushButton(self.tbl_search_results)
-        btn.setText(btn_text.strip())
-        #download_icon = QIcon(os.path.join(config.app_root, 'resources', 'download.png'))
-        #btn.setIcon(download_icon)
+        #btn.setText(btn_text.strip())
+        download_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'download.png'))
+        btn.setIcon(download_icon)
 
         btn.clicked.connect(lambda x, q_data=queue_data: self.__send_to_pqp(q_data))
         btn.setMinimumHeight(30)
@@ -812,7 +823,7 @@ class MainWindow(QMainWindow):
         downloaded_types = []
         logger.info(f"Mass download for {result_type} was clicked.. Here hangs up the application")
         if data is None:
-            self.__splash_dialog.run('No search results to download !')
+            self.__splash_dialog.run(self.tr("No search results to download."))
         else:
             hide_dialog = config.get('disable_bulk_dl_notices')
             for d_key in data.keys():  # d_key in ['Albums', 'Artists', 'Tracks', 'Playlists']
@@ -829,9 +840,7 @@ class MainWindow(QMainWindow):
                         self.__send_to_pqp(queue_data)
                     downloaded_types.append(d_key)
             if len(downloaded_types) != 0:
-                self.__splash_dialog.run(
-                    f"Added all results of types {','.join(x for x in downloaded_types)} to queue"
-                )
+                self.__splash_dialog.run(self.tr("Added all results to download queue."))
 
     def rem_complete_from_table(self):
         check_row = 0

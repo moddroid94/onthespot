@@ -43,6 +43,8 @@ class Config:
         print('OTS Version : ', self.version)
         self.__template_data = {
             "version": 0.6, # Application version
+            "language": "en_US", # Language
+            "language_index": 0, # Language
             "max_threads": 1, # Maximum number of thread we can spawn
             "parsing_acc_sn": 1, # Serial number of account that will be used for parsing links
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads

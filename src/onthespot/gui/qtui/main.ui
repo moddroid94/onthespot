@@ -868,6 +868,19 @@
                </widget>
               </item>
               <item>
+               <widget class="QCheckBox" name="btn_toggle_advanced">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Advanced Settings</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QGroupBox" name="groupBox_2">
                 <property name="maximumSize">
                  <size>
@@ -880,6 +893,20 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_9">
                  <item>
+                  <widget class="QComboBox" name="inp_language">
+                   <item>
+                    <property name="text">
+                     <string>        🇬🇧 English</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>       🇵🇹 Português</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QPushButton" name="toggle_theme_button">
                    <property name="minimumSize">
                     <size>
@@ -889,19 +916,6 @@
                    </property>
                    <property name="text">
                     <string>Dark/Light Theme</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="btn_toggle_advanced">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Advanced Settings</string>
                    </property>
                   </widget>
                  </item>

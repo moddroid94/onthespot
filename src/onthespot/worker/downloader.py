@@ -92,7 +92,7 @@ class DownloadWorker(QObject):
                 return False
             else:
                 if os.path.isfile(filename) and os.path.getsize(filename) and skip_existing_file:
-                    self.progress.emit([trk_track_id_str, "Already exists", [100, 100],
+                    self.progress.emit([trk_track_id_str, self.tr("Already exists"), [100, 100],
                                         filename,
                                         f'{song_info["name"]} [{_artist} - {song_info["album_name"]}:{song_info["release_year"]}].f{config.get("media_format")}'])
                     self.logger.info(f"File already exists, Skipping download for track by id '{trk_track_id_str}'")
@@ -112,7 +112,7 @@ class DownloadWorker(QObject):
                     with open(filename, 'wb') as file:
                         while downloaded < total_size:
                             if trk_track_id_str in cancel_list:
-                                self.progress.emit([trk_track_id_str, "Cancelled", [0, 100]])
+                                self.progress.emit([trk_track_id_str, self.tr("Cancelled"), [0, 100]])
                                 cancel_list.pop(trk_track_id_str)
                                 self.__last_cancelled = True
                                 if os.path.exists(filename):
@@ -147,11 +147,11 @@ class DownloadWorker(QObject):
                                 return None
                             self.progress.emit([trk_track_id_str, None, [downloaded, total_size]])
                     if not config.get("force_raw"):
-                        self.progress.emit([trk_track_id_str, "Converting", None])
+                        self.progress.emit([trk_track_id_str, self.tr("Converting"), None])
                         convert_audio_format(filename, quality)
-                        self.progress.emit([trk_track_id_str, "Writing metadata", None])
+                        self.progress.emit([trk_track_id_str, self.tr("Writing metadata"), None])
                         set_audio_tags(filename, song_info, trk_track_id_str)
-                        self.progress.emit([trk_track_id_str, "Setting thumbnail", None])
+                        self.progress.emit([trk_track_id_str, self.tr("Setting thumbnail"), None])
                         set_music_thumbnail(filename, song_info['image_url'])
                     else:
                         self.logger.warning(

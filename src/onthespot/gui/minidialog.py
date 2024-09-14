@@ -17,8 +17,8 @@ class MiniDialog(QDialog):
         logger.debug('Dialog item is ready..')
 
         # Set theme
-        self.dark_theme_path = os.path.join(config.app_root,'resources', 'mini_dialog_dark_theme.qss')
-        self.light_theme_path = os.path.join(config.app_root,'resources', 'mini_dialog_light_theme.qss')
+        self.dark_theme_path = os.path.join(config.app_root,'resources', 'themes', 'mini_dialog_dark_theme.qss')
+        self.light_theme_path = os.path.join(config.app_root,'resources', 'themes', 'mini_dialog_light_theme.qss')
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.theme = config.get("theme")
         if self.theme == "Dark":
