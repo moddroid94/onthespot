@@ -1278,12 +1278,12 @@
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_31">
                  <item>
-                  <widget class="QCheckBox" name="inp_alternate_acc_sn">
+                  <widget class="QCheckBox" name="inp_rotate_acc_sn">
                    <property name="layoutDirection">
                     <enum>Qt::RightToLeft</enum>
                    </property>
                    <property name="text">
-                    <string>Alternate Active Account Number</string>
+                    <string>Rotate Active Account Number</string>
                    </property>
                   </widget>
                  </item>

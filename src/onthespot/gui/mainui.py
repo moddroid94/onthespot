@@ -557,10 +557,10 @@ class MainWindow(QMainWindow):
         self.inp_playlist_name_formatter.setText(config.get("playlist_name_formatter"))
         self.inp_max_recdl_delay.setValue(config.get("recoverable_fail_wait_delay"))
         self.inp_dl_endskip.setValue(config.get("dl_end_padding_bytes"))
-        if config.get("alternate_acc_sn"):
-            self.inp_alternate_acc_sn.setChecked(True)
+        if config.get("rotate_acc_sn"):
+            self.inp_rotate_acc_sn.setChecked(True)
         else:
-            self.inp_alternate_acc_sn.setChecked(False)
+            self.inp_rotate_acc_sn.setChecked(False)
         if config.get("download_copy_btn"):
             self.inp_download_copy_btn.setChecked(True)
         else:
@@ -635,10 +635,10 @@ class MainWindow(QMainWindow):
         else:
             config.set_('max_search_results', 5)
         config.set_('media_format', self.inp_media_format.text())
-        if self.inp_alternate_acc_sn.isChecked():
-            config.set_('alternate_acc_sn', True)
+        if self.inp_rotate_acc_sn.isChecked():
+            config.set_('rotate_acc_sn', True)
         else:
-            config.set_('alternate_acc_sn', False)
+            config.set_('rotate_acc_sn', False)
         if self.inp_raw_download.isChecked():
             config.set_('force_raw', True)
         else:
@@ -722,7 +722,7 @@ class MainWindow(QMainWindow):
                 filters.append('track')
             if self.inp_enable_search_artists.isChecked():
                 filters.append('artist')
-            if config.get("alternate_acc_sn") == True:
+            if config.get("rotate_acc_sn") == True:
                 try:
                     parsing_index = config.get("parsing_acc_sn")
                     selected_uuid = config.get('accounts')[parsing_index][3]

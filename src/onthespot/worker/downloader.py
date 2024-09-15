@@ -324,7 +324,7 @@ class DownloadWorker(QObject):
                 self.logger.info(f"Processing download for track by id '{item['media_id']}', Attempt: {attempt}/{config.get('max_retries')}")
                 attempt = attempt + 1
                 status = False
-                if config.get("alternate_acc_sn") == True:
+                if config.get("rotate_acc_sn") == True:
                     try:
                         parsing_index = config.get("parsing_acc_sn")
                         selected_uuid = config.get('accounts')[parsing_index][3]

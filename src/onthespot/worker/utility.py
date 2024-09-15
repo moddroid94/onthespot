@@ -90,7 +90,7 @@ class ParsingQueueProcessor(QObject):
         while not self.__stop:
             logger.info('Waiting for new item to parse')
             item = self.__queue.get()
-            if config.get("alternate_acc_sn") == True:
+            if config.get("rotate_acc_sn") == True:
                 try:
                     parsing_index = config.get("parsing_acc_sn")
                     selected_uuid = config.get('accounts')[parsing_index][3]

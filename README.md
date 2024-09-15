@@ -1,4 +1,4 @@
-# OnTheSpot <img src="src/onthespot/resources/icon.svg" width="40" height="32">
+# OnTheSpot <img src="src/onthespot/resources/icons/onthespot.svg" width="40" height="32">
 
 qt based music downloader written in python.
 <img src="https://github.com/user-attachments/assets/41657b8b-2b80-4fe4-afe7-ef8bacab5991">
@@ -156,7 +156,7 @@ The download status and progress can be viewed by navigating to the 'Progress' t
 # 4. Configuration
 ### 4.1. General Configuration options
 - **Max download workers**   : It is the number of threads to be used for media downloads. Set this to the number of accounts you added. Changing this setting requires an application restart to take effect.
-- **Parsing Account SN**              : It is the number shown at left side of the username in the accounts table. The number is the account responsible for providing search results and parsing download url(s).
+- **Active account number**           : It is the number shown at left side of the username in the accounts table. The number is the account responsible for providing search results and parsing download url(s).
 - **Download Location**               : The root folder where downloaded media are placed in.
 - **Download delay**                  : Time in seconds to wait before next download after a successful download.
 - **Max retries**                     : Number of times to retry a download before moving on.
@@ -207,8 +207,11 @@ Variables can be used by enclosing them between `{}`. A few variables are availa
 
 The value of variables with their description ending in * maybe empty in some cases. This can be a path too.
 
-- **Download chunk size**: 
-Size of chunks (bytes) used for downloading.
+- **Download Buttons**: 
+Add additional functionality to your download queue. Copy song links, like songs on spotify, play songs, and locate local files
+
+- **Rotate active account number**: 
+This setting will override the 'active account number' setting. Alternate downloading and fetching metadata from multiple to avoid/reduce rate limits.
 
 - **Disable bulk download notice**: 
 Enabling this will disable popup dialogs about status when using bulk downloads.
