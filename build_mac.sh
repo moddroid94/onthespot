@@ -36,6 +36,7 @@ if [ -f "ffbin_mac/ffmpeg" ]; then
                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
                 --add-data="src/onthespot/resources/icons/*.png:onthespot/resources/icons" \
                 --add-data="src/onthespot/resources/themes/*.qss:onthespot/resources/themes" \
+                --add-data="src/onthespot/resources/translations/*.qm;onthespot/resources/translations" \
                 --add-binary="ffbin_mac/*:onthespot/bin/ffmpeg" \
                 --paths="src/onthespot" \
                 --name="onthespot_mac_ffm" \
@@ -49,6 +50,7 @@ else
                 --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
                 --add-data="src/onthespot/resources/icons/*.png:onthespot/resources/icons" \
                 --add-data="src/onthespot/resources/themes/*.qss:onthespot/resources/themes" \
+                --add-data="src/onthespot/resources/translations/*.qm;onthespot/resources/translations" \
                 --paths="src/onthespot" \
                 --name="onthespot_mac" \
                 --icon="src/onthespot/resources/onthespot.png" \
