@@ -324,11 +324,21 @@ class DownloadWorker(QObject):
                 self.logger.info(f"Processing download for track by id '{item['media_id']}', Attempt: {attempt}/{config.get('max_retries')}")
                 attempt = attempt + 1
                 status = False
+                if config.get("alternate_acc_sn") == True:
+                    try:
+                        parsing_index = config.get("parsing_acc_sn")
+                        selected_uuid = config.get('accounts')[parsing_index][3]
+                    except IndexError as e:
+                        parsing_index = 0
+                        selected_uuid = config.get('accounts')[parsing_index][3]
+                    config.set_('parsing_acc_sn', parsing_index + 1)
+                else:
+                    selected_uuid = self.__session_uuid
                 self.progress.emit([item['media_id'], "Downloading", None])
                 try:
                     if item['media_type'] == "track":
                         status = self.download_track(
-                            session=session_pool[self.__session_uuid],
+                            session=session_pool[selected_uuid],
                             track_id_str=item['media_id'],
                             extra_paths=item['extra_paths'],
                             extra_path_as_root=item['extra_path_as_root'],
@@ -338,7 +348,7 @@ class DownloadWorker(QObject):
                         )
                     elif item['media_type'] == "episode":
                         status = self.download_episode(
-                            session=session_pool[self.__session_uuid],
+                            session=session_pool[selected_uuid],
                             episode_id_str=item['media_id'],
                             extra_paths=item['extra_paths'],
                             extra_path_as_root=item['extra_path_as_root'],

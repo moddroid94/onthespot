@@ -46,6 +46,7 @@ class Config:
             "language_index": 0, # Language
             "max_threads": 1, # Maximum number of thread we can spawn
             "parsing_acc_sn": 1, # Serial number of account that will be used for parsing links
+            "alternate_acc_sn": False, # Alternate active account for parsing and downloading tracks
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
             "download_delay": 5, # Seconds to wait before next download
             "track_path_formatter": "{artist}" + os.path.sep + "[{rel_year}] {album}" + os.path.sep + "{track_number}. {name}", # Track name format string
@@ -67,7 +68,7 @@ class Config:
             "ffmpeg_args": [], # Extra arguments for ffmpeg
             "show_search_thumbnails": 1, # Show thumbnails in search view
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
-            "metadata_seperator": ";", # Seperator used for metadata fields that have multiple values
+            "metadata_seperator": ",", # Seperator used for metadata fields that have multiple values
             "download_copy_btn": False, # Add copy button to downloads
             "download_save_btn": False, # Add save button to downloads
             "download_play_btn": True, # Add play button to downloads

@@ -41,7 +41,8 @@ class DownloadActionsButtons(QWidget):
         layout.addWidget(locate_btn)
         self.setLayout(layout)
         if config.get("download_save_btn"):
-            selected_uuid = config.get('accounts')[config.get('parsing_acc_sn') - 1][3]
+            #selected_uuid = config.get('accounts')[config.get('parsing_acc_sn') - 1][3]
+            selected_uuid = config.get('accounts')[0][3]
             self.session = session_pool[selected_uuid]
             in_library = check_if_media_in_library(self.session, self.__id, self.media_type)
             if in_library:

@@ -90,11 +90,21 @@ class ParsingQueueProcessor(QObject):
         while not self.__stop:
             logger.info('Waiting for new item to parse')
             item = self.__queue.get()
-            parsing_index = item.get('override_parsing_acc_sn', config.get("parsing_acc_sn") - 1)
-            selected_uuid = config.get('accounts')[parsing_index][3]
+            if config.get("alternate_acc_sn") == True:
+                try:
+                    parsing_index = config.get("parsing_acc_sn")
+                    selected_uuid = config.get('accounts')[parsing_index][3]
+                except IndexError as e:
+                    parsing_index = 0
+                    selected_uuid = config.get('accounts')[parsing_index][3]
+                config.set_('parsing_acc_sn', parsing_index + 1)
+            else:
+                parsing_index = item.get('override_parsing_acc_sn', config.get("parsing_acc_sn") - 1)
+                selected_uuid = config.get('accounts')[parsing_index][3]
             logger.debug(f'Got data to parse: {str(item)}')
             try:
                 session = session_pool[selected_uuid]
+                logger.info(f'{session}')
                 enqueue_part_cfg = {
                         'extra_paths': item['data'].get('dl_path', ''),
                         'extra_path_as_root': item['data'].get('dl_path_is_root', False),
@@ -157,7 +167,7 @@ class ParsingQueueProcessor(QObject):
                     podcast_name, episode_name, thumbnail, release_date, total_episodes, artist = get_episode_info(session, item['media_id'])
                     logger.info(f"PQP parsing podcast episode : {episode_name}:{item['media_id']}")
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(self.tr("Adding episode {episode_name} to download queue !").format(episode_name))
+                        self.progress.emit(self.tr("Adding episode {0} to download queue !").format(episode_name))
                     # TODO: Use new enqueue method
                     self.enqueue.emit(
                         {
@@ -204,7 +214,7 @@ class ParsingQueueProcessor(QObject):
                             self.enqueue_tracks([song['track']], enqueue_part_cfg=enqueue_part_cfg,
                                                 log_id=f'{item_name}:{item["media_id"]}', item_type=f"Playlist [{name}]")
                     if not item['data'].get('hide_dialogs', False):
-                        self.progress.emit(f"Added playlist '{item_name}' by {owner} to download queue !")
+                        self.progress.emit(self.tr("Added playlist '{0}' to download queue !").format(item_name))
                 elif item['media_type'] == 'track':
                     song_info = get_song_info(session, item['media_id'])
                     name = song_info['name']
