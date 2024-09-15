@@ -219,7 +219,7 @@ Enabling this will disable popup dialogs about status when using bulk downloads.
 - **Recoverable downloads retry delay**: 
 Time to wait before attempting another download after failed attempt.
 
-- **Skip bytes at the end (download end skip bytes)**: 
+- **Skip bytes at End**: 
 Sometimes the last few bytes of a track can't be downloaded, leading to a 'PD Error' which causes the downloads to fail constantly.
 This option sets the number of bytes to skip downloading when this happens.
 The value might change but the current working value is '167' bytes. If you get 'decode errors' or incomplete song downloads, try setting it to 0.
