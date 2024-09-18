@@ -236,7 +236,9 @@ Do not include '.' in it. This setting will be ignored while using the raw media
 Decode error: If you are receiving this error, your account might have gotten restricted. Wait some time or try a different account. The application may crash frequently as there is no proper exception handling yet. You can help by opening a new issue with the error message displayed in your console window after the application misbehaves.
  
 # 6. Contributing/Supporting
-You can write code to include additional feature or bug fixes or make a issue regarding bugs and features or just spread the work about the application. You can donate via BTC or XMR at the addresses below:
+You can write code to include additional features or add translations. Translations can be submitted with the template found [here](src/onthespot/resources/translations/pt_PT.ts). Once filled out open an issue with the format "[New Translation]: en_US".
+
+You can also donate via BTC or XMR at the addresses below:
 
 BTC: bc1qm4747q4s0ypef4x4uknmwkc9pjffnstyapejdk
 

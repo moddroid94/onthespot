@@ -1,6 +1,6 @@
 import os
 import time
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 from ..otsconfig import config_dir, config
 from ..runtimedata import session_pool, get_logger
 from ..utils.utils import login_user

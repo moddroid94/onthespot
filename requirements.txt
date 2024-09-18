@@ -13,9 +13,9 @@ protobuf
 pycryptodomex
 PyOgg
 pyperclip
-PyQt5
-PyQt5-Qt5
-PyQt5-sip
+PyQt6
+PyQt6-Qt6
+PyQt6-sip
 pyxdg
 requests
 show-in-file-manager

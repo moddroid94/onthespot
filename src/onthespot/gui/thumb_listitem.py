@@ -1,7 +1,7 @@
-from PyQt5 import QtNetwork
-from PyQt5.QtCore import Qt, QObject, QUrl
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QHBoxLayout, QWidget, QLabel
+from PyQt6 import QtNetwork
+from PyQt6.QtCore import Qt, QObject, QUrl
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QHBoxLayout, QWidget, QLabel
 
 
 class LabelWithThumb(QWidget):
@@ -17,7 +17,7 @@ class LabelWithThumb(QWidget):
         self.__text_label.setText(label_text)
         self.__text_label.setWordWrap(True)
         self.__text_label.setToolTip(label_text)
-        self.__text_label.setAlignment(Qt.AlignLeft)
+        self.__text_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
         if thumb_enabled:
             self.__thumb_label = QLabel()
             self.__thumb_label.setFixedHeight(thumb_height)

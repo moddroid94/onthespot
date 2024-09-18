@@ -1,7 +1,7 @@
 import os
-from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog
-from PyQt5.QtCore import Qt
+from PyQt6 import uic
+from PyQt6.QtWidgets import QDialog
+from PyQt6.QtCore import Qt
 from ..runtimedata import get_logger
 from ..otsconfig import config
 
@@ -19,7 +19,6 @@ class MiniDialog(QDialog):
         # Set theme
         self.dark_theme_path = os.path.join(config.app_root,'resources', 'themes', 'mini_dialog_dark_theme.qss')
         self.light_theme_path = os.path.join(config.app_root,'resources', 'themes', 'mini_dialog_light_theme.qss')
-        self.setWindowFlags(Qt.FramelessWindowHint)
         self.theme = config.get("theme")
         if self.theme == "Dark":
           with open(self.dark_theme_path, 'r') as f:

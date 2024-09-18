@@ -4,7 +4,7 @@ import time
 import requests
 from librespot.core import Session
 import re
-from ..otsconfig import config_dir
+from ..otsconfig import config, config_dir
 from ..runtimedata import get_logger
 from .spotify import search_by_term, get_currently_playing_url
 import subprocess
@@ -301,3 +301,16 @@ def name_by_from_sdata(d_key: str, item: dict):
             item_name = item['name'] + f"  |  GENERES: {'/'.join(item['genres'])}"
         item_by = f"{item['name']}"
     return item_name, item_by
+
+def fetch_account_uuid(download):
+    if config.get("rotate_acc_sn") == True:
+         try:
+             parsing_index = config.get("parsing_acc_sn")
+             return config.get('accounts')[parsing_index][3]
+         except IndexError as e:
+             parsing_index = 0
+             return config.get('accounts')[parsing_index][3]
+         if download == True:
+             config.set_('parsing_acc_sn', parsing_index + 1)
+    else:
+        return config.get('accounts')[ config.get('parsing_acc_sn') - 1 ][3]

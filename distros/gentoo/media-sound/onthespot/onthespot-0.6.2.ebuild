@@ -40,7 +40,6 @@ RDEPEND="
 	dev-python/pillow
 	dev-python/protobuf-python
 	dev-python/PyQt5[network,widgets]
-	dev-python/PyQt5-sip
 	dev-python/PyOgg
 	dev-python/pyxdg
 	dev-python/requests

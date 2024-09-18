@@ -6,7 +6,7 @@ import time
 import traceback
 
 import requests
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from urllib3.exceptions import MaxRetryError, NewConnectionError
@@ -15,7 +15,7 @@ from ..otsconfig import config
 from ..runtimedata import get_logger, cancel_list, failed_downloads, unavailable, session_pool
 from ..utils.spotify import check_premium, get_song_info, convert_audio_format, set_music_thumbnail, set_audio_tags, \
     get_episode_info, get_track_lyrics
-from ..utils.utils import re_init_session
+from ..utils.utils import re_init_session, fetch_account_uuid
 
 
 class DownloadWorker(QObject):
@@ -324,16 +324,8 @@ class DownloadWorker(QObject):
                 self.logger.info(f"Processing download for track by id '{item['media_id']}', Attempt: {attempt}/{config.get('max_retries')}")
                 attempt = attempt + 1
                 status = False
-                if config.get("rotate_acc_sn") == True:
-                    try:
-                        parsing_index = config.get("parsing_acc_sn")
-                        selected_uuid = config.get('accounts')[parsing_index][3]
-                    except IndexError as e:
-                        parsing_index = 0
-                        selected_uuid = config.get('accounts')[parsing_index][3]
-                    config.set_('parsing_acc_sn', parsing_index + 1)
-                else:
-                    selected_uuid = self.__session_uuid
+                download = True
+                selected_uuid = fetch_account_uuid(download)
                 self.progress.emit([item['media_id'], "Downloading", None])
                 try:
                     if item['media_type'] == "track":

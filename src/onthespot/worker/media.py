@@ -1,6 +1,6 @@
 import queue
 import time
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 from urllib3.exceptions import NewConnectionError, MaxRetryError
 
 from ..otsconfig import config

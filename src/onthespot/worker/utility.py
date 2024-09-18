@@ -1,14 +1,14 @@
 import os
 import queue
 import time
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from ..otsconfig import config
 from ..runtimedata import get_logger, playlist_m3u_queue, downloaded_data, session_pool, unavailable
 from ..utils.spotify import get_album_tracks, get_album_name, get_artist_albums, get_show_episodes, get_episode_info, \
     get_song_info, get_tracks_from_playlist, get_playlist_data, sanitize_data
-from ..utils.utils import re_init_session
+from ..utils.utils import re_init_session, fetch_account_uuid
 
 logger = get_logger("worker.utility")
 
@@ -90,17 +90,8 @@ class ParsingQueueProcessor(QObject):
         while not self.__stop:
             logger.info('Waiting for new item to parse')
             item = self.__queue.get()
-            if config.get("rotate_acc_sn") == True:
-                try:
-                    parsing_index = config.get("parsing_acc_sn")
-                    selected_uuid = config.get('accounts')[parsing_index][3]
-                except IndexError as e:
-                    parsing_index = 0
-                    selected_uuid = config.get('accounts')[parsing_index][3]
-                config.set_('parsing_acc_sn', parsing_index + 1)
-            else:
-                parsing_index = item.get('override_parsing_acc_sn', config.get("parsing_acc_sn") - 1)
-                selected_uuid = config.get('accounts')[parsing_index][3]
+            download = False
+            selected_uuid = fetch_account_uuid(download)
             logger.debug(f'Got data to parse: {str(item)}')
             try:
                 session = session_pool[selected_uuid]

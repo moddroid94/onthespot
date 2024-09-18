@@ -893,18 +893,7 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_9">
                  <item>
-                  <widget class="QComboBox" name="inp_language">
-                   <item>
-                    <property name="text">
-                     <string>        🇬🇧 English</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>       🇵🇹 Português</string>
-                    </property>
-                   </item>
-                  </widget>
+                  <widget class="QComboBox" name="inp_language"/>
                  </item>
                  <item>
                   <widget class="QPushButton" name="toggle_theme_button">

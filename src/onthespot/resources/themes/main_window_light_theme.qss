@@ -1,2 +1,4 @@
-QWidget {
+QComboBox {
+   padding-left: auto;
+   padding-right: 14%;
 }

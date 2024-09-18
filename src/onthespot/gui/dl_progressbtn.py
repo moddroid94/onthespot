@@ -2,8 +2,8 @@ import platform
 import os
 import subprocess
 import pyperclip
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QHBoxLayout, QWidget
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QHBoxLayout, QWidget
 from ..otsconfig import config
 from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue, session_pool, get_logger
 from showinfm import show_in_file_manager

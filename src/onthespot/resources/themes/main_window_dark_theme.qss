@@ -2,6 +2,10 @@ QWidget {
    background-color: #282828;
    color: #fff;
 }
+QComboBox {
+   padding-left: auto;
+   padding-right: 14%;
+}
 QPushButton {
    background-color: #282828;
    color: #fff;

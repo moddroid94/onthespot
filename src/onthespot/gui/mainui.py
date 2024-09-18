@@ -3,13 +3,13 @@ import queue
 import time
 import threading
 import uuid
-from PyQt5 import uic, QtNetwork, QtGui
-from PyQt5.QtCore import QThread, QDir, Qt, QTranslator
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
+from PyQt6 import uic, QtNetwork, QtGui
+from PyQt6.QtCore import QThread, QDir, Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
 from ..utils.spotify import search_by_term, get_thumbnail
-from ..utils.utils import name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session
+from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session
 from ..worker import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
 from ..worker.zeroconf import new_session
 from .dl_progressbtn import DownloadActionsButtons
@@ -89,14 +89,37 @@ def cancel_all_downloads():
 
 class MainWindow(QMainWindow):
 
+    def contribute(self):
+        if self.inp_language.currentIndex() == self.inp_language.count() - 1:
+            import platform, subprocess
+            url = "https://github.com/justin025/onthespot/blob/main/README.md#6-contributingsupporting"
+            if platform.system() == 'Windows':
+                os.startfile(url)
+            elif platform.system() == 'Darwin':  # For MacOS
+                subprocess.Popen(['open', url])
+            else:  # For Linux and other Unix-like systems
+                subprocess.Popen(['xdg-open', url])
+
     def __init__(self, _dialog, start_url=''):
         super(MainWindow, self).__init__()
         self.path = os.path.dirname(os.path.realpath(__file__))
         icon_path = os.path.join(config.app_root, 'resources', 'icons', 'onthespot.png')
         QApplication.setStyle("fusion")
-        QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(QtGui.QIcon(icon_path))
+
+        en_US_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'en_US.png'))
+        self.inp_language.insertItem(0, en_US_icon, "English")
+        en_US_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'de_DE.png'))
+        self.inp_language.insertItem(1, en_US_icon, "Deutsch")
+        pt_PT_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pt_PT.png'))
+        self.inp_language.insertItem(2, pt_PT_icon, "Português")
+
+        # Contribute Translations
+        pirate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pirate_flag.png'))
+        self.inp_language.insertItem(999, pirate_icon, "Contribute")
+        self.inp_language.currentIndexChanged.connect(self.contribute)
+
         save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'save.png'))
         self.btn_save_config.setIcon(save_icon)
         folder_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
@@ -107,7 +130,7 @@ class MainWindow(QMainWindow):
         collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
         self.btn_search_filter_toggle.setIcon(collapse_down_icon)
 
-       # Breaks zeroconf login because of dirty restart
+        # Breaks zeroconf login because of dirty restart
         #self.start_url = start_url
         self.start_url = ""
         self.inp_session_uuid.setText(config.session_uuid)
@@ -250,22 +273,22 @@ class MainWindow(QMainWindow):
         logger.info("Setting table item properties")
         # Sessions table
         tbl_sessions_header = self.tbl_sessions.horizontalHeader()
-        tbl_sessions_header.setSectionResizeMode(0, QHeaderView.Stretch)
-        tbl_sessions_header.setSectionResizeMode(1, QHeaderView.Stretch)
-        tbl_sessions_header.setSectionResizeMode(2, QHeaderView.Stretch)
-        tbl_sessions_header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        tbl_sessions_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        tbl_sessions_header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        tbl_sessions_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        tbl_sessions_header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
         # Search results table
         tbl_search_results_headers = self.tbl_search_results.horizontalHeader()
-        tbl_search_results_headers.setSectionResizeMode(0, QHeaderView.Interactive)
-        tbl_search_results_headers.setSectionResizeMode(1, QHeaderView.Stretch)
-        tbl_search_results_headers.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        tbl_search_results_headers.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        tbl_search_results_headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
+        tbl_search_results_headers.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        tbl_search_results_headers.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        tbl_search_results_headers.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         # Download progress table
         tbl_dl_progress_header = self.tbl_dl_progress.horizontalHeader()
-        tbl_dl_progress_header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        tbl_dl_progress_header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        tbl_dl_progress_header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        tbl_dl_progress_header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        tbl_dl_progress_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        tbl_dl_progress_header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        tbl_dl_progress_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        tbl_dl_progress_header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
         return True
 
     def __m3u_maker_set(self):
@@ -722,15 +745,8 @@ class MainWindow(QMainWindow):
                 filters.append('track')
             if self.inp_enable_search_artists.isChecked():
                 filters.append('artist')
-            if config.get("rotate_acc_sn") == True:
-                try:
-                    parsing_index = config.get("parsing_acc_sn")
-                    selected_uuid = config.get('accounts')[parsing_index][3]
-                except IndexError as e:
-                    parsing_index = 0
-                    selected_uuid = config.get('accounts')[parsing_index][3]
-            else:
-                selected_uuid = config.get('accounts')[ config.get('parsing_acc_sn') - 1 ][3]
+            download = False
+            selected_uuid = fetch_account_uuid(download)
             session = session_pool[ selected_uuid ]
             try:
                 results = search_by_term(session, search_term,
@@ -821,6 +837,10 @@ class MainWindow(QMainWindow):
                     continue
                 if d_key.lower() == "tracks":
                     thumb_dict = item['album']['images']
+                # Playlists fail because height and width in the response are set to null
+                elif d_key.lower() == "playlists":
+                    url = item['images'][int('0')]['url']
+                    thumb_dict = [{'height': 640, 'url': url,'width': 640}]
                 else:
                     thumb_dict = item['images']
                 queue_data = {'media_type': d_key[0:-1], 'media_id': item['id'],
@@ -828,9 +848,7 @@ class MainWindow(QMainWindow):
                                   'media_title': item_name.replace("[ E ]", ""),
                                   'thumb_url': get_thumbnail(thumb_dict,
                                                              preferred_size=config.get('search_thumb_height')^2
-                                                             ).replace(
-                                      'https', 'http'
-                                  )
+                                                             )
                               }}
                 tmp_dl_val = self.inp_tmp_dl_root.text().strip()
                 if self.__advanced_visible and tmp_dl_val != "" and os.path.isdir(tmp_dl_val):
