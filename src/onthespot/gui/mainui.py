@@ -889,7 +889,7 @@ class MainWindow(QMainWindow):
             if did in downloads_status:
                 progress = downloads_status[did]["progress_bar"].value()
                 status = downloads_status[did]["status_label"].text().lower()
-                if progress == 100 or status in ['cancelled', 'unavailable']:
+                if progress == 100 or status in ['cancelled']:
                     self.tbl_dl_progress.removeRow(check_row)
                     downloads_status.pop(did)
                 else:
