@@ -4,8 +4,7 @@ charset-normalizer
 defusedxml
 idna
 ifaddr
-librespot @ git+https://github.com/kokarare1212/librespot-python
-music-tag
+librespot
 mutagen
 packaging
 Pillow
