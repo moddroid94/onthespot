@@ -289,10 +289,12 @@ def set_audio_tags(filename, metadata, track_id_str):
         value = metadata[key]
         if key == 'artists':
             tags['artist'] = conv_artist_format(value)
-        elif key in ['name', 'track_title', 'tracktitle']:
-            tags['title'] = value
         elif key in ['album_name', 'album']:
             tags['album'] = value
+        elif key in ['album_artists']:
+            tags['albumartist'] = value
+        elif key in ['name', 'track_title', 'tracktitle']:
+            tags['title'] = value
         elif key in ['year', 'release_year']:
             tags['date'] = value
         elif key in ['discnumber', 'disc_number', 'disknumber', 'disk_number']:
@@ -301,33 +303,34 @@ def set_audio_tags(filename, metadata, track_id_str):
         elif key in ['track_number', 'tracknumber']:
             # EasyID3 requires the format value/total, i.e. 3/10
             tags['tracknumber'] = str(value) + '/' + str(metadata['total_tracks'])
-        # Lyrics would need to be fetched before the track for this tag to work.
-        # I don't really care enough to fix this, open a pull request if you want it included.
-        elif key == 'lyrics':
-            tags['lyrics'] = value
         elif key == 'genre':
             if 'Podcast' in value or 'podcast' in value:
                 type_ = 'episode'
             tags['genre'] = conv_artist_format(value)
-        elif key == 'duration':
-            tags['length'] = str(value)
-        elif key == 'isrc':
-            tags['isrc'] = value
-        elif key == 'copyrights':
-            tags['copyright'] = value
         elif key == 'performers':
             tags['performer'] = value
-        elif key == 'writers':
-            tags['author'] = value
         elif key == 'producers':
             EasyID3.RegisterTextKey('producer', 'TIPL')
             tags['producer'] = value
+        elif key == 'writers':
+            tags['author'] = value
         elif key == 'label':
             EasyID3.RegisterTextKey('label', 'TPUB')
             tags['label'] = value
-    tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
+        elif key == 'copyrights':
+            tags['copyright'] = value
+        elif key == 'isrc':
+            tags['isrc'] = value
+        elif key == 'duration':
+            tags['length'] = str(value)
+        # Lyrics would need to be fetched before the track for this tag to work.
+        # I don't really care enough to fix this, open a pull request if you want it included.
+        #
+        #elif key == 'lyrics':
+        #    tags['lyrics'] = value
     #EasyID3.RegisterTextKey('comment', 'COMM')
     #tags['comment'] = f'id[spotify.com:{type_}:{track_id_str}]'
+    tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
     tags.save()
 
 
@@ -428,6 +431,7 @@ def get_song_info(session, song_id):
     info = {
         'artists': artists,
         'album_name': sanitize_data(info['tracks'][0]['album']["name"]),
+        'album_artists': album_data['artists'][0]['name'],
         'name': sanitize_data(info['tracks'][0]['name']),
         'image_url': get_thumbnail(info['tracks'][0]['album']['images'], preferred_size=640000),
         'release_year': info['tracks'][0]['album']['release_date'].split("-")[0],
@@ -435,27 +439,26 @@ def get_song_info(session, song_id):
         'track_number': info['tracks'][0]['track_number'],
         'total_tracks': info['tracks'][0]['album']['total_tracks'],
         'total_discs': sorted([trk['disc_number'] for trk in album_data['tracks']['items']])[-1] if 'tracks' in album_data else 1,
-        'scraped_song_id': info['tracks'][0]['id'],
-        'is_playable': info['tracks'][0]['is_playable'],
-        'popularity': info['tracks'][0]['popularity'],
-        'isrc': info['tracks'][0]['external_ids'].get('isrc', ''),
-        'genre': artist_data['genres'],
-        'duration': info['tracks'][0]['duration_ms'],
-        #'credits': credits,
-        #'source': credits[source],
-        'performers': performers,
-        'writers': writers,
-        'producers': producers,
         # https://developer.spotify.com/documentation/web-api/reference/get-track
         # List of genre is supposed to be here, genre from album API is deprecated and it always seems to be unavailable
         # Use artist endpoint to get artist's genre instead
+        'genre': artist_data['genres'],
+        'source': credits['source'], # Not sure what this is, I believe it's the label. Needs to be formatted like performers. unused
+        'performers': performers,
+        'producers': producers,
+        'writers': writers,
         'label': sanitize_data(album_data['label']),
         'copyrights':  [
             sanitize_data(holder['text'])
             for holder
             in album_data['copyrights']
             ],
-        'explicit': info['tracks'][0]['explicit']
+        'explicit': info['tracks'][0]['explicit'], # unused
+        'isrc': info['tracks'][0]['external_ids'].get('isrc', ''),
+        'duration': info['tracks'][0]['duration_ms'],
+        'scraped_song_id': info['tracks'][0]['id'], # unused
+        'is_playable': info['tracks'][0]['is_playable'], # unused
+        'popularity': info['tracks'][0]['popularity'] # unused
     }
     return info
 

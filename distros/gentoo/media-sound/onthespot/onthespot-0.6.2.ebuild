@@ -35,7 +35,6 @@ RDEPEND="
 	dev-python/idna
 	dev-python/ifaddr
 	dev-python/librespot
-	dev-python/music-tag
 	dev-python/packaging
 	dev-python/pillow
 	dev-python/protobuf-python
