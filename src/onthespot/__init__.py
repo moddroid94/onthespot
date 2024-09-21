@@ -14,18 +14,19 @@ def main():
     app = QApplication(sys.argv)
 
     if config.get("language_index") == 0:
-        language = "en_US"
+        config.set_('language', "en_US")
     elif config.get("language_index") == 1:
-        language = "de_DE"
-    elif config.get("language_index") == 1:
-        language = "pt_PT"
+        config.set_('language', "de_DE")
+    elif config.get("language_index") == 2:
+        config.set_('language', "pt_PT")
     else:
         logger.info(f'Unknown language index: {config.get("language_index")}')
-        language = "en_US"
+        config.set_('language', "en_US")
+    config.update()
 
     translator = QTranslator()
     path = os.path.join(os.path.join(config.app_root, 'resources', 'translations'),
-                 f"{language}.qm")
+                 f"{config.get('language')}.qm")
     translator.load(path)
     app.installTranslator(translator)
 

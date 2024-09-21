@@ -43,7 +43,8 @@ class Config:
         print('OTS Version : ', self.version)
         self.__template_data = {
             "version": 0.6, # Application version
-            "language_index": 0, # Language
+            "language": "en_US", # Language
+            "language_index": 0, # Language Index
             "max_threads": 1, # Maximum number of thread we can spawn
             "parsing_acc_sn": 1, # Serial number of account that will be used for parsing links
             "rotate_acc_sn": False, # Rotate active account for parsing and downloading tracks
@@ -65,6 +66,7 @@ class Config:
             "inp_enable_lyrics": False, # Enable lyrics download
             "only_synced_lyrics": False, # Only use synced lyrics
             "create_m3u_playlists": False, # Create m3u based playlist
+            "translate_file_path": False, # Translate downloaded mp3 names to english
             "ffmpeg_args": [], # Extra arguments for ffmpeg
             "show_search_thumbnails": 1, # Show thumbnails in search view
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )

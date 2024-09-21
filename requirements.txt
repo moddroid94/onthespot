@@ -2,6 +2,7 @@ async-timeout
 certifi
 charset-normalizer
 defusedxml
+googletrans==4.0.0-rc1
 idna
 ifaddr
 librespot

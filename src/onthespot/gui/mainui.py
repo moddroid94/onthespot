@@ -600,6 +600,10 @@ class MainWindow(QMainWindow):
             self.inp_download_locate_btn.setChecked(True)
         else:
             self.inp_download_locate_btn.setChecked(False)
+        if config.get("translate_file_path"):
+            self.inp_translate_file_path.setChecked(True)
+        else:
+            self.inp_translate_file_path.setChecked(False)
         if config.get("force_raw"):
             self.inp_raw_download.setChecked(True)
         else:
@@ -662,6 +666,10 @@ class MainWindow(QMainWindow):
             config.set_('rotate_acc_sn', True)
         else:
             config.set_('rotate_acc_sn', False)
+        if self.inp_translate_file_path.isChecked():
+            config.set_('translate_file_path', True)
+        else:
+            config.set_('translate_file_path', False)
         if self.inp_raw_download.isChecked():
             config.set_('force_raw', True)
         else:

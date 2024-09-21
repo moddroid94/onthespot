@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>740</width>
-    <height>531</height>
+    <height>602</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1027,7 +1027,7 @@
         <item>
          <widget class="QGroupBox" name="imput_adv_group">
           <property name="styleSheet">
-           <string notr="true">QGroupBox #gb0, #gb1, #gb2, #gb3, #gb4, #gb5, #imput_adv_group {
+           <string notr="true">QGroupBox #gb0, #gb1, #gb2, #gb3, #gb4, #gb5, #gb6, #imput_adv_group {
      border: 0;
  } </string>
           </property>
@@ -1038,6 +1038,9 @@
            <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_11">
+           <property name="spacing">
+            <number>6</number>
+           </property>
            <property name="leftMargin">
             <number>0</number>
            </property>
@@ -1542,6 +1545,66 @@
                  </item>
                 </layout>
                </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="gb6">
+             <property name="title">
+              <string/>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_78">
+              <item>
+               <widget class="QGroupBox" name="group_playlist_cfg_m3u_6">
+                <property name="title">
+                 <string/>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_79">
+                 <item>
+                  <widget class="QCheckBox" name="inp_translate_file_path">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A premium account is required to download lyrics&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="layoutDirection">
+                    <enum>Qt::RightToLeft</enum>
+                   </property>
+                   <property name="text">
+                    <string>Translate Track Name and Album to Application Language</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_40">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>

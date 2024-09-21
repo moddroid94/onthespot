@@ -48,13 +48,23 @@ class DownloadWorker(QObject):
         quality = AudioQuality.HIGH
         if check_premium(session) or config.get('force_premium'):
             quality = AudioQuality.VERY_HIGH
+
         try:
             song_info = get_song_info(session, track_id_str)
+
+            if config.get("translate_file_path"):
+                from googletrans import Translator
+                _name = Translator().translate(song_info['name'], src="auto", dest=config.get("language")).text
+                _album = Translator().translate(song_info['album_name'], src="auto", dest=config.get("language")).text
+            else:
+                _name = song_info['name']
+                _album=song_info['album_name']
+
             _artist = song_info['artists'][0]
             song_name = config.get("track_path_formatter").format(
                 artist=_artist,
-                album=song_info['album_name'],
-                name=song_info['name'],
+                album=_album,
+                name=_name,
                 rel_year=song_info['release_year'],
                 disc_number=song_info['disc_number'],
                 track_number=song_info['track_number'],
@@ -68,6 +78,7 @@ class DownloadWorker(QObject):
                 playlist_owner=playlist_owner,
                 playlist_desc=playlist_desc
             )
+
             if not config.get("force_raw"):
                 song_name = song_name + "." + config.get("media_format")
             else:
