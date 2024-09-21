@@ -66,7 +66,7 @@ class Config:
             "inp_enable_lyrics": False, # Enable lyrics download
             "only_synced_lyrics": False, # Only use synced lyrics
             "create_m3u_playlists": False, # Create m3u based playlist
-            "translate_file_path": False, # Translate downloaded mp3 names to english
+            "translate_file_path": False, # Translate downloaded mp3 names to application language
             "ffmpeg_args": [], # Extra arguments for ffmpeg
             "show_search_thumbnails": 1, # Show thumbnails in search view
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
