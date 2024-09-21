@@ -92,6 +92,10 @@
         <translation>Bytes am Ende überspringen</translation>
     </message>
     <message>
+      <source>Translate Track Path to Application Language</source>
+      <translation>Track Path in Anwendungssprache übersetzen</translation>
+    </message>
+    <message>
         <source>Playlist</source>
         <translation>Wiedergabeliste</translation>
     </message>

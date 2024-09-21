@@ -1573,7 +1573,7 @@
                     <enum>Qt::RightToLeft</enum>
                    </property>
                    <property name="text">
-                    <string>Translate Track Name and Album to Application Language</string>
+                    <string>Translate Track Path to Application Language</string>
                    </property>
                   </widget>
                  </item>

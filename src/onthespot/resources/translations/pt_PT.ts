@@ -92,6 +92,10 @@
         <translation>Saltar Bytes no Fim</translation>
     </message>
     <message>
+      <source>Translate Track Path to Application Language</source>
+      <translation>Traduzir 'Organizar faixa por' para o idioma da aplicação</translation>
+    </message>
+    <message>
         <source>Playlist</source>
         <translation>Lista de reprodução</translation>
     </message>
