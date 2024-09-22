@@ -39,6 +39,7 @@ RDEPEND="
 	dev-python/packaging
 	dev-python/pillow
 	dev-python/protobuf-python
+        dev-python/pyperclip
 	dev-python/PyQt6[network,widgets]
 	dev-python/PyOgg
 	dev-python/pyxdg
