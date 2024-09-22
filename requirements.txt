@@ -18,7 +18,6 @@ PyQt6-Qt6
 PyQt6-sip
 pyxdg
 requests
-show-in-file-manager
 urllib3
 websocket-client
 zeroconf

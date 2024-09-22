@@ -9,7 +9,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
 from ..utils.spotify import search_by_term, get_thumbnail
-from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release
+from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release, open_item
 from ..worker import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
 from ..worker.zeroconf import new_session
 from .dl_progressbtn import DownloadActionsButtons
@@ -89,16 +89,11 @@ def cancel_all_downloads():
 
 class MainWindow(QMainWindow):
 
+    # Remove Later
     def contribute(self):
         if self.inp_language.currentIndex() == self.inp_language.count() - 1:
-            import platform, subprocess
             url = "https://github.com/justin025/onthespot/blob/main/README.md#6-contributingsupporting"
-            if platform.system() == 'Windows':
-                os.startfile(url)
-            elif platform.system() == 'Darwin':  # For MacOS
-                subprocess.Popen(['open', url])
-            else:  # For Linux and other Unix-like systems
-                subprocess.Popen(['xdg-open', url])
+            open_item(url)
 
     def __init__(self, _dialog, start_url=''):
         super(MainWindow, self).__init__()

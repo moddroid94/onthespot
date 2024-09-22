@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 from ..otsconfig import config
 from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue, session_pool, get_logger
-from showinfm import show_in_file_manager
+from ..utils.utils import open_item
 from ..utils.spotify import check_if_media_in_library, save_media_to_library, remove_media_from_library
 
 logger = get_logger("worker.utility")
@@ -87,15 +87,11 @@ class DownloadActionsButtons(QWidget):
             logger.info(f"Unable to determine if song is in library cannot save, value: {in_library}")
 
     def play_file (self):
-        file_path = os.path.abspath(downloaded_data[self.__id]['media_path'])
-        if platform.system() == 'Windows':
-            os.startfile(file_path)
-        elif platform.system() == 'Darwin':  # For MacOS
-            subprocess.Popen(['open', file_path])
-        else:  # For Linux and other Unix-like systems
-            subprocess.Popen(['xdg-open', file_path])
+        file = os.path.abspath(downloaded_data[self.__id]['media_path'])
+        open_item(file)
 
     def locate_file(self):
         if self.__id in downloaded_data:
             if downloaded_data[self.__id].get('media_path', None):
-                show_in_file_manager(os.path.abspath(downloaded_data[self.__id]['media_path']))
+                file_dir = os.path.dirname(downloaded_data[self.__id]['media_path'])
+                open_item(file_dir)

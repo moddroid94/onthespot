@@ -43,7 +43,6 @@ RDEPEND="
 	dev-python/PyOgg
 	dev-python/pyxdg
 	dev-python/requests
-	dev-python/show-in-file-manager
 	dev-python/urllib3
 	dev-python/websocket-client
 	dev-python/zeroconf

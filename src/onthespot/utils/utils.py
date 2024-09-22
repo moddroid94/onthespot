@@ -324,3 +324,11 @@ def latest_release():
         if int(latest_version) > int(current_version):
             logger.info(f"Update Available: {int(latest_version)} > {int(current_version)}")
             return False
+
+def open_item(item):
+    if platform.system() == 'Windows':
+        os.startfile(item)
+    elif platform.system() == 'Darwin':  # For MacOS
+        subprocess.Popen(['open', item])
+    else:  # For Linux and other Unix-like systems
+        subprocess.Popen(['xdg-open', item])
