@@ -322,5 +322,5 @@ def latest_release():
         current_version = str(config.get("version")).replace('v', '').replace('.', '')
         latest_version = response.json()['name'].replace('v', '').replace('.', '')
         if int(latest_version) > int(current_version):
-            logger.info(f"{int(latest_version)} {int(current_version)}")
+            logger.info(f"Update Available: {int(latest_version)} > {int(current_version)}")
             return False
