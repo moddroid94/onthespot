@@ -32,6 +32,7 @@ RDEPEND="
 	dev-python/certifi
 	dev-python/charset-normalizer
 	dev-python/defusedxml
+        dev-python/googletrans
 	dev-python/idna
 	dev-python/ifaddr
 	dev-python/librespot

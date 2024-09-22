@@ -314,3 +314,13 @@ def fetch_account_uuid(download):
              config.set_('parsing_acc_sn', parsing_index + 1)
     else:
         return config.get('accounts')[ config.get('parsing_acc_sn') - 1 ][3]
+
+def latest_release():
+    url = "https://api.github.com/repos/justin025/onthespot/releases/latest"
+    response = requests.get(url)
+    if response.status_code == 200:
+        current_version = str(config.get("version")).replace('v', '').replace('.', '')
+        latest_version = response.json()['name'].replace('v', '').replace('.', '')
+        if int(latest_version) > int(current_version):
+            logger.info(f"{int(latest_version)} {int(current_version)}")
+            return False

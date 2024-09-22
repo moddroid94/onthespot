@@ -13,15 +13,26 @@ def main():
     logger.info('Starting application in \n3\n2\n1')
     app = QApplication(sys.argv)
 
+    # Set Application Version
+    version = "v0.6.3"
+    config.set_("version", version)
+    logger.info(f'OnTheSpot Version: {version}')
+
+    # Migration (<v0.6.3)
+    if " " not in config.get("metadata_seperator"):
+        config.set_("metadata_seperator", config.get("metadata_seperator")+" ")
+
+    # Language
     if config.get("language_index") == 0:
-        config.set_('language', "en_US")
+        config.set_("language", "en_US")
     elif config.get("language_index") == 1:
-        config.set_('language', "de_DE")
+        config.set_("language", "de_DE")
     elif config.get("language_index") == 2:
-        config.set_('language', "pt_PT")
+        config.set_("language", "pt_PT")
     else:
         logger.info(f'Unknown language index: {config.get("language_index")}')
-        config.set_('language', "en_US")
+        config.set_("language", "en_US")
+
     config.update()
 
     translator = QTranslator()

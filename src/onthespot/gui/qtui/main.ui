@@ -40,7 +40,7 @@
        <string notr="true">QTabWidget::pane { border: 0; }</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -1594,17 +1594,39 @@
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_40">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+               <widget class="QGroupBox" name="group_playlist_cfg_m3u_7">
+                <property name="title">
+                 <string/>
                 </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
+                <layout class="QHBoxLayout" name="horizontalLayout_80">
+                 <item>
+                  <widget class="QCheckBox" name="inp_check_for_updates">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A premium account is required to download lyrics&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="layoutDirection">
+                    <enum>Qt::RightToLeft</enum>
+                   </property>
+                   <property name="text">
+                    <string>Check For Updates</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_6">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
               </item>
              </layout>
             </widget>

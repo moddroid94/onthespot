@@ -274,7 +274,7 @@ def convert_audio_format(filename, quality):
 def conv_artist_format(artists):
     formatted = ""
     for artist in artists:
-        formatted += artist + config.get('metadata_seperator')+" "
+        formatted += artist + config.get('metadata_seperator')
     return formatted[:-2].strip()
 
 
@@ -423,11 +423,11 @@ def get_song_info(session, song_id):
     for data in info['tracks'][0]['artists']:
         artists.append(sanitize_data(data['name']))
     performer_list = [item for item in credits['performers'] if isinstance(item, str)]
-    performers = ', '.join(performer_list)
+    performers = config.get('metadata_seperator').join(performer_list)
     writer_list = [item for item in credits['writers'] if isinstance(item, str)]
-    writers = ', '.join(writer_list)
+    writers = config.get('metadata_seperator').join(writer_list)
     producer_list = [item for item in credits['producers'] if isinstance(item, str)]
-    producers = ', '.join(producer_list)
+    producers = config.get('metadata_seperator').join(producer_list)
     info = {
         'artists': artists,
         'album_name': sanitize_data(info['tracks'][0]['album']["name"]),

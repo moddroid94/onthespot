@@ -9,7 +9,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
 from ..utils.spotify import search_by_term, get_thumbnail
-from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session
+from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release
 from ..worker import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
 from ..worker.zeroconf import new_session
 from .dl_progressbtn import DownloadActionsButtons
@@ -29,20 +29,19 @@ def dl_progress_update(data):
     progress = data[2]
     try:
         if status is not None:
-            if status.lower() in ['failed', 'cancelled', 'unavailable']:
+            if progress == [0, 100]:
                 downloads_status[media_id]["btn"]['cancel'].hide()
-                if status.lower() != "unavailable":
-                    if config.get("download_copy_btn"):
-                        downloads_status[media_id]['btn']['copy'].show()
-                    downloads_status[media_id]["btn"]['retry'].show()
-            if 'downloading' == status.lower():
+                if config.get("download_copy_btn"):
+                    downloads_status[media_id]['btn']['copy'].show()
+                downloads_status[media_id]["btn"]['retry'].show()
+            elif progress != [0, 100]:
                 downloads_status[media_id]["btn"]['retry'].hide()
                 if config.get("download_copy_btn"):
                     downloads_status[media_id]['btn']['copy'].show()
                 downloads_status[media_id]["btn"]['cancel'].show()
             downloads_status[media_id]["status_label"].setText(status)
             logger.debug(f"Updating status text for download item '{media_id}' to '{status}'")
-        if progress is not None:
+        if progress != None:
             percent = int((progress[0] / progress[1]) * 100)
             if percent >= 100:
                 downloads_status[media_id]['btn']['cancel'].hide()
@@ -70,7 +69,8 @@ def dl_progress_update(data):
 
 def retry_all_failed_downloads():
     for dl_id in list(failed_downloads.keys()):
-        downloads_status[dl_id]["status_label"].setText("Waiting")
+        if config.get("download_copy_btn"):
+            downloads_status[media_id]['btn']['copy'].show()
         downloads_status[dl_id]["btn"]['cancel'].show()
         downloads_status[dl_id]["btn"]['retry'].hide()
         download_queue.put(failed_downloads[dl_id].copy())
@@ -383,7 +383,7 @@ class MainWindow(QMainWindow):
             elif item['item_id'] in failed_downloads:
                 dl_id = item['item_id']
                 logger.info(f'The media: "{item["item_title"]}" ({item["item_id"]}) had failed to download, re-downloading ! !')
-                downloads_status[dl_id]["status_label"].setText("Waiting")
+                downloads_status[dl_id]["status_label"].setText(self.tr("Waiting"))
                 downloads_status[dl_id]["btn"]['cancel'].show()
                 downloads_status[dl_id]["btn"]['retry'].hide()
                 download_queue.put(failed_downloads[dl_id].copy())
@@ -398,45 +398,45 @@ class MainWindow(QMainWindow):
         #copy_btn.setText('Retry')
         copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
         copy_btn.setIcon(copy_icon)
-        copy_btn.setToolTip('Copy')
+        copy_btn.setToolTip(self.tr('Copy'))
         copy_btn.setMinimumHeight(30)
         copy_btn.hide()
         cancel_btn = QPushButton()
         # cancel_btn.setText('Cancel')
         cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
         cancel_btn.setIcon(cancel_icon)
-        cancel_btn.setToolTip('Cancel')
+        cancel_btn.setToolTip(self.tr('Cancel'))
         cancel_btn.setMinimumHeight(30)
         retry_btn = QPushButton()
         #retry_btn.setText('Retry')
         retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
         retry_btn.setIcon(retry_icon)
-        retry_btn.setToolTip('Retry')
+        retry_btn.setToolTip(self.tr('Retry'))
         retry_btn.setMinimumHeight(30)
         retry_btn.hide()
         save_btn = QPushButton()
         #save_btn.setText('Save')
         #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled-heart.png'))
         #save_btn.setIcon(save_icon)
-        save_btn.setToolTip('Save')
+        save_btn.setToolTip(self.tr('Save'))
         save_btn.setMinimumHeight(30)
         save_btn.hide()
         play_btn = QPushButton()
         #play_btn.setText('Play')
         play_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'play.png'))
         play_btn.setIcon(play_icon)
-        play_btn.setToolTip('Play')
+        play_btn.setToolTip(self.tr('Play'))
         play_btn.setMinimumHeight(30)
         play_btn.hide()
         locate_btn = QPushButton()
         #locate_btn.setText('Locate')
         locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
         locate_btn.setIcon(locate_icon)
-        locate_btn.setToolTip('Locate')
+        locate_btn.setToolTip(self.tr('Locate'))
         locate_btn.setMinimumHeight(30)
         locate_btn.hide()
         status = QLabel(self.tbl_dl_progress)
-        status.setText("Waiting")
+        status.setText(self.tr("Waiting"))
         actions = DownloadActionsButtons(item['item_id'], item['dl_params']['media_type'], pbar, copy_btn, cancel_btn, retry_btn, save_btn, play_btn, locate_btn)
         download_queue.put(
             {
@@ -496,6 +496,10 @@ class MainWindow(QMainWindow):
         self.start_url = ''
         # Build threads
         self.__rebuild_threads()
+        # Update Checker
+        if config.get("check_for_updates"):
+            if latest_release() == False:
+                self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
 
     def __user_table_remove_click(self, account_uuid):
         button = self.sender()
@@ -632,6 +636,10 @@ class MainWindow(QMainWindow):
             self.inp_create_playlists.setChecked(True)
         else:
             self.inp_create_playlists.setChecked(False)
+        if config.get('check_for_updates'):
+            self.inp_check_for_updates.setChecked(True)
+        else:
+            self.inp_check_for_updates.setChecked(False)
 
         logger.info('Config filled to UI')
 
@@ -710,6 +718,10 @@ class MainWindow(QMainWindow):
             config.set_('create_m3u_playlists', True)
         else:
             config.set_('create_m3u_playlists', False)
+        if self.inp_check_for_updates.isChecked():
+            config.set_('check_for_updates', True)
+        else:
+            config.set_('check_for_updates', False)
         config.update()
         logger.info('Config updated !')
 
@@ -897,7 +909,7 @@ class MainWindow(QMainWindow):
             if did in downloads_status:
                 progress = downloads_status[did]["progress_bar"].value()
                 status = downloads_status[did]["status_label"].text().lower()
-                if progress == 100 or status in ['cancelled']:
+                if progress == 100 or status == self.tr("cancelled"):
                     self.tbl_dl_progress.removeRow(check_row)
                     downloads_status.pop(did)
                 else:
