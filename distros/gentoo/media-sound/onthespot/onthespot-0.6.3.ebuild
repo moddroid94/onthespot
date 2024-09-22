@@ -41,7 +41,6 @@ RDEPEND="
 	dev-python/protobuf-python
         dev-python/pyperclip
 	dev-python/PyQt6[network,widgets]
-	dev-python/PyOgg
 	dev-python/pyxdg
 	dev-python/requests
 	dev-python/urllib3
