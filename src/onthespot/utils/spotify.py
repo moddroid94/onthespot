@@ -105,7 +105,7 @@ def get_track_lyrics(session, track_id, metadata, forced_synced):
         if lyrics_json_req.status_code == 200:
             lyrics_json = lyrics_json_req.json()['lyrics']
             lyrics.append(f'[ti:{tracktitle}]')
-            lyrics.append(f'[au:{";".join(writer for writer in metadata["credits"].get("writers", []))}]')
+            lyrics.append(f'[au:{config.get("metadata_seperator").join(writer for writer in metadata["credits"].get("writers", []))}]')
             lyrics.append(f'[ar:{artist}]')
             lyrics.append(f'[al:{album}]')
             lyrics.append(f'[by:{lyrics_json["provider"]}]')
@@ -337,6 +337,7 @@ def set_audio_tags(filename, metadata, track_id_str):
     for key in metadata.keys():
         value = metadata[key]
         if key == 'lyrics':
+            # Adds unsynced lyrics, should figure out how to add synced lyrics (SYLT) at some point.
             ID3tags.add(USLT(encoding=3, lang=u'xxx', desc=u'desc', text=value))
     ID3tags.add(WOAS(url=f'https://open.spotify.com/{type_}/{track_id_str}'))
     ID3tags.save()
