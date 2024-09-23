@@ -2,6 +2,19 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
   <context>
+    <name>DownloadActionsButtons</name>
+    <message>
+      <location filename="../../gui/dl_progressbtn.py" line="77" />
+      <source>Waiting</source>
+      <translation type="unfinished">Warten</translation>
+    </message>
+    <message>
+      <location filename="../../gui/dl_progressbtn.py" line="117" />
+      <source>Deleted</source>
+      <translation type="unfinished" />
+    </message>
+  </context>
+  <context>
     <name>DownloadWorker</name>
     <message>
       <location filename="../../worker/downloader.py" line="255" />
@@ -155,146 +168,162 @@
   <context>
     <name>MainWindow</name>
     <message>
-      <location filename="../../gui/mainui.py" line="220" />
-      <location filename="../../gui/mainui.py" line="200" />
+      <location filename="../../gui/mainui.py" line="221" />
+      <location filename="../../gui/mainui.py" line="201" />
       <source> Light Theme</source>
       <translation> Helles Thema</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="229" />
-      <location filename="../../gui/mainui.py" line="207" />
+      <location filename="../../gui/mainui.py" line="230" />
+      <location filename="../../gui/mainui.py" line="208" />
       <source> Dark Theme</source>
       <translation> Dunkles Thema</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="373" />
+      <location filename="../../gui/mainui.py" line="374" />
       <source>Warning: Downloading lyrics is a premium feature.</source>
       <translation>Warnung: Das Herunterladen von Lyrics ist eine Premium-Funktion.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="439" />
-      <location filename="../../gui/mainui.py" line="386" />
+      <location filename="../../gui/mainui.py" line="461" />
+      <location filename="../../gui/mainui.py" line="387" />
       <source>Waiting</source>
       <translation>Warten</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <location filename="../../gui/mainui.py" line="401" />
+      <location filename="../../gui/mainui.py" line="402" />
       <source>Copy</source>
       <translation>Kopieren</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="408" />
+      <location filename="../../gui/mainui.py" line="409" />
       <source>Cancel</source>
       <translation>Abbrechen</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="414" />
+      <location filename="../../gui/mainui.py" line="415" />
       <source>Retry</source>
       <translation>Wiederholung</translation>
     </message>
     <message>
-      <location filename="../../gui/qtui/main.ui" line="0" />
-      <location filename="../../gui/mainui.py" line="421" />
-      <source>Save</source>
-      <translation>Speichern</translation>
-    </message>
-    <message>
-      <location filename="../../gui/qtui/main.ui" line="0" />
-      <location filename="../../gui/mainui.py" line="428" />
+      <location filename="../../gui/mainui.py" line="422" />
       <source>Play</source>
       <translation>Abspielen</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <location filename="../../gui/mainui.py" line="435" />
+      <location filename="../../gui/mainui.py" line="429" />
+      <source>Save</source>
+      <translation>Speichern</translation>
+    </message>
+    <message>
+      <location filename="../../gui/mainui.py" line="436" />
+      <source>Queue</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <location filename="../../gui/mainui.py" line="443" />
+      <source>Open</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <location filename="../../gui/mainui.py" line="450" />
       <source>Locate</source>
       <translation>Lokalisieren</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="502" />
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <location filename="../../gui/mainui.py" line="457" />
+      <source>Delete</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/mainui.py" line="527" />
       <source>&lt;p&gt;An update is available at the link below,&lt;p&gt;&lt;a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'&gt;https://github.com/justin025/onthespot/releases/latest&lt;/a&gt;</source>
       <translation>&lt;p&gt;Eine aktualisierte Fassung finden Sie unter folgendem Link,&lt;p&gt;&lt;a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'&gt;https://github.com/justin025/onthespot/releases/latest&lt;/a&gt;</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="517" />
+      <location filename="../../gui/mainui.py" line="542" />
       <source>Account {0} was removed successfully.</source>
       <translation>Account {0} wurde erfolgreich entfernt.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="519" />
+      <location filename="../../gui/mainui.py" line="544" />
       <source>Something went wrong while removing account {0}.</source>
       <translation>Beim Entfernen des Accounts {0} ist etwas schief gelaufen.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="530" />
+      <location filename="../../gui/mainui.py" line="555" />
       <source> Remove </source>
       <translation> Entfernen </translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="571" />
+      <location filename="../../gui/mainui.py" line="596" />
       <source>No session available, login with at least one account.</source>
       <translation>Keine Sitzung verfügbar, melden Sie sich mit mindestens einem Konto an.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="648" />
+      <location filename="../../gui/mainui.py" line="767" />
       <source>Language changed. 
  Application needs to be restarted for changes to take effect.</source>
       <translation>Sprache geändert. 
  Damit die Änderungen wirksam werden, muss die Anwendung neu gestartet werden.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="651" />
+      <location filename="../../gui/mainui.py" line="770" />
       <source>Thread config was changed. 
  Application needs to be restarted for changes to take effect.</source>
       <translation>Die Thread-Konfiguration wurde geändert. 
  Damit die Änderungen wirksam werden, muss die Anwendung neu gestartet werden.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="730" />
+      <location filename="../../gui/mainui.py" line="943" />
       <source>Waiting...</source>
       <translation>Warten...</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="735" />
+      <location filename="../../gui/mainui.py" line="948" />
       <source>Login Service Started...
 Select 'OnTheSpot' under devices in the Spotify Desktop App.</source>
       <translation>Anmeldedienst gestartet...
 Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="800" />
-      <location filename="../../gui/mainui.py" line="741" />
+      <location filename="../../gui/mainui.py" line="1013" />
+      <location filename="../../gui/mainui.py" line="954" />
       <source>You need to login to at least one account to use this feature.</source>
       <translation>Sie müssen sich bei mindestens einem Konto anmelden, um diese Funktion zu nutzen.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="786" />
+      <location filename="../../gui/mainui.py" line="999" />
       <source>No results found.</source>
       <translation>Keine Ergebnisse gefunden.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="795" />
+      <location filename="../../gui/mainui.py" line="1008" />
       <source>Unable to parse inputted URL.</source>
       <translation>Unfähig, die eingegebene URL zu analysieren.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="813" />
+      <location filename="../../gui/mainui.py" line="1026" />
       <source>The {0} is being parsed and will be added to download queue shortly.</source>
       <translation>Die {0} wird analysiert und wird in Kürze zur Download-Warteschlange hinzugefügt.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="885" />
+      <location filename="../../gui/mainui.py" line="1098" />
       <source>No search results to download.</source>
       <translation>Keine Suchergebnisse zum Herunterladen.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="902" />
+      <location filename="../../gui/mainui.py" line="1115" />
       <source>Added all results to download queue.</source>
       <translation>Alle Ergebnisse zur Download-Warteschlange hinzugefügt.</translation>
     </message>
     <message>
-      <location filename="../../gui/mainui.py" line="912" />
+      <location filename="../../gui/mainui.py" line="1125" />
       <source>cancelled</source>
       <translation>abgesagt</translation>
     </message>
@@ -402,6 +431,7 @@ Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
+      <location filename="../../gui/qtui/main.ui" line="0" />
       <source>Downloads</source>
       <translation>Downloads</translation>
     </message>
@@ -498,11 +528,6 @@ Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Force Premium</source>
-      <translation>Premium erzwingen</translation>
-    </message>
-    <message>
-      <location filename="../../gui/qtui/main.ui" line="0" />
       <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mirror playback on your Spotify account&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
       <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spiegeln der Wiedergabe auf Ihrem Spotify-Konto&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -555,30 +580,64 @@ Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Track Path</source>
-      <translation>Track-Pfad</translation>
+      <source>General</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Media Format</source>
-      <translation>Medienformat</translation>
+      <source> Download Buttons</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
       <location filename="../../gui/qtui/main.ui" line="0" />
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A premium account is required to download lyrics&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ein Premium-Konto ist erforderlich, um Liedtexte herunterzuladen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>This feature requires a premium account.</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Download Lyrics from Spotify</source>
-      <translation>Liedtexte von Spotify herunterladen</translation>
+      <source>Play*</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Download Synced Lyrics Only </source>
-      <translation>Nur synchronisierte Liedtexte herunterladen </translation>
+      <source>Queue*</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Show Thumbnails in Search</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source> Search Thumbnail Size</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Disable Bulk Download Popups</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Check For Updates</source>
+      <translation>Nach Updates suchen</translation>
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source> Track Path</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source> Media Format</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
@@ -587,8 +646,28 @@ Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>M3U Path</source>
-      <translation>M3U-Pfad</translation>
+      <source> M3U Path</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Force Premium*</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Download Lyrics from Spotify*</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Download Synced Lyrics Only*</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Save LRC File*</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
@@ -597,28 +676,23 @@ Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Download Buttons</source>
-      <translation>Download-Buttons</translation>
+      <source> Download Chunk Size</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Disable Bulk Download Notice Popups</source>
-      <translation>Warn-Pop-ups für Massen-Downloads deaktivieren</translation>
+      <source> Recoverable Downloads Retry Delay</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Download Chunk Size</source>
-      <translation>Download-Blockgrösse</translation>
+      <source> Skip Bytes at End</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Recoverable Downloads Retry Delay</source>
-      <translation>Wiederholungsverzögerung für wiederherstellbare Downloads</translation>
-    </message>
-    <message>
-      <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Skip Bytes at End</source>
-      <translation>Bytes am Ende überspringen</translation>
+      <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A premium account is required to download lyrics&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ein Premium-Konto ist erforderlich, um Liedtexte herunterzuladen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
@@ -627,8 +701,103 @@ Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Check For Updates</source>
-      <translation>Nach Updates suchen</translation>
+      <source>Metadata</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source> Metadata Seperator</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Branding</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Artist</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Album</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Album Artist</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Name</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Release Year</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Disc Number</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Track Number</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Genre</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Performers</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Producers</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Writers</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Label</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Copyright</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed ISRC</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Length</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed Lyrics*</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>Embed URL</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
@@ -642,13 +811,18 @@ Wählen Sie 'OnTheSpot' unter Geräte in der Spotify Desktop-App.</translation>
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>Session/Log UUID : </source>
-      <translation>Sitzung/Protokoll UUID : </translation>
+      <source>&lt;strong&gt;Version : &lt;/strong&gt;</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
-      <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:20pt;"&gt;OnTheSpot - Spotify Downloader&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;OnTheSpot is not related or endorsed by Spotify by any means.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;You are solely liable for any actions you perform through this application and it's consequences.&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;This application is distributed under &lt;/span&gt;&lt;/a&gt;&lt;a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.0.html"&gt;&lt;span style=" text-decoration: underline; color:#2980b9;"&gt;GPLv2&lt;/span&gt;&lt;/a&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt; License&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;License Terms:&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:20pt;"&gt;OnTheSpot - Spotify Downloader&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;OnTheSpot ist in keiner Weise mit Spotify verbunden oder wird von Spotify unterstützt.&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;Sie sind allein verantwortlich für alle Handlungen, die Sie über diese Anwendung durchführen, und deren Konsequenzen.&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;Diese Applikation wird unter der &lt;/span&gt;&lt;/a&gt;&lt;a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.0.html"&gt;&lt;span style=" text-decoration: underline; color:#2980b9;"&gt;GPLv2&lt;/span&gt;&lt;/a&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt; Lizenz&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;a href="https://github.com/justin025/onthespot"&gt;&lt;span style=" font-size:12pt; text-decoration: underline; color:#2980b9;"&gt;Lizenzbedingungen:&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+      <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;Log UUID : &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+      <translation type="unfinished" />
+    </message>
+    <message>
+      <location filename="../../gui/qtui/main.ui" line="0" />
+      <source>&lt;html&gt;&lt;head/&gt;&lt;body style="text-align:center; font-size:13pt"&gt;&lt;p&gt;&lt;br/&gt;&lt;span style=" font-size:20pt;"&gt;&lt;strong&gt;OnTheSpot - Spotify Downloader&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span&gt;OnTheSpot is not related or endorsed by Spotify by any means.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span&gt;You are solely liable for any actions you perform through this application and it's consequences.&lt;/span&gt;&lt;br/&gt;&lt;/p&gt;&lt;p &gt;&lt;span"&gt;This application is distributed under &lt;/span&gt;&lt;span style="font-size:12px;"&gt;GPLv2&lt;/span&gt;&lt;span&gt; License&lt;/span&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+      <translation type="unfinished" />
     </message>
     <message>
       <location filename="../../gui/qtui/main.ui" line="0" />
