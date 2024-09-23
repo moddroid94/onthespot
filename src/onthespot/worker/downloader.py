@@ -178,11 +178,11 @@ class DownloadWorker(QObject):
                             lyrics = get_track_lyrics(session, trk_track_id_str, song_info, config.get('only_synced_lyrics'))
                             if lyrics:
                                 self.logger.info(f'Found lyrics for: {trk_track_id_str}, writing...')
-                                if config.get('use_lrc_file', 1):
+                                if config.get('use_lrc_file'):
                                     with open(filename[0:-len(config.get('media_format'))] + 'lrc', 'w',
                                               encoding='utf-8') as f:
                                         f.write(lyrics)
-                                if config.get('embed_lyrics', 0):
+                                if config.get('embed_lyrics'):
                                     set_audio_tags(filename, {'lyrics': lyrics}, trk_track_id_str)
                                 self.logger.info(f'lyrics saved for: {trk_track_id_str}')
                         except Exception:

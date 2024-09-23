@@ -63,6 +63,8 @@ class Config:
             "recoverable_fail_wait_delay": 10, # No of seconds to wait before failure that can be retried
             "disable_bulk_dl_notices": True, # Hide popups for bulk download buttons
             "inp_enable_lyrics": False, # Enable lyrics download
+            "embed_lyrics": True, # Embed lyrics in downloaded track
+            "use_lrc_file": True, # Download .lrc file alongside track
             "only_synced_lyrics": False, # Only use synced lyrics
             "create_m3u_playlists": False, # Create m3u based playlist
             "translate_file_path": False, # Translate downloaded file path to application language
