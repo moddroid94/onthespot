@@ -14,13 +14,16 @@ def main():
     app = QApplication(sys.argv)
 
     # Set Application Version
-    version = "v0.6.3"
-    config.set_("version", version)
+    version = "v0.7.0"
     logger.info(f'OnTheSpot Version: {version}')
 
-    # Migration (<v0.6.3)
-    if " " not in config.get("metadata_seperator"):
-        config.set_("metadata_seperator", config.get("metadata_seperator")+" ")
+    # Migration (<v0.7)
+    if int(version.replace('v', '').replace('.', '')) > int(config.get("version").replace('v', '').replace('.', '')):
+        if " " not in config.get("metadata_seperator"):
+            config.set_("metadata_seperator", config.get("metadata_seperator")+" ")
+        config.set_("download_play_btn", False)
+
+    config.set_("version", version)
 
     # Language
     if config.get("language_index") == 0:
@@ -41,8 +44,17 @@ def main():
     translator.load(path)
     app.installTranslator(translator)
 
+    # Check for start url
+    try:
+        if sys.argv[1] == "-u" or sys.argv[1] == "--url":
+            start_url = sys.argv[2]
+        else:
+            start_url = ""
+    except IndexError:
+        start_url = ""
+
     _dialog = MiniDialog()
-    window = MainWindow(_dialog, sys.argv[1] if len(sys.argv) >= 2 else '' )
+    window = MainWindow(_dialog, start_url)
     app.setDesktopFileName('org.eu.casualsnek.onthespot')
     app.exec()
     logger.info('Good bye ..')

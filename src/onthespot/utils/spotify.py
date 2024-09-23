@@ -19,30 +19,54 @@ from librespot.audio.decoders import AudioQuality
 logger = get_logger("spotutils")
 requests.adapters.DEFAULT_RETRIES = 10
 
+def play_media(session, media_id, media_type):
+    access_token = session.tokens().get("user-modify-playback-state")
+    url = 'https://api.spotify.com/v1/me/player/play'
+
+    payload = {
+        "context_uri": f"spotify:{media_type}:{media_id}",
+        "offset": {
+            "position": 5
+        },
+        "position_ms": 0
+    }
+    headers = {
+    'Authorization': f'Bearer {access_token}'
+    }
+
+    resp = requests.put(url, headers=headers)
+    logger.info(f"Playing item: {resp}")
+
+def queue_media(session, media_id, media_type):
+    access_token = session.tokens().get("user-modify-playback-state")
+    url = f'https://api.spotify.com/v1/me/player/queue?uri=spotify%3A{media_type}%3A{media_id}'
+    headers = {
+    'Authorization': f'Bearer {access_token}'
+    }
+    resp = requests.post(url, headers=headers)
+    logger.info(f"Item Queued: {resp}")
+
 def check_if_media_in_library(session, media_id, media_type):
-    if media_type == 'track' or media_type == 'episode':
-        access_token = session.tokens().get("user-library-read")
-        url = f'https://api.spotify.com/v1/me/{media_type}s/contains?ids={media_id}'
-        headers = {
-        'Authorization': f'Bearer {access_token}'
-        }
-        saved = requests.get(url, headers=headers)
-        if saved.json() == [True]:
-            return True
-        else:
-            return False
+    access_token = session.tokens().get("user-library-read")
+    url = f'https://api.spotify.com/v1/me/{media_type}s/contains?ids={media_id}'
+    headers = {
+    'Authorization': f'Bearer {access_token}'
+    }
+    resp = requests.get(url, headers=headers)
+    logger.info(f"Checking if item is in library: {resp}")
+    if resp.json() == [True]:
+        return True
     else:
-        logger.info(f"Unable to check if media is in library, unknown type; id: {media_id} type: {media_type}'")
-        return
+        return False
 
 def save_media_to_library(session, media_id, media_type):
-    if media_type == 'track' or media_type == 'episode':
-        access_token = session.tokens().get("user-library-modify")
-        url = f'https://api.spotify.com/v1/me/{media_type}s?ids={media_id}'
-        headers = {
-        'Authorization': f'Bearer {access_token}'
-        }
-        saved = requests.put(url, headers=headers)
+    access_token = session.tokens().get("user-library-modify")
+    url = f'https://api.spotify.com/v1/me/{media_type}s?ids={media_id}'
+    headers = {
+    'Authorization': f'Bearer {access_token}'
+    }
+    resp = requests.put(url, headers=headers)
+    logger.info(f"Item saved to library: {resp}")
 
 def remove_media_from_library(session, media_id, media_type):
     if media_type == 'track' or media_type == 'episode':
@@ -51,15 +75,15 @@ def remove_media_from_library(session, media_id, media_type):
         headers = {
         'Authorization': f'Bearer {access_token}'
         }
-        saved = requests.delete(url, headers=headers)
+        resp = requests.delete(url, headers=headers)
+        logger.info(f"Item removed from library: {resp}")
 
 def get_currently_playing_url(session):
     url = "https://api.spotify.com/v1/me/player/currently-playing"
     access_token = session.tokens().get("user-read-currently-playing")
     resp = requests.get(url, headers={"Authorization": "Bearer %s" % access_token}, params={})
     if resp.status_code == 200:
-        json_data = resp.json()
-        return json_data['item']['external_urls']['spotify']
+        return resp.json()['item']['external_urls']['spotify']
     else:
         return ""
 
@@ -101,7 +125,7 @@ def get_track_lyrics(session, track_id, metadata, forced_synced):
                 tracktitle = value
             elif key in ['album_name', 'album']:
                 album = value
-        l_ms = metadata['duration']
+        l_ms = metadata['length']
         if lyrics_json_req.status_code == 200:
             lyrics_json = lyrics_json_req.json()['lyrics']
             lyrics.append(f'[ti:{tracktitle}]')
@@ -109,6 +133,8 @@ def get_track_lyrics(session, track_id, metadata, forced_synced):
             lyrics.append(f'[ar:{artist}]')
             lyrics.append(f'[al:{album}]')
             lyrics.append(f'[by:{lyrics_json["provider"]}]')
+            if config.get("embed_branding"):
+                lyrics.append('[re:OnTheSpot]')
             if round((l_ms/1000)/60) < 10:
                 digit="0"
             else:
@@ -285,61 +311,63 @@ def set_audio_tags(filename, metadata, track_id_str):
         )
     type_ = 'track'
     tags = EasyID3(filename)
+    if config.get("embed_branding"):
+        EasyID3.RegisterTextKey('comment', 'COMM')
+        tags['comment'] = "Downloaded by OnTheSpot, https://github.com/justin025/onthespot"
     for key in metadata.keys():
         value = metadata[key]
-        if key == 'artists':
+        if key == 'artists' and config.get("embed_artist"):
             tags['artist'] = conv_artist_format(value)
-        elif key in ['album_name', 'album']:
+        elif key in ['album_name', 'album'] and config.get("embed_album"):
             tags['album'] = value
-        elif key in ['album_artists']:
+        elif key in ['album_artists'] and config.get("embed_albumartist"):
             tags['albumartist'] = value
-        elif key in ['name', 'track_title', 'tracktitle']:
+        elif key in ['name', 'track_title', 'tracktitle'] and config.get("embed_name"):
             tags['title'] = value
-        elif key in ['year', 'release_year']:
+        elif key in ['year', 'release_year'] and config.get("embed_year"):
             tags['date'] = value
-        elif key in ['discnumber', 'disc_number', 'disknumber', 'disk_number']:
+        elif key in ['discnumber', 'disc_number', 'disknumber', 'disk_number'] and config.get("embed_discnumber"):
             # EasyID3 requires the format value/total, i.e. 3/10
             tags['discnumber'] = str(value) + '/' + str(metadata['total_discs'])
-        elif key in ['track_number', 'tracknumber']:
+        elif key in ['track_number', 'tracknumber'] and config.get("embed_tracknumber"):
             # EasyID3 requires the format value/total, i.e. 3/10
             tags['tracknumber'] = str(value) + '/' + str(metadata['total_tracks'])
-        elif key == 'genre':
+        elif key == 'genre' and config.get("embed_genre"):
             if 'Podcast' in value or 'podcast' in value:
                 type_ = 'episode'
             tags['genre'] = conv_artist_format(value)
-        elif key == 'performers':
+        elif key == 'performers' and config.get("embed_performers"):
             tags['performer'] = value
-        elif key == 'producers':
+        elif key == 'producers' and config.get("embed_producers"):
             EasyID3.RegisterTextKey('producer', 'TIPL')
             tags['producer'] = value
-        elif key == 'writers':
+        elif key == 'writers' and config.get("embed_writers"):
             tags['author'] = value
-        elif key == 'label':
+        elif key == 'label' and config.get("embed_label"):
             EasyID3.RegisterTextKey('label', 'TPUB')
             tags['label'] = value
-        elif key == 'copyrights':
+        elif key == 'copyright' and config.get("embed_copyright"):
             tags['copyright'] = value
-        elif key == 'isrc':
+        elif key == 'isrc' and config.get("embed_isrc"):
             tags['isrc'] = value
-        elif key == 'duration':
+        elif key == 'length' and config.get("embed_length"):
             tags['length'] = str(value)
-    #EasyID3.RegisterTextKey('comment', 'COMM')
-    #tags['comment'] = f'id[spotify.com:{type_}:{track_id_str}]'
+    #tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
+    #
     # The EasyID3 'website' tag is mapped to WOAR which according to ID3 is supposed to be the official artist/performer
     # webpage. Since we are mapping to a spotify track url two better options are WOAF (Official audio file webpage) and
     # WOAS (Official audio source webpage). WOAF is supposed to link to a file so WOAS was used below.
     # https://id3.org/id3v2.4.0-frames
-    #
-    #tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
     tags.save()
 
     ID3tags = ID3(filename)
+    if config.get("embed_url"):
+        ID3tags.add(WOAS(url=f'https://open.spotify.com/{type_}/{track_id_str}'))
     for key in metadata.keys():
         value = metadata[key]
-        if key == 'lyrics':
-            # Adds unsynced lyrics, should figure out how to add synced lyrics (SYLT) at some point.
+        if key == 'lyrics' and config.get("embed_lyrics"):
+            # The following adds unsynced lyrics, not sure how to add synced lyrics (SYLT).
             ID3tags.add(USLT(encoding=3, lang=u'xxx', desc=u'desc', text=value))
-    ID3tags.add(WOAS(url=f'https://open.spotify.com/{type_}/{track_id_str}'))
     ID3tags.save()
 
 
@@ -457,14 +485,14 @@ def get_song_info(session, song_id):
         'producers': producers,
         'writers': writers,
         'label': sanitize_data(album_data['label']),
-        'copyrights':  [
+        'copyright':  [
             sanitize_data(holder['text'])
             for holder
             in album_data['copyrights']
             ],
         'explicit': info['tracks'][0]['explicit'], # unused
         'isrc': info['tracks'][0]['external_ids'].get('isrc', ''),
-        'duration': info['tracks'][0]['duration_ms'],
+        'length': info['tracks'][0]['duration_ms'],
         'scraped_song_id': info['tracks'][0]['id'], # unused
         'is_playable': info['tracks'][0]['is_playable'], # unused
         'popularity': info['tracks'][0]['popularity'] # unused

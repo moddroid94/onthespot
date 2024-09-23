@@ -63,19 +63,38 @@ class Config:
             "recoverable_fail_wait_delay": 10, # No of seconds to wait before failure that can be retried
             "disable_bulk_dl_notices": True, # Hide popups for bulk download buttons
             "inp_enable_lyrics": False, # Enable lyrics download
-            "embed_lyrics": True, # Embed lyrics in downloaded track
             "use_lrc_file": True, # Download .lrc file alongside track
             "only_synced_lyrics": False, # Only use synced lyrics
             "create_m3u_playlists": False, # Create m3u based playlist
             "translate_file_path": False, # Translate downloaded file path to application language
             "ffmpeg_args": [], # Extra arguments for ffmpeg
-            "show_search_thumbnails": 1, # Show thumbnails in search view
+            "show_search_thumbnails": False, # Show thumbnails in search view
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
             "metadata_seperator": "; ", # Seperator used for metadata fields that have multiple values
+            "embed_branding": False,
+            "embed_artist": True,
+            "embed_album": True,
+            "embed_albumartist": True,
+            "embed_name": True,
+            "embed_year": True,
+            "embed_discnumber": True,
+            "embed_tracknumber": True,
+            "embed_genre": True,
+            "embed_performers": True,
+            "embed_producers": True,
+            "embed_writers": True,
+            "embed_label": True,
+            "embed_copyright": True,
+            "embed_isrc": True,
+            "embed_length": True,
+            "embed_lyrics": True,
+            "embed_url": True,
             "download_copy_btn": False, # Add copy button to downloads
             "download_save_btn": False, # Add save button to downloads
+            "download_queue_btn": False, # Add queue button to downloads
             "download_play_btn": True, # Add play button to downloads
             "download_locate_btn": True, # Add locate button to downloads
+            "download_delete_btn": False, # Add delete button to downloads
             "theme": "Dark", # Light\Dark
             "accounts": [] # Saved account information
         }
