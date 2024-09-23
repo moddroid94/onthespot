@@ -6,7 +6,7 @@ from ..otsconfig import config
 import requests
 import json
 from mutagen.easyid3 import EasyID3, ID3
-from mutagen.id3 import APIC
+from mutagen.id3 import APIC, WOAS
 import os
 from pathlib import Path
 import re
@@ -325,12 +325,23 @@ def set_audio_tags(filename, metadata, track_id_str):
             tags['length'] = str(value)
         # Lyrics would need to be fetched before the track for this tag to work.
         # I don't really care enough to fix this, open a pull request if you want it included.
+        # https://id3.org/id3v2.4.0-frames
         #
         #elif key == 'lyrics':
         #    tags['lyrics'] = value
     #EasyID3.RegisterTextKey('comment', 'COMM')
     #tags['comment'] = f'id[spotify.com:{type_}:{track_id_str}]'
-    tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
+    #
+    # The EasyID3 'website' tag is mapped to WOAR which according to ID3 is supposed to be the official artist/performer
+    # webpage. Since we are mapping to a spotify track url two better options are WOAF (Official audio file webpage) and
+    # WOAS (Official audio source webpage). WOAF is supposed to link to a file so WOAS was used below.
+    # https://id3.org/id3v2.4.0-frames
+    #
+    #tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
+    tags.save()
+    # WOAS does not register through EasyID3.
+    tags = ID3(filename)
+    tags.add(WOAS(url=f'https://open.spotify.com/{type_}/{track_id_str}'))
     tags.save()
 
 
