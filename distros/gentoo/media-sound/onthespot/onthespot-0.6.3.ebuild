@@ -28,24 +28,13 @@ BDEPEND="
 "
 
 RDEPEND="
-	dev-python/async-timeout
-	dev-python/certifi
-	dev-python/charset-normalizer
-	dev-python/defusedxml
         dev-python/googletrans
-	dev-python/idna
-	dev-python/ifaddr
 	dev-python/librespot
-	dev-python/packaging
 	dev-python/pillow
-	dev-python/protobuf-python
         dev-python/pyperclip
 	dev-python/PyQt6[network,widgets]
-	dev-python/pyxdg
 	dev-python/requests
 	dev-python/urllib3
-	dev-python/websocket-client
-	dev-python/zeroconf
 	media-libs/mutagen
 	media-video/ffmpeg[mp3,sdl]
 "
