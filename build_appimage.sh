@@ -37,7 +37,7 @@ rm OnTheSpot.AppDir/.DirIcon
 rm OnTheSpot.AppDir/python.png
 rm OnTheSpot.AppDir/python3.12.3.desktop
 
-cp ../src/onthespot/resources/icon.svg OnTheSpot.AppDir/casual_onthespot.svg
+cp ../src/onthespot/resources/icons/onthespot.svg OnTheSpot.AppDir/onthespot.svg
 cp ../src/onthespot/resources/org.eu.casualsnek.onthespot.desktop OnTheSpot.AppDir/org.eu.casualsnek.onthespot.desktop
 
 echo '#! /bin/bash
