@@ -97,7 +97,8 @@ class Config:
             "download_copy_btn": False, # Add copy button to downloads
             "download_save_btn": False, # Add save button to downloads
             "download_queue_btn": False, # Add queue button to downloads
-            "download_play_btn": True, # Add play button to downloads
+            "download_play_btn": False, # Add play button to downloads
+            "download_open_btn": True, # Add open button to downloads
             "download_locate_btn": True, # Add locate button to downloads
             "download_delete_btn": False, # Add delete button to downloads
             "theme": "Dark", # Light\Dark
