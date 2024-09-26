@@ -101,7 +101,7 @@ class Config:
             "download_open_btn": True, # Add open button to downloads
             "download_locate_btn": True, # Add locate button to downloads
             "download_delete_btn": False, # Add delete button to downloads
-            "theme": "Dark", # Light\Dark
+            "theme": "dark", # Light\Dark
             "accounts": [] # Saved account information
         }
         if os.path.isfile(self.__cfg_path):

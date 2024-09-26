@@ -189,27 +189,21 @@ class MainWindow(QMainWindow):
         self.__media_parser_worker.enqueue.connect(self.__add_item_to_downloads)
         self.__media_parser_thread.start()
 
-        # Create path to dark_theme
-        self.dark_theme_path = os.path.join(config.app_root,'resources', 'themes', 'main_window_dark_theme.qss')
-        self.light_theme_path = os.path.join(config.app_root,'resources', 'themes', 'main_window_light_theme.qss')
-        # Create button and add to the interface
+        # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
-        # Set theme from config
         self.theme = config.get("theme")
-        if self.theme == "Dark":
-          theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'light.png'))
-          self.toggle_theme_button.setIcon(theme_icon)
-          self.toggle_theme_button.setText(self.tr(" Light Theme"))
-          with open(self.dark_theme_path, 'r') as f:
-              dark_theme = f.read()
-              self.setStyleSheet(dark_theme)
-        elif self.theme == "Light":
-          theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'dark.png'))
-          self.toggle_theme_button.setIcon(theme_icon)
-          self.toggle_theme_button.setText(self.tr(" Dark Theme"))
-          with open(self.light_theme_path, 'r') as f:
-              light_theme = f.read()
-              self.setStyleSheet(light_theme)
+        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
+        if self.theme == "dark":
+            self.toggle_theme_button.setText(self.tr(" Light Theme"))
+            theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'light.png'))
+        elif self.theme == "light":
+            self.toggle_theme_button.setText(self.tr(" Dark Theme"))
+            theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'dark.png'))
+        self.toggle_theme_button.setIcon(theme_icon)
+
+        with open(self.theme_path, 'r') as f:
+              theme = f.read()
+              self.setStyleSheet(theme)
         logger.info(f"Set theme {self.theme}!")
 
         # Set the table header properties
@@ -217,27 +211,29 @@ class MainWindow(QMainWindow):
         logger.info("Main window init completed !")
 
     def load_dark_theme(self):
-        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'light.png'))
+        self.theme = "dark"
+        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
+        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', f'light.png'))
         self.toggle_theme_button.setIcon(theme_icon)
         self.toggle_theme_button.setText(self.tr(" Light Theme"))
-        with open(self.dark_theme_path, 'r') as f:
+        with open(self.theme_path, 'r') as f:
             dark_theme = f.read()
             self.setStyleSheet(dark_theme)
-        self.theme = "Dark"
 
     def load_light_theme(self):
-        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'dark.png'))
+        self.theme = "light"
+        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
+        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', f'dark.png'))
         self.toggle_theme_button.setIcon(theme_icon)
         self.toggle_theme_button.setText(self.tr(" Dark Theme"))
-        with open(self.light_theme_path, 'r') as f:
+        with open(self.theme_path, 'r') as f:
             light_theme = f.read()
             self.setStyleSheet(light_theme)
-        self.theme = "Light"
 
     def toggle_theme(self):
-        if self.theme == "Light":
+        if self.theme == "light":
             self.load_dark_theme()
-        elif self.theme == "Dark":
+        elif self.theme == "dark":
             self.load_light_theme()
 
     def bind_button_inputs(self):
