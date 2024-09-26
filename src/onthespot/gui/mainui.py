@@ -75,6 +75,7 @@ def dl_progress_update(data):
 
 def retry_all_failed_downloads():
     for dl_id in list(failed_downloads.keys()):
+        downloads_status[dl_id]["status_label"].setText("Waiting")
         if config.get("download_copy_btn"):
             downloads_status[media_id]['btn']['copy'].show()
         downloads_status[dl_id]["btn"]['cancel'].show()
