@@ -72,6 +72,7 @@ class Config:
             "translate_file_path": False, # Translate downloaded file path to application language
             "ffmpeg_args": [], # Extra arguments for ffmpeg
             "show_search_thumbnails": True, # Show thumbnails in search view
+            "explicit_label": "🅴", # Explicit label in app and download path
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
             "metadata_seperator": "; ", # Seperator used for metadata fields that have multiple values
             "embed_branding": False,
@@ -92,8 +93,10 @@ class Config:
             "embed_language": True,
             "embed_isrc": True,
             "embed_length": True,
-            "embed_lyrics": False,
             "embed_url": True,
+            "embed_lyrics": False,
+            "embed_explicit": False,
+            "embed_compilation": False,
             "download_copy_btn": False, # Add copy button to downloads
             "download_save_btn": False, # Add save button to downloads
             "download_queue_btn": False, # Add queue button to downloads
