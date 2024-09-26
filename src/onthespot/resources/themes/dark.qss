@@ -30,26 +30,26 @@ QProgressBar::chunk {
    background: #2596BE;
    color: #fff;
 }
-QScrollBar:vertical {
+QScrollBar {
     border: 1px solid #424242;
     background: #424242;
-    width:10px;
     margin: 0px 0px 0px 0px;
 }
-QScrollBar::handle:vertical {
+QScrollBar:vertical {
+    width:10px;
+}
+QScrollBar:horizontal {
+    height:10px;
+}
+QScrollBar::handle {
     background: #616161;
-    min-height: 5px;
     border-radius: 4px;
 }
-QScrollBar::add-line:vertical {
+QScrollBar::add-line {
     background: #616161;
     height: 0px;
-    subcontrol-position: bottom;
-    subcontrol-origin: margin;
 }
-QScrollBar::sub-line:vertical {
+QScrollBar::sub-line {
     background: #616161;
     height: 0 px;
-    subcontrol-position: top;
-    subcontrol-origin: margin;
 }
