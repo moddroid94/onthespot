@@ -1108,7 +1108,7 @@ class MainWindow(QMainWindow):
                     thumb_dict = item['images']
                 queue_data = {'media_type': d_key[0:-1], 'media_id': item['id'],
                               'data': {
-                                  'media_title': item_name.replace("[ E ]", ""),
+                                  'media_title': item_name.replace("🅴", ""),
                                   'thumb_url': get_thumbnail(thumb_dict,
                                                              preferred_size=config.get('search_thumb_height')^2
                                                              )
@@ -1136,7 +1136,7 @@ class MainWindow(QMainWindow):
                             continue
                         queue_data = {'media_type': d_key[0:-1], 'media_id': item['id'],
                                       'data': {
-                                          'media_title': item_name.replace('[ E ]', ''),
+                                          'media_title': item_name.replace('🅴', ''),
                                           "hide_dialogs": hide_dialog
                                       }}
                         self.__send_to_pqp(queue_data)
