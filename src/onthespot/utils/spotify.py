@@ -162,9 +162,9 @@ def get_tracks_from_playlist(session, playlist_id):
     songs = []
     access_token = session.tokens().get("user-read-email")
     headers = {'Authorization': f'Bearer {access_token}'}
-    url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
+    url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=episode'
     while url:
-        resp = make_call(url, token=access_token)
+        resp = make_call(url, token=access_token, no_cache=True)
         songs.extend(resp['items'])
         url = resp['next']
     return songs
