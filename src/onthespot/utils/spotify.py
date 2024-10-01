@@ -381,22 +381,27 @@ def set_audio_tags(filename, metadata, track_id_str):
 
 
 def set_music_thumbnail(filename, image_url):
-    logger.info(f"Set thumbnail for audio media at '{filename}' with '{image_url}'")
-    img = Image.open(BytesIO(requests.get(image_url).content))
-    buf = BytesIO()
-    if img.mode != 'RGB':
-        img = img.convert('RGB')
-    img.save(buf, format='png')
-    buf.seek(0)
-    tags = ID3(filename)
-    tags['APIC'] = APIC(
-                      encoding=3,
-                      mime='image/png',
-                      type=3, desc=u'Cover',
-                      data=buf.read()
-                    )
-    tags.save()
-
+    if config.get("embed_cover"):
+        logger.info(f"Set thumbnail for audio media at '{filename}' with '{image_url}'")
+        img = Image.open(BytesIO(requests.get(image_url).content))
+        buf = BytesIO()
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        img.save(buf, format='png')
+        buf.seek(0)
+        tags = ID3(filename)
+        tags['APIC'] = APIC(
+                          encoding=3,
+                          mime=f'image/{config.get("album_cover_format")}',
+                          type=3, desc=u'Cover',
+                          data=buf.read()
+                        )
+        tags.save()
+    if config.get("save_album_cover"):
+        cover_path = os.path.join(
+            Path(filename).parent, 'cover' + "." + config.get('album_cover_format'))
+        if not os.path.exists(cover_path):
+            img.save(cover_path)
 
 def search_by_term(session,
                    search_term,
