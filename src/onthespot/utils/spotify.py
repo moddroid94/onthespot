@@ -1,3 +1,6 @@
+import base64
+import os
+import re
 import string
 import subprocess
 from ..exceptions import *
@@ -7,10 +10,10 @@ import requests
 import json
 from mutagen import File
 from mutagen.easyid3 import EasyID3, ID3
+from mutagen.flac import Picture, FLAC
 from mutagen.id3 import APIC, TXXX, USLT, WOAS
-import os
+from mutagen.oggvorbis import OggVorbis
 from pathlib import Path
-import re
 from PIL import Image
 from io import BytesIO
 from hashlib import md5
@@ -411,7 +414,7 @@ def set_music_thumbnail(filename, image_url):
         buf = BytesIO()
         if img.mode != 'RGB':
             img = img.convert('RGB')
-        img.save(buf, format=config.get('album_cover_format'))
+        img.save(buf, format=config.get("album_cover_format"))
         buf.seek(0)
         if filetype == '.mp3':
             tags = ID3(filename)
@@ -421,11 +424,26 @@ def set_music_thumbnail(filename, image_url):
                               type=3, desc=u'Cover',
                               data=buf.read()
                             )
-        else:
-            tags = File(filename)
-            tags['METADATA_BLOCK_PICTURE'] = [
-                f'picture/{config.get("album_cover_format")};{len(buf.read())};cover;{buf.read()}'
-            ]
+        elif filetype == '.flac':
+            tags = FLAC(filename)
+            picture = Picture()
+            picture.data = buf.read()
+            picture.type = 17
+            picture.mime = f"image/{config.get('album_cover_format')}"
+            picture_data = picture.write()
+            encoded_data = base64.b64encode(picture_data)
+            vcomment_value = encoded_data.decode("ascii")
+            tags["metadata_block_picture"] = [vcomment_value]
+        elif filetype == '.ogg':
+            tags = OggVorbis(filename)
+            picture = Picture()
+            picture.data = buf.read()
+            picture.type = 17
+            picture.mime = f"image/{config.get('album_cover_format')}"
+            picture_data = picture.write()
+            encoded_data = base64.b64encode(picture_data)
+            vcomment_value = encoded_data.decode("ascii")
+            tags["metadata_block_picture"] = [vcomment_value]
         tags.save()
     if config.get("save_album_cover"):
         cover_path = os.path.join(
