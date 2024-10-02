@@ -428,7 +428,8 @@ def set_music_thumbnail(filename, image_url):
             tags = FLAC(filename)
             picture = Picture()
             picture.data = buf.read()
-            picture.type = 17
+            picture.type = 3
+            picture.desc = "Cover"
             picture.mime = f"image/{config.get('album_cover_format')}"
             picture_data = picture.write()
             encoded_data = base64.b64encode(picture_data)
@@ -438,7 +439,8 @@ def set_music_thumbnail(filename, image_url):
             tags = OggVorbis(filename)
             picture = Picture()
             picture.data = buf.read()
-            picture.type = 17
+            picture.type = 3
+            picture.desc = "Cover"
             picture.mime = f"image/{config.get('album_cover_format')}"
             picture_data = picture.write()
             encoded_data = base64.b64encode(picture_data)
@@ -527,6 +529,8 @@ def get_song_info(session, song_id):
     writers = config.get('metadata_seperator').join(writer_list)
     producer_list = [item for item in credits['producers'] if isinstance(item, str)]
     producers = config.get('metadata_seperator').join(producer_list)
+    copyright_list = [holder['text'] for holder in album_data['copyrights']]
+    copyright = config.get('metadata_seperator').join(copyright_list)
     info = {
         'artists': artists,
         'album_name': sanitize_data(info['tracks'][0]['album']["name"]),
@@ -548,11 +552,7 @@ def get_song_info(session, song_id):
         'producers': producers,
         'writers': writers,
         'label': album_data['label'],
-        'copyright':  [
-            holder['text']
-            for holder
-            in album_data['copyrights']
-            ],
+        'copyright': copyright,
         'explicit': info['tracks'][0]['explicit'],
         'isrc': info['tracks'][0]['external_ids'].get('isrc', ''),
         'length': info['tracks'][0]['duration_ms'],
