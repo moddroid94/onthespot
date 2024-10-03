@@ -446,13 +446,13 @@ def set_audio_tags(filename, metadata, track_id_str):
         elif filetype == '.m4a':
             tags['\xa9exp'] = 'Yes'
         else:
-            tags['explicit'] = 'yes'
+            tags['explicit'] = '1'
 
     if config.get("embed_compilation") and metadata['album_type'] == "compilation":
         if filetype == '.mp3':
             tags.add(TXXX(encoding=3, desc=u'COMPILATION', text="1"))
         else:
-            tags['compilation'] = 'yes'
+            tags['compilation'] = '1'
 
     for key in metadata.keys():
         value = metadata[key]
