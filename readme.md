@@ -21,9 +21,9 @@
       <br />
       <a href="https://discord.gg/GCQwRBFPk9">Join Discord</a>
       ·
-      <a href="https://github.com/V1p3rOne/OnTheSpot-Development/issues/new?assignees=&labels=bug&projects=&template=bug-report.yml">Report Bug</a>
+      <a href="https://github.com/justin025/OnTheSpot/issues/new?assignees=&labels=bug&projects=&template=bug-report.yml">Report Bug</a>
       ·
-      <a href="https://github.com/V1p3rOne/OnTheSpot-Development/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml">Request Feature</a>
+      <a href="https://github.com/justin025/OnTheSpot/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml">Request Feature</a>
    </p>
    <br>
 </div>
