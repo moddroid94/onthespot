@@ -1,0 +1,51 @@
+name: Bug Report
+description: Found a bug? Report it here.
+labels: [bug]
+body:
+- type: markdown
+  attributes:
+    value: |
+      **Please follow the guidelines below to help us resolve your issue.**
+
+      **Guidelines:**
+      - Please **search existing issues** to ensure your issue isn't already reported by [checking here](https://github.com/justin025/onthespot/issues?q=is%3Aissue).
+      - **Report one bug per issue** by creating separate issues for each bug.
+      - **Provide a descriptive title** that clearly summarizes your issue.
+      - **Include detailed information** to help us reproduce and fix the problem.
+
+      **If you don't follow the guidelines, the issue will be deleted!**
+
+- type: textarea
+  id: description
+  attributes:
+    label: Bug Description
+    description: A detailed and accurate description of the bug is required.
+    placeholder: When I perform X action, Y happens instead of the expected Z.
+  validations:
+    required: true
+
+- type: textarea
+  id: environment
+  attributes:
+    label: Environment Details
+    description: Provide details about your setup.
+    render: markdown
+    value: |
+      | **Detail**               | **Your Information**                 |
+      |--------------------------|--------------------------------------|
+      | **Operating System**     | Windows 10 / MacOS 13 / Ubuntu 22.04 |
+      | **Application Version**  | v0.7.0                               |
+      | **Installation Method**  | GitHub Release / Build from Script   |
+      | **Python Version**       | 3.11.4                               |
+      | **FFmpeg Version**       | e.g., 4.3.1                          |
+  validations:
+    required: true
+
+- type: textarea
+  id: additional_info
+  attributes:
+    label: Additional Information
+    description: Add any other context, screenshots, or logs.
+    placeholder: Include logs, screenshots, or any other relevant details here.
+  validations:
+    required: false
