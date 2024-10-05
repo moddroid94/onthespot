@@ -10,7 +10,7 @@
 
 Thank you for considering contributing to the **OnTheSpot** project! We appreciate all contributions.
 
-Before contributing, we encourage you to read our [License](../license) and [ReadMe](../ReadMe.md). If you have any questions not answered by the content of this repository, feel free to [contact us](mailto:justin026@protonmail.com).
+Before contributing, we encourage you to read our [License](../license) and [ReadMe](../). If you have any questions not answered by the content of this repository, feel free to [contact us](mailto:justin026@protonmail.com).
 
 ## License
 
@@ -22,7 +22,7 @@ We welcome contributions in many forms, including bug reports, feature requests,
 
 ### Reporting Issues
 
-If you encounter any bugs or have feature requests, please [open an issue]([issues](https://github.com/justin025/OnTheSpot/issues)) in this repository. Provide as much detail as possible to help us understand and address your concerns.
+If you encounter any bugs or have feature requests, please [open an issue](https://github.com/justin025/OnTheSpot/issues) in this repository. Provide as much detail as possible to help us understand and address your concerns.
 
 ### Submitting Pull Requests
 
