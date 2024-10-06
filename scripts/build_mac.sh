@@ -55,7 +55,7 @@ pyinstaller --windowed \
     $FFBIN \
     --paths="src/onthespot" \
     --name=$NAME \
-    --icon="src/onthespot/resources/onthespot.png" \
+    --icon="src/onthespot/resources/icons/onthespot.png" \
     src/portable.py
 
 # Set executable permissions
