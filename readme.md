@@ -55,8 +55,8 @@ OnTheSpot is an open-source music search and download application. You can find 
 
 To begin, please refer to the following documents:
 
-1. [**Installation Guide**](documentation/installation.md)
-2. [**Basic Usage Instructions**](documentation/usage.md)
+1. [**Installation Guide**](docs/installation.md)
+2. [**Basic Usage Instructions**](docs/usage.md)
 
 ### Need More Help?
 
@@ -69,7 +69,7 @@ If you have any questions or run into issues while using OnTheSpot, feel free to
 
 Contributions are welcome! If you encounter bugs, have suggestions, or would like to translate the app to your native language feel free to [**open an issue**](https://github.com/justin025/onthespot/issues) or submit a pull request.
 
-For more detailed info, please read our [**Contributions**](documentation/contributing.md) Document.
+For more detailed info, please read our [**Contributions**](docs/contributing.md) Document.
 
 ## Disclaimer
 
@@ -77,14 +77,14 @@ OnTheSpot is an open-source project designed to enhance your experience with leg
 
 ### Important Notice
 
-- [**Educational and Personal Use Only**](documentation/disclaimer.md#1-purpose-and-use)
-- [**Independent Project**](documentation/disclaimer.md#2-no-affiliation)
-- [**Legal Compliance**](documentation/disclaimer.md#3-legal-compliance)
-- [**Usage Limitations**](documentation/disclaimer.md#4-usage-limitations)
-- [**Liability and Warranty**](documentation/disclaimer.md#5-liability-and-warranty)
-- [**Agreement and Modifications**](documentation/disclaimer.md#6-agreement-and-modifications)
+- [**Educational and Personal Use Only**](docs/disclaimer.md#1-purpose-and-use)
+- [**Independent Project**](docs/disclaimer.md#2-no-affiliation)
+- [**Legal Compliance**](docs/disclaimer.md#3-legal-compliance)
+- [**Usage Limitations**](docs/disclaimer.md#4-usage-limitations)
+- [**Liability and Warranty**](docs/disclaimer.md#5-liability-and-warranty)
+- [**Agreement and Modifications**](docs/disclaimer.md#6-agreement-and-modifications)
 
-For full details, please read our [**Disclaimer**](documentation/disclaimer.md).
+For full details, please read our [**Disclaimer**](docs/disclaimer.md).
 
 ## Contact Us
 
