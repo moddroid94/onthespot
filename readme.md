@@ -67,13 +67,7 @@ If you have any questions or run into issues while using OnTheSpot, feel free to
 
 ## Contributing
 
-Contributions are welcome! If you encounter bugs or have suggestions, please [**open an Issue**](https://github.com/justin025/onthespot/issues) or submit a pull request. Follow these steps:
-
-1. Fork the project.
-2. Create your feature branch: `git checkout -b feature/new-feature`
-3. Commit your changes: `git commit -am 'Add a new feature'`
-4. Push to the branch: `git push origin feature/new-feature`
-5. Open a pull request.
+Contributions are welcome! If you encounter bugs, have suggestions, or would like to translate the app to your native language feel free to [**open an issue**](https://github.com/justin025/onthespot/issues) or submit a pull request.
 
 For more detailed info, please read our [**Contributions**](documentation/contributing.md) Document.
 

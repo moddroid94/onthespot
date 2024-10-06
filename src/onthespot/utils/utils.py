@@ -112,6 +112,9 @@ def remove_user(username: str, login_data_dir: str, config, session_uuid: str, t
 
 
 def regex_input_for_urls(search_input):
+    # Standardize international urls
+    search_input = re.compile(r'intl-([a-zA-Z]+)/').sub('', search_input)
+
     logger.info(f"Parsing url '{search_input}'")
     track_uri_search = re.search(
         r"^spotify:track:(?P<TrackID>[0-9a-zA-Z]{22})$",

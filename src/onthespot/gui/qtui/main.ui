@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1324</width>
-    <height>748</height>
+    <width>656</width>
+    <height>471</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1030,8 +1030,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>678</width>
-             <height>2047</height>
+             <width>641</width>
+             <height>2235</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -3213,7 +3213,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:20pt; font-weight:600;&quot;&gt;App Disclaimer&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;OnTheSpot is &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;strictly &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;intended for &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;educational, private and fair use only &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;in compliance with the &lt;/span&gt;&lt;a href=&quot;https://www.copyright.gov/dmca/&quot;&gt;&lt;span style=&quot; font-size:14pt; text-decoration: underline; color:#0000ff;&quot;&gt;Digital Millennium Copyright Act (DMCA), Section 1201&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;. It is not affiliated with or endorsed by any music streaming services or platforms. The &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;contributors/developers &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;of OnTheSpot are &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;not responsible &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;for &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;any misuse &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;of the program or source code.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;Users are solely responsible for ensuring &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;that their use of &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;OnTheSpot complies with all relevant/applicable laws in their country.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;The &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;creators &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;and &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;contributors &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;of OnTheSpot assume &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;no liability &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;for &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;any misuse &lt;/span&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;of legal terms associated with the application or its source code.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1&quot;&gt;&lt;span style=&quot; font-size:14pt; text-decoration: underline; color:#0000ff;&quot;&gt;GPL-2.0 License&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html align=&quot;center&quot; style=&quot;font-size:14pt;&quot;&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt; font-weight:600;&quot;&gt;App Disclaimer&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;OnTheSpot is &lt;strong&gt;strictly&lt;/strong&gt; intended for &lt;strong&gt;educational, private and fair use only&lt;/strong&gt; in compliance with the &lt;a href=&quot;https://www.copyright.gov/dmca/&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;Digital Millennium Copyright Act (DMCA), Section 1201&lt;/a&gt;. It is not affiliated with or endorsed by any music streaming services or platforms. The &lt;strong&gt;contributors / developers&lt;/strong&gt; of OnTheSpot are not responsible for  &lt;strong&gt;any misuse&lt;/strong&gt;of the program or source code. &lt;strong&gt; Users are solely responsible for ensuring &lt;/strong&gt;that their use of &lt;strong&gt;OnTheSpot complies with all relevant/applicable laws in their country.&lt;/strong&gt;The &lt;strong&gt;creators&lt;/strong&gt; and &lt;strong&gt;contributors&lt;/strong&gt; of OnTheSpot assume &lt;strong&gt;no liability&lt;/strong&gt; for &lt;/span&gt;&lt;strong&gt;any misuse&lt;/strong&gt; of legal terms associated with the application or its source code.&lt;br/&gt;&lt;br/&gt;&lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;GPL-2.0 License&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="scaledContents">
               <bool>false</bool>

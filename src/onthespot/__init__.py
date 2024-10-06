@@ -14,10 +14,10 @@ def main():
     app = QApplication(sys.argv)
 
     # Set Application Version
-    version = "v0.7.0"
+    version = "v0.7.1"
     logger.info(f'OnTheSpot Version: {version}')
 
-    # Migration (<v0.7)
+    # Migration (<v0.7.0)
     if config.get("version") != "":
         if int(version.replace('v', '').replace('.', '')) > int(str(config.get("version")).replace('v', '').replace('.', '')):
             if " " not in config.get("metadata_seperator"):

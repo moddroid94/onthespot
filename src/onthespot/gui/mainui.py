@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
     # Remove Later
     def contribute(self):
         if self.inp_language.currentIndex() == self.inp_language.count() - 1:
-            url = "https://github.com/justin025/onthespot/blob/main/README.md#6-contributingsupporting"
+            url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
             open_item(url)
 
     def __init__(self, _dialog, start_url=''):
@@ -112,10 +112,10 @@ class MainWindow(QMainWindow):
 
         en_US_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'en_US.png'))
         self.inp_language.insertItem(0, en_US_icon, "English")
-        #de_DE_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'de_DE.png'))
-        #self.inp_language.insertItem(1, de_DE_icon, "Deutsch")
-        #pt_PT_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pt_PT.png'))
-        #self.inp_language.insertItem(2, pt_PT_icon, "Português")
+        de_DE_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'de_DE.png'))
+        self.inp_language.insertItem(1, de_DE_icon, "Deutsch")
+        pt_PT_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pt_PT.png'))
+        self.inp_language.insertItem(2, pt_PT_icon, "Português")
 
         # Contribute Translations
         pirate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pirate_flag.png'))
@@ -421,7 +421,7 @@ class MainWindow(QMainWindow):
         play_btn.hide()
         save_btn = QPushButton()
         #save_btn.setText('Save')
-        #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled-heart.png'))
+        #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
         #save_btn.setIcon(save_icon)
         save_btn.setToolTip(self.tr('Save'))
         save_btn.setMinimumHeight(30)
