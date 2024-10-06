@@ -8,7 +8,7 @@ FOLDER_NAME=$(basename "$PWD")
 if [ "$FOLDER_NAME" == "scripts" ]; then
     echo "You are in the scripts folder. Changing to the parent directory..."
     cd ..
-elif [ "$FOLDER_NAME" != "onthespot" ]; then
+elif [ "$FOLDER_NAME" != "OnTheSpot" ]; then
     echo "Make sure that you are inside the project folder. Current folder is: $FOLDER_NAME"
     exit 1
 fi
@@ -27,7 +27,7 @@ source ./venv/bin/activate
 
 # Upgrade pip and install dependencies
 echo " => Upgrading pip and installing dependencies using Bash..."
-venv/bin/pip install --upgrade pip wheel winsdk pyinstaller
+venv/bin/pip install --upgrade pip wheel pyinstaller
 
 # Install project-specific dependencies
 echo " => Installing project-specific dependencies..."
@@ -40,8 +40,8 @@ if [ -f "ffbin_mac/ffmpeg" ]; then
     NAME="onthespot_mac_ffm"
 else
     echo " => FFmpeg binary not found. Building without it."
-    NAME="onthespot_mac"
     FFBIN=""
+    NAME="onthespot_mac"
 fi
 
 # Run PyInstaller to create the app

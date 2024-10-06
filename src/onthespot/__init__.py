@@ -60,7 +60,7 @@ def main():
 
     _dialog = MiniDialog()
     window = MainWindow(_dialog, start_url)
-    app.setDesktopFileName('org.eu.casualsnek.onthespot')
+    app.setDesktopFileName('org.onthespot.OnTheSpot')
     app.exec()
     logger.info('Good bye ..')
 
