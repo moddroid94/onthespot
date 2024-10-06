@@ -8,7 +8,7 @@ for %%F in ("%cd%") do set FOLDER_NAME=%%~nxF
 if /i "%FOLDER_NAME%"=="scripts" (
     echo You are in the scripts folder. Changing to the parent directory...
     cd ..
-) else if /i not "%FOLDER_NAME%"=="OnTheSpot" (
+) else if /i not "%FOLDER_NAME%"=="onthespot" (
     echo Make sure that you are inside the project folder. Current folder is: %FOLDER_NAME%
     timeout /t 10 >nul
     exit /b 1

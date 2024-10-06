@@ -8,7 +8,7 @@ FOLDER_NAME=$(basename "$PWD")
 if [ "$FOLDER_NAME" == "scripts" ]; then
     echo "You are in the scripts folder. Changing to the parent directory..."
     cd ..
-elif [ "$FOLDER_NAME" != "OnTheSpot" ]; then
+elif [ "$FOLDER_NAME" != "onthespot" ]; then
     echo "Make sure that you are inside the project folder. Current folder is: $FOLDER_NAME"
     exit 1
 fi
