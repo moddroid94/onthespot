@@ -21,7 +21,7 @@ This is the easiest way to get started.
    - Visit our [GitHub Releases Page](https://github.com/justin025/onthespot/releases).
    - Look for the latest version suitable for your operating system:
      - **Windows Users**: Download the `.exe` file.
-     - **MacOS Users**: Download the `.dmg` or `.zip` file.
+     - **MacOS Users**: Download the `.dmg` file.
      - **Linux Users**: Download the `.AppImage` or `tar.gz` file.
 
 2. **Install OnTheSpot**
@@ -54,7 +54,7 @@ If you prefer to build OnTheSpot yourself, follow these steps.
 
 2. **Run the Build Script for Your Operating System**
 
-   - **Windows**: Open the `/scripts` Folder. Double-click [`build_windows.bat`](scripts/build_windows.bat) or run it in Command Prompt.
+   - **Windows**: Open the `scripts` Folder. Double-click [`build_windows.bat`](scripts/build_windows.bat) or run it in Command Prompt.
    - **MacOS**: Run [`build_mac.sh`](scripts/build_mac.sh) in Terminal with `./scripts/build_mac.sh`.
    - **Linux**: Run [`build_linux.sh`](scripts/build_linux.sh) in Terminal with `./scripts/build_linux.sh`.
    - **Linux AppImage**: Run [`build_appimage.sh`](scripts/build_appimage.sh) in Terminal with `./scripts/build_appimage.sh`.
