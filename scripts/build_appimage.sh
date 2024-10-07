@@ -1,84 +1,75 @@
 #!/bin/bash
 
-echo "========= OnTheSpot AppImage Build Script ========="
+echo "========= OnTheSpot Appimage Build Script ==========="
 
-# Check the current folder and change directory if necessary
-FOLDER_NAME=$(basename "$PWD")
 
-if [ "$FOLDER_NAME" == "scripts" ]; then
-    echo "You are in the scripts folder. Changing to the parent directory..."
-    cd ..
-elif [ "$FOLDER_NAME" != "onthespot" ]; then
-    echo "Make sure that you are inside the project folder. Current folder is: $FOLDER_NAME"
-    exit 1
-fi
-
-# Clean up previous builds
-echo " => Cleaning up!"
+echo " => Cleaning up !"
 rm -rf dist build
 
-# Fetch Dependencies
-echo " => Fetching Dependencies"
-mkdir -p build && cd build
 
-# Download AppImage Tool and Python AppImage
+echo " => Fetch Dependencies"
+mkdir build
+cd build
+
 wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
 chmod +x appimagetool-x86_64.AppImage
 
 wget https://github.com/niess/python-appimage/releases/download/python3.12/python3.12.3-cp312-cp312-manylinux2014_x86_64.AppImage
 chmod +x python3.12.3-cp312-cp312-manylinux2014_x86_64.AppImage
 
-# Extract Python AppImage
-echo " => Extracting Python AppImage"
 ./python3.12.3-cp312-cp312-manylinux2014_x86_64.AppImage --appimage-extract
 mv squashfs-root OnTheSpot.AppDir
 
-# Build OnTheSpot Wheel
-echo " => Building OnTheSpot wheel"
+
+echo " => Build OnTheSpot.whl"
 cd ..
 build/OnTheSpot.AppDir/AppRun -m build
 
-# Upgrade pip and install necessary dependencies
-echo " => Upgrading pip and installing necessary dependencies..."
-build/OnTheSpot.AppDir/AppRun -m pip install --upgrade pip wheel pyinstaller
 
-# Prepare OnTheSpot AppImage
-echo " => Preparing OnTheSpot AppImage"
-cd build
-OnTheSpot.AppDir/AppRun -m pip install -r ../requirements.txt
-OnTheSpot.AppDir/AppRun -m pip install ../dist/onthespot-*-py3-none-any.whl
+echo " => Prepare OnTheSpot Appimage"
+cd build/OnTheSpot.AppDir
+./AppRun -m pip install -r ../../requirements.txt
+./AppRun -m pip install ../../dist/onthespot-*-py3-none-any.whl
 
-# Clean up unnecessary files
-rm OnTheSpot.AppDir/AppRun OnTheSpot.AppDir/.DirIcon OnTheSpot.AppDir/python.png OnTheSpot.AppDir/python3.12.3.desktop
+rm AppRun .DirIcon python.png python3.12.3.desktop
+cp -t . ../../src/onthespot/resources/icons/onthespot.png ../../src/onthespot/resources/org.onthespot.OnTheSpot.desktop
 
-# Copy resources
-cp ../src/onthespot/resources/icons/onthespot.png OnTheSpot.AppDir/onthespot.png
-cp ../src/onthespot/resources/org.onthespot.OnTheSpot.desktop OnTheSpot.AppDir/org.onthespot.OnTheSpot.desktop
-
-# Create AppRun script
-cat << 'EOF' > OnTheSpot.AppDir/AppRun
-#!/bin/bash
+# Create AppRun Script
+echo '#! /bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"
-# Export PATH
-export PATH=$HERE/usr/bin:$PATH
-# Export TCl/Tk
+export PATH=$HERE/usr/bin:$PATH;
+export APPIMAGE_COMMAND=$(command -v -- "$ARGV0")
 export TCL_LIBRARY="${APPDIR}/usr/share/tcltk/tcl8.6"
 export TK_LIBRARY="${APPDIR}/usr/share/tcltk/tk8.6"
 export TKPATH="${TK_LIBRARY}"
-# Export SSL certificate
 export SSL_CERT_FILE="${APPDIR}/opt/_internal/certs.pem"
-# Call OnTheSpot
-"$HERE/opt/python3.12/bin/python3.12" -m onthespot "$@"
-EOF
-chmod 0755 OnTheSpot.AppDir/AppRun
+"$HERE/opt/python3.12/bin/python3.12" "-m" "onthespot" "$@"' > AppRun
 
-# FFmpeg notice
-echo ' => ffmpeg and ffplay need to be manually added to OnTheSpot.AppDir/usr/bin.'
-echo ' => Binaries can be found at https://johnvansickle.com/ffmpeg/'
-read -p ' => Done adding ffmpeg binaries? (y/n): ' ffmpeg
-if [[ "$ffmpeg" == "y" ]]; then
-    echo " => Building OnTheSpot AppImage"
-    ./appimagetool-x86_64.AppImage --appimage-extract-and-run OnTheSpot.AppDir
-    mv OnTheSpot-x86_64.AppImage ../dist/OnTheSpot-x86_64.AppImage
-    echo " => Done!"
-fi
+chmod +x AppRun
+chmod 0755 AppRun
+
+echo ' '
+echo ' # ffmpeg and ffplay need to be manually added to OnTheSpot.AppDir/usr/bin.'
+echo ' # Make sure to run chmod +x on each, binaries can be found here:'
+echo ' # https://johnvansickle.com/ffmpeg/'
+echo ' '
+echo ' => Done adding ffmpeg binaries? (y/n)'
+
+read ffmpeg
+case $ffmpeg in
+  y)
+    sleep 1
+    clear
+    ;;
+esac
+
+
+echo " => Build OnTheSpot Appimage"
+
+cd ..
+./appimagetool-x86_64.AppImage --appimage-extract
+squashfs-root/AppRun OnTheSpot.AppDir
+mv OnTheSpot-x86_64.AppImage ../dist/OnTheSpot-x86_64.AppImage
+
+
+echo " => Done "
