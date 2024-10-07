@@ -88,7 +88,7 @@ For full details, please read our [**Disclaimer**](docs/disclaimer.md).
 
 ## Contact Us
 
-If you have any questions, co or need assistance, feel free to [contact us](mailto:justin026@protonmail.com).
+If you have any questions, concerns or need assistance, feel free to [contact us](mailto:justin026@protonmail.com).
 
 <!-- Issues Badge -->
 [issues-shield]: https://img.shields.io/github/issues/justin025/onthespot?style=flat&label=Issues&labelColor=003366&color=1DB954
