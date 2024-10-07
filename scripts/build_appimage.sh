@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "========= OnTheSpot Appimage Build Script ==========="
+echo "========= OnTheSpot AppImage Build Script ==========="
 
 
 echo " => Cleaning up !"
@@ -26,7 +26,7 @@ cd ..
 build/OnTheSpot.AppDir/AppRun -m build
 
 
-echo " => Prepare OnTheSpot Appimage"
+echo " => Prepare OnTheSpot AppImage"
 cd build/OnTheSpot.AppDir
 ./AppRun -m pip install -r ../../requirements.txt
 ./AppRun -m pip install ../../dist/onthespot-*-py3-none-any.whl
@@ -45,8 +45,8 @@ export TKPATH="${TK_LIBRARY}"
 export SSL_CERT_FILE="${APPDIR}/opt/_internal/certs.pem"
 "$HERE/opt/python3.12/bin/python3.12" "-m" "onthespot" "$@"' > AppRun
 
+chmod -R 0755 ../OnTheSpot.AppDir
 chmod +x AppRun
-chmod 0755 AppRun
 
 echo ' '
 echo ' # ffmpeg and ffplay need to be manually added to OnTheSpot.AppDir/usr/bin.'
@@ -64,7 +64,7 @@ case $ffmpeg in
 esac
 
 
-echo " => Build OnTheSpot Appimage"
+echo " => Build OnTheSpot AppImage"
 
 cd ..
 ./appimagetool-x86_64.AppImage --appimage-extract
