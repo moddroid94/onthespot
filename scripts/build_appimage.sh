@@ -70,7 +70,7 @@ export SSL_CERT_FILE="${APPDIR}/opt/_internal/certs.pem"
 # Call OnTheSpot
 "$HERE/opt/python3.12/bin/python3.12" -m onthespot "$@"
 EOF
-chmod +x OnTheSpot.AppDir/AppRun
+chmod 0755 OnTheSpot.AppDir/AppRun
 
 # FFmpeg notice
 echo ' => ffmpeg and ffplay need to be manually added to OnTheSpot.AppDir/usr/bin.'
