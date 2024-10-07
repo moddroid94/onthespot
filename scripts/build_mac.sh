@@ -34,7 +34,6 @@ echo " => Installing project-specific dependencies..."
 venv/bin/pip install -r requirements.txt
 
 # Check for FFmpeg binary and set build options
-NAME="OnTheSpot"
 if [ -f "ffbin_mac/ffmpeg" ]; then
     echo " => Found 'ffbin_mac' directory and ffmpeg binary. Including FFmpeg in the build."
     FFBIN='--add-binary=ffbin_mac/*:onthespot/bin/ffmpeg'
@@ -52,7 +51,7 @@ pyinstaller --windowed \
     --add-data="src/onthespot/resources/translations/*.qm:onthespot/resources/translations" \
     $FFBIN \
     --paths="src/onthespot" \
-    --name=$NAME \
+    --name="OnTheSpot" \
     --icon="src/onthespot/resources/icons/onthespot.png" \
     src/portable.py
 
