@@ -34,14 +34,12 @@ echo " => Installing project-specific dependencies..."
 venv/bin/pip install -r requirements.txt
 
 # Check for FFmpeg binary and set build options
+NAME="OnTheSpot"
 if [ -f "ffbin_mac/ffmpeg" ]; then
     echo " => Found 'ffbin_mac' directory and ffmpeg binary. Including FFmpeg in the build."
     FFBIN='--add-binary=ffbin_mac/*:onthespot/bin/ffmpeg'
-    NAME="onthespot_mac_ffm"
 else
     echo " => FFmpeg binary not found. Building without it."
-    FFBIN=""
-    NAME="onthespot_mac"
 fi
 
 # Run PyInstaller to create the app
@@ -60,8 +58,7 @@ pyinstaller --windowed \
 
 # Set executable permissions
 echo " => Setting executable permissions..."
-[ -f ./dist/onthespot_mac.app ] && chmod +x ./dist/onthespot_mac.app
-[ -f ./dist/onthespot_mac_ffm.app ] && chmod +x ./dist/onthespot_mac_ffm.app
+chmod +x ./dist/OnTheSpot.app
 
 # Clean up unnecessary files
 echo " => Cleaning up temporary files..."
