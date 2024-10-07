@@ -86,7 +86,7 @@ def remove_media_from_library(session, media_id, media_type):
 def get_currently_playing_url(session):
     url = "https://api.spotify.com/v1/me/player/currently-playing"
     access_token = session.tokens().get("user-read-currently-playing")
-    resp = requests.get(url, headers={"Authorization": "Bearer %s" % access_token}, params={})
+    resp = requests.get(url, headers={"Authorization": "Bearer %s" % access_token})
     if resp.status_code == 200:
         return resp.json()['item']['external_urls']['spotify']
     else:
@@ -125,13 +125,13 @@ def get_track_lyrics(session, track_id, metadata, forced_synced):
         for key in metadata.keys():
             value = metadata[key]
             if key == 'artists':
-                artist = conv_artist_format(value)
+                artist = conv_list_format(value)
             elif key in ['name', 'track_title', 'tracktitle']:
                 tracktitle = value
             elif key in ['album_name', 'album']:
                 album = value
             elif key in ['writers']:
-                author = value
+                author = conv_list_format(value)
         l_ms = metadata['length']
         if lyrics_json_req.status_code == 200:
             lyrics_json = lyrics_json_req.json()['lyrics']
@@ -308,10 +308,10 @@ def convert_audio_format(filename, quality):
         raise FileNotFoundError
 
 
-def conv_artist_format(artists):
+def conv_list_format(items):
     formatted = ""
-    for artist in artists:
-        formatted += artist + config.get('metadata_seperator')
+    for item in items:
+        formatted += item + config.get('metadata_seperator')
     return formatted[:-2].strip()
 
 
@@ -340,9 +340,9 @@ def set_audio_tags(filename, metadata, track_id_str):
 
         if key == 'artists' and config.get("embed_artist"):
             if filetype == '.m4a':
-                tags['\xa9ART'] = conv_artist_format(value)
+                tags['\xa9ART'] = conv_list_format(value)
             else:
-                tags['artist'] = conv_artist_format(value)
+                tags['artist'] = conv_list_format(value)
 
         elif key in ['album_name', 'album'] and config.get("embed_album"):
             if filetype == '.m4a':
@@ -384,20 +384,20 @@ def set_audio_tags(filename, metadata, track_id_str):
             if 'Podcast' in value or 'podcast' in value:
                 type_ = 'episode'
             if filetype == '.m4a':
-                tags['\xa9gen'] = conv_artist_format(value)
+                tags['\xa9gen'] = conv_list_format(value)
             else:
-                tags['genre'] = conv_artist_format(value)
+                tags['genre'] = conv_list_format(value)
 
         elif key == 'performers' and config.get("embed_performers"):
-            tags['performer'] = value
+            tags['performer'] = conv_list_format(value)
 
         elif key == 'producers' and config.get("embed_producers"):
             if filetype == '.mp3':
                 EasyID3.RegisterTextKey('producer', 'TIPL')
-            tags['producer'] = value
+            tags['producer'] = conv_list_format(value)
 
         elif key == 'writers' and config.get("embed_writers"):
-            tags['author'] = value
+            tags['author'] = conv_list_format(value)
 
         elif key == 'label' and config.get("embed_label"):
             if filetype == '.mp3':
@@ -405,7 +405,7 @@ def set_audio_tags(filename, metadata, track_id_str):
             tags['publisher'] = value
 
         elif key == 'copyright' and config.get("embed_copyright"):
-            tags['copyright'] = value
+            tags['copyright'] = conv_list_format(value)
 
         elif key == 'description' and config.get("embed_description"):
             if filetype == '.mp3':
@@ -420,6 +420,14 @@ def set_audio_tags(filename, metadata, track_id_str):
 
         elif key == 'length' and config.get("embed_length"):
             tags['length'] = str(value)
+
+        elif key == 'bpm' and config.get("embed_bpm"):
+            tags['bpm'] = str(value)
+
+        elif key == 'key' and config.get("embed_key"):
+            if filetype == '.mp3':
+                EasyID3.RegisterTextKey('key', 'TKEY')
+            tags['key'] = str(value)
     #tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
     #
     # The EasyID3 'website' tag is mapped to WOAR which according to ID3 is supposed to be the official artist/performer
@@ -440,14 +448,6 @@ def set_audio_tags(filename, metadata, track_id_str):
         else:
             tags['website'] = url
 
-    if config.get("embed_explicit") and metadata['explicit']:
-        if filetype == '.mp3':
-            tags.add(TXXX(encoding=3, desc=u'ITUNESADVISORY', text="1"))
-        elif filetype == '.m4a':
-            tags['\xa9exp'] = 'Yes'
-        else:
-            tags['explicit'] = '1'
-
     if config.get("embed_compilation") and metadata['album_type'] == "compilation":
         if filetype == '.mp3':
             tags.add(TXXX(encoding=3, desc=u'COMPILATION', text="1"))
@@ -456,7 +456,16 @@ def set_audio_tags(filename, metadata, track_id_str):
 
     for key in metadata.keys():
         value = metadata[key]
-        if key == 'lyrics' and config.get("embed_lyrics"):
+
+        if key == 'explicit' and config.get("embed_explicit"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'ITUNESADVISORY', text=str(value)))
+            elif filetype == '.m4a' and metadata['explicit'] == "1":
+                tags['\xa9exp'] = 'Yes'
+            else:
+                tags['explicit'] = str(value)
+
+        elif key == 'lyrics' and config.get("embed_lyrics"):
             # The following adds unsynced lyrics, not sure how to add synced lyrics (SYLT).
             if filetype == '.mp3':
                 tags.add(USLT(encoding=3, lang=u'xxx', desc=u'desc', text=value))
@@ -464,6 +473,54 @@ def set_audio_tags(filename, metadata, track_id_str):
                 tags['\xa9lyr'] = value
             else:
                 tags['lyrics'] = value
+
+        elif key == 'time_signature' and config.get("embed_timesignature"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'TIMESIGNATURE', text=str(value)))
+            else:
+                tags['TIMESIGNATURE'] = str(value)
+
+        elif key == 'acousticness' and config.get("embed_acousticness"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'ACOUSTICNESS', text=str(value)))
+            else:
+                tags['ACOUSTICNESS'] = str(value)
+
+        elif key == 'danceability' and config.get("embed_danceability"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'DANCEABILITY', text=str(value)))
+            else:
+                tags['DANCEABILITY'] = str(value)
+
+        elif key == 'liveness' and config.get("embed_liveness"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'LIVENESS', text=str(value)))
+            else:
+                tags['LIVENESS'] = str(value)
+
+        elif key == 'loudness' and config.get("embed_loudness"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'LOUDNESS', text=str(value)))
+            else:
+                tags['LOUDNESS'] = str(value)
+
+        elif key == 'speechiness' and config.get("embed_speechiness"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'SPEECHINESS', text=str(value)))
+            else:
+                tags['SPEECHINESS'] = str(value)
+
+        elif key == 'energy' and config.get("embed_energy"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'ENERGY', text=str(value)))
+            else:
+                tags['ENERGY'] = str(value)
+
+        elif key == 'valence' and config.get("embed_valence"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'VALENCE', text=str(value)))
+            else:
+                tags['VALENCE'] = str(value)
     tags.save()
 
 
@@ -565,66 +622,93 @@ def check_premium(session):
 
 def get_song_info(session, song_id):
     token = session.tokens().get("user-read-email")
-    uri = f'https://api.spotify.com/v1/tracks?ids={song_id}&market=from_token'
-    uri_credits = f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{song_id}/credits'
-    info = make_call(uri, token=token)
-    credits_json = make_call(uri_credits, token=token)
-    credits = {}
-    try:
-        for credit_block in credits_json.get('roleCredits', []):
-            credits[credit_block['roleTitle'].lower()] = [
-                artist['name']
-                for artist
-                in
-                credit_block['artists']
-                ]
-    except KeyError:
-        logger.warn(f"roleCredits not found in credits response:\n{credits_json}")
-        pass
-    credits['source'] = credits_json.get('sourceNames', [])
-    album_url = info['tracks'][0]['album']['href']
-    artist_url = info['tracks'][0]['artists'][0]['href']
-    album_data = make_call(album_url, token=token)
-    artist_data = make_call(artist_url, token=token)
+    info = make_call(f'https://api.spotify.com/v1/tracks?ids={song_id}&market=from_token', token=token)
+    credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{song_id}/credits', token=token)
+    track_audio_data = make_call(f'https://api.spotify.com/v1/audio-features/{song_id}', token=token)
+    album_data = make_call(info['tracks'][0]['album']['href'], token=token)
+    artist_data = make_call(info['tracks'][0]['artists'][0]['href'], token=token)
+
+    # Format Artists
     artists = []
     for data in info['tracks'][0]['artists']:
-        artists.append(sanitize_data(data['name']))
-    performer_list = [item for item in credits['performers'] if isinstance(item, str)]
-    performers = config.get('metadata_seperator').join(performer_list)
-    writer_list = [item for item in credits['writers'] if isinstance(item, str)]
-    writers = config.get('metadata_seperator').join(writer_list)
-    producer_list = [item for item in credits['producers'] if isinstance(item, str)]
-    producers = config.get('metadata_seperator').join(producer_list)
-    copyright_list = [holder['text'] for holder in album_data['copyrights']]
-    copyright = config.get('metadata_seperator').join(copyright_list)
+        artists.append(data['name'])
+
+    # Format Credits
+    credits = {}
+    for credit_block in credits_data.get('roleCredits', []):
+        credits[credit_block['roleTitle'].lower()] = [
+            artist['name']
+            for artist
+            in
+            credit_block['artists']
+            ]
+
+    # Format Key
+    if track_audio_data['key'] == 0:
+        key = "C"
+    elif track_audio_data['key'] == 1:
+        key = "C♯/D♭"
+    elif track_audio_data['key'] == 2:
+        key = "D"
+    elif track_audio_data['key'] == 3:
+        key = "D♯/E♭"
+    elif track_audio_data['key'] == 4:
+        key = "E"
+    elif track_audio_data['key'] == 5:
+        key = "F"
+    elif track_audio_data['key'] == 6:
+        key = "F♯/G♭"
+    elif track_audio_data['key'] == 7:
+        key = "G"
+    elif track_audio_data['key'] == 8:
+        key = "G♯/A♭"
+    elif track_audio_data['key'] == 9:
+        key = "A"
+    elif track_audio_data['key'] == 10:
+        key = "A♯/B♭"
+    elif track_audio_data['key'] == 11:
+        key = "B"
+    else:
+        key = ""
+
     info = {
         'artists': artists,
-        'album_name': sanitize_data(info['tracks'][0]['album']["name"]),
+        'album_name': info['tracks'][0]['album']["name"],
         'album_type': album_data['album_type'],
         'album_artists': album_data['artists'][0]['name'],
-        'name': sanitize_data(info['tracks'][0]['name']),
+        'name': info['tracks'][0]['name'],
         'image_url': get_thumbnail(info['tracks'][0]['album']['images'], preferred_size=640000),
         'release_year': info['tracks'][0]['album']['release_date'].split("-")[0],
-        'disc_number': info['tracks'][0]['disc_number'],
         'track_number': info['tracks'][0]['track_number'],
         'total_tracks': info['tracks'][0]['album']['total_tracks'],
+        'disc_number': info['tracks'][0]['disc_number'],
         'total_discs': sorted([trk['disc_number'] for trk in album_data['tracks']['items']])[-1] if 'tracks' in album_data else 1,
         # https://developer.spotify.com/documentation/web-api/reference/get-track
         # List of genre is supposed to be here, genre from album API is deprecated and it always seems to be unavailable
         # Use artist endpoint to get artist's genre instead
         'genre': artist_data['genres'],
-        'source': credits['source'], # Not sure what this is, I believe it's the label. Needs to be formatted like performers. unused
-        'performers': performers,
-        'producers': producers,
-        'writers': writers,
+        'performers': [item for item in credits['performers'] if isinstance(item, str)],
+        'producers': [item for item in credits['producers'] if isinstance(item, str)],
+        'writers': [item for item in credits['writers'] if isinstance(item, str)],
         'label': album_data['label'],
-        'copyright': copyright,
+        'copyright': [holder['text'] for holder in album_data['copyrights']],
         'explicit': info['tracks'][0]['explicit'],
         'isrc': info['tracks'][0]['external_ids'].get('isrc', ''),
         'length': info['tracks'][0]['duration_ms'],
-        'scraped_song_id': info['tracks'][0]['id'], # unused
-        'is_playable': info['tracks'][0]['is_playable'], # unused
-        'popularity': info['tracks'][0]['popularity'] # unused
+        'popularity': info['tracks'][0]['popularity'], # unused
+        'bpm': track_audio_data['tempo'],
+        'key': key,
+        'time_signature': track_audio_data['time_signature'],
+        'acousticness': track_audio_data['acousticness'],
+        'danceability': track_audio_data['danceability'],
+        'energy': track_audio_data['energy'],
+        'liveness': track_audio_data['liveness'],
+        'loudness': track_audio_data['loudness'],
+        'speechiness': track_audio_data['speechiness'],
+        'valence': track_audio_data['valence'],
+
+        'scraped_song_id': info['tracks'][0]['id'],
+        'is_playable': info['tracks'][0]['is_playable']
     }
     return info
 
@@ -690,7 +774,7 @@ def make_call(url, token, params=None, no_cache=False):
                 logger.error(f'URL "{url}" cache has invalid data, retring request !')
                 pass
         logger.debug(f'URL "{url}" has cache miss ! HASH: {request_key}; Fetching data')
-    response = requests.get(url, headers={"Authorization": "Bearer %s" % token}, params=params).text
+    response = requests.get(url, headers={"Authorization": f"Bearer {token}"}, params=params).text
     if not no_cache:
         with open(req_cache_file, 'w', encoding='utf-8') as cf:
             cf.write(response)

@@ -773,6 +773,14 @@ class MainWindow(QMainWindow):
             self.inp_embed_length.setChecked(True)
         else:
             self.inp_embed_length.setChecked(False)
+        if config.get('embed_key'):
+            self.inp_embed_key.setChecked(True)
+        else:
+            self.inp_embed_key.setChecked(False)
+        if config.get('embed_bpm'):
+            self.inp_embed_bpm.setChecked(True)
+        else:
+            self.inp_embed_bpm.setChecked(False)
         if config.get('embed_url'):
             self.inp_embed_url.setChecked(True)
         else:
@@ -789,6 +797,38 @@ class MainWindow(QMainWindow):
             self.inp_embed_compilation.setChecked(True)
         else:
             self.inp_embed_compilation.setChecked(False)
+        if config.get('embed_timesignature'):
+            self.inp_embed_timesignature.setChecked(True)
+        else:
+            self.inp_embed_timesignature.setChecked(False)
+        if config.get('embed_acousticness'):
+            self.inp_embed_acousticness.setChecked(True)
+        else:
+            self.inp_embed_acousticness.setChecked(False)
+        if config.get('embed_danceability'):
+            self.inp_embed_danceability.setChecked(True)
+        else:
+            self.inp_embed_danceability.setChecked(False)
+        if config.get('embed_energy'):
+            self.inp_embed_energy.setChecked(True)
+        else:
+            self.inp_embed_energy.setChecked(False)
+        if config.get('embed_liveness'):
+            self.inp_embed_liveness.setChecked(True)
+        else:
+            self.inp_embed_liveness.setChecked(False)
+        if config.get('embed_loudness'):
+            self.inp_embed_loudness.setChecked(True)
+        else:
+            self.inp_embed_loudness.setChecked(False)
+        if config.get('embed_speechiness'):
+            self.inp_embed_speechiness.setChecked(True)
+        else:
+            self.inp_embed_speechiness.setChecked(False)
+        if config.get('embed_valence'):
+            self.inp_embed_valence.setChecked(True)
+        else:
+            self.inp_embed_valence.setChecked(False)
 
         logger.info('Config filled to UI')
 
@@ -982,8 +1022,16 @@ class MainWindow(QMainWindow):
             config.set_('embed_length', True)
         else:
             config.set_('embed_length', False)
+        if self.inp_embed_key.isChecked():
+            config.set_('embed_key', True)
+        else:
+            config.set_('embed_key', False)
+        if self.inp_embed_length.isChecked():
+            config.set_('embed_bpm', True)
+        else:
+            config.set_('embed_bpm', False)
         if self.inp_embed_url.isChecked():
-            config.set_('embed_url', True)
+            config.set_('embed_bpm', True)
         else:
             config.set_('embed_url', False)
         if self.inp_embed_lyrics.isChecked():
@@ -998,6 +1046,39 @@ class MainWindow(QMainWindow):
             config.set_('embed_compilation', True)
         else:
             config.set_('embed_compilation', False)
+
+        if self.inp_embed_timesignature.isChecked():
+            config.set_('embed_timesignature', True)
+        else:
+            config.set_('embed_timesignature', False)
+        if self.inp_embed_acousticness.isChecked():
+            config.set_('embed_acousticness', True)
+        else:
+            config.set_('embed_acousticness', False)
+        if self.inp_embed_danceability.isChecked():
+            config.set_('embed_danceability', True)
+        else:
+            config.set_('embed_danceability', False)
+        if self.inp_embed_energy.isChecked():
+            config.set_('embed_energy', True)
+        else:
+            config.set_('embed_energy', False)
+        if self.inp_embed_liveness.isChecked():
+            config.set_('embed_liveness', True)
+        else:
+            config.set_('embed_liveness', False)
+        if self.inp_embed_loudness.isChecked():
+            config.set_('embed_loudness', True)
+        else:
+            config.set_('embed_loudness', False)
+        if self.inp_embed_speechiness.isChecked():
+            config.set_('embed_speechiness', True)
+        else:
+            config.set_('embed_speechiness', False)
+        if self.inp_embed_valence.isChecked():
+            config.set_('embed_valence', True)
+        else:
+            config.set_('embed_valence', False)
         config.update()
         logger.info('Config updated !')
 

@@ -98,8 +98,19 @@ class Config:
             "embed_length": True,
             "embed_url": True,
             "embed_lyrics": False,
+            "embed_key": True,
+            "embed_bpm": True,
             "embed_explicit": False,
             "embed_compilation": False,
+            "embed_timesignature": False,
+            "embed_acousticness": False,
+            "embed_danceability": False,
+            "embed_energy": False,
+            "embed_liveness": False,
+            "embed_loudness": False,
+            "embed_performer": False,
+            "embed_speechiness": False,
+            "embed_valence": False,
             "download_copy_btn": False, # Add copy button to downloads
             "download_save_btn": False, # Add save button to downloads
             "download_queue_btn": False, # Add queue button to downloads
