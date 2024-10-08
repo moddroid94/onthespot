@@ -3,9 +3,9 @@ import os
 import re
 import string
 import subprocess
-from ..exceptions import *
+from onthespot.exceptions import *
 import requests.adapters
-from ..otsconfig import config
+from onthespot.otsconfig import config
 import requests
 import json
 from mutagen import File
@@ -18,7 +18,7 @@ from pathlib import Path
 from PIL import Image
 from io import BytesIO
 from hashlib import md5
-from ..runtimedata import get_logger
+from onthespot.runtimedata import get_logger
 from librespot.audio.decoders import AudioQuality
 
 logger = get_logger("spotutils")
@@ -102,25 +102,24 @@ def get_artist_albums(session, artist_id):
 def get_playlist_data(session, playlist_id):
     logger.info(f"Get playlist dump for '{playlist_id}'")
     access_token = session.tokens().get("user-read-email")
-    resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', token=access_token, no_cache=True)
+    resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', token=access_token, skip_cache=True)
     return sanitize_data(resp['name']), sanitize_data(resp['owner']['display_name']), sanitize_data(resp['description']), resp['external_urls']['spotify']
 
 
 def get_track_lyrics(session, track_id, metadata, forced_synced):
     lyrics = []
     try:
-        params = 'format=json&market=from_token'
-        access_token = session.tokens().get("user-read-email")
         url = f'https://spclient.wg.spotify.com/color-lyrics/v2/track/{track_id}'
+        token = session.tokens().get("user-read-email")
+        params = 'format=json&market=from_token'
 
-        payload = {}
         headers = {
         'app-platform': 'WebPlayer',
-        'Authorization': f'Bearer {access_token}',
+        'Authorization': f'Bearer {token}',
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
         }
 
-        lyrics_json_req = requests.request("GET", url, headers=headers, data=payload, params=params)
+        resp = make_call(url, token, headers=headers, params=params)
 
         for key in metadata.keys():
             value = metadata[key]
@@ -133,39 +132,34 @@ def get_track_lyrics(session, track_id, metadata, forced_synced):
             elif key in ['writers']:
                 author = conv_list_format(value)
         l_ms = metadata['length']
-        if lyrics_json_req.status_code == 200:
-            lyrics_json = lyrics_json_req.json()['lyrics']
-            if config.get("embed_branding"):
-                lyrics.append('[re:OnTheSpot]')
-            if config.get("embed_name"):
-                lyrics.append(f'[ti:{tracktitle}]')
-            if config.get("embed_writers"):
-                lyrics.append(f'[au:{author}]')
-            if config.get("embed_artist"):
-                lyrics.append(f'[ar:{artist}]')
-            if config.get("embed_album"):
-                lyrics.append(f'[al:{album}]')
-            lyrics.append(f'[by:{lyrics_json["provider"]}]')
-            if config.get("embed_length"):
-                if round((l_ms/1000)/60) < 10:
-                    digit="0"
-                else:
-                    digit=""
-                lyrics.append(f'[length:{digit}{round((l_ms/1000)/60)}:{round((l_ms/1000)%60)}]\n')
-            if lyrics_json['syncType'].lower() == 'text':
-                # It's un synced lyrics, if not forcing synced lyrics return it
-                if not forced_synced:
-                    lyrics = [line['words'][0]['string'] for line in lyrics_json['lines']]
-            elif lyrics_json['syncType'].lower() == 'line_synced':
-                for line in lyrics_json['lines']:
-                    minutes, seconds = divmod(int(line['startTimeMs']) / 1000, 60)
-                    lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["words"]}')
+        if config.get("embed_branding"):
+            lyrics.append('[re:OnTheSpot]')
+        if config.get("embed_name"):
+            lyrics.append(f'[ti:{tracktitle}]')
+        if config.get("embed_writers"):
+            lyrics.append(f'[au:{author}]')
+        if config.get("embed_artist"):
+            lyrics.append(f'[ar:{artist}]')
+        if config.get("embed_album"):
+            lyrics.append(f'[al:{album}]')
+        lyrics.append(f'[by:{resp["lyrics"]["provider"]}]')
+        if config.get("embed_length"):
+            if round((l_ms/1000)/60) < 10:
+                digit="0"
+            else:
+                digit=""
+            lyrics.append(f'[length:{digit}{round((l_ms/1000)/60)}:{round((l_ms/1000)%60)}]\n')
+        if resp["lyrics"]["syncType"] == "LINE_SYNCED":
+            for line in resp["lyrics"]["lines"]:
+                minutes, seconds = divmod(int(line['startTimeMs']) / 1000, 60)
+                lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["words"]}')
         else:
-            logger.warning(f'Failed to get lyrics for track id: {track_id}, '
-                           f'statucode: {lyrics_json_req.status_code}, Text: {lyrics_json_req.text}')
+            # It's un synced lyrics, if not forcing synced lyrics return it
+            if not forced_synced:
+                lyrics = [line['words'][0]['string'] for line in resp['lines']]
     except (KeyError, IndexError):
         logger.error(f'KeyError/Index Error. Failed to get lyrics for track id: {track_id}, ')
-    return None if len(lyrics) <= 2 else '\n'.join(lyrics)
+    return None if len(lyrics) <= 2 else {"lyrics": '\n'.join(lyrics), "language": resp["lyrics"]["language"]}
 
 
 def get_tracks_from_playlist(session, playlist_id):
@@ -175,7 +169,7 @@ def get_tracks_from_playlist(session, playlist_id):
     headers = {'Authorization': f'Bearer {access_token}'}
     url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=episode'
     while url:
-        resp = make_call(url, token=access_token, no_cache=True)
+        resp = make_call(url, token=access_token, skip_cache=True)
         songs.extend(resp['items'])
         url = resp['next']
     return songs
@@ -428,6 +422,11 @@ def set_audio_tags(filename, metadata, track_id_str):
             if filetype == '.mp3':
                 EasyID3.RegisterTextKey('key', 'TKEY')
             tags['key'] = str(value)
+
+        elif key == 'album_type' and config.get("embed_compilation"):
+            if filetype == '.mp3':
+                EasyID3.RegisterTextKey('compilation', 'TCMP')
+            tags['compilation'] = f"{int(value == 'compilation')}"
     #tags['website'] = f'https://open.spotify.com/{type_}/{track_id_str}'
     #
     # The EasyID3 'website' tag is mapped to WOAR which according to ID3 is supposed to be the official artist/performer
@@ -448,27 +447,21 @@ def set_audio_tags(filename, metadata, track_id_str):
         else:
             tags['website'] = url
 
-    if config.get("embed_compilation") and metadata['album_type'] == "compilation":
-        if filetype == '.mp3':
-            tags.add(TXXX(encoding=3, desc=u'COMPILATION', text="1"))
-        else:
-            tags['compilation'] = '1'
-
     for key in metadata.keys():
         value = metadata[key]
 
         if key == 'explicit' and config.get("embed_explicit"):
             if filetype == '.mp3':
-                tags.add(TXXX(encoding=3, desc=u'ITUNESADVISORY', text=str(value)))
-            elif filetype == '.m4a' and metadata['explicit'] == "1":
-                tags['\xa9exp'] = 'Yes'
+                tags.add(TXXX(encoding=3, desc=u'ITUNESADVISORY', text=f"{value}"))
+            elif filetype == '.m4a':
+                tags['\xa9exp'] = f"{value}"
             else:
-                tags['explicit'] = str(value)
+                tags['explicit'] = f"{value}"
 
         elif key == 'lyrics' and config.get("embed_lyrics"):
             # The following adds unsynced lyrics, not sure how to add synced lyrics (SYLT).
             if filetype == '.mp3':
-                tags.add(USLT(encoding=3, lang=u'xxx', desc=u'desc', text=value))
+                tags.add(USLT(encoding=3, lang=u'und', desc=u'desc', text=value))
             elif filetype == '.m4a':
                 tags['\xa9lyr'] = value
             else:
@@ -491,6 +484,12 @@ def set_audio_tags(filename, metadata, track_id_str):
                 tags.add(TXXX(encoding=3, desc=u'DANCEABILITY', text=str(value)))
             else:
                 tags['DANCEABILITY'] = str(value)
+
+        elif key == 'instrumentalness' and config.get("embed_instrumentalness"):
+            if filetype == '.mp3':
+                tags.add(TXXX(encoding=3, desc=u'INSTRUMENTALNESS', text=str(value)))
+            else:
+                tags['INSTRUMENTALNESS'] = str(value)
 
         elif key == 'liveness' and config.get("embed_liveness"):
             if filetype == '.mp3':
@@ -702,6 +701,7 @@ def get_song_info(session, song_id):
         'acousticness': track_audio_data['acousticness'],
         'danceability': track_audio_data['danceability'],
         'energy': track_audio_data['energy'],
+        'instrumentalness': track_audio_data['instrumentalness'],
         'liveness': track_audio_data['liveness'],
         'loudness': track_audio_data['loudness'],
         'speechiness': track_audio_data['speechiness'],
@@ -757,11 +757,13 @@ def get_thumbnail(image_dict, preferred_size=22500):
             return images[size]
     return images[available_sizes[-1]] if len(available_sizes) > 0 else ""
 
-def make_call(url, token, params=None, no_cache=False):
+def make_call(url, token, params=None, headers=None, skip_cache=False):
     if params is None:
         params = {}
-    if not no_cache:
-        request_key = md5(f'{url}-{";".join( str(key)+":"+str(value) for key, value in params.items() )}'.encode()).hexdigest()
+    if headers is None:
+        headers = {"Authorization": f"Bearer {token}"}
+    if not skip_cache:
+        request_key = md5(f'{url}'.encode()).hexdigest()
         req_cache_file = os.path.join(config.get('_cache_dir'), 'reqcache', request_key+'.otcache')
         os.makedirs(os.path.dirname(req_cache_file), exist_ok=True)
         if os.path.isfile(req_cache_file):
@@ -774,8 +776,8 @@ def make_call(url, token, params=None, no_cache=False):
                 logger.error(f'URL "{url}" cache has invalid data, retring request !')
                 pass
         logger.debug(f'URL "{url}" has cache miss ! HASH: {request_key}; Fetching data')
-    response = requests.get(url, headers={"Authorization": f"Bearer {token}"}, params=params).text
-    if not no_cache:
+    response = requests.get(url, headers=headers, params=params).text
+    if not skip_cache:
         with open(req_cache_file, 'w', encoding='utf-8') as cf:
             cf.write(response)
     return json.loads(response)

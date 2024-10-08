@@ -37,7 +37,7 @@ call venvwin\Scripts\activate.bat || (
 
 REM Install dependencies
 echo =^> Installing dependencies via pip...
-for %%P in (pip wheel winsdk pyinstaller) do (
+for %%P in (pip wheel pyinstaller) do (
     python -m pip show %%P >nul || python -m pip install --upgrade %%P || (
         echo Failed to install %%P. Exiting...
         timeout /t 10 >nul

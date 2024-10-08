@@ -11,11 +11,11 @@ from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
-from ..otsconfig import config
-from ..runtimedata import get_logger, cancel_list, failed_downloads, unavailable, session_pool
-from ..utils.spotify import check_premium, get_song_info, convert_audio_format, set_music_thumbnail, set_audio_tags, \
+from onthespot.otsconfig import config
+from onthespot.runtimedata import get_logger, cancel_list, failed_downloads, unavailable, session_pool
+from .api import check_premium, get_song_info, convert_audio_format, set_music_thumbnail, set_audio_tags, \
     get_episode_info, get_track_lyrics
-from ..utils.utils import re_init_session, fetch_account_uuid
+from onthespot.utils.utils import re_init_session, fetch_account_uuid
 
 
 class DownloadWorker(QObject):
@@ -210,9 +210,9 @@ class DownloadWorker(QObject):
                                 if config.get('use_lrc_file'):
                                     with open(filename[0:-len(config.get('media_format'))] + 'lrc', 'w',
                                               encoding='utf-8') as f:
-                                        f.write(lyrics)
+                                        f.write(lyrics["lyrics"])
                                 if config.get('embed_lyrics'):
-                                    set_audio_tags(filename, {'lyrics': lyrics}, trk_track_id_str)
+                                    set_audio_tags(filename, {"lyrics": lyrics["lyrics"], "language": lyrics["language"]}, trk_track_id_str)
                                 self.logger.info(f'lyrics saved for: {trk_track_id_str}')
                         except Exception:
                             self.logger.error(f'Could not get lyrics for {trk_track_id_str}, '

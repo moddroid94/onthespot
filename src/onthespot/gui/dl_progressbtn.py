@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QWidget
 from ..otsconfig import config
 from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue, session_pool, get_logger
 from ..utils.utils import open_item
-from ..utils.spotify import check_if_media_in_library, save_media_to_library, remove_media_from_library, queue_media, play_media
+from ..services.spotify.api import check_if_media_in_library, save_media_to_library, remove_media_from_library, queue_media, play_media
 
 logger = get_logger("worker.utility")
 

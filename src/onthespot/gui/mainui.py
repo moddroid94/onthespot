@@ -8,10 +8,10 @@ from PyQt6.QtCore import QThread, QDir, Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
-from ..utils.spotify import search_by_term, get_thumbnail
+from ..services.spotify.api import search_by_term, get_thumbnail
 from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release, open_item
-from ..worker import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
-from ..worker.zeroconf import new_session
+from ..services.spotify import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
+from ..services.spotify.zeroconf import new_session
 from .dl_progressbtn import DownloadActionsButtons
 from .minidialog import MiniDialog
 from ..otsconfig import config_dir, config
@@ -813,6 +813,10 @@ class MainWindow(QMainWindow):
             self.inp_embed_energy.setChecked(True)
         else:
             self.inp_embed_energy.setChecked(False)
+        if config.get('embed_instrumentalness'):
+            self.inp_embed_instrumentalness.setChecked(True)
+        else:
+            self.inp_embed_instrumentalness.setChecked(False)
         if config.get('embed_liveness'):
             self.inp_embed_liveness.setChecked(True)
         else:
@@ -1063,6 +1067,10 @@ class MainWindow(QMainWindow):
             config.set_('embed_energy', True)
         else:
             config.set_('embed_energy', False)
+        if self.inp_embed_instrumentalness.isChecked():
+            config.set_('embed_instrumentalness', True)
+        else:
+            config.set_('embed_instrumentalness', False)
         if self.inp_embed_liveness.isChecked():
             config.set_('embed_liveness', True)
         else:

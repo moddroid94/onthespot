@@ -6,14 +6,11 @@ from librespot.core import Session
 import re
 from ..otsconfig import config, config_dir
 from ..runtimedata import get_logger
-from .spotify import search_by_term, get_currently_playing_url
+from ..services.spotify.api import search_by_term, get_currently_playing_url
 import subprocess
 import asyncio
 import traceback
 import json
-
-if platform.system() == "Windows":
-    from winsdk.windows.media.control import GlobalSystemMediaTransportControlsSessionManager as MediaManager
 
 logger = get_logger("utils")
 media_tracker_last_query = ''
@@ -245,41 +242,6 @@ def get_now_playing_local(session):
             return get_currently_playing_url(session)
         spotify_url = playerctl_out.decode()
         return spotify_url
-    elif platform.system() == "Windows":
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        logger.debug("Windows detected ! Using unreliable search method to get media info")
-        info_dict = None
-        sessions = loop.run_until_complete(MediaManager.request_async())
-        current_session = sessions.get_current_session()
-        if current_session:
-            if current_session.source_app_user_model_id == "Spotify.exe":
-                logger.debug("Spotify running..")
-                info = loop.run_until_complete(current_session.try_get_media_properties_async())
-                info_dict = {song_attr: info.__getattribute__(song_attr) for song_attr in dir(info) if
-                             song_attr[0] != '_'}
-                info_dict['genres'] = list(info_dict['genres'])
-        if info_dict:
-            query_str = f"{info_dict['title']} {info_dict['artist']} {info_dict['album_title']}".strip()
-            logger.debug(f"Spotify running and playing {query_str}")
-            if media_tracker_last_query == query_str:
-                return ""
-            results = search_by_term(session, query_str, max_results=1, content_types=["track"])
-            media_tracker_last_query = query_str
-            if len(results["tracks"]) > 0:
-                try:
-                    link = results["tracks"][0]["external_urls"]["spotify"]
-                    logger.debug(f"Spotify now playing {link}")
-                    return link
-                except (KeyError, IndexError):
-                    logger.debug("KeyError. Fetching track via api..")
-                    return get_currently_playing_url(session)
-            else:
-                logger.debug("No result for currently playing track. Fetching track via api..")
-                return get_currently_playing_url(session)
-        else:
-            logger.debug("Event loop failed. Fetching track via api..")
-            return get_currently_playing_url(session)
     else:
         logger.debug("Unsupported platform for auto download. Fetching track via api..")
         return get_currently_playing_url(session)
