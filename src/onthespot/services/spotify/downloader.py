@@ -255,8 +255,8 @@ class DownloadWorker(QObject):
 
                 audio_name = config.get("podcast_path_formatter").format(
                     artist=artist,
-                    podcast_name=podcast_name,
-                    episode_name=episode_name,
+                    podcast_name=sanitize_data(podcast_name),
+                    episode_name=sanitize_data(episode_name),
                     episode_id=episode_id,
                     release_date=release_date,
                     total_episodes=total_episodes,

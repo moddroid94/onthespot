@@ -690,7 +690,7 @@ def get_episode_info(session, episode_id_str):
     if "error" in info:
         return None, None, None
     else:
-        return info["show"]["name"], info["name"], get_thumbnail(info['images']), info['release_date'], info['show']['total_episodes'], info['show']['publisher'], info['language'], info['description'], info['show']['copyrights']
+        return info["show"]["name"], info["name"], get_thumbnail(info['images']), info['release_date'], info['show']['total_episodes'], info['show']['publisher'], info['language'] if info['language'] != "" else info['show']['languages'][0], info['description'] if info['description'] != "" else info['show']['description'], info['show']['copyrights']
 
 
 def get_show_episodes(session, show_id_str):
