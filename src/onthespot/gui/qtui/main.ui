@@ -1028,10 +1028,10 @@
           <widget class="QWidget" name="adv_settings_scrollarea">
            <property name="geometry">
             <rect>
-             <x>0</x>
+             <x>-41</x>
              <y>0</y>
              <width>641</width>
-             <height>2715</height>
+             <height>2717</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1702,6 +1702,25 @@
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_13">
                   <item>
+                   <widget class="QGroupBox" name="group_lyrics_cfg_only_synced_3">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_48">
+                     <item>
+                      <widget class="QLabel" name="lb_illegal_character_replacement">
+                       <property name="text">
+                        <string>Illegal Character Replacement</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="inp_illegal_character_replacement"/>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
                    <widget class="QGroupBox" name="group_lyrics_cfg_lyricsenable">
                     <property name="title">
                      <string/>
@@ -1739,6 +1758,18 @@
                     </layout>
                    </widget>
                   </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_3">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_84">
                   <item>
                    <widget class="QGroupBox" name="group_lyrics_cfg_only_synced">
                     <property name="title">
@@ -1774,18 +1805,6 @@
                     </layout>
                    </widget>
                   </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb1_3">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_84">
                   <item>
                    <widget class="QGroupBox" name="group_playlist_cfg_m3u_11">
                     <property name="title">
@@ -1821,6 +1840,18 @@
                     </layout>
                    </widget>
                   </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_4">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_32">
                   <item>
                    <widget class="QGroupBox" name="groupBox_26">
                     <property name="title">
@@ -1856,18 +1887,6 @@
                     </layout>
                    </widget>
                   </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb1_4">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_32">
                   <item>
                    <widget class="QGroupBox" name="groupBox_25">
                     <property name="title">
@@ -1900,6 +1919,18 @@
                     </layout>
                    </widget>
                   </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_5">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_41">
                   <item>
                    <widget class="QGroupBox" name="groupBox_8">
                     <property name="title">
@@ -1948,18 +1979,6 @@
                     </layout>
                    </widget>
                   </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb1_5">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_41">
                   <item>
                    <widget class="QGroupBox" name="groupBox_22">
                     <property name="title">
@@ -2005,6 +2024,18 @@
                     </layout>
                    </widget>
                   </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_6">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_44">
                   <item>
                    <widget class="QGroupBox" name="groupBox_23">
                     <property name="title">
@@ -2047,18 +2078,6 @@
                     </layout>
                    </widget>
                   </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb1_6">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_44">
                   <item>
                    <widget class="QGroupBox" name="inp_translate_file_path_2">
                     <property name="title">
@@ -2093,19 +2112,6 @@
                      </item>
                     </layout>
                    </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_13">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                  </layout>
                 </widget>

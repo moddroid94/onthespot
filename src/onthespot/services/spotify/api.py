@@ -103,7 +103,7 @@ def get_playlist_data(session, playlist_id):
     logger.info(f"Get playlist dump for '{playlist_id}'")
     access_token = session.tokens().get("user-read-email")
     resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', token=access_token, skip_cache=True)
-    return sanitize_data(resp['name']), sanitize_data(resp['owner']['display_name']), sanitize_data(resp['description']), resp['external_urls']['spotify']
+    return resp['name'], resp['owner']['display_name'], resp['description'], resp['external_urls']['spotify']
 
 
 def get_track_lyrics(session, track_id, metadata, forced_synced):
@@ -175,37 +175,6 @@ def get_tracks_from_playlist(session, playlist_id):
     return songs
 
 
-def sanitize_data(value, allow_path_separators=False, escape_quotes=False):
-    logger.info(
-        f'Sanitising string: "{value}"; '
-        f'Allow path separators: {allow_path_separators}'
-        )
-    if value is None:
-        return ''
-    sanitize = ['*', '?', '<', '>', '"'] if os.name == 'nt' else []
-    if os.name == 'nt':
-        value = value.replace('/', '\\')
-    if not allow_path_separators:
-        sanitize.append(os.path.sep)
-    for i in sanitize:
-        value = value.replace(i, '')
-    if os.name == 'nt':
-        value = value.replace('|', '-')
-        drive_letter, tail = os.path.splitdrive(value)
-        value = os.path.join(
-            drive_letter,
-            tail.replace(':', '-')
-        )
-        value = value.rstrip('.')
-    else:
-        if escape_quotes and '"' in value:
-            # Since convert uses double quotes, we may need to escape if it
-            # exists in path, on windows double quotes is
-            # not allowed in path and will be removed
-            value = value.replace('"', '\\"')
-    return value
-
-
 def get_album_name(session, album_id):
     logger.info(f"Get album info from album by id ''{album_id}'")
     access_token = session.tokens().get("user-read-email")
@@ -215,11 +184,11 @@ def get_album_name(session, album_id):
         )
     if m := re.search(r'(\d{4})', resp['release_date']):
         return resp['artists'][0]['name'],\
-            m.group(1), sanitize_data(resp['name']),\
+            m.group(1), resp['name'],\
             resp['total_tracks']
     else:
-        return sanitize_data(resp['artists'][0]['name']),\
-            resp['release_date'], sanitize_data(resp['name']),\
+        return resp['artists'][0]['name'],\
+            resp['release_date'], resp['name'],\
             resp['total_tracks']
 
 
@@ -263,11 +232,7 @@ def convert_audio_format(filename, quality):
         # Prepare default parameters
         command = [
             config.get('_ffmpeg_bin_path'),
-            '-i', sanitize_data(
-                temp_name,
-                allow_path_separators=True,
-                escape_quotes=False
-                )
+            '-i', temp_name
         ]
         # If the media format is set to ogg, just correct the downloaded file
         # and add tags
@@ -283,11 +248,7 @@ def convert_audio_format(filename, quality):
             command.append(param)
         # Add output parameter at last
         command.append(
-            sanitize_data(
-                filename,
-                allow_path_separators=True,
-                escape_quotes=False
-                )
+                filename
             )
         logger.info(
             f'Converting media with ffmpeg. Built commandline {command}'
@@ -720,7 +681,7 @@ def get_episode_info(session, episode_id_str):
     if "error" in info:
         return None, None, None
     else:
-        return sanitize_data(info["show"]["name"]), sanitize_data(info["name"]), get_thumbnail(info['images']), info['release_date'], info['show']['total_episodes'], sanitize_data(info['show']['publisher']), info['language'], info['description'], info['show']['copyrights']
+        return info["show"]["name"], info["name"], get_thumbnail(info['images']), info['release_date'], info['show']['total_episodes'], info['show']['publisher'], info['language'], info['description'], info['show']['copyrights']
 
 
 def get_show_episodes(session, show_id_str):

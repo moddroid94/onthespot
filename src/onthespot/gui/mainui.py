@@ -604,6 +604,7 @@ class MainWindow(QMainWindow):
         self.inp_chunk_size.setValue(config.get("chunk_size"))
         self.inp_media_format.setText(config.get("media_format"))
         self.inp_podcast_media_format.setText(config.get("podcast_media_format"))
+        self.inp_illegal_character_replacement.setText(config.get("illegal_character_replacement"))
         self.inp_track_formatter.setText(config.get("track_path_formatter"))
         self.inp_podcast_path_formatter.setText(config.get("podcast_path_formatter"))
         self.inp_playlist_path_formatter.setText(config.get("playlist_path_formatter"))
@@ -870,6 +871,7 @@ class MainWindow(QMainWindow):
             config.set_('max_search_results', 5)
         config.set_('media_format', self.inp_media_format.text())
         config.set_('podcast_media_format', self.inp_podcast_media_format.text())
+        config.set_('illegal_character_replacement', self.inp_illegal_character_replacement.text())
         if self.inp_show_search_thumbnails.isChecked():
             config.set_('show_search_thumbnails', True)
         else:

@@ -13,6 +13,7 @@ from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from onthespot.otsconfig import config
 from onthespot.runtimedata import get_logger, cancel_list, failed_downloads, unavailable, session_pool
+from onthespot.utils.utils import sanitize_data
 from .api import check_premium, get_song_info, convert_audio_format, set_music_thumbnail, set_audio_tags, \
     get_episode_info, get_track_lyrics
 from onthespot.utils.utils import re_init_session, fetch_account_uuid
@@ -64,51 +65,36 @@ class DownloadWorker(QObject):
             _artist = song_info['artists'][0]
 
             if playlist_name != None and config.get("use_playlist_path"):
-                song_name = config.get("playlist_path_formatter").format(
-                    artist=_artist,
-                    album=_album,
-                    name=_name,
-                    rel_year=song_info['release_year'],
-                    disc_number=song_info['disc_number'],
-                    track_number=song_info['track_number'],
-                    spotid=song_info['scraped_song_id'],
-                    genre=song_info['genre'][0] if len(song_info['genre']) > 0 else '',
-                    label=song_info['label'],
-                    explicit=str(config.get('explicit')) if song_info['explicit'] else '',
-                    trackcount=song_info['total_tracks'],
-                    disccount=song_info['total_discs'],
-                    playlist_name=playlist_name,
-                    playlist_owner=playlist_owner,
-                    playlist_desc=playlist_desc
-                )
+                path = config.get("playlist_path_formatter")
             else:
-                song_name = config.get("track_path_formatter").format(
-                    artist=_artist,
-                    album=_album,
-                    name=_name,
-                    rel_year=song_info['release_year'],
-                    disc_number=song_info['disc_number'],
-                    track_number=song_info['track_number'],
-                    spotid=song_info['scraped_song_id'],
-                    genre=song_info['genre'][0] if len(song_info['genre']) > 0 else '',
-                    label=song_info['label'],
-                    explicit=str(config.get('explicit')) if song_info['explicit'] else '',
-                    trackcount=song_info['total_tracks'],
-                    disccount=song_info['total_discs'],
-                    playlist_name=playlist_name,
-                    playlist_owner=playlist_owner,
-                    playlist_desc=playlist_desc
-                )
+                path = config.get("track_path_formatter")
+            song_path = path.format(
+                artist = sanitize_data(_artist),
+                album = sanitize_data(_album),
+                name = sanitize_data(_name),
+                rel_year = sanitize_data(song_info['release_year']),
+                disc_number = song_info['disc_number'],
+                track_number = song_info['track_number'],
+                spotid = song_info['scraped_song_id'],
+                genre = sanitize_data(song_info['genre'][0] if len(song_info['genre']) > 0 else ''),
+                label = sanitize_data(song_info['label']),
+                explicit = sanitize_data(str(config.get('explicit')) if song_info['explicit'] else ''),
+                trackcount = song_info['total_tracks'],
+                disccount = song_info['total_discs'],
+                playlist_name = sanitize_data(playlist_name),
+                playlist_owner = sanitize_data(playlist_owner),
+                playlist_desc = sanitize_data(playlist_desc)
+            )
 
             if not config.get("force_raw"):
-                song_name = song_name + "." + config.get("media_format")
+                song_path = song_path + "." + config.get("media_format")
             else:
-                song_name = song_name + ".ogg"
+                song_path = song_path + ".ogg"
 
             dl_root = os.path.abspath(extra_paths) if extra_path_as_root else config.get("download_root")
             # If extra path as root is enabled, extra path is already set as DL root, unset it
             extra_paths = '' if extra_path_as_root else extra_paths.strip()
-            filename = os.path.join(dl_root, extra_paths, song_name)
+            filepath = os.path.join(dl_root, extra_paths, song_path)
         except Exception:
             self.logger.error(
                 f"Metadata fetching failed for track by id '{trk_track_id_str}', {traceback.format_exc()}")
@@ -124,16 +110,16 @@ class DownloadWorker(QObject):
                 return False
             else:
                 # Skip file if exists under different extension
-                directory = os.path.dirname(filename)
-                base_filename = os.path.splitext(os.path.basename(filename))[0]
+                directory = os.path.dirname(filepath)
+                base_filepath = os.path.splitext(os.path.basename(filepath))[0]
                 try:
                     files_in_directory = os.listdir(directory)
                 except FileNotFoundError:
                     files_in_directory = []
-                matching_files = [file for file in files_in_directory if file.startswith(base_filename) and not file.endswith('.lrc')]
+                matching_files = [file for file in files_in_directory if file.startswith(base_filepath) and not file.endswith('.lrc')]
                 if matching_files:
                     self.progress.emit([trk_track_id_str, self.tr("Already exists"), [100, 100],
-                                        filename,
+                                        filepath,
                                         f'{song_info["name"]} [{_artist} - {song_info["album_name"]}:{song_info["release_year"]}].f{config.get("media_format")}'])
                     self.logger.info(f"File already exists, Skipping download for track by id '{trk_track_id_str}'")
                     self.__last_cancelled = True
@@ -144,20 +130,20 @@ class DownloadWorker(QObject):
 
                     track_id = TrackId.from_base62(track_id_str)
                     stream = session.content_feeder().load(track_id, VorbisOnlyAudioQuality(quality), False, None)
-                    os.makedirs(os.path.dirname(filename), exist_ok=True)
+                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
                     total_size = stream.input_stream.size
                     downloaded = 0
                     _CHUNK_SIZE = chunk_size
                     fail = 0
-                    with open(filename, 'wb') as file:
+                    with open(filepath, 'wb') as file:
                         while downloaded < total_size:
                             if trk_track_id_str in cancel_list:
                                 self.progress.emit([trk_track_id_str, self.tr("Cancelled"), [0, 100]])
                                 cancel_list.pop(trk_track_id_str)
                                 self.__last_cancelled = True
-                                if os.path.exists(filename):
+                                if os.path.exists(filepath):
                                     file.close()
-                                    os.remove(filename)
+                                    os.remove(filepath)
                                 return False
                             self.logger.debug(
                                 f"Reading chunk of {_CHUNK_SIZE} bytes from stream  track by id '{trk_track_id_str}'")
@@ -182,17 +168,17 @@ class DownloadWorker(QObject):
                                 self.progress.emit([trk_track_id_str, self.tr("RETRY ") + str(fail + 1), None])
                                 self.logger.error(f"Max retries exceed for track by id '{trk_track_id_str}'")
                                 self.progress.emit([trk_track_id_str, self.tr("PD error. Will retry"), None])
-                                if os.path.exists(filename):
-                                    os.remove(filename)
+                                if os.path.exists(filepath):
+                                    os.remove(filepath)
                                 return None
                             self.progress.emit([trk_track_id_str, None, [downloaded, total_size]])
                     if not config.get("force_raw"):
                         self.progress.emit([trk_track_id_str, self.tr("Converting"), None])
-                        convert_audio_format(filename, quality)
+                        convert_audio_format(filepath, quality)
                         self.progress.emit([trk_track_id_str, self.tr("Writing metadata"), None])
-                        set_audio_tags(filename, song_info, trk_track_id_str)
+                        set_audio_tags(filepath, song_info, trk_track_id_str)
                         self.progress.emit([trk_track_id_str, self.tr("Setting thumbnail"), None])
-                        set_music_thumbnail(filename, song_info['image_url'])
+                        set_music_thumbnail(filepath, song_info['image_url'])
                     else:
                         self.logger.warning(
                             f"Force raw is disabled for track by id '{trk_track_id_str}', "
@@ -208,29 +194,29 @@ class DownloadWorker(QObject):
                             if lyrics:
                                 self.logger.info(f'Found lyrics for: {trk_track_id_str}, writing...')
                                 if config.get('use_lrc_file'):
-                                    with open(filename[0:-len(config.get('media_format'))] + 'lrc', 'w',
+                                    with open(filepath[0:-len(config.get('media_format'))] + 'lrc', 'w',
                                               encoding='utf-8') as f:
                                         f.write(lyrics["lyrics"])
                                 if config.get('embed_lyrics'):
-                                    set_audio_tags(filename, {"lyrics": lyrics["lyrics"], "language": lyrics["language"]}, trk_track_id_str)
+                                    set_audio_tags(filepath, {"lyrics": lyrics["lyrics"], "language": lyrics["language"]}, trk_track_id_str)
                                 self.logger.info(f'lyrics saved for: {trk_track_id_str}')
                         except Exception:
                             self.logger.error(f'Could not get lyrics for {trk_track_id_str}, '
                                               f'unexpected error: {traceback.format_exc()}')
                     self.progress.emit([trk_track_id_str, self.tr("Downloaded"), [100, 100],
-                                        filename,
+                                        filepath,
                                         f'{song_info["name"]} [{_artist} - {song_info["album_name"]}:{song_info["release_year"]}].f{config.get("media_format")}'])
                     return True
         except queue.Empty:
-            if os.path.exists(filename):
-                os.remove(filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
             self.logger.error(
                 f"Network timeout from spotify for track by id '{trk_track_id_str}', download will be retried !")
             self.progress.emit([trk_track_id_str, self.tr("Timeout. Will retry"), None])
             return None
         except subprocess.CalledProcessError as exc:
-            if os.path.exists(filename):
-                os.remove(filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
             self.logger.error(
                 f"Decoding error for track by id '{trk_track_id_str}', "
                 f"possibly due to use of rate limited spotify account ! {exc.returncode} | {exc.output}"
@@ -239,8 +225,8 @@ class DownloadWorker(QObject):
             traceback.print_exc()
             return None
         except Exception:
-            if os.path.exists(filename):
-                os.remove(filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
             self.progress.emit([trk_track_id_str, self.tr("Failed"), [0, 100]])
             self.logger.error(
                 f"Download failed for track by id '{trk_track_id_str}', Unexpected error: {traceback.format_exc()} !")
