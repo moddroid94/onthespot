@@ -582,95 +582,104 @@ def check_premium(session):
 
 def get_song_info(session, song_id):
     token = session.tokens().get("user-read-email")
-    info = make_call(f'https://api.spotify.com/v1/tracks?ids={song_id}&market=from_token', token=token)
+    track_data = make_call(f'https://api.spotify.com/v1/tracks?ids={song_id}&market=from_token', token=token)
     credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{song_id}/credits', token=token)
     track_audio_data = make_call(f'https://api.spotify.com/v1/audio-features/{song_id}', token=token)
-    album_data = make_call(info['tracks'][0]['album']['href'], token=token)
-    artist_data = make_call(info['tracks'][0]['artists'][0]['href'], token=token)
+    album_data = make_call(track_data['tracks'][0]['album']['href'], token=token)
+    artist_data = make_call(track_data['tracks'][0]['artists'][0]['href'], token=token)
 
-    # Format Artists
-    artists = []
-    for data in info['tracks'][0]['artists']:
-        artists.append(data['name'])
+    info = {}
 
-    # Format Credits
-    credits = {}
-    for credit_block in credits_data.get('roleCredits', []):
-        credits[credit_block['roleTitle'].lower()] = [
-            artist['name']
-            for artist
-            in
-            credit_block['artists']
-            ]
+    # Add Default Track Keys
+    try:
+        # Format Artists
+        artists = []
+        for data in track_data['tracks'][0]['artists']:
+            artists.append(data['name'])
 
-    # Format Key
-    if track_audio_data['key'] == 0:
-        key = "C"
-    elif track_audio_data['key'] == 1:
-        key = "C♯/D♭"
-    elif track_audio_data['key'] == 2:
-        key = "D"
-    elif track_audio_data['key'] == 3:
-        key = "D♯/E♭"
-    elif track_audio_data['key'] == 4:
-        key = "E"
-    elif track_audio_data['key'] == 5:
-        key = "F"
-    elif track_audio_data['key'] == 6:
-        key = "F♯/G♭"
-    elif track_audio_data['key'] == 7:
-        key = "G"
-    elif track_audio_data['key'] == 8:
-        key = "G♯/A♭"
-    elif track_audio_data['key'] == 9:
-        key = "A"
-    elif track_audio_data['key'] == 10:
-        key = "A♯/B♭"
-    elif track_audio_data['key'] == 11:
-        key = "B"
-    else:
-        key = ""
+        # Format Credits
+        credits = {}
+        for credit_block in credits_data.get('roleCredits', []):
+            credits[credit_block['roleTitle'].lower()] = [
+                    artist['name']
+                    for artist
+                    in
+                    credit_block['artists']
+                ]
 
-    info = {
-        'artists': artists,
-        'album_name': info['tracks'][0]['album']["name"],
-        'album_type': album_data['album_type'],
-        'album_artists': album_data['artists'][0]['name'],
-        'name': info['tracks'][0]['name'],
-        'image_url': get_thumbnail(info['tracks'][0]['album']['images'], preferred_size=640000),
-        'release_year': info['tracks'][0]['album']['release_date'].split("-")[0],
-        'track_number': info['tracks'][0]['track_number'],
-        'total_tracks': info['tracks'][0]['album']['total_tracks'],
-        'disc_number': info['tracks'][0]['disc_number'],
-        'total_discs': sorted([trk['disc_number'] for trk in album_data['tracks']['items']])[-1] if 'tracks' in album_data else 1,
+        info['artists'] = artists
+        info['album_name'] = track_data['tracks'][0]['album']["name"]
+        info['album_type'] = album_data['album_type']
+        info['album_artists'] = album_data['artists'][0]['name']
+        info['name'] = track_data['tracks'][0]['name']
+        info['image_url'] = get_thumbnail(track_data['tracks'][0]['album']['images'], preferred_size=640000)
+        info['release_year'] = track_data['tracks'][0]['album']['release_date'].split("-")[0]
+        info['track_number'] = track_data['tracks'][0]['track_number']
+        info['total_tracks'] = track_data['tracks'][0]['album']['total_tracks']
+        info['disc_number'] = track_data['tracks'][0]['disc_number']
+        info['total_discs'] = sorted([trk['disc_number'] for trk in album_data['tracks']['items']])[-1] if 'tracks' in album_data else 1
         # https://developer.spotify.com/documentation/web-api/reference/get-track
         # List of genre is supposed to be here, genre from album API is deprecated and it always seems to be unavailable
         # Use artist endpoint to get artist's genre instead
-        'genre': artist_data['genres'],
-        'performers': [item for item in credits['performers'] if isinstance(item, str)],
-        'producers': [item for item in credits['producers'] if isinstance(item, str)],
-        'writers': [item for item in credits['writers'] if isinstance(item, str)],
-        'label': album_data['label'],
-        'copyright': [holder['text'] for holder in album_data['copyrights']],
-        'explicit': info['tracks'][0]['explicit'],
-        'isrc': info['tracks'][0]['external_ids'].get('isrc', ''),
-        'length': info['tracks'][0]['duration_ms'],
-        'popularity': info['tracks'][0]['popularity'], # unused
-        'bpm': track_audio_data['tempo'],
-        'key': key,
-        'time_signature': track_audio_data['time_signature'],
-        'acousticness': track_audio_data['acousticness'],
-        'danceability': track_audio_data['danceability'],
-        'energy': track_audio_data['energy'],
-        'instrumentalness': track_audio_data['instrumentalness'],
-        'liveness': track_audio_data['liveness'],
-        'loudness': track_audio_data['loudness'],
-        'speechiness': track_audio_data['speechiness'],
-        'valence': track_audio_data['valence'],
+        info['genre'] = artist_data['genres']
+        info['performers'] = [item for item in credits['performers'] if isinstance(item, str)]
+        info['producers'] = [item for item in credits['producers'] if isinstance(item, str)]
+        info['writers'] = [item for item in credits['writers'] if isinstance(item, str)]
+        info['label'] = album_data['label']
+        info['copyright'] = [holder['text'] for holder in album_data['copyrights']]
+        info['explicit'] = track_data['tracks'][0]['explicit']
+        info['isrc'] = track_data['tracks'][0]['external_ids'].get('isrc', '')
+        info['length'] = track_data['tracks'][0]['duration_ms']
+        info['popularity'] = track_data['tracks'][0]['popularity'] # unused
+        info['scraped_song_id'] = track_data['tracks'][0]['id']
+        info['is_playable'] = track_data['tracks'][0]['is_playable']
+    except TypeError:
+        logger.info('Caught a TypeError: Something went wrong in the default track keys, please file a bug report.')
 
-        'scraped_song_id': info['tracks'][0]['id'],
-        'is_playable': info['tracks'][0]['is_playable']
-    }
+    # Add Audio Analysis Keys
+    try:
+        # Format Key
+        if track_audio_data['key'] == 0:
+            key = "C"
+        elif track_audio_data['key'] == 1:
+            key = "C♯/D♭"
+        elif track_audio_data['key'] == 2:
+            key = "D"
+        elif track_audio_data['key'] == 3:
+            key = "D♯/E♭"
+        elif track_audio_data['key'] == 4:
+            key = "E"
+        elif track_audio_data['key'] == 5:
+            key = "F"
+        elif track_audio_data['key'] == 6:
+            key = "F♯/G♭"
+        elif track_audio_data['key'] == 7:
+            key = "G"
+        elif track_audio_data['key'] == 8:
+            key = "G♯/A♭"
+        elif track_audio_data['key'] == 9:
+            key = "A"
+        elif track_audio_data['key'] == 10:
+            key = "A♯/B♭"
+        elif track_audio_data['key'] == 11:
+            key = "B"
+        else:
+            key = ""
+
+        info['bpm'] = track_audio_data['tempo']
+        info['key'] = key
+        info['time_signature'] = track_audio_data['time_signature']
+        info['acousticness'] = track_audio_data['acousticness']
+        info['danceability'] = track_audio_data['danceability']
+        info['energy'] = track_audio_data['energy']
+        info['instrumentalness'] = track_audio_data['instrumentalness']
+        info['liveness'] = track_audio_data['liveness']
+        info['loudness'] = track_audio_data['loudness']
+        info['speechiness'] = track_audio_data['speechiness']
+        info['valence'] = track_audio_data['valence']
+    except TypeError:
+        logger.info('Caught a TypeError: Audio analysis likely does not exist for this track.')
+
     return info
 
 
@@ -737,8 +746,9 @@ def make_call(url, token, params=None, headers=None, skip_cache=False):
                 logger.error(f'URL "{url}" cache has invalid data, retring request !')
                 pass
         logger.debug(f'URL "{url}" has cache miss ! HASH: {request_key}; Fetching data')
-    response = requests.get(url, headers=headers, params=params).text
-    if not skip_cache:
-        with open(req_cache_file, 'w', encoding='utf-8') as cf:
-            cf.write(response)
-    return json.loads(response)
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code == 200:
+        if not skip_cache:
+            with open(req_cache_file, 'w', encoding='utf-8') as cf:
+                cf.write(response.text)
+        return json.loads(response.text)
