@@ -265,6 +265,15 @@ def name_by_from_sdata(d_key: str, item: dict):
         if f"{'/'.join(item['genres'])}" != "":
             item_name = item['name'] + f"  |  GENERES: {'/'.join(item['genres'])}"
         item_by = f"{item['name']}"
+    elif d_key == "shows":
+        item_name = f"{config.get('explicit_label') if item['explicit'] else '       '} {item['name']}"
+        item_by = f"{item['publisher']}"
+    elif d_key == "episodes":
+        item_name = f"{config.get('explicit_label') if item['explicit'] else '       '} {item['name']}"
+        item_by = ""
+    elif d_key == "audiobooks":
+        item_name = f"{config.get('explicit_label') if item['explicit'] else '       '} {item['name']}"
+        item_by = f"{item['publisher']}"
     return item_name, item_by
 
 def fetch_account_uuid(download):

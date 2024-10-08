@@ -545,6 +545,9 @@ def search_by_term(session,
         "albums": [],
         "playlists": [],
         "artists": [],
+        "shows": [],
+        "episodes": [],
+        "audiobooks": [],
     }
     logger.info(
         f"Get search result for term '{search_term}', max items '{max_results}'"
@@ -553,7 +556,7 @@ def search_by_term(session,
         logger.warning(f"Returning empty data as query is empty !")
         return results
     if content_types is None:
-        content_types = ["track", "album", "playlist", "artist"]
+        content_types = ["track", "album", "playlist", "artist", "show", "episode", "audiobook"]
     token = session.tokens().get("user-read-email")
     resp = requests.get(
         "https://api.spotify.com/v1/search",
@@ -567,7 +570,7 @@ def search_by_term(session,
     )
     for c_type in content_types:
         results[c_type + "s"] = resp.json()[c_type + "s"]["items"]
-    if len(results["tracks"]) + len(results["albums"]) + len(results["artists"]) + len(results["playlists"]) == 0:
+    if len(results["tracks"]) + len(results["albums"]) + len(results["artists"]) + len(results["playlists"]) + len(results["shows"]) + len(results["episodes"]) + len(results["audiobooks"]) == 0:
         logger.warning(f"No results for term '{search_term}', max items '{max_results}'")
         raise EmptySearchResultException("No result found for search term '{}' ".format(search_term))
     else:

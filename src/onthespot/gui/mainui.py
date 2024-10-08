@@ -1132,6 +1132,12 @@ class MainWindow(QMainWindow):
                 filters.append('track')
             if self.inp_enable_search_artists.isChecked():
                 filters.append('artist')
+            if self.inp_enable_search_shows.isChecked():
+                filters.append('show')
+            if self.inp_enable_search_episodes.isChecked():
+                filters.append('episode')
+            if self.inp_enable_search_audiobooks.isChecked():
+                filters.append('audiobook')
             download = False
             selected_uuid = fetch_account_uuid(download)
             session = session_pool[ selected_uuid ]

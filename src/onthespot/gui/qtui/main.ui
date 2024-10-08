@@ -227,6 +227,36 @@
             </widget>
            </item>
            <item>
+            <widget class="QCheckBox" name="inp_enable_search_shows">
+             <property name="text">
+              <string>Podcasts</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="inp_enable_search_episodes">
+             <property name="text">
+              <string>Episodes</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="inp_enable_search_audiobooks">
+             <property name="text">
+              <string>Audiobooks</string>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="horizontalSpacer_7">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -1028,7 +1058,7 @@
           <widget class="QWidget" name="adv_settings_scrollarea">
            <property name="geometry">
             <rect>
-             <x>-41</x>
+             <x>0</x>
              <y>0</y>
              <width>641</width>
              <height>2717</height>
