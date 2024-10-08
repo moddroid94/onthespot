@@ -3,9 +3,9 @@ import os
 import re
 import string
 import subprocess
-from onthespot.exceptions import *
+from ..exceptions import *
 import requests.adapters
-from onthespot.otsconfig import config
+from ..otsconfig import config
 import requests
 import json
 from mutagen import File
@@ -18,7 +18,7 @@ from pathlib import Path
 from PIL import Image
 from io import BytesIO
 from hashlib import md5
-from onthespot.runtimedata import get_logger
+from ..runtimedata import get_logger
 from librespot.audio.decoders import AudioQuality
 
 logger = get_logger("spotutils")

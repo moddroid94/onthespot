@@ -11,12 +11,12 @@ from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
-from onthespot.otsconfig import config
-from onthespot.runtimedata import get_logger, cancel_list, failed_downloads, unavailable, session_pool
-from onthespot.utils.utils import sanitize_data
+from ..otsconfig import config
+from ..runtimedata import get_logger, cancel_list, failed_downloads, unavailable, session_pool
+from ..utils.utils import sanitize_data
 from .api import check_premium, get_song_info, convert_audio_format, set_music_thumbnail, set_audio_tags, \
     get_episode_info, get_track_lyrics
-from onthespot.utils.utils import re_init_session, fetch_account_uuid
+from ..utils.utils import re_init_session, fetch_account_uuid
 
 
 class DownloadWorker(QObject):

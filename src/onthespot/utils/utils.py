@@ -6,7 +6,7 @@ from librespot.core import Session
 import re
 from ..otsconfig import config, config_dir
 from ..runtimedata import get_logger
-from ..services.spotify.api import search_by_term, get_currently_playing_url
+from ..spotify.api import search_by_term, get_currently_playing_url
 import subprocess
 import asyncio
 import traceback

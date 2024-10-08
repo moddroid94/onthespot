@@ -4,8 +4,8 @@ import sys
 import time
 import uuid
 from librespot.zeroconf import ZeroconfServer
-from onthespot.otsconfig import config_dir, config
-from onthespot.runtimedata import get_logger
+from ..otsconfig import config_dir, config
+from ..runtimedata import get_logger
 
 logger = get_logger("worker.session")
 

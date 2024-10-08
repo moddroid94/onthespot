@@ -10,8 +10,8 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPus
 from ..exceptions import EmptySearchResultException
 from ..services.spotify.api import search_by_term, get_thumbnail
 from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release, open_item
-from ..services.spotify import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
-from ..services.spotify.zeroconf import new_session
+from ..spotify import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
+from ..spotify.zeroconf import new_session
 from .dl_progressbtn import DownloadActionsButtons
 from .minidialog import MiniDialog
 from ..otsconfig import config_dir, config
