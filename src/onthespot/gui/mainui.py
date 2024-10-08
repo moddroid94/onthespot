@@ -8,7 +8,7 @@ from PyQt6.QtCore import QThread, QDir, Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
 from ..exceptions import EmptySearchResultException
-from ..services.spotify.api import search_by_term, get_thumbnail
+from ..spotify.api import search_by_term, get_thumbnail
 from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release, open_item
 from ..spotify import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
 from ..spotify.zeroconf import new_session
