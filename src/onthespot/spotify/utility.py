@@ -128,12 +128,12 @@ class ParsingQueueProcessor(QObject):
                                             log_id=f'{artist}:{item["media_id"]}', item_type=f"Artist [{item_name}]")
                     if not item['data'].get('hide_dialogs', False):
                         self.progress.emit(self.tr("Added tracks by artist '{0}' to download queue !").format(item_name))
-                elif item['media_type'] == 'podcast':
+                elif item['media_type'] in ['podcast', 'show', 'audiobook']:
                     show_name = ''
                     if not item['data'].get('hide_dialogs', False):
                         self.progress.emit(self.tr('Episodes are being parsed and will be added to download queue shortly !'))
                     for episode_id in get_show_episodes(session, item['media_id']):
-                        show_name, episode_name, thumbnail, release_date, total_episodes, artist, language, description, copyright = get_episode_info(session, episode_id)
+                        show_name, episode_name, thumbnail, release_date, total_episodes, artist, language, description, copyright, length = get_episode_info(session, episode_id)
                         logger.info(
                             f"PQP parsing podcast : {show_name}:{item['media_id']}, "
                             f"episode item: {episode_name}:{episode_id}"
@@ -155,7 +155,7 @@ class ParsingQueueProcessor(QObject):
                     if not item['data'].get('hide_dialogs', False):
                         self.progress.emit(self.tr("Added show {0} to download queue!").format(show_name))
                 elif item['media_type'] == 'episode':
-                    podcast_name, episode_name, thumbnail, release_date, total_episodes, artist, language, description, copyright = get_episode_info(session, item['media_id'])
+                    podcast_name, episode_name, thumbnail, release_date, total_episodes, artist, language, description, copyright, length = get_episode_info(session, item['media_id'])
                     logger.info(f"PQP parsing podcast episode : {episode_name}:{item['media_id']}")
                     if not item['data'].get('hide_dialogs', False):
                         self.progress.emit(self.tr("Adding episode {0} to download queue !").format(episode_name))

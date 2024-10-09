@@ -106,10 +106,14 @@ def get_playlist_data(session, playlist_id):
     return resp['name'], resp['owner']['display_name'], resp['description'], resp['external_urls']['spotify']
 
 
-def get_track_lyrics(session, track_id, metadata, forced_synced):
+def get_track_lyrics(session, item_id, item_type, metadata, forced_synced):
     lyrics = []
     try:
-        url = f'https://spclient.wg.spotify.com/color-lyrics/v2/track/{track_id}'
+        if item_type == "track":
+            url = f'https://spclient.wg.spotify.com/color-lyrics/v2/track/{item_id}'
+        elif item_type == "episode":
+            url = f"https://spclient.wg.spotify.com/transcript-read-along/v2/episode/{item_id}"
+
         token = session.tokens().get("user-read-email")
         params = 'format=json&market=from_token'
 
@@ -120,47 +124,72 @@ def get_track_lyrics(session, track_id, metadata, forced_synced):
         }
 
         resp = make_call(url, token, headers=headers, params=params)
+        if resp == None:
+            logger.info(f"Failed to find lyrics for {item_type}: {item_id}")
+            return None
+
+        if config.get("embed_branding"):
+            lyrics.append('[re:OnTheSpot]')
 
         for key in metadata.keys():
             value = metadata[key]
-            if key == 'artists':
-                artist = conv_list_format(value)
-            elif key in ['name', 'track_title', 'tracktitle']:
+
+            if key in ['name', 'track_title', 'tracktitle'] and config.get("embed_name"):
                 tracktitle = value
-            elif key in ['album_name', 'album']:
+                lyrics.append(f'[ti:{tracktitle}]')
+
+            elif key == 'artists' and config.get("embed_artist"):
+                artist = conv_list_format(value)
+                lyrics.append(f'[ar:{artist}]')
+
+            elif key in ['album_name', 'album'] and config.get("embed_album"):
                 album = value
-            elif key in ['writers']:
+                lyrics.append(f'[al:{album}]')
+
+            elif key in ['writers'] and config.get("embed_writers"):
                 author = conv_list_format(value)
-        l_ms = metadata['length']
-        if config.get("embed_branding"):
-            lyrics.append('[re:OnTheSpot]')
-        if config.get("embed_name"):
-            lyrics.append(f'[ti:{tracktitle}]')
-        if config.get("embed_writers"):
-            lyrics.append(f'[au:{author}]')
-        if config.get("embed_artist"):
-            lyrics.append(f'[ar:{artist}]')
-        if config.get("embed_album"):
-            lyrics.append(f'[al:{album}]')
-        lyrics.append(f'[by:{resp["lyrics"]["provider"]}]')
+                lyrics.append(f'[au:{author}]')
+
+        if item_type == "track":
+            lyrics.append(f'[by:{resp["lyrics"]["provider"]}]')
+
         if config.get("embed_length"):
+            l_ms = metadata['length']
             if round((l_ms/1000)/60) < 10:
                 digit="0"
             else:
                 digit=""
             lyrics.append(f'[length:{digit}{round((l_ms/1000)/60)}:{round((l_ms/1000)%60)}]\n')
-        if resp["lyrics"]["syncType"] == "LINE_SYNCED":
-            for line in resp["lyrics"]["lines"]:
-                minutes, seconds = divmod(int(line['startTimeMs']) / 1000, 60)
-                lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["words"]}')
-        else:
-            # It's un synced lyrics, if not forcing synced lyrics return it
-            if not forced_synced:
-                lyrics = [line['words'][0]['string'] for line in resp['lines']]
-    except (KeyError, IndexError):
-        logger.error(f'KeyError/Index Error. Failed to get lyrics for track id: {track_id}, ')
-    return None if len(lyrics) <= 2 else {"lyrics": '\n'.join(lyrics), "language": resp["lyrics"]["language"]}
 
+        if item_type == "track":
+            if resp["lyrics"]["syncType"] == "LINE_SYNCED":
+                for line in resp["lyrics"]["lines"]:
+                    minutes, seconds = divmod(int(line['startTimeMs']) / 1000, 60)
+                    lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["words"]}')
+            else:
+                # It's un synced lyrics, if not forcing synced lyrics return it
+                if not forced_synced:
+                    lyrics = [line['words'][0]['string'] for line in resp['lines']]
+
+        elif item_type == "episode":
+            if resp["timeSyncedStatus"] == "SYLLABLE_SYNCED":
+                for line in resp["section"]:
+                    try:
+                        minutes, seconds = divmod(int(line['startMs']) / 1000, 60)
+                        lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["text"]["sentence"]["text"]}')
+                    except KeyError as e:
+                        logger.debug("Invalid line, likely title, skipping..")
+
+            else:
+                logger.info("Unsynced episode lyrics, please open a bug report.")
+
+    except (KeyError, IndexError):
+        logger.error(f'KeyError/Index Error. Failed to get lyrics for track id: {item_id}, ')
+
+    if item_type == "track":
+        return None if len(lyrics) <= 2 else {"lyrics": '\n'.join(lyrics), "language": resp["lyrics"]["language"]}
+    elif item_type == "episode":
+        return None if len(lyrics) <= 2 else {"lyrics": '\n'.join(lyrics)}
 
 def get_tracks_from_playlist(session, playlist_id):
     logger.info(f"Get tracks from playlist by id '{playlist_id}'")
@@ -693,7 +722,7 @@ def get_episode_info(session, episode_id_str):
     if "error" in info:
         return None, None, None
     else:
-        return info["show"]["name"], info["name"], get_thumbnail(info['images']), info['release_date'], info['show']['total_episodes'], info['show']['publisher'], info['language'] if info['language'] != "" else info['show']['languages'][0], info['description'] if info['description'] != "" else info['show']['description'], info['show']['copyrights']
+        return info["show"]["name"], info["name"], get_thumbnail(info['images']), info['release_date'], info['show']['total_episodes'], info['show']['publisher'], info['language'] if info['language'] != "" else info['show']['languages'][0], info['description'] if info['description'] != "" else info['show']['description'], info['show']['copyrights'], info['duration_ms']
 
 
 def get_show_episodes(session, show_id_str):

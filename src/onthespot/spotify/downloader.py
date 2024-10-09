@@ -190,7 +190,7 @@ class DownloadWorker(QObject):
                         self.logger.info(f'Fetching lyrics for track id: {trk_track_id_str}, '
                                          f'{config.get("only_synced_lyrics")}')
                         try:
-                            lyrics = get_track_lyrics(session, trk_track_id_str, song_info, config.get('only_synced_lyrics'))
+                            lyrics = get_track_lyrics(session, trk_track_id_str, "track", song_info, config.get('only_synced_lyrics'))
                             if lyrics:
                                 self.logger.info(f'Found lyrics for: {trk_track_id_str}, writing...')
                                 if config.get('use_lrc_file'):
@@ -235,7 +235,7 @@ class DownloadWorker(QObject):
     def download_episode(self, session, episode_id_str, extra_paths="", extra_path_as_root=False):
         self.logger.info(f"Downloading episode by id '{episode_id_str}'")
         quality = AudioQuality.HIGH
-        podcast_name, episode_name, thumbnail, release_date, total_episodes, artist, language, description, copyright = get_episode_info(session, episode_id_str)
+        podcast_name, episode_name, thumbnail, release_date, total_episodes, artist, language, description, copyright, length = get_episode_info(session, episode_id_str)
         skip_existing_file = True
         if extra_paths == "":
             extra_paths = os.path.join(extra_paths, podcast_name)
@@ -303,24 +303,43 @@ class DownloadWorker(QObject):
                     convert_audio_format(file_path, quality)
                 self.logger.info(f'Writing metadata for episode "{episode_id_str}" ')
                 self.progress.emit([episode_id_str, self.tr("Writing metadata"), None, file_path, filename])
-                set_audio_tags(
-                    file_path,
-                    {
-                        'name': episode_name,
-                        'album_name': podcast_name,
-                        'release_year': release_date,
-                        'total_tracks': total_episodes,
-                        'artists': [artist],
-                        'genre': ['Podcast'],
-                        'language': language,
-                        'description': description,
-                        'copyright': copyright
-                    },
-                    episode_id_str
-                )
+
+                episode_info = {}
+                episode_info['name'] = episode_name
+                episode_info['album_name'] = podcast_name
+                episode_info['release_year'] = release_date
+                episode_info['total_tracks'] = total_episodes
+                episode_info['artists'] = [artist]
+                episode_info['genre'] = ['Podcast']
+                episode_info['language'] = language
+                episode_info['description'] = description
+                episode_info['copyright'] = copyright
+                episode_info['length'] = length
+                set_audio_tags(file_path, episode_info, episode_id_str)
+
                 self.progress.emit([episode_id_str, self.tr("Setting thumbnail"), None, file_path, filename])
                 self.logger.info(f'Setting thumbnail for episode "{episode_id_str}" ')
                 set_music_thumbnail(file_path, thumbnail)
+
+                if config.get('inp_enable_lyrics'):
+                    self.progress.emit([episode_id_str, self.tr("Getting Lyrics"), None])
+                    self.logger.info(f'Fetching lyrics for track id: {episode_id_str}, '
+                                     f'{config.get("only_synced_lyrics")}')
+                    try:
+                        lyrics = get_track_lyrics(session, episode_id_str, "episode", episode_info, config.get('only_synced_lyrics'))
+                        if lyrics:
+                            self.logger.info(f'Found lyrics for: {episode_id_str}, writing...')
+                            if config.get('use_lrc_file'):
+                                with open(file_path[0:-len(config.get('media_format'))] + 'lrc', 'w',
+                                          encoding='utf-8') as f:
+                                    f.write(lyrics["lyrics"])
+                            if config.get('embed_lyrics'):
+                                set_audio_tags(file_path, {"lyrics": lyrics["lyrics"]}, episode_id_str)
+                            self.logger.info(f'lyrics saved for: {episode_id_str}')
+                    except Exception:
+                        self.logger.error(f'Could not get lyrics for {episode_id_str}, '
+                                          f'unexpected error: {traceback.format_exc()}')
+
                 self.progress.emit([episode_id_str, self.tr("Downloaded"), [100, 100], file_path, filename])
                 return True
             except subprocess.CalledProcessError as exc:

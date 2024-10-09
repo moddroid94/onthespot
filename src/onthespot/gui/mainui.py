@@ -1222,7 +1222,7 @@ class MainWindow(QMainWindow):
         logger.debug('Populating search results table ')
         while self.tbl_search_results.rowCount() > 0:
             self.tbl_search_results.removeRow(0)
-        for d_key in data.keys():  # d_key in ['Albums', 'Artists', 'Tracks', 'Playlists']
+        for d_key in data.keys():  # d_key in ['Albums', 'Artists', 'Tracks', 'Playlists', 'Shows', 'Episodes', 'Audiobooks']
             for item in data[d_key]:  # Item is Data for Albums, Artists, etc.
                 # Set item name
                 item_name, item_by = name_by_from_sdata(d_key, item)
