@@ -316,18 +316,14 @@ def sanitize_data(value, allow_path_separators=False, escape_quotes=False):
     char = config.get("illegal_character_replacement")
     if os.name == 'nt':
         value = value.replace('\\', char)
+        value = value.replace('/', char)
+        value = value.replace(':', char)
         value = value.replace('*', char)
         value = value.replace('?', char)
+        value = value.replace('"', char)
         value = value.replace('<', char)
         value = value.replace('>', char)
-        value = value.replace('"', char)
         value = value.replace('|', char)
-        drive_letter, tail = os.path.splitdrive(value)
-        value = os.path.join(
-            drive_letter,
-            tail.replace(':', char)
-        )
-        value = value.rstrip('.')
     else:
         value = value.replace('/', char)
     return value
