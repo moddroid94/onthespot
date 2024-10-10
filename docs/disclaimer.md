@@ -25,7 +25,7 @@ By using this software, you agree to the following terms:
 - **Independent Project**<br>
   OnTheSpot is **not affiliated with, endorsed by, or associated with** any music streaming services or platforms.
 
-- **Trademarks**  
+- **Trademarks**
   All trademarks and service marks remain the property of their respective owners.
 
 ## 3. Legal Compliance

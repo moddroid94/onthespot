@@ -8,7 +8,7 @@
 
 # Getting Started
 
-When launching the application for the first time, you will receive a warning that no Spotify accounts are added.
+When launching the application for the first time you will receive a warning that no Spotify accounts are added.
 
 1. **Dismiss the Warning**
    - Click the close button on the warning dialog.
@@ -65,28 +65,20 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 
 ### General Configuration Options
 
-<details>
-  <summary  style="color: red"><b>Open Options Table</b></summary>
+<details open>
+  <summary><b>Open Options Table</b></summary>
 
   | **Option** | **Description** |
   | ------ | ------ |
-  | **Version** | Version of the application. |
-  | **Check for Updates** | Automatically check for application updates. |
-  | **Max Download Workers** | Number of simultaneous download threads. Set this to match the number of Spotify accounts you've added. Requires application restart to take effect. |
-  | **Rotate Active Account** | Automatically switch between added accounts for downloading to minimize the chance of hitting rate limits. |
-  | **Download Location** | Root folder where all downloaded media will be saved. |
+  | **Active Account Number** | Specifies which account from the list will be used for api calls and downloads. |
+  | **Max Download Workers** | Number of simultaneous download threads. Requires application restart to take effect. |
+  | **Download Path** | Root folder where all downloaded media will be saved. |
   | **Download Delay** | Time (in seconds) to wait before initiating the next download. Helps prevent Spotify's rate limits. |
   | **Max Retries** | Number of retry attempts for a failed download before skipping to the next item. |
   | **Max Search Results** | Limits the number of search results displayed for each media type (e.g., songs, albums). |
-  | **Media Format** | Select the audio format for your downloaded music or podcasts (e.g., `mp3`, `flac`). |
-  | [**Track/Episode Path Format**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
-  | **Download Lyrics** | Enable downloading of lyrics for each track. |
-  | **Save LRC File** | Save lyrics in an `.lrc` file alongside the track. |
-  | **Force Premium** | Enforce high-quality downloads (requires a premium account). |
-  | **Show Search Thumbnails**| Display thumbnails next to search results. |
-  | **Metadata Separator** | Set the separator for metadata fields with multiple values (default: `;`). |
-  | **Embed Metadata Tags** | Select which metadata tags to embed in downloaded files (e.g., `artist`, `album`, `year`, `lyrics`, etc.). |
-  | **Explicit Label** | Customize how explicit content is labeled in file names and the app (default: 🅴). |
+  | **Raw Media Download** | Downloads the raw ogg file from Spotify. With this enabled file conversion and the embedding of metadata and cover art is skipped. |
+  | **Mirror Playback** | Download currently playing song on the active Spotify account. |
+  | **Advanced Settings** | Enables advanced settings. |
   | **Theme** | Choose the application theme (`light` or `dark`). |
 
 </details>
@@ -98,6 +90,45 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 
 For users who want more control over how their music is organized and downloaded.
 
+> [!CAUTION]
+> Changing some advanced settings may affect the organization and quality of your downloaded music. Proceed with adjustments only if you are familiar with the options.
+
+### Additional Advanced Options
+
+   <details open>
+   <summary><b>Open Advanced Options</b></summary>
+
+| **Option** | **Description** |
+| ------ | ------ |
+| **Download Buttons** | Adds extra functionalities like copying song links, opening tracks in your local music player, and locating the download directory. |
+| **Show Thumbnails In Search**| Display thumbnails next to search results. |
+| **Thumbnail Search Size**| Quality of thumbnails in search, it is unlikely you will notice a difference. |
+| **Disable Bulk Download Notices** | Disables pop-up messages while downloading multiple songs or episodes. |
+| **Explicit Label** | Customize how explicit content is labeled in file names and the app (default: 🅴). |
+| **Check for Updates** | Automatically check for application updates. |
+| **Track/Episode Format** | Select the audio format for your downloaded music or podcasts (e.g. `mp3`, `flac`, `ogg`, `m4a`). |
+| [**Track/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
+| **Use Custom Playlist Path** | Enable the use of a custom path format for playlists. |
+| [**Playlist Path**](#trackplaylist-path-format) | Customize the file naming pattern for playlists using variables like `{artist}`, `{album}`, etc. |
+| **Create M3U Files for Playlists** | If enabled create an M3U file for downloaded tracks in a playlist. |
+| [**M3U Path**](#trackplaylist-path-format) | Customize the download path of created M3U files using variables like `{artist}`, `{album}`, etc. |
+| **Save Album Cover** | Save album cover as an image with a default format of cover.png |
+| **Album Cover Format** | The image format to save album covers in (default: png) |
+| **Illegal Character Replacement** | Replace illegal characters in the filepath with the value specified (e.g., `/`, `\`, `<`, `>`, `*`, etc.). |
+| **Download Lyrics from Spotify\*** | Enable downloading of lyrics for each track/episode. *This feature requires a premium account.* |
+| **Download Synced Lyrics Only\*** | Only download synced lyrics for tracks. *This feature requires a premium account.*|
+| **Save LRC File\*** | Save lyrics in an `.lrc` file alongside the track. *This feature requires a premium account.* |
+| **Force Premium** | Only download tracks in 'Very High' quality, this feature may break downloads for tracks that do not support 320kbps. *This feature requires a premium account.* |
+| **Rotate Active Account** | Automatically rotate between added accounts for downloading to minimize the chance of hitting rate limits. This feature breaks the functionality of 'Active Account Number'. |
+| **Recoverable Downloads Retry Delay**| Sets the wait time before retrying a failed download attempt (default: `10 seconds`). |
+| **Skip Bytes at End** | Sets the number of bytes to skip at the end of a download when encountering 'PD Errors' to avoid incomplete tracks. |
+| **Translate File Path** | Translate file paths into the application language. |
+| **Metadata Separator** | Set the separator for metadata fields with multiple values (default: `; `). |
+| **Embed Metadata Tags** | Select which metadata tags to embed in downloaded files (e.g., `artist`, `album`, `year`, `lyrics`, etc.). |
+
+   </details>
+
+
 ### Track/Playlist Path Format
 
 - **Customize File Names**
@@ -105,8 +136,8 @@ For users who want more control over how their music is organized and downloaded
 
 - **Available Variables**
 
-   <details>
-   <summary style="color: red"><b>Open Variables Table</b></summary>
+   <details open>
+   <summary><b>Open Variables Table</b></summary>
 
    | **Variable**      | **Description**                                     |
    | ----------------- | --------------------------------------------------- |
@@ -135,8 +166,8 @@ For users who want more control over how their music is organized and downloaded
 
 - **Available Variables**
 
-   <details>
-   <summary style="color: red"><b>Open Variables Table</b></summary>
+   <details open>
+   <summary><b>Open Variables Table</b></summary>
 
   | **Variable**      | **Description**                               |
   | ----------------- | --------------------------------------------- |
@@ -153,24 +184,6 @@ For users who want more control over how their music is organized and downloaded
 > **Example:**  
 > Setting the directory format to `{artist}/{podcast_name}/{episode})` will create folders like `Artist Name/Podcast Name/Episode Name.mp3`.
 
-### Additional Advanced Options
-
-   <details>
-   <summary style="color: red"><b>Open Advanced Options</b></summary>
-
-| **Option**                          | **Description**                                                                                                                                                                               |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Use Custom Playlist Path**         | Enable the use of a custom path format for playlists.                                                                                                                                          |
-| **Download Buttons**                 | Adds extra functionalities like copying song links, opening tracks in your local music player, and locating the download directory.                                                             |
-| **Recoverable Downloads Retry Delay**| Sets the wait time before retrying a failed download attempt (default: `10 seconds`).                                                                                                          |
-| **Skip Bytes at End**                | Sets the number of bytes to skip at the end of a download when encountering 'PD Errors' to avoid incomplete tracks.                                                                             |
-| **Disable Bulk Download Notices**    | Disables pop-up messages during bulk downloads for a cleaner user experience.                                                                                                                  |
-| **Translate File Path**              | Translate file paths into the application language.                                                                                                                                           |
-
-   </details>
-
-> [!CAUTION]
-> Changing some advanced settings may affect the organization and quality of your downloaded music. Proceed with adjustments only if you are familiar with the options.
 
 ## 6. Saving Your Configuration
 

@@ -32,7 +32,7 @@
 
 ## What is OnTheSpot?
 
-OnTheSpot is a open-source user-friendly music downloader built with Qt and Python. Inspired by the original [**OnTheSpot**](https://github.com/casualsnek/onthespot) and [**Zotify**](https://github.com/zotify-dev/zotify), made for educational and personal use only. You can search for songs, artists, albums and playlists and download them straight to your device. It's designed to be simple and effective, and it works across multiple platforms, so anyone can enjoy their favourite music offline.
+OnTheSpot is a open-source user-friendly music downloader built with Qt and Python. Inspired by the original [**OnTheSpot**](https://github.com/casualsnek/onthespot) and [**Zotify**](https://github.com/zotify-dev/zotify), made for educational and personal use only. You can search for songs, artists, albums, playlists, podcasts, and audiobooks and download them straight to your device. It's designed to work across multiple platforms, so anyone can enjoy their favourite music offline.
 
 ![OTS_Overview](assets/02_Images/IMG_Overview.png)
 
@@ -41,7 +41,7 @@ OnTheSpot is a open-source user-friendly music downloader built with Qt and Pyth
 - [**Cross-Platform**](https://www.techopedia.com/definition/17056/cross-platform)<br>Available for Windows, macOS, and Linux (Including AppImage, PKGBUILD, and eBuild).
 - [**High-Quality Downloads**](https://www.whathifi.com/advice/high-resolution-audio-everything-you-need-to-know)<br>Download music up to 320kbps directly from the source.
 - [**Multi-Language Support**](https://phrase.com/blog/posts/multilingual-customer-support/)<br>Download track and album names translated to your application's language.
-- [**Comprehensive Content Coverage**](https://thisisglance.com/blog/why-spotify-is-the-outright-best-music-streaming-app)<br>Supports songs, podcasts, playlists, albums, singles, and compilations.
+- [**Comprehensive Content Coverage**](https://thisisglance.com/blog/why-spotify-is-the-outright-best-music-streaming-app)<br>Supports songs, podcasts, playlists, albums, singles, compilations, and audiobooks.
 - [**Rich Metadata Embedding**](https://sonosuite.com/en/blog/what-is-music-metadata-and-why-is-important-to-digital-music/)<br>Automatically embed detailed metadata like artist, album, year, and lyrics.
 - [**Custom Download Paths**](https://www.microsoft.com/en-us/microsoft-365/business-insights-ideas/resources/11-ideas-for-how-to-organize-digital-files)<br>Set personalized paths for playlists and episodes for easy organization.
 - [**Free and Premium Support**](https://community.spotify.com/t5/Social-Random/What-is-the-difference-between-free-Spotify-and-Premium/td-p/5478479)<br>Compatible with both free and premium accounts.
@@ -51,7 +51,7 @@ OnTheSpot is a open-source user-friendly music downloader built with Qt and Pyth
 
 ## Getting Started
 
-OnTheSpot is an open-source music search and download application. You can find what you need by entering queries or URLs, and the app will locate the relevant media for you. Downloads are easy to manage, with options to adjust settings, formats, and directories to your liking.
+OnTheSpot is an open-source music search and download application. You can find what you need by entering queries or URLs and the app will locate the relevant media for you. Downloads are easy to manage with options to adjust settings, formats, and directories to your liking.
 
 To begin, please refer to the following documents:
 
@@ -88,7 +88,7 @@ For full details, please read our [**Disclaimer**](docs/disclaimer.md).
 
 ## Contact Us
 
-If you have any questions, concerns or need assistance, feel free to [contact us](mailto:justin026@protonmail.com).
+If you have any questions, concerns, or need assistance feel free to [contact us](mailto:justin026@protonmail.com).
 
 <!-- Issues Badge -->
 [issues-shield]: https://img.shields.io/github/issues/justin025/onthespot?style=flat&label=Issues&labelColor=003366&color=1DB954

@@ -8,9 +8,9 @@
 
 # Installing
 
-We've made the installation process really straightforward, even if you're new to this. You can install OnTheSpot in two different ways. We think you'll find the first option easier. 
+We've made the installation process really straightforward, even if you're new to this. You can install OnTheSpot using the two methods listed below. We think you'll find the first option easier.
 
-It's really straightforward.
+It's quite easy.
 
 ## 1. Install via GitHub Releases (Recommended)
 
@@ -43,8 +43,9 @@ This is the easiest way to get started.
 
 If you prefer to build OnTheSpot yourself, follow these steps.
 
-1. **Download the Source Code**
+1. **Install Python and Download the Source Code**
 
+   - Installing python can vary depending on your operating system.
    - The source code can be downloaded through github or through the commands below:
 
      ```bash
@@ -65,4 +66,4 @@ If you prefer to build OnTheSpot yourself, follow these steps.
 3. **Install and Launch OnTheSpot**
 
 > [!TIP]
-> After building, the application will be located in the `dist` folder. Be sure to follow installation steps based on your operating system.
+> After building the application will be located in the `dist` folder. Be sure to follow installation steps based on your operating system.
