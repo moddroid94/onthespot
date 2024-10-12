@@ -31,10 +31,9 @@ def new_session():
         time.sleep(1)
         if zs.has_valid_session():
             logger.info(f"Grabbed {zs._ZeroconfServer__session} for {zs._ZeroconfServer__session.username()}")
-
-            if {zs._ZeroconfServer__session.username()} in [user[0] for user in config.get('accounts')]:
+            if any(zs._ZeroconfServer__session.username() in current_accounts for current_accounts in config.get('accounts')):
                 logger.info("Account already exists")
-                return
+                return False
             else:
                 cfg_copy = config.get('accounts').copy()
                 new_user = [
@@ -47,6 +46,5 @@ def new_session():
                 cfg_copy.append(new_user)
                 config.set_('accounts', cfg_copy)
                 config.update()
-                logger.info("Config updated, restarting...")
-                os.execl(sys.executable, sys.executable, * sys.argv)
-                return
+                logger.info("New account added to config.")
+                return True

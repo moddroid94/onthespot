@@ -1092,11 +1092,18 @@ class MainWindow(QMainWindow):
         config.update()
         logger.info('Config updated !')
 
+    def __create_new_session(self):
+        create_new_session = new_session()
+        if create_new_session == True:
+            self.__splash_dialog.run(self.tr("Account added, Please restart the app."))
+        elif create_new_session == False:
+            self.__splash_dialog.run(self.tr("Account already exists."))
+
     def __add_account(self):
         logger.info('Add account clicked ')
         self.btn_login_add.setText(self.tr("Waiting..."))
         self.btn_login_add.setDisabled(True)
-        login = threading.Thread(target=new_session)
+        login = threading.Thread(target=self.__create_new_session)
         login.daemon = True
         login.start()
         self.__splash_dialog.run(self.tr("Login Service Started...\nSelect 'OnTheSpot' under devices in the Spotify Desktop App."))

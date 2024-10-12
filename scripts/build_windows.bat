@@ -130,4 +130,3 @@ rmdir /s /q venvwin 2>nul
 rmdir /s /q ffbin_win 2>nul
 
 echo =^> Done!
-timeout /t 10 >nul
