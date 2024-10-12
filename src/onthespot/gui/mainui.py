@@ -6,7 +6,7 @@ import uuid
 from PyQt6 import uic, QtNetwork, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton
 from ..exceptions import EmptySearchResultException
 from ..spotify.api import search_by_term, get_thumbnail
 from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release, open_item
@@ -271,10 +271,12 @@ class MainWindow(QMainWindow):
         logger.info("Setting table item properties")
         # Sessions table
         tbl_sessions_header = self.tbl_sessions.horizontalHeader()
-        tbl_sessions_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        tbl_sessions_header.resizeSection(0, 20)
         tbl_sessions_header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         tbl_sessions_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        tbl_sessions_header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
+        tbl_sessions_header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        tbl_sessions_header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        tbl_sessions_header.setSectionResizeMode(5, QHeaderView.ResizeMode.Fixed)
         # Search results table
         tbl_search_results_headers = self.tbl_search_results.horizontalHeader()
         tbl_search_results_headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
@@ -548,10 +550,17 @@ class MainWindow(QMainWindow):
         sn = 0
         for user in userdata:
             sn = sn + 1
+
+            radiobutton = QRadioButton()
+            radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow() + 1) and config.update())
+            if sn == config.get("parsing_acc_sn"):
+                radiobutton.setChecked(True)
+
             btn = QPushButton(self.tbl_sessions)
             btn.setText(self.tr(" Remove "))
             btn.clicked.connect(lambda x, account_uuid=user[3]: self.__user_table_remove_click(account_uuid))
             btn.setMinimumHeight(30)
+
             rows = self.tbl_sessions.rowCount()
             br = "N/A"
             if user[1].lower() == "free":
@@ -559,11 +568,12 @@ class MainWindow(QMainWindow):
             elif user[1].lower() == "premium":
                 br = "320K"
             self.tbl_sessions.insertRow(rows)
-            self.tbl_sessions.setItem(rows, 0, QTableWidgetItem(user[0]))
-            self.tbl_sessions.setItem(rows, 1, QTableWidgetItem(user[1]))
-            self.tbl_sessions.setItem(rows, 2, QTableWidgetItem(br))
-            self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(user[2]))
-            self.tbl_sessions.setCellWidget(rows, 4, btn)
+            self.tbl_sessions.setCellWidget(rows, 0, radiobutton)
+            self.tbl_sessions.setItem(rows, 1, QTableWidgetItem(user[0]))
+            self.tbl_sessions.setItem(rows, 2, QTableWidgetItem(user[1]))
+            self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(br))
+            self.tbl_sessions.setItem(rows, 4, QTableWidgetItem(user[2]))
+            self.tbl_sessions.setCellWidget(rows, 5, btn)
         logger.info("Accounts table was populated !")
 
     def __rebuild_threads(self):
@@ -595,7 +605,6 @@ class MainWindow(QMainWindow):
     def __fill_configs(self):
         self.inp_language.setCurrentIndex(config.get("language_index"))
         self.inp_max_threads.setValue(config.get("max_threads"))
-        self.inp_parsing_acc_sn.setValue(config.get("parsing_acc_sn"))
         self.inp_explicit_label.setText(config.get("explicit_label"))
         self.inp_download_root.setText(config.get("download_root"))
         self.inp_download_delay.setValue(config.get("download_delay"))
@@ -844,11 +853,6 @@ class MainWindow(QMainWindow):
         if config.get('max_threads') != self.inp_max_threads.value():
             self.__splash_dialog.run(self.tr("Thread config was changed. \n Application needs to be restarted for changes to take effect."))
         config.set_('max_threads', self.inp_max_threads.value())
-        if self.inp_parsing_acc_sn.value() > len(session_pool):
-            config.set_('parsing_acc_sn', 1)
-            self.inp_parsing_acc_sn.setValue(1)
-        else:
-            config.set_('parsing_acc_sn', self.inp_parsing_acc_sn.value())
         config.set_('explicit_label', self.inp_explicit_label.text())
         config.set_('download_root', self.inp_download_root.text())
         config.set_('track_path_formatter', self.inp_track_formatter.text())

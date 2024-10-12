@@ -10,11 +10,11 @@
 
 Thank you for considering contributing to the **OnTheSpot** project! We appreciate all contributions.
 
-Before contributing, we encourage you to read our [License](../license) and [ReadMe](../). If you have any questions not answered by the content of this repository, feel free to [contact us](mailto:justin026@protonmail.com).
+Before contributing, we encourage you to read our [License](../LICENSE) and [ReadMe](../). If you have any questions not answered by the content of this repository, feel free to [contact us](mailto:justin026@protonmail.com).
 
 ## License
 
-OnTheSpot is open-source software licensed under the [GNU General Public License v2.0](../license). By contributing to this project, you agree that your contributions will be licensed under the GPL-2.0 as well.
+OnTheSpot is open-source software licensed under the [GNU General Public License v2.0](../LICENSE). By contributing to this project, you agree that your contributions will be licensed under the GPL-2.0 as well.
 
 ## How to Contribute
 

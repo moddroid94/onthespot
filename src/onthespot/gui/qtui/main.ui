@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
+    <width>671</width>
     <height>471</height>
    </rect>
   </property>
@@ -638,7 +638,7 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
                  <item>
-                  <widget class="QGroupBox" name="groupBox_14">
+                  <widget class="QGroupBox" name="groupBox_20">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -651,22 +651,22 @@
                    <property name="flat">
                     <bool>true</bool>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_11">
+                   <layout class="QHBoxLayout" name="horizontalLayout_15">
                     <item>
-                     <widget class="QLabel" name="lb_parsing_acc_sn">
+                     <widget class="QLabel" name="lb_download_delay">
                       <property name="text">
-                       <string>Active Account Number</string>
+                       <string>Download Delay</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="inp_parsing_acc_sn"/>
+                     <widget class="QSpinBox" name="inp_download_delay"/>
                     </item>
                    </layout>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QGroupBox" name="groupBox_11">
+                  <widget class="QGroupBox" name="groupBox_17">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -679,16 +679,16 @@
                    <property name="flat">
                     <bool>true</bool>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_8">
+                   <layout class="QHBoxLayout" name="horizontalLayout_12">
                     <item>
-                     <widget class="QLabel" name="lb_max_threads">
+                     <widget class="QLabel" name="lb_max_retries">
                       <property name="text">
-                       <string>Max Download Workers</string>
+                       <string>Max Retries</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="inp_max_threads"/>
+                     <widget class="QSpinBox" name="inp_max_retries"/>
                     </item>
                    </layout>
                   </widget>
@@ -748,7 +748,7 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_7">
                  <item>
-                  <widget class="QGroupBox" name="groupBox_20">
+                  <widget class="QGroupBox" name="groupBox_11">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -761,44 +761,16 @@
                    <property name="flat">
                     <bool>true</bool>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_15">
+                   <layout class="QHBoxLayout" name="horizontalLayout_8">
                     <item>
-                     <widget class="QLabel" name="lb_download_delay">
+                     <widget class="QLabel" name="lb_max_threads">
                       <property name="text">
-                       <string>Download Delay</string>
+                       <string>Max Download Workers</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="inp_download_delay"/>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="groupBox_17">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_12">
-                    <item>
-                     <widget class="QLabel" name="lb_max_retries">
-                      <property name="text">
-                       <string>Max Retries</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="inp_max_retries"/>
+                     <widget class="QSpinBox" name="inp_max_threads"/>
                     </item>
                    </layout>
                   </widget>
@@ -836,6 +808,23 @@
                      </widget>
                     </item>
                    </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QGroupBox" name="groupBox_14">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <property name="flat">
+                    <bool>true</bool>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_11"/>
                   </widget>
                  </item>
                 </layout>
@@ -976,12 +965,32 @@
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
+             <property name="showGrid">
+              <bool>true</bool>
+             </property>
              <property name="sortingEnabled">
               <bool>true</bool>
              </property>
+             <attribute name="horizontalHeaderCascadingSectionResizes">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="horizontalHeaderDefaultSectionSize">
+              <number>100</number>
+             </attribute>
              <attribute name="horizontalHeaderStretchLastSection">
               <bool>true</bool>
              </attribute>
+             <attribute name="verticalHeaderVisible">
+              <bool>false</bool>
+             </attribute>
+             <column>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="textAlignment">
+               <set>AlignTrailing|AlignTop</set>
+              </property>
+             </column>
              <column>
               <property name="text">
                <string>Username</string>
