@@ -1095,9 +1095,12 @@ class MainWindow(QMainWindow):
     def __create_new_session(self):
         create_new_session = new_session()
         if create_new_session == True:
-            self.__splash_dialog.run(self.tr("Account added, Please restart the app."))
+            self.__splash_dialog.run(self.tr("Account added, please restart the app."))
+            self.btn_login_add.setText(self.tr("Please Restart The App"))
         elif create_new_session == False:
             self.__splash_dialog.run(self.tr("Account already exists."))
+            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.setDisabled(False)
 
     def __add_account(self):
         logger.info('Add account clicked ')
