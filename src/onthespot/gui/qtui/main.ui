@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>671</width>
-    <height>471</height>
+    <height>584</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -162,98 +162,151 @@
           <property name="flat">
            <bool>true</bool>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_29">
+          <layout class="QVBoxLayout" name="verticalLayout_37">
            <item>
-            <spacer name="horizontalSpacer_8">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
+            <widget class="QGroupBox" name="group_login_form_5">
+             <property name="minimumSize">
               <size>
-               <width>10</width>
-               <height>20</height>
+               <width>0</width>
+               <height>0</height>
               </size>
              </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Search for: </string>
+             <property name="title">
+              <string/>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="inp_enable_search_playlists">
-             <property name="text">
-              <string>Playlist</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="inp_enable_search_albums">
-             <property name="text">
-              <string>Albums</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="inp_enable_search_tracks">
-             <property name="text">
-              <string>Tracks</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="inp_enable_search_artists">
-             <property name="text">
-              <string>Artists</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="inp_enable_search_shows">
-             <property name="text">
-              <string>Podcasts</string>
-             </property>
-             <property name="checked">
+             <property name="flat">
               <bool>false</bool>
              </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_233">
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Search for: </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="inp_enable_search_tracks">
+                <property name="text">
+                 <string>Tracks</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="inp_enable_search_albums">
+                <property name="text">
+                 <string>Albums</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="inp_enable_search_artists">
+                <property name="text">
+                 <string>Artists</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="inp_enable_search_playlists">
+                <property name="text">
+                 <string>Playlist</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="inp_enable_search_episodes">
+                <property name="text">
+                 <string>Episodes</string>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="inp_enable_search_shows">
+                <property name="text">
+                 <string>Podcasts</string>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="inp_enable_search_audiobooks">
+                <property name="text">
+                 <string>Audiobooks</string>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="inp_enable_search_episodes">
-             <property name="text">
-              <string>Episodes</string>
+            <widget class="QGroupBox" name="group_login_form_6">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
              </property>
-             <property name="checked">
+             <property name="title">
+              <string/>
+             </property>
+             <property name="flat">
               <bool>false</bool>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="inp_enable_search_audiobooks">
-             <property name="text">
-              <string>Audiobooks</string>
-             </property>
-             <property name="checked">
-              <bool>false</bool>
-             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_234">
+              <item>
+               <widget class="QLabel" name="lb_tmp_dl_root">
+                <property name="text">
+                 <string>Temporary Download Path</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="inp_tmp_dl_root"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_download_tmp_browse">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
            <item>
@@ -304,23 +357,6 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item>
-            <widget class="QLabel" name="lb_tmp_dl_root">
-             <property name="text">
-              <string>Temporary Download Path</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="inp_tmp_dl_root"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_download_tmp_browse">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
@@ -384,6 +420,11 @@
              <column>
               <property name="text">
                <string>Content Type</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Service</string>
               </property>
              </column>
              <column>
@@ -577,483 +618,11 @@
        </layout>
       </widget>
       <widget class="QWidget" name="settings">
-       <attribute name="title">
-        <string>Settings</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QGroupBox" name="groupBox">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="title">
-           <string>Application Settings</string>
-          </property>
-          <property name="flat">
-           <bool>false</bool>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_7">
-           <item>
-            <widget class="QGroupBox" name="groupBox_10">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QGroupBox {
-	border:0;
-}</string>
-             </property>
-             <property name="title">
-              <string/>
-             </property>
-             <property name="flat">
-              <bool>true</bool>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_16">
-              <item>
-               <widget class="QGroupBox" name="groupBox_15">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="autoFillBackground">
-                 <bool>false</bool>
-                </property>
-                <property name="title">
-                 <string/>
-                </property>
-                <property name="flat">
-                 <bool>true</bool>
-                </property>
-                <property name="checkable">
-                 <bool>false</bool>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout_6">
-                 <item>
-                  <widget class="QGroupBox" name="groupBox_20">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_15">
-                    <item>
-                     <widget class="QLabel" name="lb_download_delay">
-                      <property name="text">
-                       <string>Download Delay</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="inp_download_delay"/>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="groupBox_17">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_12">
-                    <item>
-                     <widget class="QLabel" name="lb_max_retries">
-                      <property name="text">
-                       <string>Max Retries</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="inp_max_retries"/>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="groupBox_12">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_9">
-                    <item>
-                     <widget class="QLabel" name="lb_download_root">
-                      <property name="text">
-                       <string>Download Path</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="inp_download_root">
-                      <property name="dragEnabled">
-                       <bool>true</bool>
-                      </property>
-                      <property name="clearButtonEnabled">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="btn_download_root_browse">
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item>
-               <widget class="QGroupBox" name="groupBox_16">
-                <property name="title">
-                 <string/>
-                </property>
-                <property name="flat">
-                 <bool>true</bool>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout_7">
-                 <item>
-                  <widget class="QGroupBox" name="groupBox_11">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_8">
-                    <item>
-                     <widget class="QLabel" name="lb_max_threads">
-                      <property name="text">
-                       <string>Max Download Workers</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="inp_max_threads"/>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="groupBox_21">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_10">
-                    <item>
-                     <widget class="QLabel" name="lm_media_format_2">
-                      <property name="text">
-                       <string>Max Search Results</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="inp_max_search_results">
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>50</number>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="groupBox_14">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_11"/>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="groupBox_9">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>300</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">QGroupBox {
-	border:0;
-}</string>
-             </property>
-             <property name="title">
-              <string/>
-             </property>
-             <property name="flat">
-              <bool>true</bool>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_8">
-              <item>
-               <widget class="QCheckBox" name="inp_raw_download">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Skip injecting metadata, album cover, and file conversion&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Raw Media Download</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="inp_enable_spot_watch">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mirror playback on your Spotify account&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Mirror Playback</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="btn_toggle_advanced">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Advanced Settings</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QGroupBox" name="groupBox_2">
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>140</height>
-                 </size>
-                </property>
-                <property name="title">
-                 <string/>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout_9">
-                 <item>
-                  <widget class="QComboBox" name="inp_language"/>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="toggle_theme_button">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Dark/Light Theme</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="btn_save_config">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string> Save Settings</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupbox_accounts">
-          <property name="title">
-           <string>Spotify Accounts</string>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <widget class="QTableWidget" name="tbl_sessions">
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="editTriggers">
-              <set>QAbstractItemView::NoEditTriggers</set>
-             </property>
-             <property name="selectionMode">
-              <enum>QAbstractItemView::SingleSelection</enum>
-             </property>
-             <property name="selectionBehavior">
-              <enum>QAbstractItemView::SelectRows</enum>
-             </property>
-             <property name="showGrid">
-              <bool>true</bool>
-             </property>
-             <property name="sortingEnabled">
-              <bool>true</bool>
-             </property>
-             <attribute name="horizontalHeaderCascadingSectionResizes">
-              <bool>false</bool>
-             </attribute>
-             <attribute name="horizontalHeaderDefaultSectionSize">
-              <number>100</number>
-             </attribute>
-             <attribute name="horizontalHeaderStretchLastSection">
-              <bool>true</bool>
-             </attribute>
-             <attribute name="verticalHeaderVisible">
-              <bool>false</bool>
-             </attribute>
-             <column>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="textAlignment">
-               <set>AlignTrailing|AlignTop</set>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>Username</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>Account Type</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>DL Bitrate</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>Status</string>
-              </property>
-             </column>
-             <column>
-              <property name="text">
-               <string>Action</string>
-              </property>
-             </column>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="group_login_form">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="title">
-              <string/>
-             </property>
-             <property name="flat">
-              <bool>false</bool>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QPushButton" name="btn_login_add">
-                <property name="text">
-                 <string>Add Account</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="advanced_settings">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <attribute name="title">
-        <string>Advanced Settings</string>
+        <string>Settings</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_12">
         <item>
@@ -1068,12 +637,143 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>0</y>
+             <y>-84</y>
              <width>641</width>
-             <height>2717</height>
+             <height>3345</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
+            <item>
+             <widget class="QGroupBox" name="groupbox_accounts_3">
+              <property name="title">
+               <string>Accounts</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_18">
+               <item>
+                <widget class="QTableWidget" name="tbl_sessions">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>200</height>
+                  </size>
+                 </property>
+                 <property name="frameShape">
+                  <enum>QFrame::StyledPanel</enum>
+                 </property>
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::NoEditTriggers</set>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SingleSelection</enum>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectRows</enum>
+                 </property>
+                 <property name="showGrid">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sortingEnabled">
+                  <bool>true</bool>
+                 </property>
+                 <attribute name="horizontalHeaderCascadingSectionResizes">
+                  <bool>false</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderDefaultSectionSize">
+                  <number>100</number>
+                 </attribute>
+                 <attribute name="horizontalHeaderStretchLastSection">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
+                 <column>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="textAlignment">
+                   <set>AlignTrailing|AlignTop</set>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Username</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Service</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Account Type</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>DL Bitrate</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Status</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Action</string>
+                  </property>
+                 </column>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="group_login_form_3">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>false</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_50">
+                  <item>
+                   <widget class="QComboBox" name="add_service">
+                    <property name="maximumSize">
+                     <size>
+                      <width>45</width>
+                      <height>45</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btn_login_add_spotify">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>45</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Add Spotify Account</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
             <item>
              <widget class="QGroupBox" name="gb0">
               <property name="styleSheet">
@@ -1086,6 +786,117 @@
                <bool>false</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_26">
+               <item>
+                <widget class="QGroupBox" name="gb0_4">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_74">
+                  <item>
+                   <widget class="QGroupBox" name="group_playlist_cfg_m3u_24">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_114">
+                     <item>
+                      <widget class="QLabel" name="lb_chunk_size_6">
+                       <property name="text">
+                        <string>Language</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="inp_language">
+                       <property name="frame">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_44">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeType">
+                        <enum>QSizePolicy::Minimum</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="lb_chunk_size_7">
+                       <property name="text">
+                        <string>Theme</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="toggle_theme_button">
+                       <property name="text">
+                        <string>Dark/Light Theme</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_45">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeType">
+                        <enum>QSizePolicy::Minimum</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="lb_download_root">
+                       <property name="text">
+                        <string>Download Path</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="inp_download_root">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="btn_download_root_browse">
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
                <item>
                 <widget class="QGroupBox" name="gb0_0">
                  <property name="styleSheet">
@@ -1954,6 +1765,298 @@
                         </size>
                        </property>
                       </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_23">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_240">
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_132">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_241">
+                     <item>
+                      <widget class="QCheckBox" name="inp_raw_download">
+                       <property name="toolTip">
+                        <string/>
+                       </property>
+                       <property name="layoutDirection">
+                        <enum>Qt::RightToLeft</enum>
+                       </property>
+                       <property name="text">
+                        <string>Raw Media Download</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_50">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_133">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_242">
+                     <item>
+                      <widget class="QCheckBox" name="inp_enable_spot_watch">
+                       <property name="layoutDirection">
+                        <enum>Qt::RightToLeft</enum>
+                       </property>
+                       <property name="text">
+                        <string>Mirror Playback</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_52">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_21">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_231">
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_128">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_235">
+                     <item>
+                      <widget class="QLabel" name="lb_chunk_size_3">
+                       <property name="text">
+                        <string>Download Delay</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_46">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_download_delay">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="minimum">
+                        <number>10000</number>
+                       </property>
+                       <property name="maximum">
+                        <number>10000000</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_129">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_236">
+                     <item>
+                      <widget class="QLabel" name="lb_max_recdl_delay_3">
+                       <property name="text">
+                        <string>Max Download Workers</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_47">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_max_threads">
+                       <property name="minimumSize">
+                        <size>
+                         <width>80</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximum">
+                        <number>999999</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_22">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_237">
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_130">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_238">
+                     <item>
+                      <widget class="QLabel" name="lb_chunk_size_4">
+                       <property name="text">
+                        <string>Max Retries</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_48">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_max_retries">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="minimum">
+                        <number>1</number>
+                       </property>
+                       <property name="maximum">
+                        <number>99</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_131">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_239">
+                     <item>
+                      <widget class="QLabel" name="lb_max_recdl_delay_4">
+                       <property name="text">
+                        <string>Max Search Results</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_49">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_max_search_results">
+                       <property name="minimumSize">
+                        <size>
+                         <width>80</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="minimum">
+                        <number>1</number>
+                       </property>
+                       <property name="maximum">
+                        <number>50</number>
+                       </property>
+                      </widget>
                      </item>
                     </layout>
                    </widget>
@@ -3569,7 +3672,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="btn_save_adv_config">
+            <widget class="QPushButton" name="btn_save_config">
              <property name="minimumSize">
               <size>
                <width>0</width>

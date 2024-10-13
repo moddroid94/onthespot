@@ -122,6 +122,15 @@ class MainWindow(QMainWindow):
         self.inp_language.insertItem(999, pirate_icon, "Contribute")
         self.inp_language.currentIndexChanged.connect(self.contribute)
 
+        spotify_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png'))
+        #self.btn_login_add_spotify.setIcon(spotify_icon)
+
+        self.add_service.insertItem(0, spotify_icon, "")
+
+
+        #soundcloud_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'soundcloud.png'))
+        #self.btn_login_add_soundcloud.setIcon(soundcloud_icon)
+
         save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'save.png'))
         self.btn_save_config.setIcon(save_icon)
         folder_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
@@ -154,12 +163,6 @@ class MainWindow(QMainWindow):
         # Fill the value from configs
         logger.info("Loading configurations..")
         self.__fill_configs()
-
-        # Hide the advanced tab on initial startup
-        self.__advanced_visible = False
-        self.tabview.setTabVisible(3, self.__advanced_visible)
-        if not self.__advanced_visible:
-            self.group_temp_dl_root.hide()
 
         self.__splash_dialog = _dialog
 
@@ -243,13 +246,11 @@ class MainWindow(QMainWindow):
 
         self.btn_search.clicked.connect(self.__get_search_results)
 
-        self.btn_login_add.clicked.connect(self.__add_account)
+        self.btn_login_add_spotify.clicked.connect(self.__add_account)
         self.btn_save_config.clicked.connect(self.__update_config)
         self.btn_reset_config.clicked.connect(self.reset_app_config)
 
         self.btn_search_download_all.clicked.connect(lambda x, cat="all": self.__mass_action_dl(cat))
-        self.btn_save_adv_config.clicked.connect(self.__update_config)
-        self.btn_toggle_advanced.clicked.connect(self.__toggle_advanced)
         self.inp_enable_lyrics.clicked.connect(self.__enable_lyrics)
         self.btn_progress_retry_all.clicked.connect(retry_all_failed_downloads)
         self.btn_progress_cancel_all.clicked.connect(cancel_all_downloads)
@@ -276,13 +277,15 @@ class MainWindow(QMainWindow):
         tbl_sessions_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         tbl_sessions_header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         tbl_sessions_header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        tbl_sessions_header.setSectionResizeMode(5, QHeaderView.ResizeMode.Fixed)
+        tbl_sessions_header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        tbl_sessions_header.setSectionResizeMode(6, QHeaderView.ResizeMode.Fixed)
         # Search results table
         tbl_search_results_headers = self.tbl_search_results.horizontalHeader()
         tbl_search_results_headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
         tbl_search_results_headers.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         tbl_search_results_headers.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         tbl_search_results_headers.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        tbl_search_results_headers.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         # Download progress table
         tbl_dl_progress_header = self.tbl_dl_progress.horizontalHeader()
         tbl_dl_progress_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
@@ -359,14 +362,6 @@ class MainWindow(QMainWindow):
         dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
         if dir_path.strip() != '':
             self.inp_tmp_dl_root.setText(QDir.toNativeSeparators(dir_path))
-
-    def __toggle_advanced(self):
-        self.__advanced_visible = False if self.__advanced_visible else True
-        self.tabview.setTabVisible(3, self.__advanced_visible)
-        if not self.__advanced_visible:
-            self.group_temp_dl_root.hide()
-        else:
-            self.group_temp_dl_root.show()
 
     def __enable_lyrics(self):
         if self.inp_enable_lyrics.isChecked() == True and user[1].lower() == "free":
@@ -550,6 +545,7 @@ class MainWindow(QMainWindow):
         sn = 0
         for user in userdata:
             sn = sn + 1
+            rows = self.tbl_sessions.rowCount()
 
             radiobutton = QRadioButton()
             radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow() + 1) and config.update())
@@ -561,7 +557,9 @@ class MainWindow(QMainWindow):
             btn.clicked.connect(lambda x, account_uuid=user[3]: self.__user_table_remove_click(account_uuid))
             btn.setMinimumHeight(30)
 
-            rows = self.tbl_sessions.rowCount()
+            service = QTableWidgetItem("Spotify")
+            service.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png')))
+
             br = "N/A"
             if user[1].lower() == "free":
                 br = "160K"
@@ -570,10 +568,11 @@ class MainWindow(QMainWindow):
             self.tbl_sessions.insertRow(rows)
             self.tbl_sessions.setCellWidget(rows, 0, radiobutton)
             self.tbl_sessions.setItem(rows, 1, QTableWidgetItem(user[0]))
-            self.tbl_sessions.setItem(rows, 2, QTableWidgetItem(user[1]))
-            self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(br))
-            self.tbl_sessions.setItem(rows, 4, QTableWidgetItem(user[2]))
-            self.tbl_sessions.setCellWidget(rows, 5, btn)
+            self.tbl_sessions.setItem(rows, 2, service)
+            self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(user[1]))
+            self.tbl_sessions.setItem(rows, 4, QTableWidgetItem(br))
+            self.tbl_sessions.setItem(rows, 5, QTableWidgetItem(user[2]))
+            self.tbl_sessions.setCellWidget(rows, 6, btn)
         logger.info("Accounts table was populated !")
 
     def __rebuild_threads(self):
@@ -1100,16 +1099,16 @@ class MainWindow(QMainWindow):
         create_new_session = new_session()
         if create_new_session == True:
             self.__splash_dialog.run(self.tr("Account added, please restart the app."))
-            self.btn_login_add.setText(self.tr("Please Restart The App"))
+            self.btn_login_add_spotify.setText(self.tr("Please Restart The App"))
         elif create_new_session == False:
             self.__splash_dialog.run(self.tr("Account already exists."))
-            self.btn_login_add.setText(self.tr("Add Account"))
-            self.btn_login_add.setDisabled(False)
+            self.btn_login_add_spotify.setText(self.tr("Add Account"))
+            self.btn_login_add_spotify.setDisabled(False)
 
     def __add_account(self):
         logger.info('Add account clicked ')
-        self.btn_login_add.setText(self.tr("Waiting..."))
-        self.btn_login_add.setDisabled(True)
+        self.btn_login_add_spotify.setText(self.tr("Waiting..."))
+        self.btn_login_add_spotify.setDisabled(True)
         login = threading.Thread(target=self.__create_new_session)
         login.daemon = True
         login.start()
@@ -1225,8 +1224,12 @@ class MainWindow(QMainWindow):
         c2item = QTableWidgetItem(item_type.strip())
         c2item.setToolTip(item_type.strip())
         self.tbl_search_results.setItem(rows, 2, c2item)
+        c3item = QTableWidgetItem("Spotify ")
+        c3item.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png')))
+
+        self.tbl_search_results.setItem(rows, 3, c3item)
         btn.setToolTip(f"Download {item_type.strip()} '{item_name.strip()}' by '{item_by.strip()}'. ")
-        self.tbl_search_results.setCellWidget(rows, 3, btn)
+        self.tbl_search_results.setCellWidget(rows, 4, btn)
         tbl_search_results_headers.resizeSection(0, 450)
         return True
 
@@ -1258,7 +1261,7 @@ class MainWindow(QMainWindow):
                                                              )
                               }}
                 tmp_dl_val = self.inp_tmp_dl_root.text().strip()
-                if self.__advanced_visible and tmp_dl_val != "" and os.path.isdir(tmp_dl_val):
+                if tmp_dl_val != "" and os.path.isdir(tmp_dl_val):
                     queue_data['data']['dl_path'] = tmp_dl_val
                 btn_text = f"Download {d_key[0:-1]}".replace('artist', 'discography').title()
                 self.__insert_search_result_row(btn_text=btn_text, item_name=item_name, item_by=item_by,
