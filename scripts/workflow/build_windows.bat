@@ -17,7 +17,7 @@ del /F /Q dist\* 2>nul
 REM Bundle ffmpeg
 echo => Downloading FFmpeg binary...
 mkdir build
-curl -L https://github.com/GyanD/codexffmpeg/releases/download/7.1/ffmpeg-7.1-essentials_build.zip -o build\ffmpeg.zip || (
+powershell -Command "Invoke-WebRequest -Uri 'https://github.com/GyanD/codexffmpeg/releases/download/7.1/ffmpeg-7.1-essentials_build.zip' -OutFile 'build\ffmpeg.zip'" || (
     echo Failed to download FFmpeg. Exiting...
     exit /b 1
 )
@@ -54,7 +54,7 @@ pyinstaller --onefile --noconsole --noconfirm ^
     --add-binary="ffbin_win/ffmpeg.exe;onthespot/bin/ffmpeg" ^
     --paths=src/onthespot ^
     --name=onthespot_windows ^
-    --icon=src/onthespot/resources/icons/onthespot.png ^
+    --icon=src/onthespot/resources/icons/onthespot.ico ^
     src\portable.py || (
     echo PyInstaller build failed. Exiting...
     exit /b 1
@@ -62,9 +62,13 @@ pyinstaller --onefile --noconsole --noconfirm ^
 
 REM Move the executable to artifacts folder
 echo => Moving executable to artifacts folder...
-mkdir artifacts
-mkdir artifacts\windows
-move dist\onthespot_windows.exe artifacts\windows\
+if not exist artifacts\windows (
+    mkdir artifacts\windows
+)
+move dist\onthespot_windows.exe artifacts\windows\ || (
+    echo Failed to move executable. Exiting...
+    exit /b 1
+)
 
 REM Clean up unnecessary files
 echo => Cleaning up temporary files...

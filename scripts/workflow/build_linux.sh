@@ -24,9 +24,14 @@ if [ -f "ffbin_nix/ffmpeg" ]; then
     FFBIN="--add-binary=ffbin_nix/*:onthespot/bin/ffmpeg"
     NAME="onthespot_linux_ffm"
 else
-    echo " => FFmpeg binary not found. Building without it."
-    FFBIN=""
-    NAME="onthespot_linux"
+    echo " => FFmpeg binary not found. Downloading..."
+    mkdir -p ffbin_nix
+    wget -q https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+    tar -xf ffmpeg-release-amd64-static.tar.xz
+    cp ffmpeg-*-amd64-static/ffmpeg ffbin_nix/
+    rm -rf ffmpeg-*-amd64-static ffmpeg-release-amd64-static.tar.xz
+    FFBIN="--add-binary=ffbin_nix/*:onthespot/bin/ffmpeg"
+    NAME="onthespot_linux_ffm"
 fi
 
 # Run PyInstaller
@@ -67,6 +72,11 @@ echo " => Building AppImage..."
 wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
 chmod +x linuxdeploy-x86_64.AppImage
 
+if [ ! -f "linuxdeploy-x86_64.AppImage" ]; then
+    echo " => Failed to download linuxdeploy. Exiting."
+    exit 1
+fi
+
 # Create AppDir structure
 mkdir -p AppDir/usr/bin
 cp "dist/$NAME" AppDir/usr/bin/onthespot
@@ -89,6 +99,12 @@ EOF
 
 # Run linuxdeploy to create AppImage
 ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage
+
+# Check if AppImage was created
+if [ ! -f OnTheSpot-x86_64.AppImage ]; then
+    echo " => AppImage creation failed. Exiting."
+    exit 1
+fi
 
 # Move the AppImage to dist
 mv OnTheSpot*.AppImage dist/OnTheSpot.AppImage

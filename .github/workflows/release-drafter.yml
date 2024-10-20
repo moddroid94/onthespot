@@ -16,42 +16,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Set up Node.js environment
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      # Install Conventional Changelog CLI for release notes generation
-      - name: Install Conventional Changelog CLI
-        run: npm install -g conventional-changelog-cli
-
-      # Generate changelog based on the commit history
-      - name: Generate Changelog
-        run: |
-          conventional-changelog -p angular -i CHANGELOG.md -s -r 0 --config ./changelog-config.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Commit the changelog without pushing it immediately
-      - name: Commit Changelog
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add CHANGELOG.md
-          git commit -m "docs(changelog): update changelog [skip ci]"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Create a draft release on GitHub (release is not published yet)
-      - name: Create Draft Release
+      # Create a release on GitHub
+      - name: Create Release
         uses: ncipollo/release-action@v1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           commit: ${{ github.sha }}
-          body: |
-            $(cat CHANGELOG.md)
-          draft: true    # This ensures the release is saved as a draft
+          draft: false
           prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}

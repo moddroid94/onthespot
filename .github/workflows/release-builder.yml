@@ -46,10 +46,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf fuse libfuse2
+          sudo apt-get install -y patchelf fuse libfuse2 wget
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
@@ -74,9 +79,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
       - name: Install Dependencies
         run: |
-          brew install pyinstaller
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
@@ -99,6 +108,7 @@ jobs:
     name: Collect Artifacts
     needs: [windows-build, linux-build, macos-build]
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
     steps:
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v3
@@ -118,63 +128,9 @@ jobs:
           name: macos-build
           path: artifacts/macos/
 
-      - name: Upload Combined Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Create Release and Upload Assets
+        uses: ncipollo/release-action@v1
         with:
-          name: OnTheSpot-Builds
-          path: artifacts/
-
-      - name: Create Release
-        if: github.event_name == 'release'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.event.release.tag_name }}
-          release_name: ${{ github.event.release.name }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Windows Executable to Release
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/windows/onthespot_windows.exe
-          asset_name: onthespot_windows.exe
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux Tar.gz to Release
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/linux/onthespot_linux.tar.gz
-          asset_name: onthespot_linux.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Linux AppImage to Release
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/linux/OnTheSpot.AppImage
-          asset_name: OnTheSpot.AppImage
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS DMG to Release
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/macos/OnTheSpot.dmg
-          asset_name: OnTheSpot.dmg
-          asset_content_type: application/x-apple-diskimage
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.release.tag_name }}
+ 

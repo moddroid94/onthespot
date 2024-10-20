@@ -21,8 +21,11 @@ if [ -f "ffbin_mac/ffmpeg" ]; then
     echo " => Found 'ffbin_mac' directory and ffmpeg binary. Including FFmpeg in the build."
     FFBIN='--add-binary=ffbin_mac/*:onthespot/bin/ffmpeg'
 else
-    echo " => FFmpeg binary not found. Building without it."
-    FFBIN=""
+    echo " => FFmpeg binary not found. Downloading..."
+    mkdir -p ffbin_mac
+    curl -L https://evermeet.cx/ffmpeg/ffmpeg -o ffbin_mac/ffmpeg
+    chmod +x ffbin_mac/ffmpeg
+    FFBIN='--add-binary=ffbin_mac/*:onthespot/bin/ffmpeg'
 fi
 
 # Run PyInstaller to create the app
@@ -42,9 +45,7 @@ pyinstaller --windowed \
 
 # Check if the build was successful
 if [ -d "./dist/OnTheSpot.app" ]; then
-    # Set executable permissions
-    echo " => Setting executable permissions..."
-    chmod +x "./dist/OnTheSpot.app"
+    echo " => Build succeeded."
 else
     echo " => Build failed or output app not found."
     exit 1
@@ -56,6 +57,12 @@ mkdir -p dist/dmg_contents
 cp -R dist/OnTheSpot.app dist/dmg_contents/
 hdiutil create -volname "OnTheSpot" -srcfolder dist/dmg_contents -ov -format UDZO dist/OnTheSpot.dmg
 rm -rf dist/dmg_contents
+
+# Check if DMG was created
+if [ ! -f "dist/OnTheSpot.dmg" ]; then
+    echo " => DMG creation failed. Exiting."
+    exit 1
+fi
 
 # Move the DMG to artifacts folder
 echo " => Moving DMG to artifacts folder..."
