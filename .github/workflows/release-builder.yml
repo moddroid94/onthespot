@@ -32,7 +32,7 @@ jobs:
           pip install pyinstaller
 
       - name: Run Windows Build Script
-        run: scripts\build_windows.bat
+        run: scripts/workflow/build_windows.bat
         shell: cmd
 
       - name: Upload Artifacts
@@ -59,10 +59,10 @@ jobs:
           pip install pyinstaller
 
       - name: Make Build Script Executable
-        run: chmod +x scripts/build_linux.sh
+        run: chmod +x scripts/workflow/build_linux.sh
 
       - name: Run Linux Build Script
-        run: scripts/build_linux.sh
+        run: scripts/workflow/build_linux.sh
         shell: bash
 
       - name: Upload Artifacts
@@ -88,10 +88,10 @@ jobs:
           pip install pyinstaller
 
       - name: Make Build Script Executable
-        run: chmod +x scripts/build_mac.sh
+        run: chmod +x scripts/workflow/build_mac.sh
 
       - name: Run macOS Build Script
-        run: scripts/build_mac.sh
+        run: scripts/workflow/build_mac.sh
         shell: bash
 
       - name: Upload Artifacts
