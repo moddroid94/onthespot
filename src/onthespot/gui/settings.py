@@ -1,6 +1,6 @@
 import os
 from PyQt6.QtGui import QIcon
-from ..otsconfig import config_dir, config
+from ..otsconfig import config
 
 
 def load_config(self):

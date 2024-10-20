@@ -1,30 +1,16 @@
 import os
+import traceback
+import time
+import subprocess
+from PyQt6.QtCore import QThread, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
-#from .spotify.api import get_item_metadata, get_episode_info, get_track_lyrics, check_premium
-#from .utils.utils import re_init_session, fetch_account_uuid, sanitize_data
-from .runtimedata import get_logger, download_queue, download_queue_gui, downloads_status, downloaded_data, failed_downloads, cancel_list, \
-    session_pool, thread_pool
+from .runtimedata import get_logger, download_queue
 from .otsconfig import config
 from .post_download import convert_audio_format, set_audio_tags, set_music_thumbnail
-import traceback
-from PyQt6.QtCore import QThread, pyqtSignal
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_format_track_path, spotify_format_episode_path, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_format_track_path
-#, soundcloud_download_track
-import time
-import requests
-
 from .accounts import get_account_token
-
-import re
-import os
-import subprocess
-import requests
-import threading
-
-from .runtimedata import parsing, download_queue, pending, failed, completed, cancelled
-
 
 logger = get_logger("spotify.downloader")
 
