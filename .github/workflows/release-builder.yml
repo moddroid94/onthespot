@@ -33,15 +33,15 @@ jobs:
         run: scripts\build_windows.bat
         shell: cmd
 
+      - name: List Dist Directory (Windows)
+        run: dir dist
+
       - name: Upload Windows Artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/upload-artifact@v3
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/onthespot_win*.exe
-          asset_name: onthespot_windows.exe
-          asset_content_type: application/octet-stream
+          name: windows-build
+          path: dist\*.exe  # Ensure windows builds to dist\*.exe
+          if-no-files-found: error
 
   # Linux Build
   linux-build:
@@ -72,25 +72,15 @@ jobs:
         run: scripts/build_appimage.sh
         shell: bash
 
-      - name: Upload Linux Artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/onthespot_linux
-          asset_name: onthespot_linux
-          asset_content_type: application/octet-stream
+      - name: List Dist Directory (Linux)
+        run: ls -la dist/
 
-      - name: Upload Linux AppImage
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/OnTheSpot-x86_64.AppImage
-          asset_name: OnTheSpot.AppImage
-          asset_content_type: application/octet-stream
+          name: linux-build
+          path: dist/*
+          if-no-files-found: error
 
   # macOS Build
   macos-build:
@@ -112,36 +102,89 @@ jobs:
         run: scripts/build_mac.sh
         shell: bash
 
-      - name: Upload macOS Artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/OnTheSpot.dmg
-          asset_name: OnTheSpot.dmg
-          asset_content_type: application/x-apple-diskimage
+      - name: List Dist Directory (macOS)
+        run: ls -la dist/
 
-  # Create Release Summary
-  update-release-summary:
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-build
+          path: dist/*
+          if-no-files-found: error
+
+  # Collect Artifacts
+  collect-artifacts:
     needs: [windows-build, linux-build, macos-build]
     runs-on: ubuntu-latest
     steps:
-      - name: Update Release Notes with Build Links
-        run: |
-          echo "**Builds are available for download:**" > release_body.txt
-          echo "- [Windows Build](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/onthespot_windows.exe)" >> release_body.txt
-          echo "- [Linux Build (Executable)](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/onthespot_linux)" >> release_body.txt
-          echo "- [Linux Build (AppImage)](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/OnTheSpot.AppImage)" >> release_body.txt
-          echo "- [macOS Build](https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/OnTheSpot.dmg)" >> release_body.txt
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-build
+          path: dist/windows/
 
-      - name: Update Release
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-build
+          path: dist/linux/
+
+      - name: Download macOS Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-build
+          path: dist/macos/
+
+      - name: Upload Combined Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: OnTheSpot-Builds
+          path: dist/
+
+      - name: Create Release
+        if: github.event_name == 'release'
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.event.release.tag_name }}
           release_name: ${{ github.event.release.name }}
-          body_path: ./release_body.txt
           draft: false
           prerelease: false
+
+      - name: Upload Windows Executable to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/windows/onthespot_win*.exe
+          asset_name: onthespot_windows.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux Executable to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/linux/onthespot_linux*
+          asset_name: onthespot_linux
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux AppImage to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/linux/OnTheSpot-x86_64.AppImage
+          asset_name: OnTheSpot.AppImage
+          asset_content_type: application/octet-stream
+
+      - name: Upload macOS DMG to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/macos/OnTheSpot.dmg
+          asset_name: OnTheSpot.dmg
+          asset_content_type: application/x-apple-diskimage
