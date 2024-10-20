@@ -1,10 +1,8 @@
-from queue import Empty, Queue
-from .otsconfig import config
 import sys
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-
+from .otsconfig import config
 
 log_formatter = logging.Formatter(
     '[%(asctime)s :: %(name)s :: %(pathname)s -> %(lineno)s:%(funcName)20s() :: %(levelname)s] -> %(message)s'
@@ -18,27 +16,11 @@ log_handler = RotatingFileHandler(config.get("_log_file"),
 stdout_handler = logging.StreamHandler(sys.stdout)
 log_handler.setFormatter(log_formatter)
 stdout_handler.setFormatter(log_formatter)
-download_queue = Queue()
-thread_pool = {}
-session_pool = {}
 
 parsing = {}
 pending = {}
 download_queue = {}
 account_pool = []
-
-
-download_queue_gui = []
-failed = []
-completed = []
-cancelled = []
-
-failed_downloads = {}
-cancel_list = {}
-downloads_status = {}
-playlist_m3u_queue = {}
-downloaded_data = {}
-unavailable = set()
 
 loglevel = int(os.environ.get("LOG_LEVEL", 20))
 

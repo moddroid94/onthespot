@@ -1,41 +1,34 @@
-import time
-#from .parse_url import parse_url
-import queue
-from .otsconfig import config
-
-from .api.spotify import spotify_get_token, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
-
-
-from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
-
-
-from .runtimedata import get_logger, download_queue, downloads_status, downloaded_data, failed_downloads, cancel_list, \
-    session_pool, thread_pool
-
-from .runtimedata import parsing, download_queue, pending, failed, completed, cancelled
-from .accounts import get_account_token
 import re
+import time
+from .otsconfig import config
+from .api.spotify import spotify_get_token, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
+from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
+from .runtimedata import get_logger, parsing, download_queue, pending
+from .accounts import get_account_token
+
 
 logger = get_logger('gui.main_ui')
 
 SOUNDCLOUD_URL_REGEX = re.compile(r"https://soundcloud.com/[-\w:/]+")
-SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(?P<Type>track|album|artist|playlist|episode|show)/(?P<ID>[0-9a-zA-Z]{22})(\?si=.+?)?$")
-SPOTIFY_INTERNATIONAL_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/intl-([a-zA-Z]+)/(?P<Type>track|album|artist|playlist|episode|show)/(?P<ID>[0-9a-zA-Z]{22})(\?si=.+?)?$")
+SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(intl-([a-zA-Z]+)/|)(?P<Type>track|album|artist|playlist|episode|show)/(?P<ID>[0-9a-zA-Z]{22})(\?si=.+?)?$")
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 #YOUTUBE_URL_REGEX = re.compile(r"https://www\.youtube\.com/watch\?v=[-\w]")
 
-
-
-
 def parse_url(url):
-    if re.match(SOUNDCLOUD_URL_REGEX, url):
+    accounts = config.get('accounts')
+    account_service = accounts[config.get('parsing_acc_sn') - 1]['service']
+    print(account_service)
+    if account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
         item_type, item_id = soundcloud_parse_url(url)
         item_service = "soundcloud"
-    elif re.match(SPOTIFY_URL_REGEX, url) or re.match(SPOTIFY_INTERNATIONAL_URL_REGEX, url):
+    elif account_service == 'spotify' and re.match(SPOTIFY_URL_REGEX, url):
         match = re.search(SPOTIFY_URL_REGEX, url)
         item_id = match.group("ID")
         item_type = match.group("Type")
         item_service = "spotify"
+    else:
+        logger.info('Invalid Url')
+        return
     parsing[item_id] = {
         'item_url': url, 
         'item_service': item_service,

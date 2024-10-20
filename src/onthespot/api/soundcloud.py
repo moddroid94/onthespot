@@ -1,8 +1,9 @@
 import re
-import os
-import subprocess
 import requests
-import threading
+from ..otsconfig import config
+from ..runtimedata import get_logger, account_pool, parsing
+from ..utils import sanitize_data
+
 
 SOUNDCLOUD_BASE = "https://api-v2.soundcloud.com"
 
@@ -10,18 +11,7 @@ SOUNDCLOUD_CLIENT_ID = "AADp6RRMinJzmrc26qh92jqzJOF69SwF"
 SOUNDCLOUD_APP_VERSION = "1728640498"
 SOUNDCLOUD_APP_LOCALE = "en"
 
-from ..otsconfig import config
-
-import re
-import requests
-import logging
-from ..runtimedata import get_logger, account_pool, parsing
-
-from ..utils import sanitize_data
-
 logger = get_logger("worker.utility")
-
-
 
 def soundcloud_parse_url(url):
         headers = {}

@@ -1,15 +1,12 @@
-import platform
 import os
-import subprocess
 import pyperclip
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 from ..otsconfig import config
-from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue, session_pool, get_logger
+from ..runtimedata import download_queue, get_logger
 from ..utils import open_item
 from ..api.spotify import check_if_media_in_library, save_media_to_library, remove_media_from_library, queue_media, play_media
 
-from ..runtimedata import download_queue_gui
 
 logger = get_logger("worker.utility")
 

@@ -1,39 +1,24 @@
 import os
-import queue
 import time
 import threading
-import uuid
-from PyQt6 import uic, QtNetwork, QtGui
-from PyQt6.QtCore import QThread, QDir, Qt
+from urllib3.exceptions import MaxRetryError, NewConnectionError
+from PyQt6 import uic, QtGui
+from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton
-from ..api.spotify import get_thumbnail
-from ..utils import name_by_from_sdata, remove_user, re_init_session, latest_release, open_item
-
+from ..utils import re_init_session, latest_release, open_item
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
-from .minidialog import MiniDialog
-from ..otsconfig import config_dir, config
-from ..parse_item import parse_url
-from ..runtimedata import get_logger, downloads_status, downloaded_data, failed_downloads, cancel_list, \
-    session_pool, thread_pool
+from ..otsconfig import config
+from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool
 from .thumb_listitem import LabelWithThumb
-from urllib3.exceptions import MaxRetryError, NewConnectionError
-
-from ..runtimedata import parsing, pending, failed, completed, cancelled, download_queue, account_pool
-
-from PyQt6.QtCore import QThread, pyqtSignal, QObject, QTimer
-
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
-from ..post_download import conv_list_format
-
-from ..accounts import get_account_token
-
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
+from ..post_download import conv_list_format
+from ..accounts import get_account_token, FillAccountPool
 from ..search import get_search_results
-import time
 from ..downloader import DownloadWorker
-from ..accounts import FillAccountPool
+
 logger = get_logger('gui.main_ui')
 
 

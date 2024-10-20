@@ -1,17 +1,17 @@
-
-
-from .api.spotify import spotify_get_search_results
-from .api.soundcloud import soundcloud_get_search_results
-from .runtimedata import account_pool, get_logger
 import os
+from .runtimedata import account_pool, get_logger
 from .accounts import get_account_token
 from .parse_item import parse_url
-logger = get_logger("spotify.api")
 from .otsconfig import config
+from .api.spotify import spotify_get_search_results
+from .api.soundcloud import soundcloud_get_search_results
+
+logger = get_logger("spotify.api")
 
 def get_search_results(search_term, content_types=None):
     if len(account_pool) <= 0:
-            return None
+        return None
+
     if search_term.startswith('https://'):
         logger.info(f"Search clicked with value with url {search_term}")
         parse_url(search_term)
@@ -24,7 +24,6 @@ def get_search_results(search_term, content_types=None):
                     logger.info(f'Reading link "{link}" from file at "{search_term}"')
                     parse_url(link)
             return True
-
 
         logger.info(f"Search clicked with value term {search_term}")
         if search_term != "":
