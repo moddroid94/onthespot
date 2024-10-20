@@ -14,6 +14,8 @@ jobs:
   # Windows Build
   windows-build:
     runs-on: windows-latest
+    outputs:
+      artifact_path: artifacts/windows/
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -30,7 +32,7 @@ jobs:
           pip install pyinstaller
 
       - name: Run Windows Build Script
-        run: scripts/workflow/build_windows.bat
+        run: scripts\workflows\build_windows.bat
         shell: cmd
 
       - name: Upload Artifacts
@@ -42,28 +44,25 @@ jobs:
   # Linux Build
   linux-build:
     runs-on: ubuntu-latest
+    outputs:
+      artifact_path: artifacts/linux/
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf fuse libfuse2 wget
+          sudo apt-get install -y patchelf fuse libfuse2
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
 
       - name: Make Build Script Executable
-        run: chmod +x scripts/workflow/build_linux.sh
+        run: chmod +x scripts/workflows/build_linux.sh
 
       - name: Run Linux Build Script
-        run: scripts/workflow/build_linux.sh
+        run: scripts/workflows/build_linux.sh
         shell: bash
 
       - name: Upload Artifacts
@@ -75,26 +74,24 @@ jobs:
   # macOS Build
   macos-build:
     runs-on: macos-latest
+    outputs:
+      artifact_path: artifacts/macos/
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
       - name: Install Dependencies
         run: |
+          brew install pyinstaller
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
 
       - name: Make Build Script Executable
-        run: chmod +x scripts/workflow/build_mac.sh
+        run: chmod +x scripts/workflows/build_mac.sh
 
       - name: Run macOS Build Script
-        run: scripts/workflow/build_mac.sh
+        run: scripts/workflows/build_mac.sh
         shell: bash
 
       - name: Upload Artifacts
@@ -108,8 +105,10 @@ jobs:
     name: Collect Artifacts
     needs: [windows-build, linux-build, macos-build]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v3
         with:
@@ -128,9 +127,63 @@ jobs:
           name: macos-build
           path: artifacts/macos/
 
-      - name: Create Release and Upload Assets
-        uses: ncipollo/release-action@v1
+      - name: Upload Combined Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.event.release.tag_name }}
- 
+          name: OnTheSpot-Builds
+          path: artifacts/
+
+      - name: Create Release
+        if: github.event_name == 'release'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          release_name: ${{ github.event.release.name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows Executable to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: artifacts/windows/onthespot_windows.exe
+          asset_name: onthespot_windows.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux Tar.gz to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: artifacts/linux/onthespot_linux.tar.gz
+          asset_name: onthespot_linux.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Linux AppImage to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: artifacts/linux/OnTheSpot.AppImage
+          asset_name: OnTheSpot.AppImage
+          asset_content_type: application/octet-stream
+
+      - name: Upload macOS DMG to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: artifacts/macos/OnTheSpot.dmg
+          asset_name: OnTheSpot.dmg
+          asset_content_type: application/x-apple-diskimage
