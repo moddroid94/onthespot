@@ -8,12 +8,9 @@
   </picture>
 </div>
 
-<br>
-
 [![Issues Badge][issues-shield]][issues-url]
 [![Stars Badge][stars-shield]][stars-url]
 [![Downloads Badge][downloads-shield]][downloads-url]
-[![Commits Badge][commits-shield]][commits-url]
 [![License Badge][license-shield]][license-url]
 
    <p>
@@ -38,9 +35,9 @@ OnTheSpot is a open-source user-friendly music downloader built with Qt and Pyth
 
 ### Features
 
-- [**Cross-Platform**](https://www.techopedia.com/definition/17056/cross-platform)<br>Available for Windows, macOS, and Linux (Including AppImage, PKGBUILD, and eBuild).
-- [**High-Quality Downloads**](https://www.whathifi.com/advice/high-resolution-audio-everything-you-need-to-know)<br>Download music up to 320kbps directly from the source.
-- [**Multi-Language Support**](https://phrase.com/blog/posts/multilingual-customer-support/)<br>Download track and album names translated to your application's language.
+- [**Cross Platform**](https://www.techopedia.com/definition/17056/cross-platform)<br>Available for Windows, MacOS, and Linux (Including AppImage, PKGBUILD, and eBuild).
+- [**High Quality Downloads**](https://www.whathifi.com/advice/high-resolution-audio-everything-you-need-to-know)<br>Download music up to 320kbps directly from the source.
+- [**Multi Language Support**](https://phrase.com/blog/posts/multilingual-customer-support/)<br>Download track and album names translated to your application's language.
 - [**Comprehensive Content Coverage**](https://thisisglance.com/blog/why-spotify-is-the-outright-best-music-streaming-app)<br>Supports songs, podcasts, playlists, albums, singles, compilations, and audiobooks.
 - [**Rich Metadata Embedding**](https://sonosuite.com/en/blog/what-is-music-metadata-and-why-is-important-to-digital-music/)<br>Automatically embed detailed metadata like artist, album, year, and lyrics.
 - [**Custom Download Paths**](https://www.microsoft.com/en-us/microsoft-365/business-insights-ideas/resources/11-ideas-for-how-to-organize-digital-files)<br>Set personalized paths for playlists and episodes for easy organization.
@@ -91,17 +88,14 @@ For full details, please read our [**Disclaimer**](docs/disclaimer.md).
 If you have any questions, concerns, or need assistance feel free to [contact us](mailto:justin026@protonmail.com).
 
 <!-- Issues Badge -->
-[issues-shield]: https://img.shields.io/github/issues/justin025/onthespot?style=flat&label=Issues&labelColor=003366&color=1DB954
+[issues-shield]: https://img.shields.io/github/issues/justin025/onthespot?style=flat&label=Issues&labelColor=001224&color=1DB954
 [issues-url]: https://github.com/justin025/onthespot/issues
 <!-- Stars Badge -->
-[stars-shield]: https://img.shields.io/github/stars/justin025/onthespot?style=flat&label=Stars&labelColor=003366&color=1DB954
+[stars-shield]: https://img.shields.io/github/stars/justin025/onthespot?style=flat&label=Stars&labelColor=001224&color=1DB954
 [stars-url]: https://github.com/justin025/onthespot/stargazers
 <!-- Downloads Badge -->
-[downloads-shield]: https://img.shields.io/github/downloads/justin025/onthespot/total.svg?style=flat&label=Downloads&labelColor=003366&color=1DB954
+[downloads-shield]: https://img.shields.io/github/downloads/justin025/onthespot/total.svg?style=flat&label=Downloads&labelColor=001224&color=1DB954
 [downloads-url]: https://github.com/justin025/onthespot/releases/
-<!-- Commits Badge -->
-[commits-shield]: https://img.shields.io/github/commit-activity/m/justin025/onthespot?style=flat&label=Commits&labelColor=003366&color=1DB954
-[commits-url]: https://github.com/justin025/onthespot/commits/main
 <!-- License Badge -->
-[license-shield]: https://img.shields.io/github/license/justin025/onthespot?style=flat&label=License&labelColor=003366&color=1DB954
+[license-shield]: https://img.shields.io/github/license/justin025/onthespot?style=flat&label=License&labelColor=001224&color=1DB954
 [license-url]: https://github.com/justin025/onthespot/blob/main/LICENSE

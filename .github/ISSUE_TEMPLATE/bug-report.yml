@@ -2,50 +2,117 @@ name: Bug Report
 description: Found a bug? Report it here.
 labels: [bug]
 body:
-- type: markdown
-  attributes:
-    value: |
-      **Please follow the guidelines below to help us resolve your issue.**
+  - type: markdown
+    attributes:
+      value: |
+        **Please follow the guidelines below to help us resolve your issue.**
 
-      **Guidelines:**
-      - Please **search existing issues** to ensure your issue isn't already reported by [checking here](https://github.com/justin025/onthespot/issues?q=is%3Aissue).
-      - **Report one bug per issue** by creating separate issues for each bug.
-      - **Provide a descriptive title** that clearly summarizes your issue.
-      - **Include detailed information** to help us reproduce and fix the problem.
+        **Guidelines:**
+        - Please **search existing issues** to ensure your issue isn't already reported by [checking here](https://github.com/justin025/onthespot/issues?q=is%3Aissue).
+        - **Report one bug per issue** by creating separate issues for each bug.
+        - **Provide a descriptive title** that clearly summarizes your issue.
+        - **Include detailed information** to help us reproduce and fix the problem.
 
-      **If you don't follow the guidelines, the issue will be deleted!**
+        **If you don't follow the guidelines, the issue will be deleted!**
 
-- type: textarea
-  id: description
-  attributes:
-    label: Bug Description
-    description: A detailed and accurate description of the bug is required.
-    placeholder: When I perform X action, Y happens instead of the expected Z.
-  validations:
-    required: true
+  - type: textarea
+    id: ots_description
+    attributes:
+      label: Bug Description
+      description: A detailed and accurate description of the bug is required.
+      placeholder: When I perform X action, Y happens instead of the expected Z.
+    validations:
+      required: true
 
-- type: textarea
-  id: environment
-  attributes:
-    label: Environment Details
-    description: Provide details about your setup.
-    render: markdown
-    value: |
-      | **Detail**               | **Your Information**                 |
-      |--------------------------|--------------------------------------|
-      | **Operating System**     | Windows 10 / MacOS 13 / Ubuntu 22.04 |
-      | **Application Version**  | v0.7.0                               |
-      | **Installation Method**  | GitHub Release / Build from Script   |
-      | **Python Version**       | 3.11.4                               |
-      | **FFmpeg Version**       | e.g., 4.3.1                          |
-  validations:
-    required: true
+  # Environment Details Section
 
-- type: textarea
-  id: additional_info
-  attributes:
-    label: Additional Information
-    description: Add any other context, screenshots, or logs.
-    placeholder: Include logs, screenshots, or any other relevant details here.
-  validations:
-    required: false
+  - type: dropdown
+    id: ots_operating_system
+    attributes:
+      label: Operating System
+      description: Select your operating system.
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  # Operating System Version Input
+
+  - type: input
+    id: ots_os_version
+    attributes:
+      label: Operating System Version
+      description: Specify your operating system version.
+      placeholder: e.g., Windows 11, macOS Ventura (13), Ubuntu 22.04 LTS
+    validations:
+      required: true
+    conditions:
+      - field: ots_operating_system
+        any:
+          - Windows
+          - macOS
+          - Linux
+
+  # Other Operating System Specification
+
+  - type: input
+    id: ots_operating_system_other
+    attributes:
+      label: Specify Operating System
+      description: If you selected 'Other', please specify your OS and version.
+      placeholder: e.g., FreeBSD 13.0
+    validations:
+      required: true
+    conditions:
+      - field: ots_operating_system
+        equals: Other
+
+  - type: input
+    id: ots_application_version
+    attributes:
+      label: Application Version
+      description: Enter the version of the OnTheSpot application you are using.
+      placeholder: e.g., v0.7.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ots_installation_method
+    attributes:
+      label: Installation Method
+      description: How did you install the OnTheSpot application?
+      options:
+        - GitHub Release
+        - Build from Script
+    validations:
+      required: true
+
+  - type: input
+    id: ots_python_version
+    attributes:
+      label: Python Version
+      description: Enter your Python version, check with `python --version` in Terminal.
+      placeholder: e.g., 3.11.4
+    validations:
+      required: true
+
+  - type: input
+    id: ots_ffmpeg_version
+    attributes:
+      label: FFmpeg Version
+      description: Enter your FFmpeg version, check with `ffmpeg -version` in Terminal.
+      placeholder: e.g., 2024-09-05
+    validations:
+      required: true
+
+  - type: textarea
+    id: ots_additional_info
+    attributes:
+      label: Additional Information
+      description: Add any other context, screenshots, or logs.
+      placeholder: Include logs, screenshots, or any other relevant details here.
+    validations:
+      required: false
