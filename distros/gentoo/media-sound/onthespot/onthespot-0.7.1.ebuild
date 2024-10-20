@@ -36,7 +36,7 @@ RDEPEND="
 	dev-python/requests
 	dev-python/urllib3
 	media-libs/mutagen
-	media-video/ffmpeg[mp3,sdl]
+	media-video/ffmpeg[mp3,openssl,sdl]
 "
 
 src_install() {

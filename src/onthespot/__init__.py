@@ -7,11 +7,30 @@ from .gui.mainui import MainWindow
 from .gui.minidialog import MiniDialog
 from .runtimedata import get_logger
 from .otsconfig import config
+from .parse_item import worker
+import threading
+
+from .api.spotify import spotify_login_user
 
 def main():
     logger = get_logger('__init__')
     logger.info('Starting application in \n3\n2\n1')
     app = QApplication(sys.argv)
+    
+
+
+
+
+        
+
+
+    thread = threading.Thread(target=worker)
+    thread.daemon = True  # Ensure thread exits when main program does
+    thread.start()
+
+
+
+
 
     # Set Application Version
     version = "v0.7.1"

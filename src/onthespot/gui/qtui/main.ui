@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>671</width>
+    <width>683</width>
     <height>584</height>
    </rect>
   </property>
@@ -434,77 +434,6 @@
              </column>
             </widget>
            </item>
-           <item>
-            <widget class="QGroupBox" name="group_search_actions">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>100</height>
-              </size>
-             </property>
-             <property name="title">
-              <string>Bulk Download</string>
-             </property>
-             <property name="flat">
-              <bool>true</bool>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QPushButton" name="btn_search_download_all">
-                <property name="text">
-                 <string>All</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btn_search_download_tracks">
-                <property name="text">
-                 <string>All Tracks</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btn_search_download_albums">
-                <property name="text">
-                 <string>All Albums</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btn_search_download_artists">
-                <property name="text">
-                 <string>All Artists</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btn_search_download_playlists">
-                <property name="text">
-                 <string>All Playlists</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
@@ -529,12 +458,15 @@
           <property name="sortingEnabled">
            <bool>false</bool>
           </property>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>0</number>
+          </attribute>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
           </attribute>
           <column>
            <property name="text">
-            <string>MediaID</string>
+            <string>Item ID</string>
            </property>
           </column>
           <column>
@@ -549,7 +481,7 @@
           </column>
           <column>
            <property name="text">
-            <string>CollectionType</string>
+            <string>Service</string>
            </property>
           </column>
           <column>
@@ -637,9 +569,9 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-84</y>
+             <y>0</y>
              <width>641</width>
-             <height>3345</height>
+             <height>3265</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -681,6 +613,9 @@
                  <attribute name="horizontalHeaderCascadingSectionResizes">
                   <bool>false</bool>
                  </attribute>
+                 <attribute name="horizontalHeaderMinimumSectionSize">
+                  <number>0</number>
+                 </attribute>
                  <attribute name="horizontalHeaderDefaultSectionSize">
                   <number>100</number>
                  </attribute>
@@ -715,7 +650,7 @@
                  </column>
                  <column>
                   <property name="text">
-                   <string>DL Bitrate</string>
+                   <string>Bitrate</string>
                   </property>
                  </column>
                  <column>
@@ -746,7 +681,7 @@
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_50">
                   <item>
-                   <widget class="QComboBox" name="add_service">
+                   <widget class="QComboBox" name="inp_login_service">
                     <property name="maximumSize">
                      <size>
                       <width>45</width>
@@ -756,7 +691,59 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="btn_login_add_spotify">
+                   <widget class="QLabel" name="lb_login_username">
+                    <property name="text">
+                     <string>Username</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="inp_login_username">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Under Development</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="lb_login_password">
+                    <property name="text">
+                     <string>Password</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="inp_login_password">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Under Development</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btn_login_add">
                     <property name="maximumSize">
                      <size>
                       <width>16777215</width>
@@ -764,7 +751,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Add Spotify Account</string>
+                     <string>Add Account</string>
                     </property>
                    </widget>
                   </item>
@@ -1412,6 +1399,9 @@
                </item>
                <item>
                 <widget class="QGroupBox" name="gb1_1">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
                  <property name="title">
                   <string/>
                  </property>
@@ -1427,6 +1417,9 @@
                     <layout class="QHBoxLayout" name="horizontalLayout_42">
                      <item>
                       <widget class="QCheckBox" name="inp_create_playlists">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="layoutDirection">
                         <enum>Qt::RightToLeft</enum>
                        </property>
@@ -1459,13 +1452,20 @@
                     <layout class="QHBoxLayout" name="horizontalLayout_43">
                      <item>
                       <widget class="QLabel" name="lb_m3u_name_formatter">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
                        <property name="text">
                         <string> M3U Path</string>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="inp_m3u_name_formatter"/>
+                      <widget class="QLineEdit" name="inp_m3u_name_formatter">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
                      </item>
                     </layout>
                    </widget>
@@ -1588,7 +1588,7 @@
                         <enum>Qt::RightToLeft</enum>
                        </property>
                        <property name="text">
-                        <string>Download Lyrics from Spotify*</string>
+                        <string>Download Lyrics*</string>
                        </property>
                       </widget>
                      </item>
@@ -1703,41 +1703,6 @@
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_32">
                   <item>
-                   <widget class="QGroupBox" name="groupBox_26">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_25">
-                     <item>
-                      <widget class="QCheckBox" name="inp_force_premium">
-                       <property name="toolTip">
-                        <string>This feature requires a premium account.</string>
-                       </property>
-                       <property name="layoutDirection">
-                        <enum>Qt::RightToLeft</enum>
-                       </property>
-                       <property name="text">
-                        <string>Force Premium*</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_12">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="QGroupBox" name="groupBox_25">
                     <property name="title">
                      <string/>
@@ -1769,18 +1734,6 @@
                     </layout>
                    </widget>
                   </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb1_23">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_240">
                   <item>
                    <widget class="QGroupBox" name="groupBox_132">
                     <property name="title">
@@ -1816,50 +1769,18 @@
                     </layout>
                    </widget>
                   </item>
-                  <item>
-                   <widget class="QGroupBox" name="groupBox_133">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_242">
-                     <item>
-                      <widget class="QCheckBox" name="inp_enable_spot_watch">
-                       <property name="layoutDirection">
-                        <enum>Qt::RightToLeft</enum>
-                       </property>
-                       <property name="text">
-                        <string>Mirror Playback</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_52">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
                  </layout>
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="gb1_21">
+                <widget class="QGroupBox" name="gb1_23">
                  <property name="title">
                   <string/>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_231">
+                 <layout class="QHBoxLayout" name="horizontalLayout_240">
                   <item>
                    <widget class="QGroupBox" name="groupBox_128">
                     <property name="title">
@@ -1957,14 +1878,14 @@
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="gb1_22">
+                <widget class="QGroupBox" name="gb1_21">
                  <property name="title">
                   <string/>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_237">
+                 <layout class="QHBoxLayout" name="horizontalLayout_231">
                   <item>
                    <widget class="QGroupBox" name="groupBox_130">
                     <property name="title">
@@ -2065,14 +1986,14 @@
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="gb1_5">
+                <widget class="QGroupBox" name="gb1_22">
                  <property name="title">
                   <string/>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_41">
+                 <layout class="QHBoxLayout" name="horizontalLayout_237">
                   <item>
                    <widget class="QGroupBox" name="groupBox_8">
                     <property name="title">
@@ -2170,14 +2091,14 @@
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="gb1_6">
+                <widget class="QGroupBox" name="gb1_5">
                  <property name="title">
                   <string/>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_44">
+                 <layout class="QHBoxLayout" name="horizontalLayout_41">
                   <item>
                    <widget class="QGroupBox" name="groupBox_23">
                     <property name="title">

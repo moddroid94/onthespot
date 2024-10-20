@@ -1,45 +1,55 @@
-from PyQt6 import QtNetwork
-from PyQt6.QtCore import Qt, QObject, QUrl
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QHBoxLayout, QWidget, QLabel
-
+from PyQt6.QtWidgets import QLabel, QHBoxLayout, QWidget  
+from PyQt6.QtGui import QPixmap  
+from PyQt6.QtCore import Qt, QUrl  
+from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from ..otsconfig import config
 
 class LabelWithThumb(QWidget):
-    def __init__(self, thumb_url, label_text, qt_nam, thumb_enabled=True, thumb_height=60, parent=None):
-        super(LabelWithThumb, self).__init__(parent)
-        self.__thumb_url = thumb_url
-        self.__text_label = QLabel()
+    def __init__(self, label, thumb_url):
+        super().__init__()
 
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
+        self.aspect_ratio = config.get("search_thumb_height")
 
-        self.__text_label.setText(label_text)
-        self.__text_label.setWordWrap(True)
-        self.__text_label.setToolTip(label_text)
-        self.__text_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        if thumb_enabled:
-            self.__thumb_label = QLabel()
-            self.__thumb_label.setFixedHeight(thumb_height)
-            self.__thumb_label.setFixedWidth(thumb_height)
-            self.__thumb_label.setToolTip(label_text)
-            layout.addWidget(self.__thumb_label)
-            self.loader = LabelURLSetImage(self.__thumb_label, QtNetwork.QNetworkRequest(QUrl(self.__thumb_url)),
-                                           qt_nam)
-        layout.addWidget(self.__text_label)
+        # Create a horizontal layout  
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)  # Remove margins  
+        layout.setSpacing(10)  # Set spacing between widgets
+
+        # Create the QLabel for the text  
+        item_label = QLabel(self)
+        item_label.setText(label.strip())
+        item_label.setWordWrap(True)  # Allow text to wrap if necessary  
+        item_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        # Create the QLabel for the pixmap  
+        self.image_label = QLabel(self)
+        self.image_label.setFixedSize(self.aspect_ratio, self.aspect_ratio)  # Set fixed size for the image label
+
+        # Create QNetworkAccessManager  
+        self.manager = QNetworkAccessManager(self)
+        request = QNetworkRequest(QUrl(thumb_url))  # Create the network request
+        
+        # Connect the finished signal to the slot  
+        self.manager.finished.connect(self.on_finished)  
+        self.manager.get(request)  # Make the request
+
+        # Add both labels to the layout  
+        layout.addWidget(self.image_label)
+        layout.addWidget(item_label)
+
         self.setLayout(layout)
 
+    def on_finished(self, reply: QNetworkReply):
+        # This method is called when the network request is completed  
+        if reply.error() == QNetworkReply.NetworkError.NoError:  # Correct error checking  
+            # Read the image data and create a pixmap  
+            image_data = reply.readAll()
+            pixmap = QPixmap()
+            pixmap.loadFromData(image_data)
 
-class LabelURLSetImage(QObject):
-    def __init__(self, parent, req_url, net_mgr, thumb_height=60):
-        self.__thumb_height = thumb_height
-        self.fetch_task = net_mgr.get(req_url)
-        self.fetch_task.finished.connect(self.resolve_fetch)
-        super(LabelURLSetImage, self).__init__(parent)
+            # Scale the pixmap to fit within the 60x60 size  
+            scaled_pixmap = pixmap.scaled(self.aspect_ratio, self.aspect_ratio, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            self.image_label.setPixmap(scaled_pixmap)  # Update the QLabel with the pixmap  
 
-    def resolve_fetch(self):
-        response = self.fetch_task.readAll()
-        pixmap = QPixmap()
-        pixmap.loadFromData(response)
-        pixmap = pixmap.scaled(self.__thumb_height, self.__thumb_height)
-        self.parent().setPixmap(pixmap)
+        # Clean up the reply object  
+        reply.deleteLater()

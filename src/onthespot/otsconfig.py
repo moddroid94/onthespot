@@ -41,6 +41,7 @@ class Config:
         self.session_uuid = str(uuid.uuid4())
         self.__template_data = {
             "version": "", # Application version
+            "debug_mode": False, # Application version
             "check_for_updates": True, # Check for updates
             "language": "en_US", # Language
             "language_index": 0, # Language Index
@@ -49,7 +50,7 @@ class Config:
             "rotate_acc_sn": False, # Rotate active account for parsing and downloading tracks
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
             "download_delay": 5, # Seconds to wait before next download
-            "track_path_formatter": "{artist}" + os.path.sep + "[{rel_year}] {album}" + os.path.sep + "{track_number}. {name}", # Track path format string
+            "track_path_formatter": "Tracks" + os.path.sep + "{artist}" + os.path.sep + "[{rel_year}] {album}" + os.path.sep + "{track_number}. {name}", # Track path format string
             "podcast_path_formatter": "Episodes" + os.path.sep + "{podcast_name}" + os.path.sep + "{episode_name}", # Episode path format string
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name}", # Playlist path format string
             "m3u_name_formatter": "M3U" + os.path.sep + "{name} by {owner}", # M3U name format string
@@ -121,7 +122,19 @@ class Config:
             "download_locate_btn": True, # Add locate button to downloads
             "download_delete_btn": False, # Add delete button to downloads
             "theme": "dark", # Light\Dark
-            "accounts": [] # Saved account information
+            "free_soundcloud_account": True, # Application version
+            "accounts": [
+                {
+                    "uuid": "public_soundcloud",
+                    "service": "soundcloud",
+                    "active": True,
+                    "login": {
+                        "client_id": "null",
+                        "app_version": "null",
+                        "app_locale": "null"
+                    }
+                }
+            ] # Saved account information
         }
         if os.path.isfile(self.__cfg_path):
             self.__config = json.load(open(cfg_path, "r"))
@@ -217,7 +230,6 @@ class Config:
             cf.write(json.dumps(self.__config, indent=4))
 
     def rollback(self):
-        shutil.rmtree(os.path.join(config_dir(), "onthespot", "sessions"))
         with open(self.__cfg_path, "w") as cf:
             cf.write(json.dumps(self.__template_data, indent=4))
         self.__config = self.__template_data

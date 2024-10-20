@@ -6,54 +6,62 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 from ..otsconfig import config
 from ..runtimedata import downloaded_data, cancel_list, failed_downloads, downloads_status, download_queue, session_pool, get_logger
-from ..utils.utils import open_item
-from ..spotify.api import check_if_media_in_library, save_media_to_library, remove_media_from_library, queue_media, play_media
+from ..utils import open_item
+from ..api.spotify import check_if_media_in_library, save_media_to_library, remove_media_from_library, queue_media, play_media
+
+from ..runtimedata import download_queue_gui
 
 logger = get_logger("worker.utility")
 
 
 class DownloadActionsButtons(QWidget):
-    def __init__(self, dl_id, media_type, pbar, copy_btn, cancel_btn, remove_btn, play_btn, save_btn, queue_btn, open_btn, locate_btn, delete_btn, parent=None):
+    def __init__(self, item_id, pbar, copy_btn, cancel_btn, retry_btn, play_btn, save_btn, queue_btn, open_btn, locate_btn, delete_btn, parent=None):
         super(DownloadActionsButtons, self).__init__(parent)
-        self.__id = dl_id
-        self.media_type = media_type
-        self.copy_btn = copy_btn
-        self.cancel_btn = cancel_btn
-        self.remove_btn = remove_btn
-        self.play_btn = play_btn
-        self.save_btn = save_btn
-        self.queue_btn = queue_btn
-        self.open_btn = open_btn
-        self.locate_btn = locate_btn
-        self.delete_btn = delete_btn
+        self.item_id = item_id
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        copy_btn.clicked.connect(self.copy_link)
-        cancel_btn.clicked.connect(self.cancel_item)
-        remove_btn.clicked.connect(self.retry_item)
-        play_btn.clicked.connect(self.play_item)
-        save_btn.clicked.connect(self.save_item)
-        queue_btn.clicked.connect(self.queue_item)
-        open_btn.clicked.connect(self.open_file)
-        locate_btn.clicked.connect(self.locate_file)
-        delete_btn.clicked.connect(self.delete_file)
         layout.addWidget(pbar)
-        layout.addWidget(copy_btn)
+        if copy_btn != None:
+            self.copy_btn = copy_btn
+            copy_btn.clicked.connect(self.copy_link)
+            layout.addWidget(copy_btn)
+        self.cancel_btn = cancel_btn
+        cancel_btn.clicked.connect(self.cancel_item)
         layout.addWidget(cancel_btn)
-        layout.addWidget(remove_btn)
-        layout.addWidget(play_btn)
-        layout.addWidget(save_btn)
-        layout.addWidget(queue_btn)
-        layout.addWidget(open_btn)
-        layout.addWidget(locate_btn)
-        layout.addWidget(delete_btn)
+        self.retry_btn = retry_btn
+        retry_btn.clicked.connect(self.retry_item)
+        layout.addWidget(retry_btn)
+        if play_btn != None:
+            self.play_btn = play_btn
+            play_btn.clicked.connect(self.play_item)
+            layout.addWidget(play_btn)
+        if save_btn != None:
+            self.save_btn = save_btn
+            save_btn.clicked.connect(self.save_item)
+            layout.addWidget(save_btn)
+        if save_btn != None:
+            self.queue_btn = queue_btn
+            queue_btn.clicked.connect(self.queue_item)
+            layout.addWidget(queue_btn)
+        if open_btn != None:
+            self.open_btn = open_btn
+            open_btn.clicked.connect(self.open_file)
+            layout.addWidget(open_btn)
+        if locate_btn != None:
+            self.locate_btn = locate_btn
+            locate_btn.clicked.connect(self.locate_file)
+            layout.addWidget(locate_btn)
+        if delete_btn != None:
+            self.delete_btn = delete_btn
+            delete_btn.clicked.connect(self.delete_file)
+            layout.addWidget(delete_btn)
         self.setLayout(layout)
         if config.get("download_save_btn"):
             #selected_uuid = config.get('accounts')[config.get('parsing_acc_sn') - 1][3]
             selected_uuid = config.get('accounts')[0][3]
             self.session = session_pool[selected_uuid]
-            in_library = check_if_media_in_library(self.session, self.__id, self.media_type)
+            in_library = check_if_media_in_library(self.session, self.item_id, self.item_type)
             if in_library:
                 save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
                 save_btn.setIcon(save_icon)
@@ -66,31 +74,31 @@ class DownloadActionsButtons(QWidget):
                 logger.info(f"Unable to determine if song is in library, value: {in_library}")
 
     def copy_link(self):
-        pyperclip.copy(f"https://open.spotify.com/{self.media_type}/{self.__id}")
+        pyperclip.copy("FIX ME")
 
     def cancel_item(self):
-        cancel_list[self.__id] = {}
+        download_queue[self.item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
+        download_queue[self.item_id]['gui']['progress_bar'].setValue(0)
         self.cancel_btn.hide()
+        self.retry_btn.show()
 
     def retry_item(self):
-        if self.__id in failed_downloads:
-            downloads_status[self.__id]["status_label"].setText(self.tr("Waiting"))
-            self.remove_btn.hide()
-            download_queue.put(failed_downloads[self.__id])
-            self.cancel_btn.show()
+        download_queue[self.item_id]['gui']['status_label'].setText(self.tr("Waiting"))
+        self.retry_btn.hide()
+        self.cancel_btn.show()
 
     def play_item(self):
-        play_media(self.session, self.__id, self.media_type)
+        play_media(self.session, self.item_id, self.item_type)
 
     def save_item(self):
         if self.in_library:
-            remove_media_from_library(self.session, self.__id, self.media_type)
+            remove_media_from_library(self.session, self.item_id, self.item_type)
             save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'empty_heart.png'))
             self.save_btn.setIcon(save_icon)
             self.in_library = False
             logger.info(f"Song removed from spotify library")
         elif not self.in_library:
-            save_media_to_library(self.session, self.__id, self.media_type)
+            save_media_to_library(self.session, self.item_id, self.item_type)
             save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
             self.save_btn.setIcon(save_icon)
             self.in_library = True
@@ -99,22 +107,24 @@ class DownloadActionsButtons(QWidget):
             logger.info(f"Unable to determine if song is in library cannot save, value: {in_library}")
 
     def queue_item(self):
-        queue_media(self.session, self.__id, self.media_type)
+        queue_media(self.session, self.item_id, self.item_type)
 
     def open_file(self):
-        file = os.path.abspath(downloaded_data[self.__id]['media_path'])
+        file_path = download_queue[self.item_id]['file_path']
+        file = os.path.abspath(file_path)
         open_item(file)
 
+
     def locate_file(self):
-        if self.__id in downloaded_data:
-            if downloaded_data[self.__id].get('media_path', None):
-                file_dir = os.path.dirname(downloaded_data[self.__id]['media_path'])
-                open_item(file_dir)
+        file_path = download_queue[self.item_id]['file_path']
+        file_dir = os.path.dirname(file_path)
+        open_item(file_dir)
 
     def delete_file(self):
-        file = os.path.abspath(downloaded_data[self.__id]['media_path'])
+        file_path = download_queue[self.item_id]['file_path']
+        file = os.path.abspath(file_path)
         os.remove(file)
-        downloads_status[self.__id]["status_label"].setText(self.tr("Deleted"))
+        self.item["gui"]["status_label"].setText(self.tr("Deleted"))
         self.play_btn.hide()
         self.save_btn.hide()
         self.queue_btn.hide()

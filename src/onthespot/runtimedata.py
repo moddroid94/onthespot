@@ -21,6 +21,18 @@ stdout_handler.setFormatter(log_formatter)
 download_queue = Queue()
 thread_pool = {}
 session_pool = {}
+
+parsing = {}
+pending = {}
+download_queue = {}
+account_pool = []
+
+
+download_queue_gui = []
+failed = []
+completed = []
+cancelled = []
+
 failed_downloads = {}
 cancel_list = {}
 downloads_status = {}

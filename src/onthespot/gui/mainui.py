@@ -7,100 +7,320 @@ from PyQt6 import uic, QtNetwork, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton
-from ..exceptions import EmptySearchResultException
-from ..spotify.api import search_by_term, get_thumbnail
-from ..utils.utils import fetch_account_uuid, name_by_from_sdata, login_user, remove_user, get_url_data, re_init_session, latest_release, open_item
-from ..spotify import LoadSessions, ParsingQueueProcessor, MediaWatcher, PlayListMaker, DownloadWorker
-from ..spotify.zeroconf import new_session
+from ..api.spotify import get_thumbnail
+from ..utils import name_by_from_sdata, remove_user, re_init_session, latest_release, open_item
+
 from .dl_progressbtn import DownloadActionsButtons
+from .settings import load_config, save_config
 from .minidialog import MiniDialog
 from ..otsconfig import config_dir, config
-from ..runtimedata import get_logger, download_queue, downloads_status, downloaded_data, failed_downloads, cancel_list, \
+from ..parse_item import parse_url
+from ..runtimedata import get_logger, downloads_status, downloaded_data, failed_downloads, cancel_list, \
     session_pool, thread_pool
 from .thumb_listitem import LabelWithThumb
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
+from ..runtimedata import parsing, pending, failed, completed, cancelled, download_queue, account_pool
+
+from PyQt6.QtCore import QThread, pyqtSignal, QObject, QTimer
+
+from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
+from ..post_download import conv_list_format
+
+from ..accounts import get_account_token
+
+from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
+from ..search import get_search_results
+import time
+from ..downloader import DownloadWorker
+from ..accounts import FillAccountPool
 logger = get_logger('gui.main_ui')
 
 
-def dl_progress_update(data):
-    media_id = data[0]
-    status = data[1]
-    progress = data[2]
-    try:
-        if status is not None:
-            if progress == [0, 100]:
-                downloads_status[media_id]["btn"]['cancel'].hide()
-                if config.get("download_copy_btn"):
-                    downloads_status[media_id]['btn']['copy'].show()
-                downloads_status[media_id]["btn"]['retry'].show()
-            elif progress != [0, 100]:
-                downloads_status[media_id]["btn"]['retry'].hide()
-                if config.get("download_copy_btn"):
-                    downloads_status[media_id]['btn']['copy'].show()
-                downloads_status[media_id]["btn"]['cancel'].show()
-            downloads_status[media_id]["status_label"].setText(status)
-            logger.debug(f"Updating status text for download item '{media_id}' to '{status}'")
-        if progress != None:
-            percent = int((progress[0] / progress[1]) * 100)
-            if percent >= 100:
-                downloads_status[media_id]['btn']['cancel'].hide()
-                downloads_status[media_id]['btn']['retry'].hide()
-                if config.get("download_copy_btn"):
-                    downloads_status[media_id]['btn']['copy'].show()
-                if config.get("download_play_btn"):
-                    downloads_status[media_id]['btn']['play'].show()
-                if config.get("download_save_btn"):
-                    downloads_status[media_id]['btn']['save'].show()
-                if config.get("download_queue_btn"):
-                    downloads_status[media_id]['btn']['queue'].show()
-                if config.get("download_open_btn"):
-                    downloads_status[media_id]['btn']['open'].show()
-                if config.get("download_locate_btn"):
-                    downloads_status[media_id]['btn']['locate'].show()
-                if config.get("download_delete_btn"):
-                    downloads_status[media_id]['btn']['delete'].show()
-                downloaded_data[media_id] = {
-                    'media_path': data[3],
-                    'media_name': data[4]
-                }
-            downloads_status[media_id]["progress_bar"].setValue(percent)
-            logger.debug(f"Updating progressbar for download item '{media_id}' to '{percent}'%")
-    except KeyError:
-        logger.error(f"Why TF we get here ?, Got progressbar update for media_id '{media_id}' "
-                     f"which does not seem to exist !!! -> Valid Status items: "
-                     f"{str([_media_id for _media_id in downloads_status])} "
-                     )
+class QueueWorker(QThread):
+    add_item_to_download_list = pyqtSignal(dict)
+    def __init__(self):
+        super().__init__()
 
 
-def retry_all_failed_downloads():
-    for dl_id in list(failed_downloads.keys()):
-        downloads_status[dl_id]["status_label"].setText("Waiting")
-        if config.get("download_copy_btn"):
-            downloads_status[media_id]['btn']['copy'].show()
-        downloads_status[dl_id]["btn"]['cancel'].show()
-        downloads_status[dl_id]["btn"]['retry'].hide()
-        download_queue.put(failed_downloads[dl_id].copy())
-        failed_downloads.pop(dl_id)
-
-
-def cancel_all_downloads():
-    for did in downloads_status.keys():
-        logger.info(f'Trying to cancel : {did}')
-        try:
-            if downloads_status[did]['progress_bar'].value() < 95 and did not in cancel_list:
-                cancel_list[did] = {}
-        except (KeyError, RuntimeError):
-            logger.info(f'Cannot cancel media id: {did}, this might have been cleared')
-
+    def run(self):
+        while True:
+            if pending:
+                item_id = next(iter(pending))  # Get the first key  
+                item = pending.pop(item_id)
+                if item['item_id'] in download_queue:
+                    logger.info(f"Item Already In Download Queue: {item}")
+                    time.sleep(4)
+                    continue
+                else:
+                    self.add_item_to_download_list.emit(item)
+                    
+                    time.sleep(4)
+                    continue
+            else:
+                time.sleep(4)
 
 class MainWindow(QMainWindow):
+
+    def fill_account_table(self):
+
+        # Clear the table
+        while self.tbl_sessions.rowCount() > 0:
+            self.tbl_sessions.removeRow(0)
+        sn = 0
+        for account in account_pool:
+            sn = sn + 1
+            rows = self.tbl_sessions.rowCount()
+
+            radiobutton = QRadioButton()
+            radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow() + 1) and config.update())
+            if sn == config.get("parsing_acc_sn"):
+                radiobutton.setChecked(True)
+
+            btn = QPushButton(self.tbl_sessions)
+            trash_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'trash.png'))
+            btn.setIcon(trash_icon)
+            #btn.setText(self.tr(" Remove "))
+            
+            btn.clicked.connect(lambda x, index=rows: self.user_table_remove_click(index))
+            btn.setMinimumHeight(30)
+
+            service = QTableWidgetItem(str(account["service"]).title())
+            service.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{account["service"]}.png')))
+
+            self.tbl_sessions.insertRow(rows)
+            self.tbl_sessions.setCellWidget(rows, 0, radiobutton)
+            self.tbl_sessions.setItem(rows, 1, QTableWidgetItem(account["username"]))
+            self.tbl_sessions.setItem(rows, 2, QTableWidgetItem(service))
+            self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(str(account["account_type"]).title()))
+            self.tbl_sessions.setItem(rows, 4, QTableWidgetItem(account["bitrate"]))
+            self.tbl_sessions.setItem(rows, 5, QTableWidgetItem(str(account["status"]).title()))
+            self.tbl_sessions.setCellWidget(rows, 6, btn)
+        logger.info("Accounts table was populated !")
+
+    def add_item_to_download_list(self, item):
+        # Skip rendering QButtons if they are not in use
+        copy_btn = None
+        play_btn = None
+        save_btn = None
+        queue_btn = None
+        open_btn = None
+        locate_btn = None
+        delete_btn = None
+
+        # Items
+        pbar = QProgressBar()
+        pbar.setValue(0)
+        pbar.setMinimumHeight(30)
+        if config.get("download_copy_btn"):
+            copy_btn = QPushButton()
+            #copy_btn.setText('Retry')
+            copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
+            copy_btn.setIcon(copy_icon)
+            copy_btn.setToolTip(self.tr('Copy'))
+            copy_btn.setMinimumHeight(30)
+            copy_btn.hide()
+        cancel_btn = QPushButton()
+        # cancel_btn.setText('Cancel')
+        cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
+        cancel_btn.setIcon(cancel_icon)
+        cancel_btn.setToolTip(self.tr('Cancel'))
+        cancel_btn.setMinimumHeight(30)
+        retry_btn = QPushButton()
+        #retry_btn.setText('Retry')
+        retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
+        retry_btn.setIcon(retry_icon)
+        retry_btn.setToolTip(self.tr('Retry'))
+        retry_btn.setMinimumHeight(30)
+        retry_btn.hide()
+        if config.get("download_play_btn"):
+            play_btn = QPushButton()
+            #play_btn.setText('Play')
+            play_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'play.png'))
+            play_btn.setIcon(play_icon)
+            play_btn.setToolTip(self.tr('Play'))
+            play_btn.setMinimumHeight(30)
+            play_btn.hide()
+        if config.get("download_save_btn"):
+            save_btn = QPushButton()
+            #save_btn.setText('Save')
+            #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
+            #save_btn.setIcon(save_icon)
+            save_btn.setToolTip(self.tr('Save'))
+            save_btn.setMinimumHeight(30)
+            save_btn.hide()
+        if config.get("download_queue_btn"):
+            queue_btn = QPushButton()
+            #queue_btn.setText('Queue')
+            queue_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'queue.png'))
+            queue_btn.setIcon(queue_icon)
+            queue_btn.setToolTip(self.tr('Queue'))
+            queue_btn.setMinimumHeight(30)
+            queue_btn.hide()
+        if config.get("download_open_btn"):
+            open_btn = QPushButton()
+            #open_btn.setText('Open')
+            open_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'file.png'))
+            open_btn.setIcon(open_icon)
+            open_btn.setToolTip(self.tr('Open'))
+            open_btn.setMinimumHeight(30)
+            open_btn.hide()
+        if config.get("download_locate_btn"):
+            locate_btn = QPushButton()
+            #locate_btn.setText('Locate')
+            locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
+            locate_btn.setIcon(locate_icon)
+            locate_btn.setToolTip(self.tr('Locate'))
+            locate_btn.setMinimumHeight(30)
+            locate_btn.hide()
+        if config.get("download_delete_btn"):
+            delete_btn = QPushButton()
+            #delete_btn.setText('Delete')
+            delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'delete.png'))
+            delete_btn.setIcon(delete_icon)
+            delete_btn.setToolTip(self.tr('Delete'))
+            delete_btn.setMinimumHeight(30)
+            delete_btn.hide()
+        
+        item_service = item["item_service"]
+        service_label = QTableWidgetItem(str(item_service).title())
+        service_label.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{item_service}.png')))
+
+        status_label = QLabel(self.tbl_dl_progress)
+        status_label.setText(self.tr("Waiting"))
+        actions = DownloadActionsButtons(item['item_id'], pbar, copy_btn, cancel_btn, retry_btn, play_btn, save_btn, queue_btn, open_btn, locate_btn, delete_btn)
+       
+        # Get Labels
+        token = get_account_token()
+        item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
+
+        item_label = LabelWithThumb(item_metadata['title'], item_metadata['image_url'])
+
+        # Add To List
+        rows = self.tbl_dl_progress.rowCount()
+        self.tbl_dl_progress.insertRow(rows)
+        self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
+        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(item['item_id']))
+        self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
+        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(conv_list_format(item_metadata['artists'])))
+        self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(service_label))
+        self.tbl_dl_progress.setCellWidget(rows, 4, status_label)
+        self.tbl_dl_progress.setCellWidget(rows, 5, actions)
+
+        if item['is_playlist_item'] is True:
+            playlist_name = item['playlist_name']
+            playlist_by = item['playlist_by']
+        else:
+            playlist_name = ''
+            playlist_by = ''
+
+        download_queue[item['item_id']] = {
+            "item_service": item["item_service"],
+            "item_type": item["item_type"],
+            'item_id': item['item_id'], 
+            'item_id': item['item_id'], 
+            "file_path": "n/a",
+            'is_playlist_item': item['is_playlist_item'],
+            'playlist_name': playlist_name,
+            'playlist_by': playlist_by,
+            "gui": {
+                "status_label": status_label,
+                "progress_bar": pbar,
+                "btn": {
+                    "copy": copy_btn,
+                    "cancel": cancel_btn,
+                    "retry": retry_btn,
+                    "play": play_btn,
+                    "save": save_btn,
+                    "queue": queue_btn,
+                    "open": open_btn,
+                    "locate": locate_btn,
+                    "delete": delete_btn
+                    }
+                }
+            }
+
+
+    def update_item_in_download_list(self, item, status, progress):
+        item['gui']['status_label'].setText(status)
+        item['gui']['progress_bar'].setValue(progress)
+        if progress == 0:
+            item['gui']["btn"]['cancel'].hide()
+            if config.get("download_copy_btn"):
+                item['gui']['btn']['copy'].show()
+            item['gui']["btn"]['retry'].show()
+            return
+        elif progress == 100:
+            item['gui']['btn']['cancel'].hide()
+            item['gui']['btn']['retry'].hide()
+            if config.get("download_copy_btn"):
+                item['gui']['btn']['copy'].show()
+            if config.get("download_play_btn"):
+                item['gui']['btn']['play'].show()
+            if config.get("download_save_btn"):
+                item['gui']['btn']['save'].show()
+            if config.get("download_queue_btn"):
+                item['gui']['btn']['queue'].show()
+            if config.get("download_open_btn"):
+                item['gui']['btn']['open'].show()
+            if config.get("download_locate_btn"):
+                item['gui']['btn']['locate'].show()
+            if config.get("download_delete_btn"):
+                item['gui']['btn']['delete'].show()
+            return
+        elif progress != 0:
+            item['gui']["btn"]['retry'].hide()
+            if config.get("download_copy_btn"):
+                item['gui']['btn']['copy'].show()
+            item['gui']["btn"]['cancel'].show()
+            return
+
+    def remove_completed_from_download_list(self):
+        check_row = 0
+        while check_row < self.tbl_dl_progress.rowCount():
+            item_id = self.tbl_dl_progress.item(check_row, 0).text()
+            for key, item in list(download_queue.items()):
+                if key == item_id:
+                    if item['item_id'] == item_id:
+                        if item['gui']['progress_bar'].value() == 100 or item['gui']['status_label'].text() == self.tr("Cancelled"):
+                            logger.info("Clearing row {checkrow}: {item}")
+                            del download_queue[key]
+                            self.tbl_dl_progress.removeRow(check_row)
+                            check_row -= 1
+                            break
+            check_row += 1
+
+    def cancel_all_downloads(self):
+        check_row = 0
+        while check_row < self.tbl_dl_progress.rowCount():
+            item_id = self.tbl_dl_progress.item(check_row, 0).text()
+            for item_id, item in download_queue.items():
+                if item['gui']['progress_bar'].value() > 0 or item['gui']['status_label'].text() == self.tr("Cancelled"):
+                       break
+                else:
+                    self.update_item_in_download_list(item, self.tr("Cancelled"), 0)
+            check_row += 1
+
+    def retry_all_failed_downloads(self):
+        check_row = 0
+        while check_row < self.tbl_dl_progress.rowCount():
+            item_id = self.tbl_dl_progress.item(check_row, 0).text()
+            for item_id, item in download_queue.items():
+                if item['gui']['progress_bar'].value() > 0 or item['gui']['status_label'].text() == self.tr("Cancelled"):
+                       break
+                else:
+                    self.update_item_in_download_list(item, self.tr("Cancelled"), 0)
+            check_row += 1
+
 
     # Remove Later
     def contribute(self):
         if self.inp_language.currentIndex() == self.inp_language.count() - 1:
+            from ..queue import add_item_to_download_list
             url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
             open_item(url)
+
+
 
     def __init__(self, _dialog, start_url=''):
         super(MainWindow, self).__init__()
@@ -110,38 +330,6 @@ class MainWindow(QMainWindow):
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(QtGui.QIcon(icon_path))
 
-        en_US_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'en_US.png'))
-        self.inp_language.insertItem(0, en_US_icon, "English")
-        de_DE_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'de_DE.png'))
-        self.inp_language.insertItem(1, de_DE_icon, "Deutsch")
-        pt_PT_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pt_PT.png'))
-        self.inp_language.insertItem(2, pt_PT_icon, "Português")
-
-        # Contribute Translations
-        pirate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pirate_flag.png'))
-        self.inp_language.insertItem(999, pirate_icon, "Contribute")
-        self.inp_language.currentIndexChanged.connect(self.contribute)
-
-        spotify_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png'))
-        #self.btn_login_add_spotify.setIcon(spotify_icon)
-
-        self.add_service.insertItem(0, spotify_icon, "")
-
-
-        #soundcloud_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'soundcloud.png'))
-        #self.btn_login_add_soundcloud.setIcon(soundcloud_icon)
-
-        save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'save.png'))
-        self.btn_save_config.setIcon(save_icon)
-        folder_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
-        self.btn_download_root_browse.setIcon(folder_icon)
-        self.btn_download_tmp_browse.setIcon(folder_icon)
-        search_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'search.png'))
-        self.btn_search.setIcon(search_icon)
-        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
-        self.btn_search_filter_toggle.setIcon(collapse_down_icon)
-
-        # Breaks zeroconf login because of dirty restart
         self.start_url = start_url
         self.inp_version.setText(config.get("version"))
         self.inp_session_uuid.setText(config.session_uuid)
@@ -150,47 +338,37 @@ class MainWindow(QMainWindow):
         # Bind button click
         self.bind_button_inputs()
 
-        # Create required variables to store configuration state about other threads/objects
-        self.__playlist_maker = None
-        self.__media_watcher_thread = None
-        self.__media_watcher = None
-        self.__qt_nam = QtNetwork.QNetworkAccessManager()
-        # Variable to store data for class use
+
         self.__users = []
-        self.__parsing_queue = queue.Queue()
-        self.__last_search_data = None
+        self.last_search = None
 
         # Fill the value from configs
         logger.info("Loading configurations..")
-        self.__fill_configs()
+        load_config(self)
 
         self.__splash_dialog = _dialog
 
         # Start/create session builder and queue processor
-        logger.info("Preparing session loader")
-        self.__session_builder_thread = QThread()
-        self.__session_builder_worker = LoadSessions()
-        self.__session_builder_worker.setup(self.__users)
-        self.__session_builder_worker.moveToThread(self.__session_builder_thread)
-        self.__session_builder_thread.started.connect(self.__session_builder_worker.run)
-        self.__session_builder_worker.finished.connect(self.__session_builder_thread.quit)
-        self.__session_builder_worker.finished.connect(self.__session_builder_worker.deleteLater)
-        self.__session_builder_worker.finished.connect(self.__session_load_done)
-        self.__session_builder_thread.finished.connect(self.__session_builder_thread.deleteLater)
-        self.__session_builder_worker.progress.connect(self.__show_popup_dialog)
-        self.__session_builder_thread.start()
-        logger.info("Preparing parsing queue processor")
-        self.__media_parser_thread = QThread()
-        self.__media_parser_worker = ParsingQueueProcessor()
-        self.__media_parser_worker.setup(self.__parsing_queue)
-        self.__media_parser_worker.moveToThread(self.__media_parser_thread)
-        self.__media_parser_thread.started.connect(self.__media_parser_worker.run)
-        self.__media_parser_worker.finished.connect(self.__media_parser_thread.quit)
-        self.__media_parser_worker.finished.connect(self.__media_parser_worker.deleteLater)
-        self.__media_parser_thread.finished.connect(self.__media_parser_thread.deleteLater)
-        self.__media_parser_worker.progress.connect(self.__show_popup_dialog)
-        self.__media_parser_worker.enqueue.connect(self.__add_item_to_downloads)
-        self.__media_parser_thread.start()
+
+
+
+        fillaccountpool = FillAccountPool(gui=True)  
+        #fillaccountpool.finished.connect(self.__session_builder_thread.quit)
+        #fillaccountpool.finished.connect(fillaccountpool.deleteLater)
+        fillaccountpool.finished.connect(self.session_load_done)
+        #self.__session_builder_thread.finished.connect(self.__session_builder_thread.deleteLater)
+        fillaccountpool.progress.connect(self.__show_popup_dialog)
+        #queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method  
+        fillaccountpool.start()  
+
+
+        queueworker = QueueWorker()  
+        queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method  
+        queueworker.start()  
+
+        downloadworker = DownloadWorker(gui=True)  
+        downloadworker.progress.connect(self.update_item_in_download_list)  # Connect signal to update_table method  
+        downloadworker.start()  
 
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
@@ -212,6 +390,7 @@ class MainWindow(QMainWindow):
         # Set the table header properties
         self.set_table_props()
         logger.info("Main window init completed !")
+
 
     def load_dark_theme(self):
         self.theme = "dark"
@@ -244,54 +423,52 @@ class MainWindow(QMainWindow):
         collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
         collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
 
-        self.btn_search.clicked.connect(self.__get_search_results)
+        self.btn_search.clicked.connect(self.fill_search_table)
 
-        self.btn_login_add_spotify.clicked.connect(self.__add_account)
-        self.btn_save_config.clicked.connect(self.__update_config)
+        self.inp_login_service.currentIndexChanged.connect(self.set_login_fields)
+
+        self.btn_save_config.clicked.connect(self.update_config)
         self.btn_reset_config.clicked.connect(self.reset_app_config)
 
-        self.btn_search_download_all.clicked.connect(lambda x, cat="all": self.__mass_action_dl(cat))
-        self.inp_enable_lyrics.clicked.connect(self.__enable_lyrics)
-        self.btn_progress_retry_all.clicked.connect(retry_all_failed_downloads)
-        self.btn_progress_cancel_all.clicked.connect(cancel_all_downloads)
+        self.btn_progress_retry_all.clicked.connect(self.retry_all_failed_downloads)
+        self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
         self.btn_download_root_browse.clicked.connect(self.__select_dir)
         self.btn_download_tmp_browse.clicked.connect(self.__select_tmp_dir)
-        self.inp_search_term.returnPressed.connect(self.__get_search_results)
-        self.btn_search_download_tracks.clicked.connect(lambda x, cat="tracks": self.__mass_action_dl(cat))
-        self.btn_search_download_albums.clicked.connect(lambda x, cat="albums": self.__mass_action_dl(cat))
-        self.btn_search_download_artists.clicked.connect(lambda x, cat="artists": self.__mass_action_dl(cat))
-        self.btn_progress_clear_complete.clicked.connect(self.rem_complete_from_table)
-        self.btn_search_download_playlists.clicked.connect(lambda x, cat="playlists": self.__mass_action_dl(cat))
+        self.inp_search_term.returnPressed.connect(self.fill_search_table)
+        self.btn_progress_clear_complete.clicked.connect(self.remove_completed_from_download_list)
         self.btn_search_filter_toggle.clicked.connect(lambda toggle: self.group_search_items.show() if self.group_search_items.isHidden() else self.group_search_items.hide())
         self.btn_search_filter_toggle.clicked.connect(lambda switch: self.btn_search_filter_toggle.setIcon(collapse_down_icon) if self.group_search_items.isHidden() else self.btn_search_filter_toggle.setIcon(collapse_up_icon))
         # Connect checkbox state change signals
         self.inp_create_playlists.stateChanged.connect(self.__m3u_maker_set)
-        self.inp_enable_spot_watch.stateChanged.connect(self.__media_watcher_set)
 
     def set_table_props(self):
-        logger.info("Setting table item properties")
+        window_width = self.width()
+        logger.info(f"Setting table item properties {window_width}")
         # Sessions table
-        tbl_sessions_header = self.tbl_sessions.horizontalHeader()
-        tbl_sessions_header.resizeSection(0, 20)
-        tbl_sessions_header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        tbl_sessions_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        tbl_sessions_header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        tbl_sessions_header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        tbl_sessions_header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
-        tbl_sessions_header.setSectionResizeMode(6, QHeaderView.ResizeMode.Fixed)
+        self.tbl_sessions.horizontalHeader().resizeSection(0, 16)
+        self.tbl_sessions.horizontalHeader().resizeSection(1, int(0.35 * window_width))
+        self.tbl_sessions.horizontalHeader().resizeSection(2, int(0.15 * window_width))
+        self.tbl_sessions.horizontalHeader().resizeSection(3, int(0.2 * window_width))
+        self.tbl_sessions.horizontalHeader().resizeSection(4, int(0.12 * window_width))
+        self.tbl_sessions.horizontalHeader().resizeSection(5, int(0.12 * window_width))
+        self.tbl_sessions.horizontalHeader().resizeSection(6, int(0.06 * window_width))
         # Search results table
-        tbl_search_results_headers = self.tbl_search_results.horizontalHeader()
-        tbl_search_results_headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
-        tbl_search_results_headers.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        tbl_search_results_headers.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        tbl_search_results_headers.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        tbl_search_results_headers.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        self.tbl_search_results.horizontalHeader().resizeSection(0, int(0.2 * window_width))
+        self.tbl_search_results.horizontalHeader().resizeSection(1, int(0.2 * window_width))
+        self.tbl_search_results.horizontalHeader().resizeSection(2, int(0.2 * window_width))
+        self.tbl_search_results.horizontalHeader().resizeSection(3, int(0.2 * window_width))
+        self.tbl_search_results.horizontalHeader().resizeSection(4, int(0.2 * window_width))
         # Download progress table
-        tbl_dl_progress_header = self.tbl_dl_progress.horizontalHeader()
-        tbl_dl_progress_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        tbl_dl_progress_header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        tbl_dl_progress_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        tbl_dl_progress_header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
+        if config.get("debug_mode"):
+            self.tbl_dl_progress.horizontalHeader().resizeSection(0, int(0.25 * window_width))
+        else:
+            self.tbl_dl_progress.setColumnWidth(0, 0)
+        self.tbl_dl_progress.horizontalHeader().resizeSection(1, int(0.25 * window_width))
+        self.tbl_dl_progress.horizontalHeader().resizeSection(2, int(0.25 * window_width))
+        self.tbl_dl_progress.horizontalHeader().resizeSection(3, int(0.25 * window_width))
+        self.tbl_dl_progress.horizontalHeader().resizeSection(4, int(0.25 * window_width))
+        self.tbl_dl_progress.horizontalHeader().resizeSection(5, int(0.2 * window_width))
+        self.set_login_fields()
         return True
 
     def __m3u_maker_set(self):
@@ -328,7 +505,7 @@ class MainWindow(QMainWindow):
             self.__media_watcher.finished.connect(self.__media_watcher_thread.quit)
             self.__media_watcher.finished.connect(self.__media_watcher.deleteLater)
             self.__media_watcher.finished.connect(self.sig_media_track_end)
-            self.__media_watcher.changed_media.connect(self.__download_by_url)
+            # FIX ME self.__media_watcher.changed_media.connect(self.__download_by_url)
             self.__media_watcher_thread.finished.connect(self.__media_watcher_thread.deleteLater)
             self.__media_watcher_thread.start()
             logger.info("Media watcher thread started")
@@ -363,138 +540,6 @@ class MainWindow(QMainWindow):
         if dir_path.strip() != '':
             self.inp_tmp_dl_root.setText(QDir.toNativeSeparators(dir_path))
 
-    def __enable_lyrics(self):
-        if self.inp_enable_lyrics.isChecked() == True and user[1].lower() == "free":
-            self.__splash_dialog.run(self.tr("Warning: Downloading lyrics is a premium feature."))
-
-    def __add_item_to_downloads(self, item):
-        # Create progress status
-        if item['item_id'] in downloads_status:
-            # If the item is in download status dictionary, it's not cleared from view
-            logger.info(f'The media: "{item["item_title"]}" ({item["item_id"]}) was already in view')
-            if item['item_id'] in cancel_list:
-                logger.info(f'The media: "{item["item_title"]}" ({item["item_id"]}) was being cancelled, preventing cancellation !')
-                cancel_list.pop(item['item_id'])
-            elif item['item_id'] in failed_downloads:
-                dl_id = item['item_id']
-                logger.info(f'The media: "{item["item_title"]}" ({item["item_id"]}) had failed to download, re-downloading ! !')
-                downloads_status[dl_id]["status_label"].setText(self.tr("Waiting"))
-                downloads_status[dl_id]["btn"]['cancel'].show()
-                downloads_status[dl_id]["btn"]['retry'].hide()
-                download_queue.put(failed_downloads[dl_id].copy())
-                failed_downloads.pop(dl_id)
-            else:
-                logger.info(f'The media: "{item["item_title"]}" ({item["item_id"]}) is already in queue and is being downloaded, ignoring.. !')
-            return None
-        pbar = QProgressBar()
-        pbar.setValue(0)
-        pbar.setMinimumHeight(30)
-        copy_btn = QPushButton()
-        #copy_btn.setText('Retry')
-        copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
-        copy_btn.setIcon(copy_icon)
-        copy_btn.setToolTip(self.tr('Copy'))
-        copy_btn.setMinimumHeight(30)
-        copy_btn.hide()
-        cancel_btn = QPushButton()
-        # cancel_btn.setText('Cancel')
-        cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
-        cancel_btn.setIcon(cancel_icon)
-        cancel_btn.setToolTip(self.tr('Cancel'))
-        cancel_btn.setMinimumHeight(30)
-        retry_btn = QPushButton()
-        #retry_btn.setText('Retry')
-        retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
-        retry_btn.setIcon(retry_icon)
-        retry_btn.setToolTip(self.tr('Retry'))
-        retry_btn.setMinimumHeight(30)
-        retry_btn.hide()
-        play_btn = QPushButton()
-        #play_btn.setText('Play')
-        play_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'play.png'))
-        play_btn.setIcon(play_icon)
-        play_btn.setToolTip(self.tr('Play'))
-        play_btn.setMinimumHeight(30)
-        play_btn.hide()
-        save_btn = QPushButton()
-        #save_btn.setText('Save')
-        #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
-        #save_btn.setIcon(save_icon)
-        save_btn.setToolTip(self.tr('Save'))
-        save_btn.setMinimumHeight(30)
-        save_btn.hide()
-        queue_btn = QPushButton()
-        #queue_btn.setText('Queue')
-        queue_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'queue.png'))
-        queue_btn.setIcon(queue_icon)
-        queue_btn.setToolTip(self.tr('Queue'))
-        queue_btn.setMinimumHeight(30)
-        queue_btn.hide()
-        open_btn = QPushButton()
-        #open_btn.setText('Open')
-        open_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'file.png'))
-        open_btn.setIcon(open_icon)
-        open_btn.setToolTip(self.tr('Open'))
-        open_btn.setMinimumHeight(30)
-        open_btn.hide()
-        locate_btn = QPushButton()
-        #locate_btn.setText('Locate')
-        locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
-        locate_btn.setIcon(locate_icon)
-        locate_btn.setToolTip(self.tr('Locate'))
-        locate_btn.setMinimumHeight(30)
-        locate_btn.hide()
-        delete_btn = QPushButton()
-        #delete_btn.setText('Delete')
-        delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'delete.png'))
-        delete_btn.setIcon(delete_icon)
-        delete_btn.setToolTip(self.tr('Delete'))
-        delete_btn.setMinimumHeight(30)
-        delete_btn.hide()
-        status = QLabel(self.tbl_dl_progress)
-        status.setText(self.tr("Waiting"))
-        actions = DownloadActionsButtons(item['item_id'], item['dl_params']['media_type'], pbar, copy_btn, cancel_btn, retry_btn, play_btn, save_btn, queue_btn, open_btn, locate_btn, delete_btn)
-        download_queue.put(
-            {
-                'media_type': item['dl_params']['media_type'],
-                'media_id': item['item_id'],
-                'extra_paths': item['dl_params']['extra_paths'],
-                'extra_path_as_root': item['dl_params']['extra_path_as_root'],
-                'm3u_filename': '',
-                'playlist_name': item['dl_params'].get('playlist_name', ''),
-                'playlist_owner': item['dl_params'].get('playlist_owner', ''),
-                'playlist_desc': item['dl_params'].get('playlist_desc', '')
-
-            }
-        )
-        downloads_status[item['item_id']] = {
-            "status_label": status,
-            "progress_bar": pbar,
-            "btn": {
-                "copy": copy_btn,
-                "cancel": cancel_btn,
-                "retry": retry_btn,
-                "play": play_btn,
-                "save": save_btn,
-                "queue": queue_btn,
-                "open": open_btn,
-                "locate": locate_btn,
-                "delete": delete_btn
-            }
-        }
-        logger.info(
-            f"Adding item to download queue -> media_type:{item['dl_params']['media_type']}, "
-            f"media_id: {item['item_id']}, extra_path:{item['dl_params']['extra_paths']}, "
-            f"extra_path_as_root: {item['dl_params']['extra_path_as_root']}, Prefix value: ''")
-        rows = self.tbl_dl_progress.rowCount()
-        self.tbl_dl_progress.insertRow(rows)
-        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(item['item_id']))
-        self.tbl_dl_progress.setItem(rows, 1, QTableWidgetItem(item['item_title']))
-        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item['item_by_text']))
-        self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(item['item_type_text']))
-        self.tbl_dl_progress.setCellWidget(rows, 4, status)
-        self.tbl_dl_progress.setCellWidget(rows, 5, actions)
-
     def __show_popup_dialog(self, txt, btn_hide=False):
         self.__splash_dialog.lb_main.setText(str(txt))
         if btn_hide:
@@ -503,820 +548,147 @@ class MainWindow(QMainWindow):
             self.__splash_dialog.btn_close.show()
         self.__splash_dialog.show()
 
-    def __session_load_done(self):
+    def session_load_done(self):
         self.__splash_dialog.hide()
         self.__splash_dialog.btn_close.show()
-        self.__generate_users_table(self.__users)
+        self.fill_account_table()
         self.show()
         if self.start_url.strip() != '':
             logger.info(f'Session was started with query of {self.start_url}')
             self.inp_search_term.setText(self.start_url.strip())
-            self.__get_search_results()
+            self.fill_search_table()
         self.start_url = ''
-        # Build threads
-        self.__rebuild_threads()
         # Update Checker
         if config.get("check_for_updates"):
             if latest_release() == False:
                 self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
 
-    def __user_table_remove_click(self, account_uuid):
-        button = self.sender()
-        index = self.tbl_sessions.indexAt(button.pos())
-        # TODO: Wait for thread using the account, then remove thread as well as the account
-        logger.debug(f"Clicked account remove button ! uuid: {account_uuid}")
-        for account in config.get('accounts'):
-            if account[3] == account_uuid:
-                removed = remove_user(account[0],
-                                      os.path.join(config_dir(), "onthespot", "sessions"),
-                                      config, account_uuid, thread_pool, session_pool)
-                if removed:
-                    self.tbl_sessions.removeRow(index.row())
-                    self.__users = [user for user in self.__users if user[3] != account_uuid]
-                    self.__splash_dialog.run(self.tr("Account {0} was removed successfully.").format(account[0]))
-                else:
-                    self.__splash_dialog.run(self.tr("Something went wrong while removing account {0}.").format(account[0]))
-
-    def __generate_users_table(self, userdata):
-
-        # Clear the table
-        while self.tbl_sessions.rowCount() > 0:
-            self.tbl_sessions.removeRow(0)
-        sn = 0
-        for user in userdata:
-            sn = sn + 1
-            rows = self.tbl_sessions.rowCount()
-
-            radiobutton = QRadioButton()
-            radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow() + 1) and config.update())
-            if sn == config.get("parsing_acc_sn"):
-                radiobutton.setChecked(True)
-
-            btn = QPushButton(self.tbl_sessions)
-            btn.setText(self.tr(" Remove "))
-            btn.clicked.connect(lambda x, account_uuid=user[3]: self.__user_table_remove_click(account_uuid))
-            btn.setMinimumHeight(30)
-
-            service = QTableWidgetItem("Spotify")
-            service.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png')))
-
-            br = "N/A"
-            if user[1].lower() == "free":
-                br = "160K"
-            elif user[1].lower() == "premium":
-                br = "320K"
-            self.tbl_sessions.insertRow(rows)
-            self.tbl_sessions.setCellWidget(rows, 0, radiobutton)
-            self.tbl_sessions.setItem(rows, 1, QTableWidgetItem(user[0]))
-            self.tbl_sessions.setItem(rows, 2, service)
-            self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(user[1]))
-            self.tbl_sessions.setItem(rows, 4, QTableWidgetItem(br))
-            self.tbl_sessions.setItem(rows, 5, QTableWidgetItem(user[2]))
-            self.tbl_sessions.setCellWidget(rows, 6, btn)
-        logger.info("Accounts table was populated !")
-
-    def __rebuild_threads(self):
-        # Check how many threads can we build till we reach max thread
-        logger.debug(f'Thread builder -> TPool count : {len(thread_pool)}, SPool count : {len(session_pool)}, MaxT : {config.get("max_threads")}')
-        for session_uuid in session_pool.keys():
-            if ( len(thread_pool) < config.get('max_threads') ) and session_uuid not in thread_pool.keys():
-                # We have space for new thread and the session is not used by any thread
-                thread_pool[session_uuid] = [DownloadWorker(), QThread()]
-                logger.info(f"Spawning DL thread using session : {session_uuid} ")
-                thread_pool[session_uuid][0].setup(
-                    thread_name=f"SESSION_DL_TH-{session_uuid}",
-                    session_uuid=session_uuid,
-                    queue_tracks=download_queue)
-                thread_pool[session_uuid][0].moveToThread(thread_pool[session_uuid][1])
-                thread_pool[session_uuid][1].started.connect(thread_pool[session_uuid][0].run)
-                thread_pool[session_uuid][0].finished.connect(thread_pool[session_uuid][1].quit)
-                thread_pool[session_uuid][0].finished.connect(thread_pool[session_uuid][0].deleteLater)
-                thread_pool[session_uuid][1].finished.connect(thread_pool[session_uuid][1].deleteLater)
-                thread_pool[session_uuid][0].progress.connect(dl_progress_update)
-                thread_pool[session_uuid][0].finished.connect(thread_pool[session_uuid][1].quit)
-                thread_pool[session_uuid][1].start()
-            else:
-                logger.debug(f'Session {session_uuid} not used, resource busy !')
-        if len(session_pool) == 0:
-            # Display notice that no session is available and threads are not built
-            self.__splash_dialog.run(self.tr("No session available, login with at least one account."))
-
-    def __fill_configs(self):
-        self.inp_language.setCurrentIndex(config.get("language_index"))
-        self.inp_max_threads.setValue(config.get("max_threads"))
-        self.inp_explicit_label.setText(config.get("explicit_label"))
-        self.inp_download_root.setText(config.get("download_root"))
-        self.inp_download_delay.setValue(config.get("download_delay"))
-        self.inp_max_search_results.setValue(config.get("max_search_results"))
-        self.inp_max_retries.setValue(config.get("max_retries"))
-        self.inp_chunk_size.setValue(config.get("chunk_size"))
-        self.inp_media_format.setText(config.get("media_format"))
-        self.inp_podcast_media_format.setText(config.get("podcast_media_format"))
-        self.inp_illegal_character_replacement.setText(config.get("illegal_character_replacement"))
-        self.inp_track_formatter.setText(config.get("track_path_formatter"))
-        self.inp_podcast_path_formatter.setText(config.get("podcast_path_formatter"))
-        self.inp_playlist_path_formatter.setText(config.get("playlist_path_formatter"))
-        self.inp_m3u_name_formatter.setText(config.get("m3u_name_formatter"))
-        self.inp_album_cover_format.setText(config.get("album_cover_format"))
-        self.inp_max_recdl_delay.setValue(config.get("recoverable_fail_wait_delay"))
-        self.inp_dl_endskip.setValue(config.get("dl_end_padding_bytes"))
-        self.inp_search_thumb_height.setValue(config.get("search_thumb_height"))
-        self.inp_metadata_seperator.setText(config.get("metadata_seperator"))
-        if config.get("show_search_thumbnails"):
-            self.inp_show_search_thumbnails.setChecked(True)
-        else:
-            self.inp_show_search_thumbnails.setChecked(False)
-        if config.get("use_lrc_file"):
-            self.inp_use_lrc_file.setChecked(True)
-        else:
-            self.inp_use_lrc_file.setChecked(False)
-        if config.get("rotate_acc_sn"):
-            self.inp_rotate_acc_sn.setChecked(True)
-        else:
-            self.inp_rotate_acc_sn.setChecked(False)
-        if config.get("download_copy_btn"):
-            self.inp_download_copy_btn.setChecked(True)
-        else:
-            self.inp_download_copy_btn.setChecked(False)
-        if config.get("download_play_btn"):
-            self.inp_download_play_btn.setChecked(True)
-        else:
-            self.inp_download_play_btn.setChecked(False)
-        if config.get("download_save_btn"):
-            self.inp_download_save_btn.setChecked(True)
-        else:
-            self.inp_download_save_btn.setChecked(False)
-        if config.get("download_queue_btn"):
-            self.inp_download_queue_btn.setChecked(True)
-        else:
-            self.inp_download_queue_btn.setChecked(False)
-        if config.get("download_open_btn"):
-            self.inp_download_open_btn.setChecked(True)
-        else:
-            self.inp_download_open_btn.setChecked(False)
-        if config.get("download_locate_btn"):
-            self.inp_download_locate_btn.setChecked(True)
-        else:
-            self.inp_download_locate_btn.setChecked(False)
-        if config.get("download_delete_btn"):
-            self.inp_download_delete_btn.setChecked(True)
-        else:
-            self.inp_download_delete_btn.setChecked(False)
-        if config.get("translate_file_path"):
-            self.inp_translate_file_path.setChecked(True)
-        else:
-            self.inp_translate_file_path.setChecked(False)
-        if config.get("force_raw"):
-            self.inp_raw_download.setChecked(True)
-        else:
-            self.inp_raw_download.setChecked(False)
-        if config.get("watch_bg_for_spotify"):
-            self.inp_enable_spot_watch.setChecked(True)
-        else:
-            self.inp_enable_spot_watch.setChecked(False)
-        if config.get("force_premium"):
-            self.inp_force_premium.setChecked(True)
-        else:
-            self.inp_force_premium.setChecked(False)
-        if config.get("disable_bulk_dl_notices"):
-            self.inp_disable_bulk_popup.setChecked(True)
-        else:
-            self.inp_disable_bulk_popup.setChecked(False)
-        if config.get("save_album_cover"):
-            self.inp_save_album_cover.setChecked(True)
-        else:
-            self.inp_save_album_cover.setChecked(False)
-        if config.get("inp_enable_lyrics"):
-            self.inp_enable_lyrics.setChecked(True)
-        else:
-            self.inp_enable_lyrics.setChecked(False)
-        if config.get("only_synced_lyrics"):
-            self.inp_only_synced_lyrics.setChecked(True)
-        else:
-            self.inp_only_synced_lyrics.setChecked(False)
-        if config.get('use_playlist_path'):
-            self.inp_use_playlist_path.setChecked(True)
-        else:
-            self.inp_use_playlist_path.setChecked(False)
-        if config.get('create_m3u_playlists'):
-            self.inp_create_playlists.setChecked(True)
-        else:
-            self.inp_create_playlists.setChecked(False)
-        if config.get('check_for_updates'):
-            self.inp_check_for_updates.setChecked(True)
-        else:
-            self.inp_check_for_updates.setChecked(False)
-        if config.get('embed_cover'):
-            self.inp_embed_cover.setChecked(True)
-        else:
-            self.inp_embed_cover.setChecked(False)
-        if config.get('embed_branding'):
-            self.inp_embed_branding.setChecked(True)
-        else:
-            self.inp_embed_branding.setChecked(False)
-        if config.get('embed_artist'):
-            self.inp_embed_artist.setChecked(True)
-        else:
-            self.inp_embed_artist.setChecked(False)
-        if config.get('embed_album'):
-            self.inp_embed_album.setChecked(True)
-        else:
-            self.inp_embed_album.setChecked(False)
-        if config.get('embed_albumartist'):
-            self.inp_embed_albumartist.setChecked(True)
-        else:
-            self.inp_embed_albumartist.setChecked(False)
-        if config.get('embed_name'):
-            self.inp_embed_name.setChecked(True)
-        else:
-            self.inp_embed_name.setChecked(False)
-        if config.get('embed_year'):
-            self.inp_embed_year.setChecked(True)
-        else:
-            self.inp_embed_year.setChecked(False)
-        if config.get('embed_discnumber'):
-            self.inp_embed_discnumber.setChecked(True)
-        else:
-            self.inp_embed_discnumber.setChecked(False)
-        if config.get('embed_tracknumber'):
-            self.inp_embed_tracknumber.setChecked(True)
-        else:
-            self.inp_embed_tracknumber.setChecked(False)
-        if config.get('embed_genre'):
-            self.inp_embed_genre.setChecked(True)
-        else:
-            self.inp_embed_genre.setChecked(False)
-        if config.get('embed_performers'):
-            self.inp_embed_performers.setChecked(True)
-        else:
-            self.inp_embed_performers.setChecked(False)
-        if config.get('embed_producers'):
-            self.inp_embed_producers.setChecked(True)
-        else:
-            self.inp_embed_producers.setChecked(False)
-        if config.get('embed_writers'):
-            self.inp_embed_writers.setChecked(True)
-        else:
-            self.inp_embed_writers.setChecked(False)
-        if config.get('embed_label'):
-            self.inp_embed_label.setChecked(True)
-        else:
-            self.inp_embed_label.setChecked(False)
-        if config.get('embed_copyright'):
-            self.inp_embed_copyright.setChecked(True)
-        else:
-            self.inp_embed_copyright.setChecked(False)
-        if config.get('embed_description'):
-            self.inp_embed_description.setChecked(True)
-        else:
-            self.inp_embed_description.setChecked(False)
-        if config.get('embed_language'):
-            self.inp_embed_language.setChecked(True)
-        else:
-            self.inp_embed_language.setChecked(False)
-        if config.get('embed_isrc'):
-            self.inp_embed_isrc.setChecked(True)
-        else:
-            self.inp_embed_isrc.setChecked(False)
-        if config.get('embed_length'):
-            self.inp_embed_length.setChecked(True)
-        else:
-            self.inp_embed_length.setChecked(False)
-        if config.get('embed_key'):
-            self.inp_embed_key.setChecked(True)
-        else:
-            self.inp_embed_key.setChecked(False)
-        if config.get('embed_bpm'):
-            self.inp_embed_bpm.setChecked(True)
-        else:
-            self.inp_embed_bpm.setChecked(False)
-        if config.get('embed_url'):
-            self.inp_embed_url.setChecked(True)
-        else:
-            self.inp_embed_url.setChecked(False)
-        if config.get('embed_lyrics'):
-            self.inp_embed_lyrics.setChecked(True)
-        else:
-            self.inp_embed_lyrics.setChecked(False)
-        if config.get('embed_explicit'):
-            self.inp_embed_explicit.setChecked(True)
-        else:
-            self.inp_embed_explicit.setChecked(False)
-        if config.get('embed_compilation'):
-            self.inp_embed_compilation.setChecked(True)
-        else:
-            self.inp_embed_compilation.setChecked(False)
-        if config.get('embed_timesignature'):
-            self.inp_embed_timesignature.setChecked(True)
-        else:
-            self.inp_embed_timesignature.setChecked(False)
-        if config.get('embed_acousticness'):
-            self.inp_embed_acousticness.setChecked(True)
-        else:
-            self.inp_embed_acousticness.setChecked(False)
-        if config.get('embed_danceability'):
-            self.inp_embed_danceability.setChecked(True)
-        else:
-            self.inp_embed_danceability.setChecked(False)
-        if config.get('embed_energy'):
-            self.inp_embed_energy.setChecked(True)
-        else:
-            self.inp_embed_energy.setChecked(False)
-        if config.get('embed_instrumentalness'):
-            self.inp_embed_instrumentalness.setChecked(True)
-        else:
-            self.inp_embed_instrumentalness.setChecked(False)
-        if config.get('embed_liveness'):
-            self.inp_embed_liveness.setChecked(True)
-        else:
-            self.inp_embed_liveness.setChecked(False)
-        if config.get('embed_loudness'):
-            self.inp_embed_loudness.setChecked(True)
-        else:
-            self.inp_embed_loudness.setChecked(False)
-        if config.get('embed_speechiness'):
-            self.inp_embed_speechiness.setChecked(True)
-        else:
-            self.inp_embed_speechiness.setChecked(False)
-        if config.get('embed_valence'):
-            self.inp_embed_valence.setChecked(True)
-        else:
-            self.inp_embed_valence.setChecked(False)
-
-        logger.info('Config filled to UI')
-
-    def __update_config(self):
-        if config.get('language_index') != self.inp_language.currentIndex():
-            self.__splash_dialog.run(self.tr("Language changed. \n Application needs to be restarted for changes to take effect."))
-        config.set_('language_index', self.inp_language.currentIndex())
-        if config.get('max_threads') != self.inp_max_threads.value():
-            self.__splash_dialog.run(self.tr("Thread config was changed. \n Application needs to be restarted for changes to take effect."))
-        config.set_('max_threads', self.inp_max_threads.value())
-        config.set_('explicit_label', self.inp_explicit_label.text())
-        config.set_('download_root', self.inp_download_root.text())
-        config.set_('track_path_formatter', self.inp_track_formatter.text())
-        config.set_('podcast_path_formatter', self.inp_podcast_path_formatter.text())
-        config.set_('playlist_path_formatter', self.inp_playlist_path_formatter.text())
-        config.set_('m3u_name_formatter', self.inp_m3u_name_formatter.text())
-        config.set_('album_cover_format', self.inp_album_cover_format.text())
-        config.set_('download_delay', self.inp_download_delay.value())
-        config.set_('chunk_size', self.inp_chunk_size.value())
-        config.set_('recoverable_fail_wait_delay', self.inp_max_recdl_delay.value())
-        config.set_('dl_end_padding_bytes', self.inp_dl_endskip.value())
-        config.set_('search_thumb_height', self.inp_search_thumb_height.value())
-        config.set_('max_retries', self.inp_max_retries.value())
-        config.set_('disable_bulk_dl_notices', self.inp_disable_bulk_popup.isChecked())
-        config.set_('theme', self.theme)
-        config.set_('metadata_seperator', self.inp_metadata_seperator.text())
-        if 0 < self.inp_max_search_results.value() <= 50:
-            config.set_('max_search_results', self.inp_max_search_results.value())
-        else:
-            config.set_('max_search_results', 5)
-        config.set_('media_format', self.inp_media_format.text())
-        config.set_('podcast_media_format', self.inp_podcast_media_format.text())
-        config.set_('illegal_character_replacement', self.inp_illegal_character_replacement.text())
-        if self.inp_show_search_thumbnails.isChecked():
-            config.set_('show_search_thumbnails', True)
-        else:
-            config.set_('show_search_thumbnails', False)
-        if self.inp_use_lrc_file.isChecked():
-            config.set_('use_lrc_file', True)
-        else:
-            config.set_('use_lrc_file', False)
-        if self.inp_rotate_acc_sn.isChecked():
-            config.set_('rotate_acc_sn', True)
-        else:
-            config.set_('rotate_acc_sn', False)
-        if self.inp_translate_file_path.isChecked():
-            config.set_('translate_file_path', True)
-        else:
-            config.set_('translate_file_path', False)
-        if self.inp_raw_download.isChecked():
-            config.set_('force_raw', True)
-        else:
-            config.set_('force_raw', False)
-        if self.inp_download_copy_btn.isChecked():
-            config.set_('download_copy_btn', True)
-        else:
-            config.set_('download_copy_btn', False)
-        if self.inp_download_play_btn.isChecked():
-            config.set_('download_play_btn', True)
-        else:
-            config.set_('download_play_btn', False)
-        if self.inp_download_save_btn.isChecked():
-            config.set_('download_save_btn', True)
-        else:
-            config.set_('download_save_btn', False)
-        if self.inp_download_queue_btn.isChecked():
-            config.set_('download_queue_btn', True)
-        else:
-            config.set_('download_queue_btn', False)
-        if self.inp_download_open_btn.isChecked():
-            config.set_('download_open_btn', True)
-        else:
-            config.set_('download_open_btn', False)
-        if self.inp_download_locate_btn.isChecked():
-            config.set_('download_locate_btn', True)
-        else:
-            config.set_('download_locate_btn', False)
-        if self.inp_download_delete_btn.isChecked():
-            config.set_('download_delete_btn', True)
-        else:
-            config.set_('download_delete_btn', False)
-        if self.inp_force_premium.isChecked():
-            config.set_('force_premium', True)
-        else:
-            config.set_('force_premium', False)
-        if self.inp_enable_spot_watch.isChecked():
-            config.set_('watch_bg_for_spotify', True)
-        else:
-            config.set_('watch_bg_for_spotify', False)
-        if self.inp_save_album_cover.isChecked():
-            config.set_('save_album_cover', True)
-        else:
-            config.set_('save_album_cover', False)
-        if self.inp_enable_lyrics.isChecked():
-            config.set_('inp_enable_lyrics', True)
-        else:
-            config.set_('inp_enable_lyrics', False)
-        if self.inp_only_synced_lyrics.isChecked():
-            config.set_('only_synced_lyrics', True)
-        else:
-            config.set_('only_synced_lyrics', False)
-        if self.inp_use_playlist_path.isChecked():
-            config.set_('use_playlist_path', True)
-        else:
-            config.set_('use_playlist_path', False)
-        if self.inp_create_playlists.isChecked():
-            config.set_('create_m3u_playlists', True)
-        else:
-            config.set_('create_m3u_playlists', False)
-        if self.inp_check_for_updates.isChecked():
-            config.set_('check_for_updates', True)
-        else:
-            config.set_('check_for_updates', False)
-        if self.inp_embed_cover.isChecked():
-            config.set_('embed_cover', True)
-        else:
-            config.set_('embed_cover', False)
-        if self.inp_embed_branding.isChecked():
-            config.set_('embed_branding', True)
-        else:
-            config.set_('embed_branding', False)
-        if self.inp_embed_artist.isChecked():
-            config.set_('embed_artist', True)
-        else:
-            config.set_('embed_artist', False)
-        if self.inp_embed_album.isChecked():
-            config.set_('embed_album', True)
-        else:
-            config.set_('embed_album', False)
-        if self.inp_embed_albumartist.isChecked():
-            config.set_('embed_albumartist', True)
-        else:
-            config.set_('embed_albumartist', False)
-        if self.inp_embed_name.isChecked():
-            config.set_('embed_name', True)
-        else:
-            config.set_('embed_name', False)
-        if self.inp_embed_year.isChecked():
-            config.set_('embed_year', True)
-        else:
-            config.set_('embed_year', False)
-        if self.inp_embed_discnumber.isChecked():
-            config.set_('embed_discnumber', True)
-        else:
-            config.set_('embed_discnumber', False)
-        if self.inp_embed_tracknumber.isChecked():
-            config.set_('embed_tracknumber', True)
-        else:
-            config.set_('embed_tracknumber', False)
-        if self.inp_embed_genre.isChecked():
-            config.set_('embed_genre', True)
-        else:
-            config.set_('embed_genre', False)
-        if self.inp_embed_performers.isChecked():
-            config.set_('embed_performers', True)
-        else:
-            config.set_('embed_performers', False)
-        if self.inp_embed_producers.isChecked():
-            config.set_('embed_producers', True)
-        else:
-            config.set_('embed_producers', False)
-        if self.inp_embed_writers.isChecked():
-            config.set_('embed_writers', True)
-        else:
-            config.set_('embed_writers', False)
-        if self.inp_embed_label.isChecked():
-            config.set_('embed_label', True)
-        else:
-            config.set_('embed_label', False)
-        if self.inp_embed_copyright.isChecked():
-            config.set_('embed_copyright', True)
-        else:
-            config.set_('embed_copyright', False)
-        if self.inp_embed_description.isChecked():
-            config.set_('embed_description', True)
-        else:
-            config.set_('embed_description', False)
-        if self.inp_embed_language.isChecked():
-            config.set_('embed_language', True)
-        else:
-            config.set_('embed_language', False)
-        if self.inp_embed_isrc.isChecked():
-            config.set_('embed_isrc', True)
-        else:
-            config.set_('embed_isrc', False)
-        if self.inp_embed_length.isChecked():
-            config.set_('embed_length', True)
-        else:
-            config.set_('embed_length', False)
-        if self.inp_embed_key.isChecked():
-            config.set_('embed_key', True)
-        else:
-            config.set_('embed_key', False)
-        if self.inp_embed_length.isChecked():
-            config.set_('embed_bpm', True)
-        else:
-            config.set_('embed_bpm', False)
-        if self.inp_embed_url.isChecked():
-            config.set_('embed_bpm', True)
-        else:
-            config.set_('embed_url', False)
-        if self.inp_embed_lyrics.isChecked():
-            config.set_('embed_lyrics', True)
-        else:
-            config.set_('embed_lyrics', False)
-        if self.inp_embed_explicit.isChecked():
-            config.set_('embed_explicit', True)
-        else:
-            config.set_('embed_explicit', False)
-        if self.inp_embed_compilation.isChecked():
-            config.set_('embed_compilation', True)
-        else:
-            config.set_('embed_compilation', False)
-
-        if self.inp_embed_timesignature.isChecked():
-            config.set_('embed_timesignature', True)
-        else:
-            config.set_('embed_timesignature', False)
-        if self.inp_embed_acousticness.isChecked():
-            config.set_('embed_acousticness', True)
-        else:
-            config.set_('embed_acousticness', False)
-        if self.inp_embed_danceability.isChecked():
-            config.set_('embed_danceability', True)
-        else:
-            config.set_('embed_danceability', False)
-        if self.inp_embed_energy.isChecked():
-            config.set_('embed_energy', True)
-        else:
-            config.set_('embed_energy', False)
-        if self.inp_embed_instrumentalness.isChecked():
-            config.set_('embed_instrumentalness', True)
-        else:
-            config.set_('embed_instrumentalness', False)
-        if self.inp_embed_liveness.isChecked():
-            config.set_('embed_liveness', True)
-        else:
-            config.set_('embed_liveness', False)
-        if self.inp_embed_loudness.isChecked():
-            config.set_('embed_loudness', True)
-        else:
-            config.set_('embed_loudness', False)
-        if self.inp_embed_speechiness.isChecked():
-            config.set_('embed_speechiness', True)
-        else:
-            config.set_('embed_speechiness', False)
-        if self.inp_embed_valence.isChecked():
-            config.set_('embed_valence', True)
-        else:
-            config.set_('embed_valence', False)
+    def user_table_remove_click(self, index):
+        if config.get('parsing_acc_sn') == index:
+            config.set_('parsing_acc_sn', 0)
+        accounts = config.get('accounts').copy()
+        del accounts[index]
+        config.set_('accounts', accounts)
         config.update()
-        logger.info('Config updated !')
+        del account_pool[index]
+        self.tbl_sessions.removeRow(index)
+        self.__splash_dialog.run(self.tr("Account was removed successfully."))
 
-    def __create_new_session(self):
-        create_new_session = new_session()
-        if create_new_session == True:
-            self.__splash_dialog.run(self.tr("Account added, please restart the app."))
-            self.btn_login_add_spotify.setText(self.tr("Please Restart The App"))
-        elif create_new_session == False:
-            self.__splash_dialog.run(self.tr("Account already exists."))
-            self.btn_login_add_spotify.setText(self.tr("Add Account"))
-            self.btn_login_add_spotify.setDisabled(False)
+    def update_config(self):
+        save_config(self)
 
-    def __add_account(self):
-        logger.info('Add account clicked ')
-        self.btn_login_add_spotify.setText(self.tr("Waiting..."))
-        self.btn_login_add_spotify.setDisabled(True)
-        login = threading.Thread(target=self.__create_new_session)
-        login.daemon = True
-        login.start()
+    def set_login_fields(self):
+        # Spotify
+        if self.inp_login_service.currentIndex() == 0:
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.hide()
+            self.inp_login_password.hide()
+            self.btn_login_add.show()
+            self.btn_login_add.setText(self.tr("Add Spotify Account"))
+            self.btn_login_add.clicked.connect(self.add_spotify_account)
+
+        # Soundcloud
+        elif self.inp_login_service.currentIndex() == 1:
+            self.lb_login_username.show()
+            self.lb_login_username.setText(self.tr("Client ID"))
+            self.inp_login_username.show()
+            self.lb_login_password.show()
+            self.lb_login_password.setText(self.tr("Token"))
+            self.inp_login_password.show()
+            self.btn_login_add.show()
+            self.btn_login_add.setText(self.tr("Add Account"))
+
+    def add_spotify_account(self):
+        logger.info('Add spotify account clicked ')
+        self.btn_login_add.setText(self.tr("Waiting..."))
+        self.btn_login_add.setDisabled(True)
+        self.inp_login_service.setDisabled(True)
         self.__splash_dialog.run(self.tr("Login Service Started...\nSelect 'OnTheSpot' under devices in the Spotify Desktop App."))
+        login_worker = threading.Thread(target=self.add_spotify_account_worker)
+        login_worker.daemon = True
+        login_worker.start()
 
-    def __get_search_results(self):
-        search_term = self.inp_search_term.text().strip()
-        results = None
-        if len(session_pool) <= 0:
-            self.__splash_dialog.run(self.tr("You need to login to at least one account to use this feature."))
-            return None
-        if search_term.startswith('https://'):
-            logger.info(f"Search clicked with value with url {search_term}")
-            self.__download_by_url(search_term)
-            self.inp_search_term.setText('')
-            return True
-        else:
-            if os.path.isfile(search_term):
-                with open(search_term, 'r', encoding='utf-8') as sf:
-                    links = sf.readlines()
-                    for link in links:
-                        logger.info(f'Reading link "{link}" from file at "{search_term}"')
-                        self.__download_by_url(link, hide_dialog=True)
-                self.inp_search_term.setText('')
-                return True
-        logger.info(f"Search clicked with value term {search_term}")
-        try:
-            filters = []
-            if self.inp_enable_search_playlists.isChecked():
-                filters.append('playlist')
-            if self.inp_enable_search_albums.isChecked():
-                filters.append('album')
-            if self.inp_enable_search_tracks.isChecked():
-                filters.append('track')
-            if self.inp_enable_search_artists.isChecked():
-                filters.append('artist')
-            if self.inp_enable_search_shows.isChecked():
-                filters.append('show')
-            if self.inp_enable_search_episodes.isChecked():
-                filters.append('episode')
-            if self.inp_enable_search_audiobooks.isChecked():
-                filters.append('audiobook')
-            download = False
-            selected_uuid = fetch_account_uuid(download)
-            session = session_pool[ selected_uuid ]
-            try:
-                results = search_by_term(session, search_term,
-                                     config.get('max_search_results'), content_types=filters)
-            except (OSError, queue.Empty, MaxRetryError, NewConnectionError, ConnectionError):
-                # Internet disconnected ?
-                logger.error('Search failed Connection error ! Trying to re init parsing account session ! ')
-                re_init_session(session_pool, selected_uuid, wait_connectivity=False)
-                return None
-            self.__populate_search_results(results)
-            self.__last_search_data = results
-            self.inp_search_term.setText('')
-        except EmptySearchResultException:
-            self.__last_search_data = []
-            while self.tbl_search_results.rowCount() > 0:
-                self.tbl_search_results.removeRow(0)
-            self.__splash_dialog.run(self.tr("No results found."))
-            return None
+    def add_spotify_account_worker(self):
+        session = spotify_new_session()
+        if session == True:
+            self.__splash_dialog.run(self.tr("Account added, please restart the app."))
+            self.btn_login_add.setText(self.tr("Please Restart The App"))
+        elif session == False:
+            self.__splash_dialog.run(self.tr("Account already exists."))
+            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.setDisabled(False)
 
-    def __download_by_url(self, url=None, hide_dialog=False):
-        logger.info(f"URL download clicked with value {url}")
-        media_type, media_id = get_url_data(url)
-        if media_type is None:
-            logger.error(f"The type of url could not be determined ! URL: {url}")
-            if not hide_dialog:
-                self.__splash_dialog.run(self.tr("Unable to parse inputted URL."))
-            return False
-        if len(session_pool) <= 0:
-            logger.error('User needs to be logged in to download from url')
-            if not hide_dialog:
-                self.__splash_dialog.run(self.tr("You need to login to at least one account to use this feature."))
-            return False
-        queue_item = {
-            "media_type": media_type,
-            "media_id": media_id,
-            "data": {
-                "hide_dialogs": hide_dialog,
-            }
-        }
-
-        self.__send_to_pqp(queue_item)
-        logger.info(f'URL "{url}" added to parsing queue')
-        if not hide_dialog:
-            self.__splash_dialog.run(self.tr("The {0} is being parsed and will be added to download queue shortly.").format(media_type.title()))
-        return True
-
-    def __insert_search_result_row(self, btn_text, item_name, item_by, item_type, queue_data):
-        btn = QPushButton(self.tbl_search_results)
-        #btn.setText(btn_text.strip())
-        download_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'download.png'))
-        btn.setIcon(download_icon)
-
-        btn.clicked.connect(lambda x, q_data=queue_data: self.__send_to_pqp(q_data))
-        btn.setMinimumHeight(30)
-
-
-        rows = self.tbl_search_results.rowCount()
-        tbl_search_results_headers = self.tbl_search_results.horizontalHeader()
-        self.tbl_search_results.insertRow(rows)
-        self.tbl_search_results.setRowHeight(rows, 60)
-        self.tbl_search_results.setCellWidget(rows, 0, LabelWithThumb(queue_data['data']['thumb_url'],
-                                                                      item_name.strip(),
-                                                                      self.__qt_nam,
-                                                                      thumb_enabled=config.get('show_search_thumbnails'),
-                                                                      parent=self))
-        c1item = QTableWidgetItem(item_by.strip())
-        c1item.setToolTip(item_by.strip())
-        self.tbl_search_results.setItem(rows, 1, c1item)
-        c2item = QTableWidgetItem(item_type.strip())
-        c2item.setToolTip(item_type.strip())
-        self.tbl_search_results.setItem(rows, 2, c2item)
-        c3item = QTableWidgetItem("Spotify ")
-        c3item.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png')))
-
-        self.tbl_search_results.setItem(rows, 3, c3item)
-        btn.setToolTip(f"Download {item_type.strip()} '{item_name.strip()}' by '{item_by.strip()}'. ")
-        self.tbl_search_results.setCellWidget(rows, 4, btn)
-        tbl_search_results_headers.resizeSection(0, 450)
-        return True
-
-    def __populate_search_results(self, data):
-        # Clear the table
-        self.__last_search_data = data
-        logger.debug('Populating search results table ')
+    def fill_search_table(self):
         while self.tbl_search_results.rowCount() > 0:
             self.tbl_search_results.removeRow(0)
-        for d_key in data.keys():  # d_key in ['Albums', 'Artists', 'Tracks', 'Playlists', 'Shows', 'Episodes', 'Audiobooks']
-            for item in data[d_key]:  # Item is Data for Albums, Artists, etc.
-                # Set item name
-                item_name, item_by = name_by_from_sdata(d_key, item)
-                if item_name is None and item_by is None:
-                    continue
-                if d_key.lower() == "tracks":
-                    thumb_dict = item['album']['images']
-                # Playlists fail because height and width in the response are set to null
-                elif d_key.lower() == "playlists":
-                    url = item['images'][int('0')]['url']
-                    thumb_dict = [{'height': 64, 'url': url,'width': 64}]
-                else:
-                    thumb_dict = item['images']
-                queue_data = {'media_type': d_key[0:-1], 'media_id': item['id'],
-                              'data': {
-                                  'media_title': item_name.replace(config.get("explicit_label"), ""),
-                                  'thumb_url': get_thumbnail(thumb_dict,
-                                                             preferred_size=config.get('search_thumb_height')^2
-                                                             )
-                              }}
-                tmp_dl_val = self.inp_tmp_dl_root.text().strip()
-                if tmp_dl_val != "" and os.path.isdir(tmp_dl_val):
-                    queue_data['data']['dl_path'] = tmp_dl_val
-                btn_text = f"Download {d_key[0:-1]}".replace('artist', 'discography').title()
-                self.__insert_search_result_row(btn_text=btn_text, item_name=item_name, item_by=item_by,
-                                                item_type=d_key[0:-1].title(), queue_data=queue_data)
+        search_term = self.inp_search_term.text().strip()
+        content_types = []
+        if self.inp_enable_search_playlists.isChecked():
+            content_types.append('playlist')
+        if self.inp_enable_search_albums.isChecked():
+            content_types.append('album')
+        if self.inp_enable_search_tracks.isChecked():
+            content_types.append('track')
+        if self.inp_enable_search_artists.isChecked():
+            content_types.append('artist')
+        if self.inp_enable_search_shows.isChecked():
+            content_types.append('show')
+        if self.inp_enable_search_episodes.isChecked():
+            content_types.append('episode')
+        if self.inp_enable_search_audiobooks.isChecked():
+            content_types.append('audiobook')
 
-    def __mass_action_dl(self, result_type):
-        data = self.__last_search_data
-        downloaded_types = []
-        logger.info(f"Mass download for {result_type} was clicked.. Here hangs up the application")
-        if data is None:
-            self.__splash_dialog.run(self.tr("No search results to download."))
-        else:
-            hide_dialog = config.get('disable_bulk_dl_notices')
-            for d_key in data.keys():  # d_key in ['Albums', 'Artists', 'Tracks', 'Playlists']
-                if d_key == result_type or result_type == "all":
-                    for item in data[d_key]:  # Item is Data for Albums, Artists, etc.
-                        item_name, item_by = name_by_from_sdata(d_key, item)
-                        if item_name is None and item_by is None:
-                            continue
-                        queue_data = {'media_type': d_key[0:-1], 'media_id': item['id'],
-                                      'data': {
-                                          'media_title': item_name.replace(config.get("explicit_label"), ''),
-                                          "hide_dialogs": hide_dialog
-                                      }}
-                        self.__send_to_pqp(queue_data)
-                    downloaded_types.append(d_key)
-            if len(downloaded_types) != 0:
-                self.__splash_dialog.run(self.tr("Added all results to download queue."))
+        results = get_search_results(search_term, content_types)
+        if results == None:
+            self.__splash_dialog.run(self.tr("You need to login to at least one account to use this feature."))
+            self.inp_search_term.setText('')
+            return
+        elif results == True:
+            self.__splash_dialog.run(self.tr("Item is being parsed and will be added to the download queue shortly."))
+            self.inp_search_term.setText('')
+            return
 
-    def rem_complete_from_table(self):
-        check_row = 0
-        while check_row < self.tbl_dl_progress.rowCount():
-            did = self.tbl_dl_progress.item(check_row, 0).text()
-            logger.info(f'Removing Row : {check_row} and mediaid: {did}')
-            if did in downloads_status:
-                progress = downloads_status[did]["progress_bar"].value()
-                status = downloads_status[did]["status_label"].text().lower()
-                if progress == 100 or status == self.tr("cancelled"):
-                    self.tbl_dl_progress.removeRow(check_row)
-                    downloads_status.pop(did)
-                else:
-                    check_row = check_row + 1
-            else:
-                check_row = check_row + 1
 
-    def __send_to_pqp(self, queue_item):
-        tmp_dl_val = self.inp_tmp_dl_root.text().strip()
-        if self.__advanced_visible and tmp_dl_val != "":
-            logger.info('Advanced tab visible and temporary download path set !')
-            try:
-                if not os.path.exists(os.path.abspath(tmp_dl_val)):
-                    os.makedirs(os.path.abspath(tmp_dl_val), exist_ok=True)
-                queue_item['data']['dl_path'] = tmp_dl_val
-                queue_item['data']['dl_path_is_root'] = True
-            except:
-                logger.error('Temp dl path cannot be created !')
-        logger.info('Prepared media for parsing, adding to PQP queue !')
-        self.__parsing_queue.put(queue_item)
+        for result in results:
+            btn = QPushButton(self.tbl_search_results)
+            #btn.setText(btn_text.strip())
+            btn.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', 'download.png')))
+
+            item_url = result['item_url']
+
+            def download_btn_clicked(item_name, item_url, item_service, item_type, item_id, ):
+                parsing[item_id] = {
+                    'item_url': item_url, 
+                    'item_service': item_service,
+                    'item_type': item_type, 
+                    'item_id': item_id
+                }
+                self.__splash_dialog.run(self.tr("{0} is being parsed and will be added to the download queue shortly.").format(f"{item_type.title()}: {item_name}"))
+
+            btn.clicked.connect(lambda x, 
+                            item_name=result['item_name'], 
+                            item_url=result['item_url'], 
+                            item_type=result['item_type'], 
+                            item_id=result['item_id'], 
+                            item_service=result['item_service']: 
+                            download_btn_clicked(item_name, item_url, item_service, item_type, item_id))
+
+            btn.setMinimumHeight(30)
+            service = QTableWidgetItem(result['item_service'].title())
+            service.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{result['item_service']}.png')))
+
+            item_label = LabelWithThumb(result['item_name'], result['item_thumbnail_url'])
+
+            rows = self.tbl_search_results.rowCount()
+            self.tbl_search_results.insertRow(rows)
+            self.tbl_search_results.setRowHeight(rows, config.get("search_thumb_height"))
+            self.tbl_search_results.setCellWidget(rows, 0, item_label)
+            self.tbl_search_results.setItem(rows, 1, QTableWidgetItem(result['item_by']))
+            self.tbl_search_results.setItem(rows, 2, QTableWidgetItem(result['item_type'].title()))
+
+            self.tbl_search_results.setItem(rows, 3, service)
+
+            self.tbl_search_results.setCellWidget(rows, 4, btn)
+            self.tbl_search_results.horizontalHeader().resizeSection(0, 450)
+        self.inp_search_term.setText('')
