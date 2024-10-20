@@ -14,8 +14,6 @@ jobs:
   # Windows Build
   windows-build:
     runs-on: windows-latest
-    outputs:
-      artifact_path: artifacts/windows/
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -32,7 +30,7 @@ jobs:
           pip install pyinstaller
 
       - name: Run Windows Build Script
-        run: scripts\workflows\build_windows.bat
+        run: scripts\build_windows.bat
         shell: cmd
 
       - name: Upload Artifacts
@@ -44,8 +42,6 @@ jobs:
   # Linux Build
   linux-build:
     runs-on: ubuntu-latest
-    outputs:
-      artifact_path: artifacts/linux/
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -53,16 +49,23 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf fuse libfuse2
+          sudo apt-get install -y patchelf fuse libfuse2 wget
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+          pip install build
 
-      - name: Make Build Script Executable
-        run: chmod +x scripts/workflows/build_linux.sh
+      - name: Make Build Scripts Executable
+        run: |
+          chmod +x scripts/build_linux.sh
+          chmod +x scripts/build_appimage.sh
 
       - name: Run Linux Build Script
-        run: scripts/workflows/build_linux.sh
+        run: scripts/build_linux.sh
+        shell: bash
+
+      - name: Run AppImage Build Script
+        run: scripts/build_appimage.sh
         shell: bash
 
       - name: Upload Artifacts
@@ -74,8 +77,6 @@ jobs:
   # macOS Build
   macos-build:
     runs-on: macos-latest
-    outputs:
-      artifact_path: artifacts/macos/
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -85,13 +86,12 @@ jobs:
           brew install pyinstaller
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
 
       - name: Make Build Script Executable
-        run: chmod +x scripts/workflows/build_mac.sh
+        run: chmod +x scripts/build_mac.sh
 
       - name: Run macOS Build Script
-        run: scripts/workflows/build_mac.sh
+        run: scripts/build_mac.sh
         shell: bash
 
       - name: Upload Artifacts
@@ -151,7 +151,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/windows/onthespot_windows.exe
+          asset_path: artifacts/windows/onthespot_win*.exe
           asset_name: onthespot_windows.exe
           asset_content_type: application/octet-stream
 
@@ -173,7 +173,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/linux/OnTheSpot.AppImage
+          asset_path: artifacts/linux/OnTheSpot-x86_64.AppImage
           asset_name: OnTheSpot.AppImage
           asset_content_type: application/octet-stream
 
