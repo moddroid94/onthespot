@@ -33,11 +33,11 @@ jobs:
         run: scripts\build_windows.bat
         shell: cmd
 
-      - name: Upload Artifacts
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: windows-build
-          path: dist\*.exe
+          path: dist/*.exe  # Make sure windows builds to dist/*.exe
 
   # Linux Build
   linux-build:
@@ -68,11 +68,11 @@ jobs:
         run: scripts/build_appimage.sh
         shell: bash
 
-      - name: Upload Artifacts
+      - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: linux-build
-          path: dist/*
+          path: dist/*  # Ensure linux builds go to dist/
 
   # macOS Build
   macos-build:
@@ -94,15 +94,14 @@ jobs:
         run: scripts/build_mac.sh
         shell: bash
 
-      - name: Upload Artifacts
+      - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: macos-build
-          path: dist/*
+          path: dist/*  # Ensure macOS builds go to dist/
 
   # Collect Artifacts
   collect-artifacts:
-    name: Collect Artifacts
     needs: [windows-build, linux-build, macos-build]
     runs-on: ubuntu-latest
     steps:
@@ -113,19 +112,19 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: windows-build
-          path: dist/windows/
+          path: dist/windows/  # Download windows artifacts into dist/windows
 
       - name: Download Linux Artifacts
         uses: actions/download-artifact@v3
         with:
           name: linux-build
-          path: dist/linux/
+          path: dist/linux/  # Download linux artifacts into dist/linux
 
       - name: Download macOS Artifacts
         uses: actions/download-artifact@v3
         with:
           name: macos-build
-          path: dist/macos/
+          path: dist/macos/  # Download macOS artifacts into dist/macos
 
       - name: Upload Combined Artifacts
         uses: actions/upload-artifact@v3
@@ -147,6 +146,8 @@ jobs:
       - name: Upload Windows Executable to Release
         if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/windows/onthespot_win*.exe
