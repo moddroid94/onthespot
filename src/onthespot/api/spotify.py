@@ -1,41 +1,27 @@
-import base64
 import os
 import re
-import string
-import subprocess
-import requests.adapters
-from ..otsconfig import config, cache_dir
-from ..post_download import conv_list_format
-import requests
+import time
+import uuid
 import json
+from hashlib import md5
+import requests
+import requests.adapters
+from librespot.audio.decoders import AudioQuality
+from librespot.core import Session
+from librespot.zeroconf import ZeroconfServer
 from mutagen import File
 from mutagen.easyid3 import EasyID3, ID3
 from mutagen.flac import Picture, FLAC
 from mutagen.id3 import APIC, TXXX, USLT, WOAS
 from mutagen.mp4 import MP4, MP4Cover
 from mutagen.oggvorbis import OggVorbis
-from pathlib import Path
-from PIL import Image
-from io import BytesIO
-from hashlib import md5
-from ..runtimedata import get_logger, session_pool, account_pool
-from librespot.audio.decoders import AudioQuality
-
+from ..otsconfig import config, cache_dir
+from ..post_download import conv_list_format
+from ..runtimedata import get_logger, account_pool
 from ..post_download import set_audio_tags
-
-from librespot.core import Session
-
 from ..utils import sanitize_data
-
-import os
-import pathlib
-import sys
-import time
-import uuid
-from librespot.zeroconf import ZeroconfServer
 from ..otsconfig import cache_dir, config
 from ..runtimedata import get_logger
-import json
 
 
 logger = get_logger("spotify.api")
@@ -702,21 +688,6 @@ def spotify_get_show_episodes(session, show_id_str):
             break
 
     return episodes
-
-
-def get_thumbnail(image_dict, preferred_size=22500):
-    images = {}
-    for image in image_dict:
-        try:
-            images[image['height'] * image['width']] = image['url']
-        except TypeError:
-            # Some playlist and media item do not have cover images
-            pass
-    available_sizes = sorted(images)
-    for size in available_sizes:
-        if size >= preferred_size:
-            return images[size]
-    return images[available_sizes[-1]] if len(available_sizes) > 0 else ""
 
 def make_call(url, token, params=None, headers=None, skip_cache=False):
     if params is None:

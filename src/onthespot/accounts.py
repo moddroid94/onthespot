@@ -1,11 +1,12 @@
 from .runtimedata import get_logger, account_pool
 from .otsconfig import config
 
-import threading 
-
 from PyQt6.QtCore import QThread, pyqtSignal
 from .api.spotify import spotify_login_user, spotify_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
+
+
+logger = get_logger("spotify.downloader")
 
 class FillAccountPool(QThread):
     finished = pyqtSignal()
@@ -16,8 +17,8 @@ class FillAccountPool(QThread):
         super().__init__()
 
     def run(self):
-        account_list = config.get('accounts')
-        for account in account_list:
+        accounts = config.get('accounts')
+        for account in accounts:
             service = account['service']
             if not account['active']:
                 continue
