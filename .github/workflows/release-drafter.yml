@@ -1,0 +1,50 @@
+name: Release Drafter
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Conventional Changelog CLI
+        run: |
+          npm install -g conventional-changelog-cli
+
+      - name: Release Drafter
+        run: |
+          conventional-changelog -p angular -i CHANGELOG.md -s -r 0 --config ./changelog-config.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and Push Changelog
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): update changelog [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          body: |
+            $(cat CHANGELOG.md)
+          token: ${{ secrets.GITHUB_TOKEN }}
