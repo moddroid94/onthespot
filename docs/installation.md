@@ -55,10 +55,10 @@ If you prefer to build OnTheSpot yourself, follow these steps.
 
 2. **Run the Build Script for Your Operating System**
 
-   - **Windows**: Open the `scripts` Folder. Double-click [`build_windows.bat`](scripts/build_windows.bat) or run it in Command Prompt.
-   - **MacOS**: Run [`build_mac.sh`](scripts/build_mac.sh) in Terminal with `./scripts/build_mac.sh`.
-   - **Linux**: Run [`build_linux.sh`](scripts/build_linux.sh) in Terminal with `./scripts/build_linux.sh`.
-   - **Linux AppImage**: Run [`build_appimage.sh`](scripts/build_appimage.sh) in Terminal with `./scripts/build_appimage.sh`.
+   - **Windows**: Open the `scripts` Folder. Double-click [`build_windows.bat`](scripts/workflow/build_windows.bat) or run it in Command Prompt.
+   - **MacOS**: Run [`build_mac.sh`](scripts/workflow/build_mac.sh) in Terminal with `./scripts/workflow/build_mac.sh`.
+   - **Linux**: Run [`build_linux.sh`](scripts/workflow/build_linux.sh) in Terminal with `./scripts/workflow/build_linux.sh`.
+   - **Linux AppImage**: Run [`build_appimage.sh`](scripts/workflow/build_appimage.sh) in Terminal with `./scripts/workflow/build_appimage.sh`.
 
 > [!WARNING]
 > Make sure to run the correct script for your platform to avoid any build failures.

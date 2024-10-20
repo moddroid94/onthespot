@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/01_Logo/Cover_White.png">
-  <source media="(prefers-color-scheme: light)" srcset="assets/01_Logo/Cover_Black.png">
-  <img src="assets/01_Logo/Cover_White.png" alt="Logo of OnTheSpot" width="350">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/01_Logo/Cover_White.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/01_Logo/Cover_Black.png">
+  <img src="assets/01_Logo/Cover_White.png" alt="Logo of OnTheSpot" width="350">
 </picture>
 
 <br>
@@ -19,7 +19,7 @@ We would like to thank all the contributors who have helped improve this reposit
 ## Tools Used
 
 - [Python](https://www.python.org/)
-- [Qt for Python (PyQt/PySide)](https://riverbankcomputing.com/software/pyqt/intro)**
+- [Qt for Python (PyQt/PySide)](https://riverbankcomputing.com/software/pyqt/intro)
 - [PyInstaller](https://www.pyinstaller.org/)
 - [FFmpeg](https://ffmpeg.org/)
 - [Spotify Developers API](https://developer.spotify.com/)
@@ -30,4 +30,4 @@ We would like to thank all the contributors who have helped improve this reposit
 
 ## Our Community
 
-Lastly, a big thanks to all our users and community members who have provided feedback, reported bugs, or shared their suggestions for improvement. Your insights and support keep this project moving forward!
+Lastly, a big thanks to all our users and community members who have provided feedback, reported bugs, or shared their suggestions for improvement. Thanks for your help with this project!
