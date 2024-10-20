@@ -33,11 +33,16 @@ jobs:
         run: scripts\build_windows.bat
         shell: cmd
 
-      - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload Windows Executable to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: windows-build
-          path: dist/*.exe  # Windows executable in dist/
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/*.exe  # Upload .exe from dist/
+          asset_name: onthespot_windows.exe
+          asset_content_type: application/octet-stream
 
   # Linux Build
   linux-build:
@@ -64,15 +69,21 @@ jobs:
         run: scripts/build_linux.sh
         shell: bash
 
-      - name: Run AppImage Build Script
-        run: scripts/build_appimage.sh
-        shell: bash
+      - name: Create Linux tar.gz
+        run: |
+          cd dist
+          tar -czvf onthespot_linux.tar.gz onthespot_linux
 
-      - name: Upload Linux Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload Linux Executable to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: linux-build
-          path: dist/*  # Linux and AppImage in dist/
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/onthespot_linux.tar.gz  # Upload .tar.gz from dist/
+          asset_name: onthespot_linux.tar.gz
+          asset_content_type: application/gzip
 
   # macOS Build
   macos-build:
@@ -94,9 +105,14 @@ jobs:
         run: scripts/build_mac.sh
         shell: bash
 
-      - name: Upload macOS Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload macOS DMG to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: macos-build
-          path: dist/*  # macOS DMG in dist/
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/*.dmg  # Upload .dmg from dist/
+          asset_name: OnTheSpot.dmg
+          asset_content_type: application/x-apple-diskimage
 
