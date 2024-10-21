@@ -79,9 +79,10 @@ class DownloadWorker(QThread):
                     
                     item_path = globals()[f"{item_service}_format_{item_type}_path"](item_metadata, item['is_playlist_item'], item['playlist_name'], item['playlist_by'])
 
-                except Exception:
+                except (Exception, KeyError):
                     logger.error(
                         f"Metadata fetching failed for track by id '{item_id}', {traceback.format_exc()}")
+                    self.progress.emit(item, self.tr("Failed"), 0)
                     continue
 
                 dl_root = config.get("download_root")

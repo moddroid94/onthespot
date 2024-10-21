@@ -34,7 +34,7 @@ def cache_dir():
 class Config:
     def __init__(self, cfg_path=None):
         if cfg_path is None or not os.path.isfile(cfg_path):
-            cfg_path = os.path.join(config_dir(), "onthespot", "config.json")
+            cfg_path = os.path.join(config_dir(), "onthespot", "otsconfig.json")
         self.__cfg_path = cfg_path
         self.platform = platform.system()
         self.ext_ = ".exe" if self.platform == "Windows" else ""
@@ -51,7 +51,7 @@ class Config:
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
             "download_delay": 3, # Seconds to wait before next download attempt
             "track_path_formatter": "Tracks" + os.path.sep + "{artist}" + os.path.sep + "[{rel_year}] {album}" + os.path.sep + "{track_number}. {name}", # Track path format string
-            "podcast_path_formatter": "Episodes" + os.path.sep + "{podcast_name}" + os.path.sep + "{episode_name}", # Episode path format string
+            "podcast_path_formatter": "Episodes" + os.path.sep + "{album}" + os.path.sep + "{name}", # Episode path format string
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name}", # Playlist path format string
             "m3u_name_formatter": "M3U" + os.path.sep + "{name} by {owner}", # M3U name format string
             "watch_bg_for_spotify": 0, # Detect and download songs playing on spotify client,
@@ -76,6 +76,7 @@ class Config:
             "translate_file_path": False, # Translate downloaded file path to application language
             "ffmpeg_args": [], # Extra arguments for ffmpeg
             "show_search_thumbnails": True, # Show thumbnails in search view
+            "show_download_thumbnails": True, # Show thumbnails in download view
             "explicit_label": "🅴", # Explicit label in app and download path
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
             "metadata_seperator": "; ", # Seperator used for metadata fields that have multiple values
@@ -143,7 +144,7 @@ class Config:
                 os.makedirs(os.path.dirname(self.__cfg_path), exist_ok=True)
             except (FileNotFoundError, PermissionError):
                 fallback_path = os.path.abspath(
-                    os.path.join('.config', 'config.json')
+                    os.path.join('.config', 'otsconfig.json')
                     )
                 print(
                     'Critical error.. Configuration file could not be '

@@ -1,7 +1,7 @@
 import re
 import requests
 from ..otsconfig import config
-from ..runtimedata import get_logger, account_pool, parsing
+from ..runtimedata import get_logger, account_pool, pending
 from ..utils import sanitize_data, make_call
 
 SOUNDCLOUD_BASE = "https://api-v2.soundcloud.com"
@@ -22,14 +22,11 @@ def soundcloud_parse_url(url):
         params["app_locale"] = SOUNDCLOUD_APP_LOCALE
         params["url"] = url
 
-        resp = make_call(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params)
-        print(resp.status_code)
+        resp = requests.get(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params).json()
 
-        data = resp.json()
-
-        item_id = str(data["id"])
+        item_id = str(resp["id"])
         print(item_id)
-        item_type = data["kind"]
+        item_type = resp["kind"]
         print(item_type)
         return item_type, item_id
 
@@ -155,6 +152,7 @@ def soundcloud_get_search_results(token, search_term, content_types):
             'item_thumbnail_url': playlist["artwork_url"]
         })
 
+    logger.info(search_results)
     return search_results
 
 
@@ -170,14 +168,17 @@ def soundcloud_get_set_items(token, url):
 
     tracks = []
     try:
-        set_data = make_call(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params)
+        set_data = requests.get(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params).json()
 
         for track in set_data.get('tracks'):
-            parsing[track.get('id')] = {
+            pending[track.get('id')] = {
                 'item_url': track.get('permalink_url'), 
                 'item_service': 'soundcloud',
                 'item_type': 'track', 
-                'item_id': track.get('id')
+                'item_id': track.get('id'),
+                'is_playlist_item': not set_data['is_album'],
+                'playlist_name': set_data['title'],
+                'playlist_by': set_data['user']['username']
             }
     except (TypeError, KeyError):
         logger.info(f"Failed to parse tracks for set: {url}")
@@ -200,7 +201,7 @@ def soundcloud_get_track_metadata(token, item_id):
             album_href = re.search(r'href="([^"]*)"', track_webpage[start_index:])
             if album_href:
                 params["url"] = f"https://soundcloud.com{album_href.group(1)}"
-                album_data = make_call(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params)
+                album_data = requests.get(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params).json()
 
         info = {}
 
@@ -271,26 +272,21 @@ def soundcloud_get_track_metadata(token, item_id):
 
 def soundcloud_format_track_path(item_metadata, is_playlist_item, playlist_name, playlist_by):
     if config.get("translate_file_path"):
-        def translate(string):
-            return requests.get(f"https://translate.googleapis.com/translate_a/single?dj=1&dt=t&dt=sp&dt=ld&dt=bd&client=dict-chrome-ex&sl=auto&tl={config.get('language')}&q={string}").json()["sentences"][0]["trans"]
         _name = translate(item_metadata['title'])
-        #_album = translate(item_metadata['album_name'])
+        _album = translate(item_metadata['album_name'])
     else:
         _name = item_metadata['title']
-        #_album=item_metadata['album_name']
+        _album=item_metadata['album_name']
 
-    _artist = item_metadata['artists'][0]    
-
-    # FIX ME
-    playlist_name = None
-
-    if playlist_name != None and config.get("use_playlist_path"):
+    _artist = item_metadata['artists'][0]
+    
+    if is_playlist_item is True and config.get("use_playlist_path"):
         path = config.get("playlist_path_formatter")
     else:
         path = config.get("track_path_formatter")
     item_path = path.format(
         artist = sanitize_data(_artist),
-        album = sanitize_data(item_metadata['album_name']),
+        album = sanitize_data(_album),
         name = sanitize_data(_name),
         rel_year = sanitize_data(item_metadata['release_year']),
         disc_number = "",

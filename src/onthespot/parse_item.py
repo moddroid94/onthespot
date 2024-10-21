@@ -65,7 +65,6 @@ def worker():
                             'item_id': item_id,
                             'is_playlist_item': False,
                             }
-                        time.sleep(4)
                         continue
 
                     elif current_type == "album":
@@ -78,7 +77,6 @@ def worker():
                                 'item_id': item_id,
                                 'is_playlist_item': False,
                                 }
-                        time.sleep(4)
                         continue
 
                     elif current_type == "playlist":
@@ -95,7 +93,6 @@ def worker():
                                 'playlist_name': playlist_name,
                                 'playlist_by': playlist_by
                                 }
-                        time.sleep(4)
                         continue
 
                     elif current_type == "artist":
@@ -129,7 +126,7 @@ def worker():
                             'item_id': item_id,
                             'is_playlist_item': False,
                             }
-                        time.sleep(10)
+                        time.sleep(4)
                         continue
 
                     if current_type in ["album", "playlist"]:

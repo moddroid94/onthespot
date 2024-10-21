@@ -82,6 +82,15 @@ def sanitize_data(value, allow_path_separators=False, escape_quotes=False):
         value = value.replace('/', char)
     return value
 
+def translate(string):
+    try:
+        response = requests.get(
+            f"https://translate.googleapis.com/translate_a/single?dj=1&dt=t&dt=sp&dt=ld&dt=bd&client=dict-chrome-ex&sl=auto&tl={config.get('language')}&q={string}"
+        )
+        return response.json()["sentences"][0]["trans"]
+    except (requests.exceptions.RequestException, KeyError, IndexError):
+        return string 
+
 def make_call(url, params=None, headers=None, skip_cache=False):
     if not skip_cache:
         request_key = md5(f'{url}'.encode()).hexdigest()

@@ -17,7 +17,7 @@ from ..otsconfig import config, cache_dir
 from ..post_download import conv_list_format
 from ..runtimedata import get_logger, account_pool
 from ..post_download import set_audio_tags
-from ..utils import sanitize_data, make_call
+from ..utils import sanitize_data, make_call, translate
 from ..otsconfig import cache_dir, config
 from ..runtimedata import get_logger
 
@@ -25,10 +25,7 @@ logger = get_logger("spotify.api")
 
 
 def spotify_new_session():
-    try:
-        os.mkdir(os.path.join(cache_dir(), 'onthespot', 'sessions'))
-    except FileExistsError:
-        logger.info("The session directory already exists.")
+    os.makedirs(os.path.join(cache_dir(), 'onthespot', 'sessions'), exist_ok=True)
 
     uuid_uniq = str(uuid.uuid4())
     session_json_path = os.path.join(os.path.join(cache_dir(), 'onthespot', 'sessions'),
@@ -143,74 +140,75 @@ def spotify_get_token(parsing_index):
 
 def spotify_format_track_path(item_metadata, is_playlist_item, playlist_name, playlist_by):
     if config.get("translate_file_path"):
-        def translate(string):
-            return requests.get(f"https://translate.googleapis.com/translate_a/single?dj=1&dt=t&dt=sp&dt=ld&dt=bd&client=dict-chrome-ex&sl=auto&tl={config.get('language')}&q={string}").json()["sentences"][0]["trans"]
-        _name = translate(item_metadata['title'])
-        _album = translate(item_metadata['album_name'])
+        _name = translate(item_metadata.get('title', ''))
+        _album = translate(item_metadata.get('album_name', ''))
     else:
-        _name = item_metadata['title']
-        _album=item_metadata['album_name']
+        _name = item_metadata.get('title', '')
+        _album = item_metadata.get('album_name', '')
 
-    _artist = item_metadata['artists'][0]    
+    _artist = item_metadata['artists'][0]
 
-    if is_playlist_item is True and config.get("use_playlist_path"):
+    if is_playlist_item and config.get("use_playlist_path"):
         path = config.get("playlist_path_formatter")
     else:
         path = config.get("track_path_formatter")
+
     item_path = path.format(
-        artist = sanitize_data(_artist),
-        album = sanitize_data(_album),
-        name = sanitize_data(_name),
-        rel_year = sanitize_data(item_metadata['release_year']),
-        disc_number = item_metadata['disc_number'],
-        track_number = item_metadata['track_number'],
-        genre = sanitize_data(item_metadata['genre'][0] if len(item_metadata['genre']) > 0 else ''),
-        label = sanitize_data(item_metadata['label']),
-        explicit = sanitize_data(str(config.get('explicit')) if item_metadata['explicit'] else ''),
-        trackcount = item_metadata['total_tracks'],
-        disccount = item_metadata['total_discs'],
-        playlist_name = sanitize_data(playlist_name),
-        playlist_owner = sanitize_data(playlist_by),
+        artist=sanitize_data(_artist),
+        album=sanitize_data(_album),
+        name=sanitize_data(_name),
+        rel_year=sanitize_data(item_metadata.get('release_year', '')),
+        disc_number=item_metadata.get('disc_number', 0),
+        track_number=item_metadata.get('track_number', 0),
+        genre=sanitize_data(item_metadata['genre'][0] if item_metadata.get('genre') else ''),
+        label=sanitize_data(item_metadata.get('label', '')),
+        explicit=sanitize_data(str(config.get('explicit')) if item_metadata.get('explicit') else ''),
+        trackcount=item_metadata.get('total_tracks', 0),
+        disccount=item_metadata.get('total_discs', 0),
+        playlist_name=sanitize_data(playlist_name),
+        playlist_owner=sanitize_data(playlist_by),
     )
+
     if not config.get("force_raw"):
-        item_path = item_path + "." + config.get("media_format")
+        item_path += "." + config.get("media_format")
     else:
-        item_path = item_path + ".ogg"
+        item_path += ".ogg"
+
     return item_path
 
 def spotify_format_episode_path(item_metadata, is_playlist_item, playlist_name, playlist_by):
     if config.get("translate_file_path"):
-        def translate(string):
-            return requests.get(f"https://translate.googleapis.com/translate_a/single?dj=1&dt=t&dt=sp&dt=ld&dt=bd&client=dict-chrome-ex&sl=auto&tl={config.get('language')}&q={string}").json()["sentences"][0]["trans"]
-        _name = translate(item_metadata['title'])
-        _album = translate(item_metadata['album_name'])
+        _name = translate(item_metadata.get('title', ''))
+        _album = translate(item_metadata.get('album_name', ''))
     else:
-        _name = item_metadata['title']
-        _album=item_metadata['album_name']
+        _name = item_metadata.get('title', '')
+        _album = item_metadata.get('album_name', '')
 
-    _artist = item_metadata['artists'][0]    
+    _artist = item_metadata['artists'][0]
 
-    if is_playlist_item is True and config.get("use_playlist_path"):
+    if is_playlist_item and config.get("use_playlist_path"):
         path = config.get("playlist_path_formatter")
     else:
         path = config.get("podcast_path_formatter")
+
     item_path = path.format(
-        artist = sanitize_data(_artist),
-        podcast_name = sanitize_data(_album),
-        episode_name = sanitize_data(_name),
-        release_date = sanitize_data(item_metadata['release_year']),
-        explicit = sanitize_data(str(config.get('explicit')) if item_metadata['explicit'] else ''),
-        total_episodes = item_metadata['total_tracks'],
-        language = item_metadata['language'],
-        playlist_name = sanitize_data(playlist_name),
-        playlist_owner = sanitize_data(playlist_by),
+        artist=sanitize_data(_artist),
+        album=sanitize_data(_album),
+        name=sanitize_data(_name),
+        rel_year=sanitize_data(item_metadata.get('release_year', '')),
+        explicit=sanitize_data(str(config.get('explicit')) if item_metadata.get('explicit') else ''),
+        total_episodes=item_metadata.get('total_tracks', 0),
+        language=item_metadata.get('language', 'unknown'),
+        playlist_name=sanitize_data(playlist_name),
+        playlist_owner=sanitize_data(playlist_by),
     )
+
     if not config.get("force_raw"):
         item_path = item_path + "." + config.get("media_format")
     else:
         item_path = item_path + ".ogg"
-    return item_path
 
+    return item_path
 
 def spotify_get_artist_albums(session, artist_id):
     logger.info(f"Get albums for artist by id '{artist_id}'")
@@ -449,7 +447,6 @@ def spotify_get_search_results(session, search_term, content_types):
                 'item_url': item['external_urls']['spotify'],
                 'item_thumbnail_url': item_thumbnail_url
             })
-    print(search_results)
     return search_results
 
 
@@ -561,7 +558,6 @@ def spotify_get_track_metadata(session, item_id):
         info['valence'] = track_audio_data['valence']
     except TypeError:
         logger.info('Caught a TypeError: Audio analysis likely does not exist for this track.')
-
     return info
 
 
@@ -588,7 +584,6 @@ def spotify_get_episode_metadata(token, episode_id_str):
     info['length'] = episode_data['duration_ms']
     info['explicit'] = episode_data['explicit']
     info['is_playable'] = episode_data['is_playable']
-
     return info
 
 

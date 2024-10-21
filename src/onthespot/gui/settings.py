@@ -60,6 +60,7 @@ def load_config(self):
 
 
     # Checkboxes
+    self.inp_show_download_thumbnails.setChecked(config.get("show_search_thumbnails"))
     self.inp_show_search_thumbnails.setChecked(config.get("show_search_thumbnails"))
     self.inp_use_lrc_file.setChecked(config.get("use_lrc_file"))
     self.inp_rotate_acc_sn.setChecked(config.get("rotate_acc_sn"))
@@ -140,6 +141,7 @@ def save_config(self):
 
 
     # Checkboxes: config.set_('key', bool)
+    config.set_('show_download_thumbnails', self.inp_show_search_thumbnails.isChecked())
     config.set_('show_search_thumbnails', self.inp_show_search_thumbnails.isChecked())
     config.set_('use_lrc_file', self.inp_use_lrc_file.isChecked())
     config.set_('rotate_acc_sn', self.inp_rotate_acc_sn.isChecked())

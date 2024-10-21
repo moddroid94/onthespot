@@ -35,14 +35,11 @@ class QueueWorker(QThread):
                 item = pending.pop(item_id)
                 if item['item_id'] in download_queue:
                     logger.info(f"Item Already In Download Queue: {item}")
-                    time.sleep(4)
                     continue
                 else:
                     token = get_account_token()
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
                     self.add_item_to_download_list.emit(item, item_metadata)
-                    
-                    time.sleep(4)
                     continue
             else:
                 time.sleep(4)
@@ -177,12 +174,15 @@ class MainWindow(QMainWindow):
         status_label.setText(self.tr("Waiting"))
         actions = DownloadActionsButtons(item['item_id'], pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
 
-        item_label = LabelWithThumb(item_metadata['title'], item_metadata['image_url'])
-
-        # Add To List
         rows = self.tbl_dl_progress.rowCount()
         self.tbl_dl_progress.insertRow(rows)
-        self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
+        if config.get('show_download_thumbnails'):
+            self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
+            item_label = LabelWithThumb(item_metadata['title'], item_metadata['image_url'])
+        else:
+            item_label = QLabel(self.tbl_dl_progress)
+            item_label.setText(item_metadata['title'])
+        # Add To List
         self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
         self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
         self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(conv_list_format(item_metadata['artists'])))
@@ -657,17 +657,20 @@ class MainWindow(QMainWindow):
             service = QTableWidgetItem(result['item_service'].title())
             service.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{result['item_service']}.png')))
 
-            item_label = LabelWithThumb(result['item_name'], result['item_thumbnail_url'])
-
             rows = self.tbl_search_results.rowCount()
             self.tbl_search_results.insertRow(rows)
-            self.tbl_search_results.setRowHeight(rows, config.get("search_thumb_height"))
+
+            if config.get('show_search_thumbnails'):
+                self.tbl_search_results.setRowHeight(rows, config.get("search_thumb_height"))
+                item_label = LabelWithThumb(result['item_name'], result['item_thumbnail_url'])
+            else:
+                item_label = QLabel(self.tbl_dl_progress)
+                item_label.setText(result['item_name'])
+
             self.tbl_search_results.setCellWidget(rows, 0, item_label)
             self.tbl_search_results.setItem(rows, 1, QTableWidgetItem(result['item_by']))
             self.tbl_search_results.setItem(rows, 2, QTableWidgetItem(result['item_type'].title()))
-
             self.tbl_search_results.setItem(rows, 3, service)
-
             self.tbl_search_results.setCellWidget(rows, 4, btn)
             self.tbl_search_results.horizontalHeader().resizeSection(0, 450)
         self.inp_search_term.setText('')
