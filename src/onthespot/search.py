@@ -14,7 +14,9 @@ def get_search_results(search_term, content_types=None):
 
     if search_term.startswith('https://'):
         logger.info(f"Search clicked with value with url {search_term}")
-        parse_url(search_term)
+        result = parse_url(search_term)
+        if result is False:
+            return False
         return True
     else:
         if os.path.isfile(search_term):

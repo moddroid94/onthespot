@@ -26,8 +26,8 @@ def parse_url(url):
         item_type = match.group("Type")
         item_service = "spotify"
     else:
-        logger.info('Invalid Url')
-        return
+        logger.info(f'Invalid Url: {url}')
+        return False
     parsing[item_id] = {
         'item_url': url, 
         'item_service': item_service,

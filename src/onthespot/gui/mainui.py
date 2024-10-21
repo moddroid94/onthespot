@@ -620,12 +620,16 @@ class MainWindow(QMainWindow):
             content_types.append('audiobook')
 
         results = get_search_results(search_term, content_types)
-        if results == None:
+        if results is None:
             self.__splash_dialog.run(self.tr("You need to login to at least one account to use this feature."))
             self.inp_search_term.setText('')
             return
-        elif results == True:
+        elif results is True:
             self.__splash_dialog.run(self.tr("Item is being parsed and will be added to the download queue shortly."))
+            self.inp_search_term.setText('')
+            return
+        elif results is False:
+            self.__splash_dialog.run(self.tr("Invalid item, please check your account settings"))
             self.inp_search_term.setText('')
             return
 
