@@ -3,9 +3,12 @@ import platform
 import time
 import subprocess
 import requests
+import json
+from hashlib import md5
 from librespot.core import Session
 from .otsconfig import config, config_dir
 from .runtimedata import get_logger
+
 
 logger = get_logger("utils")
 
@@ -78,3 +81,25 @@ def sanitize_data(value, allow_path_separators=False, escape_quotes=False):
     else:
         value = value.replace('/', char)
     return value
+
+def make_call(url, params=None, headers=None, skip_cache=False):
+    if not skip_cache:
+        request_key = md5(f'{url}'.encode()).hexdigest()
+        req_cache_file = os.path.join(config.get('_cache_dir'), 'reqcache', request_key+'.json')
+        os.makedirs(os.path.dirname(req_cache_file), exist_ok=True)
+        if os.path.isfile(req_cache_file):
+            logger.debug(f'URL "{url}" cache found ! HASH: {request_key}')
+            try:
+                with open(req_cache_file, 'r', encoding='utf-8') as cf:
+                    json_data = json.load(cf)
+                return json_data
+            except json.JSONDecodeError:
+                logger.error(f'URL "{url}" cache has invalid data, retring request !')
+                pass
+        logger.debug(f'URL "{url}" has cache miss ! HASH: {request_key}; Fetching data')
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code == 200:
+        if not skip_cache:
+            with open(req_cache_file, 'w', encoding='utf-8') as cf:
+                cf.write(response.text)
+        return json.loads(response.text)

@@ -23,7 +23,7 @@ logger = get_logger('gui.main_ui')
 
 
 class QueueWorker(QThread):
-    add_item_to_download_list = pyqtSignal(dict)
+    add_item_to_download_list = pyqtSignal(dict, dict)
     def __init__(self):
         super().__init__()
 
@@ -38,7 +38,9 @@ class QueueWorker(QThread):
                     time.sleep(4)
                     continue
                 else:
-                    self.add_item_to_download_list.emit(item)
+                    token = get_account_token()
+                    item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
+                    self.add_item_to_download_list.emit(item, item_metadata)
                     
                     time.sleep(4)
                     continue
@@ -83,7 +85,7 @@ class MainWindow(QMainWindow):
             self.tbl_sessions.setCellWidget(rows, 6, btn)
         logger.info("Accounts table was populated !")
 
-    def add_item_to_download_list(self, item):
+    def add_item_to_download_list(self, item, item_metadata):
         # Skip rendering QButtons if they are not in use
         copy_btn = None
         play_btn = None
@@ -173,11 +175,7 @@ class MainWindow(QMainWindow):
 
         status_label = QLabel(self.tbl_dl_progress)
         status_label.setText(self.tr("Waiting"))
-        actions = DownloadActionsButtons(item['item_id'], pbar, copy_btn, cancel_btn, retry_btn, play_btn, save_btn, queue_btn, open_btn, locate_btn, delete_btn)
-       
-        # Get Labels
-        token = get_account_token()
-        item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
+        actions = DownloadActionsButtons(item['item_id'], pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
 
         item_label = LabelWithThumb(item_metadata['title'], item_metadata['image_url'])
 
@@ -185,7 +183,7 @@ class MainWindow(QMainWindow):
         rows = self.tbl_dl_progress.rowCount()
         self.tbl_dl_progress.insertRow(rows)
         self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
-        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(item['item_id']))
+        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
         self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
         self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(conv_list_format(item_metadata['artists'])))
         self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(service_label))
@@ -202,8 +200,7 @@ class MainWindow(QMainWindow):
         download_queue[item['item_id']] = {
             "item_service": item["item_service"],
             "item_type": item["item_type"],
-            'item_id': item['item_id'], 
-            'item_id': item['item_id'], 
+            'item_id': item['item_id'],
             "file_path": "n/a",
             'is_playlist_item': item['is_playlist_item'],
             'playlist_name': playlist_name,
@@ -261,41 +258,39 @@ class MainWindow(QMainWindow):
             return
 
     def remove_completed_from_download_list(self):
-        check_row = 0
-        while check_row < self.tbl_dl_progress.rowCount():
-            item_id = self.tbl_dl_progress.item(check_row, 0).text()
+        row_count = self.tbl_dl_progress.rowCount()
+        while row_count > 0:
+            item_id = self.tbl_dl_progress.item(row_count - 1, 0).text()
             for key, item in list(download_queue.items()):
-                if key == item_id:
-                    if item['item_id'] == item_id:
-                        if item['gui']['progress_bar'].value() == 100 or item['gui']['status_label'].text() == self.tr("Cancelled"):
-                            logger.info("Clearing row {checkrow}: {item}")
-                            del download_queue[key]
-                            self.tbl_dl_progress.removeRow(check_row)
-                            check_row -= 1
-                            break
-            check_row += 1
+                if str(key) == str(item_id):
+                    if item['gui']['progress_bar'].value() == 100 or item['gui']['status_label'].text() == self.tr("Cancelled"):
+                        self.tbl_dl_progress.removeRow(row_count - 1)
+                        del download_queue[key]
+                    row_count -= 1
+
 
     def cancel_all_downloads(self):
-        check_row = 0
-        while check_row < self.tbl_dl_progress.rowCount():
-            item_id = self.tbl_dl_progress.item(check_row, 0).text()
-            for item_id, item in download_queue.items():
-                if item['gui']['progress_bar'].value() > 0 or item['gui']['status_label'].text() == self.tr("Cancelled"):
-                       break
-                else:
-                    self.update_item_in_download_list(item, self.tr("Cancelled"), 0)
-            check_row += 1
+        row_count = self.tbl_dl_progress.rowCount()
+        while row_count > 0:
+            item_id = self.tbl_dl_progress.item(row_count - 1, 0).text()
+            for key, item in list(download_queue.items()):
+                if str(key) == str(item_id):
+                    if item['gui']['status_label'].text() == self.tr("Waiting"):
+                        item['gui']['status_label'].setText(self.tr("Cancelled"))
+                        item['gui']['progress_bar'].setValue(0)
+                        item['gui']["btn"]['cancel'].hide()
+                        item['gui']["btn"]['retry'].show()
+                    row_count -= 1
 
     def retry_all_failed_downloads(self):
-        check_row = 0
-        while check_row < self.tbl_dl_progress.rowCount():
-            item_id = self.tbl_dl_progress.item(check_row, 0).text()
-            for item_id, item in download_queue.items():
-                if item['gui']['progress_bar'].value() > 0 or item['gui']['status_label'].text() == self.tr("Cancelled"):
-                       break
-                else:
-                    self.update_item_in_download_list(item, self.tr("Cancelled"), 0)
-            check_row += 1
+        row_count = self.tbl_dl_progress.rowCount()
+        while row_count > 0:
+            item_id = self.tbl_dl_progress.item(row_count - 1, 0).text()
+            for key, item in list(download_queue.items()):
+                if str(key) == str(item_id):
+                    if item['gui']['progress_bar'].value() == self.tr("Failed"):
+                        item['gui']['progress_bar'].setValue(self.tr("Waiting"))
+                    row_count -= 1
 
 
     # Remove Later
@@ -304,8 +299,6 @@ class MainWindow(QMainWindow):
             from ..queue import add_item_to_download_list
             url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
             open_item(url)
-
-
 
     def __init__(self, _dialog, start_url=''):
         super(MainWindow, self).__init__()
@@ -334,26 +327,19 @@ class MainWindow(QMainWindow):
         self.__splash_dialog = _dialog
 
         # Start/create session builder and queue processor
-
-
-
         fillaccountpool = FillAccountPool(gui=True)  
-        #fillaccountpool.finished.connect(self.__session_builder_thread.quit)
-        #fillaccountpool.finished.connect(fillaccountpool.deleteLater)
         fillaccountpool.finished.connect(self.session_load_done)
-        #self.__session_builder_thread.finished.connect(self.__session_builder_thread.deleteLater)
         fillaccountpool.progress.connect(self.__show_popup_dialog)
-        #queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method  
-        fillaccountpool.start()  
+        fillaccountpool.start()
 
 
-        queueworker = QueueWorker()  
+        queueworker = QueueWorker()
         queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method  
-        queueworker.start()  
+        queueworker.start()
 
-        downloadworker = DownloadWorker(gui=True)  
+        downloadworker = DownloadWorker(gui=True)
         downloadworker.progress.connect(self.update_item_in_download_list)  # Connect signal to update_table method  
-        downloadworker.start()  
+        downloadworker.start()
 
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
@@ -430,29 +416,37 @@ class MainWindow(QMainWindow):
         window_width = self.width()
         logger.info(f"Setting table item properties {window_width}")
         # Sessions table
+        self.tbl_sessions.horizontalHeader().setSectionsMovable(True)
+        self.tbl_sessions.horizontalHeader().setSectionsClickable(True)
+        self.tbl_sessions.horizontalHeader().setSortIndicatorShown(True)
         self.tbl_sessions.horizontalHeader().resizeSection(0, 16)
-        self.tbl_sessions.horizontalHeader().resizeSection(1, int(0.35 * window_width))
-        self.tbl_sessions.horizontalHeader().resizeSection(2, int(0.15 * window_width))
-        self.tbl_sessions.horizontalHeader().resizeSection(3, int(0.2 * window_width))
-        self.tbl_sessions.horizontalHeader().resizeSection(4, int(0.12 * window_width))
-        self.tbl_sessions.horizontalHeader().resizeSection(5, int(0.12 * window_width))
-        self.tbl_sessions.horizontalHeader().resizeSection(6, int(0.06 * window_width))
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         # Search results table
-        self.tbl_search_results.horizontalHeader().resizeSection(0, int(0.2 * window_width))
-        self.tbl_search_results.horizontalHeader().resizeSection(1, int(0.2 * window_width))
-        self.tbl_search_results.horizontalHeader().resizeSection(2, int(0.2 * window_width))
-        self.tbl_search_results.horizontalHeader().resizeSection(3, int(0.2 * window_width))
-        self.tbl_search_results.horizontalHeader().resizeSection(4, int(0.2 * window_width))
+        self.tbl_search_results.horizontalHeader().setSectionsMovable(True)
+        self.tbl_search_results.horizontalHeader().setSectionsClickable(True)
+        self.tbl_search_results.horizontalHeader().setSortIndicatorShown(True)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         # Download progress table
+        self.tbl_dl_progress.horizontalHeader().setSectionsMovable(True)
+        self.tbl_dl_progress.horizontalHeader().setSectionsClickable(True)
+        self.tbl_dl_progress.horizontalHeader().setSortIndicatorShown(True)
         if config.get("debug_mode"):
-            self.tbl_dl_progress.horizontalHeader().resizeSection(0, int(0.25 * window_width))
+            self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
         else:
             self.tbl_dl_progress.setColumnWidth(0, 0)
-        self.tbl_dl_progress.horizontalHeader().resizeSection(1, int(0.25 * window_width))
-        self.tbl_dl_progress.horizontalHeader().resizeSection(2, int(0.25 * window_width))
-        self.tbl_dl_progress.horizontalHeader().resizeSection(3, int(0.25 * window_width))
-        self.tbl_dl_progress.horizontalHeader().resizeSection(4, int(0.25 * window_width))
-        self.tbl_dl_progress.horizontalHeader().resizeSection(5, int(0.2 * window_width))
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         self.set_login_fields()
         return True
 
@@ -549,8 +543,6 @@ class MainWindow(QMainWindow):
                 self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
 
     def user_table_remove_click(self, index):
-        if config.get('parsing_acc_sn') == index:
-            config.set_('parsing_acc_sn', 0)
         accounts = config.get('accounts').copy()
         del accounts[index]
         config.set_('accounts', accounts)
@@ -599,6 +591,8 @@ class MainWindow(QMainWindow):
         if session == True:
             self.__splash_dialog.run(self.tr("Account added, please restart the app."))
             self.btn_login_add.setText(self.tr("Please Restart The App"))
+            config.set_('parsing_acc_sn', config.get('parsing_acc_sn') + 1)
+            config.update()
         elif session == False:
             self.__splash_dialog.run(self.tr("Account already exists."))
             self.btn_login_add.setText(self.tr("Add Account"))

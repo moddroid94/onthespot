@@ -49,7 +49,7 @@ class Config:
             "parsing_acc_sn": 1, # Serial number of account that will be used for parsing links
             "rotate_acc_sn": False, # Rotate active account for parsing and downloading tracks
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
-            "download_delay": 5, # Seconds to wait before next download
+            "download_delay": 3, # Seconds to wait before next download attempt
             "track_path_formatter": "Tracks" + os.path.sep + "{artist}" + os.path.sep + "[{rel_year}] {album}" + os.path.sep + "{track_number}. {name}", # Track path format string
             "podcast_path_formatter": "Episodes" + os.path.sep + "{podcast_name}" + os.path.sep + "{episode_name}", # Episode path format string
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name}", # Playlist path format string

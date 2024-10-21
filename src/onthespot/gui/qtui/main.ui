@@ -164,7 +164,7 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_37">
            <item>
-            <widget class="QGroupBox" name="group_login_form_5">
+            <widget class="QGroupBox" name="search_categories">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -570,7 +570,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>641</width>
+             <width>630</width>
              <height>3265</height>
             </rect>
            </property>
@@ -712,7 +712,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Under Development</string>
+                     <string/>
                     </property>
                    </widget>
                   </item>
@@ -738,7 +738,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Under Development</string>
+                     <string/>
                     </property>
                    </widget>
                   </item>
@@ -923,33 +923,6 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QCheckBox" name="inp_download_play_btn">
-                       <property name="toolTip">
-                        <string>This feature requires a premium account.</string>
-                       </property>
-                       <property name="text">
-                        <string>Play*</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QCheckBox" name="inp_download_save_btn">
-                       <property name="text">
-                        <string>Save</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QCheckBox" name="inp_download_queue_btn">
-                       <property name="toolTip">
-                        <string>This feature requires a premium account.</string>
-                       </property>
-                       <property name="text">
-                        <string>Queue*</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
                       <widget class="QCheckBox" name="inp_download_open_btn">
                        <property name="text">
                         <string>Open</string>
@@ -1013,7 +986,7 @@
                         <enum>Qt::RightToLeft</enum>
                        </property>
                        <property name="text">
-                        <string>Show Thumbnails in Search</string>
+                        <string>Show Thumbnails</string>
                        </property>
                       </widget>
                      </item>
@@ -1045,7 +1018,7 @@
                      <item>
                       <widget class="QLabel" name="lb_search_thumb_height">
                        <property name="text">
-                        <string> Search Thumbnail Size</string>
+                        <string>Thumbnail Size</string>
                        </property>
                       </widget>
                      </item>
@@ -1814,15 +1787,12 @@
                       <widget class="QSpinBox" name="inp_download_delay">
                        <property name="minimumSize">
                         <size>
-                         <width>0</width>
+                         <width>80</width>
                          <height>0</height>
                         </size>
                        </property>
-                       <property name="minimum">
-                        <number>10000</number>
-                       </property>
                        <property name="maximum">
-                        <number>10000000</number>
+                        <number>999999</number>
                        </property>
                       </widget>
                      </item>

@@ -47,21 +47,23 @@ class DownloadWorker(QThread):
 
     def run(self):
         while True:
+            download_delay = config.get("download_delay")
             if download_queue:
-                item = download_queue.pop(next(iter(download_queue)))
-                item_service = item['item_service']
-                item_type = item['item_type']
-                item_id = item['item_id']
-                # Move item to bottom of download list after processing
-                download_queue[item_id] = item
-                try:
-                    if item['gui']['status_label'].text() in (
+                try: 
+                    item = download_queue.pop(next(iter(download_queue)))
+                    item_service = item['item_service']
+                    item_type = item['item_type']
+                    item_id = item['item_id']
+                    # Move item to bottom of download list after processing
+                    download_queue[item_id] = item
+                    status = item['gui']['status_label'].text()
+                    if status in (
                         self.tr("Cancelled"),
                         self.tr("Failed"),
                         self.tr("Unavailable"),
                         self.tr("Downloaded"),
                         self.tr("Already Exists")
-                    ):                        
+                    ):
                         time.sleep(1)
                         continue
                 except (RuntimeError, OSError):
@@ -102,7 +104,7 @@ class DownloadWorker(QThread):
                             if item['gui']['status_label'].text() == self.tr("Downloading"):
                                 self.progress.emit(item, self.tr("Already Exists"), 100)  # Emit progress
                         logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
-                        time.sleep(1)
+                        time.sleep(download_delay)
                         continue
                 except FileNotFoundError:
                     logger.info(f"File does not already exist.")
@@ -147,7 +149,7 @@ class DownloadWorker(QThread):
                         bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
 
                     elif item_service == "soundcloud":
-                        command = ["ffmpeg", "-i", f"{item_metadata['file_url']}", "-c", "copy", file_path]
+                        command = [config.get('_ffmpeg_bin_path'), "-loglevel", "error", "-i", f"{item_metadata['file_url']}", "-c", "copy", file_path]
                         if os.name == 'nt':
                             subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
                         else:
@@ -176,7 +178,10 @@ class DownloadWorker(QThread):
                 # Thumbnail
                 if self.gui:
                     self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
-                set_music_thumbnail(file_path, item_metadata['image_url'])
+                try:
+                    set_music_thumbnail(file_path, item_metadata['image_url'])
+                except MissingSchema:
+                    self.progress.emit(item, self.tr("Failed To Set Thumbnail"), 99)
 
                 # Lyrics
                 if item_service == "spotify":
@@ -186,6 +191,7 @@ class DownloadWorker(QThread):
 
                 if self.gui:
                     self.progress.emit(item, self.tr("Downloaded"), 100)
+                time.sleep(download_delay)
             else:
 
-                time.sleep(3)
+                time.sleep(download_delay)

@@ -39,7 +39,6 @@ def parse_url(url):
 # Worker function to process items in the tasks list  
 def worker():
     time.sleep(8)
-    token = get_account_token()
     while True:
         # Check if there are tasks to process  
         if parsing:
@@ -56,7 +55,8 @@ def worker():
                 current_service = item['item_service']
                 current_type = item['item_type']
                 current_id = item['item_id']
-
+                token = get_account_token()
+                
                 if current_service == "spotify":
                     if current_type == "track":
                         pending[item_id] = {
