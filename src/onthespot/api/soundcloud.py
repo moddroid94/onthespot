@@ -2,8 +2,7 @@ import re
 import requests
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool, parsing
-from ..utils import sanitize_data
-
+from ..utils import sanitize_data, make_call
 
 SOUNDCLOUD_BASE = "https://api-v2.soundcloud.com"
 
@@ -23,7 +22,7 @@ def soundcloud_parse_url(url):
         params["app_locale"] = SOUNDCLOUD_APP_LOCALE
         params["url"] = url
 
-        resp = requests.get(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params)
+        resp = make_call(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params)
         print(resp.status_code)
 
         data = resp.json()
@@ -142,7 +141,7 @@ def soundcloud_get_search_results(token, search_term, content_types):
             'item_by': track['user']['username'],
             'item_type': "track",
             'item_service': "soundcloud",
-            'item_url': track['permalink'],
+            'item_url': track['permalink_url'],
             'item_thumbnail_url': track["artwork_url"]
         })
     for playlist in playlist_search['collection']:
@@ -152,7 +151,7 @@ def soundcloud_get_search_results(token, search_term, content_types):
             'item_by': playlist['user']['username'],
             'item_type': "playlist",
             'item_service': "soundcloud",
-            'item_url': playlist['permalink'],
+            'item_url': playlist['permalink_url'],
             'item_thumbnail_url': playlist["artwork_url"]
         })
 
@@ -168,17 +167,20 @@ def soundcloud_get_set_items(token, url):
     params["app_version"] = token['app_version']
     params["app_locale"] = token['app_locale']
     params["url"] = url
- 
-    tracks = []
-    set_data = requests.get(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params).json()
-    for track in set_data['tracks']:
-        parsing[track.get('id')] = {
-            'item_url': track.get('permalink_url'), 
-            'item_service': 'soundcloud',
-            'item_type': 'track', 
-            'item_id': track.get('id')
-        }
 
+    tracks = []
+    try:
+        set_data = make_call(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params)
+
+        for track in set_data.get('tracks'):
+            parsing[track.get('id')] = {
+                'item_url': track.get('permalink_url'), 
+                'item_service': 'soundcloud',
+                'item_type': 'track', 
+                'item_id': track.get('id')
+            }
+    except (TypeError, KeyError):
+        logger.info(f"Failed to parse tracks for set: {url}")
 
 def soundcloud_get_track_metadata(token, item_id):
         headers = {}
@@ -189,7 +191,7 @@ def soundcloud_get_track_metadata(token, item_id):
         params["app_version"] = token['app_version']
         params["app_locale"] = token['app_locale']
 
-        track_data = requests.get(f"{SOUNDCLOUD_BASE}/tracks/{item_id}", headers=headers, params=params).json()
+        track_data = make_call(f"{SOUNDCLOUD_BASE}/tracks/{item_id}", headers=headers, params=params)
         track_file = requests.get(track_data["media"]["transcodings"][0]["url"], headers=headers, params=params).json()
         track_webpage = requests.get(f"{track_data['permalink_url']}/albums").text
         # Parse album webpage
@@ -198,7 +200,7 @@ def soundcloud_get_track_metadata(token, item_id):
             album_href = re.search(r'href="([^"]*)"', track_webpage[start_index:])
             if album_href:
                 params["url"] = f"https://soundcloud.com{album_href.group(1)}"
-                album_data = requests.get(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params).json()
+                album_data = make_call(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params)
 
         info = {}
 
@@ -206,12 +208,12 @@ def soundcloud_get_track_metadata(token, item_id):
         # Label
         try:
             label = track_data['label_name']
-        except KeyError:
+        except (KeyError, TypeError):
             label = ""
         # Artists
         try:
             artists = [item.strip() for item in track_data['publisher_metadata']['artist'].split(',')]
-        except KeyError:
+        except (KeyError, TypeError):
             artists = [track_data['user']['username']]
         # Track Number
         try:
@@ -221,29 +223,29 @@ def soundcloud_get_track_metadata(token, item_id):
                 track_number = track_number + 1
                 if track['id'] == track_data['id']:
                     break
-        except KeyError:
+        except (KeyError, TypeError):
             total_tracks = '1'
             track_number = '1'
         # Album Name
         try:
             album_name = track_data['publisher_metadata']['album_name']
-        except KeyError:
+        except (KeyError, TypeError):
             start_index = track_webpage.find('<h2>Appears in albums</h2>')
             if start_index != -1:
                 a_tag_match = re.search(r'<a[^>]*>(.*?)</a>', track_webpage[start_index:])
                 if a_tag_match:
                     album_name = a_tag_match.group(1)
-            if album_name.startswith("Users who like") or not album_name:
+            if album_name.startswith("Users who like"):
                 album_name = track_data['title']
         # Explicit
         try:
             explicit = track_data['publisher_metadata']['explicit']
-        except KeyError:
+        except (KeyError, TypeError):
             explicit = ""
         # Copyright
         try:
             copyright = [item.strip() for item in track_data['publisher_metadata']['c_line'].split(',')]
-        except KeyError:
+        except (KeyError, TypeError):
             copyright = ""
         
         #'media': {'transcodings': [{'url': 'https://api-v2.soundcloud.com/media/soundcloud:tracks:1893576612/5f63586d-5f78-452d-87ed-135a12e3b09d/stream/hls', 'preset': 'mp3_1_0', 'duration': 186723, 'snipped': False, 'format': {'protocol': 'hls', 'mime_type': 'audio/mpeg'}, 'quality': 'sq'},

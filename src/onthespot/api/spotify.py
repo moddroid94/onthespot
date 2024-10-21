@@ -3,9 +3,7 @@ import re
 import time
 import uuid
 import json
-from hashlib import md5
 import requests
-import requests.adapters
 from librespot.audio.decoders import AudioQuality
 from librespot.core import Session
 from librespot.zeroconf import ZeroconfServer
@@ -19,14 +17,11 @@ from ..otsconfig import config, cache_dir
 from ..post_download import conv_list_format
 from ..runtimedata import get_logger, account_pool
 from ..post_download import set_audio_tags
-from ..utils import sanitize_data
+from ..utils import sanitize_data, make_call
 from ..otsconfig import cache_dir, config
 from ..runtimedata import get_logger
 
-
 logger = get_logger("spotify.api")
-requests.adapters.DEFAULT_RETRIES = 10
-
 
 
 def spotify_new_session():
@@ -217,92 +212,23 @@ def spotify_format_episode_path(item_metadata, is_playlist_item, playlist_name, 
     return item_path
 
 
-def play_media(session, media_id, media_type):
-    session = account_pool['login']['session']
-    access_token = session.tokens().get("user-modify-playback-state")
-    url = 'https://api.spotify.com/v1/me/player/play'
-
-    payload = {
-        "context_uri": f"spotify:{media_type}:{media_id}",
-        "offset": {
-            "position": 5
-        },
-        "position_ms": 0
-    }
-    headers = {
-    'Authorization': f'Bearer {access_token}'
-    }
-
-    resp = requests.put(url, headers=headers)
-    logger.info(f"Playing item: {resp}")
-
-def queue_media(session, media_id, media_type):
-    access_token = session.tokens().get("user-modify-playback-state")
-    url = f'https://api.spotify.com/v1/me/player/queue?uri=spotify%3A{media_type}%3A{media_id}'
-    headers = {
-    'Authorization': f'Bearer {access_token}'
-    }
-    resp = requests.post(url, headers=headers)
-    logger.info(f"Item Queued: {resp}")
-
-def check_if_media_in_library(session, media_id, media_type):
-    access_token = session.tokens().get("user-library-read")
-    url = f'https://api.spotify.com/v1/me/{media_type}s/contains?ids={media_id}'
-    headers = {
-    'Authorization': f'Bearer {access_token}'
-    }
-    resp = requests.get(url, headers=headers)
-    logger.info(f"Checking if item is in library: {resp}")
-    if resp.json() == [True]:
-        return True
-    else:
-        return False
-
-def save_media_to_library(session, media_id, media_type):
-    access_token = session.tokens().get("user-library-modify")
-    url = f'https://api.spotify.com/v1/me/{media_type}s?ids={media_id}'
-    headers = {
-    'Authorization': f'Bearer {access_token}'
-    }
-    resp = requests.put(url, headers=headers)
-    logger.info(f"Item saved to library: {resp}")
-
-def remove_media_from_library(session, media_id, media_type):
-    if media_type == 'track' or media_type == 'episode':
-        access_token = session.tokens().get("user-library-modify")
-        url = f'https://api.spotify.com/v1/me/{media_type}s?ids={media_id}'
-        headers = {
-        'Authorization': f'Bearer {access_token}'
-        }
-        resp = requests.delete(url, headers=headers)
-        logger.info(f"Item removed from library: {resp}")
-
-def get_currently_playing_url(session):
-    url = "https://api.spotify.com/v1/me/player/currently-playing"
-    access_token = session.tokens().get("user-read-currently-playing")
-    resp = requests.get(url, headers={"Authorization": "Bearer %s" % access_token})
-    if resp.status_code == 200:
-        return resp.json()['item']['external_urls']['spotify']
-    else:
-        return ""
-
 def spotify_get_artist_albums(session, artist_id):
     logger.info(f"Get albums for artist by id '{artist_id}'")
-    access_token = session.tokens().get("user-read-email")
-    resp = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', token=access_token) #%2Cappears_on%2Ccompilation
+    token = session.tokens().get("user-read-email")
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', token=token) #%2Cappears_on%2Ccompilation
     return [resp['items'][i]['external_urls']['spotify'] for i in range(len(resp['items']))]
 
 
 def spotify_get_playlist_data(session, playlist_id):
     logger.info(f"Get playlist dump for '{playlist_id}'")
-    access_token = session.tokens().get("user-read-email")
-    resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', token=access_token, skip_cache=True)
+    token = session.tokens().get("user-read-email")
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers, skip_cache=True)
     return resp['name'], resp['owner']['display_name']
 
 
 def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
-                       
-
     if config.get('inp_enable_lyrics'):
         lyrics = []
         try:
@@ -403,22 +329,20 @@ def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
 
 def spotify_get_playlist_items(token, playlist_id):
     logger.info(f"Getting items in playlist: '{playlist_id}'")
-    access_token = token.tokens().get("playlist-read-private")
-    print(access_token)
-    headers = {'Authorization': f'Bearer {access_token}'}
+    token = token.tokens().get("playlist-read-private")
+    headers = {'Authorization': f'Bearer {token}'}
     url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode'
-    resp = requests.get(url, headers=headers)
-    #resp = make_call(url, token=access_token)
-    print(resp.status_code)
-    return resp.json()
+    resp = make_call(url, headers=headers, skip_cache=True)
+    return resp
 
 
 def get_album_name(session, album_id):
     logger.info(f"Get album info from album by id ''{album_id}'")
-    access_token = session.tokens().get("user-read-email")
+    token = session.tokens().get("user-read-email")
+    headers = {"Authorization": f"Bearer {token}"}
     resp = make_call(
         f'https://api.spotify.com/v1/albums/{album_id}',
-        token=access_token
+        headers=headers
         )
     if m := re.search(r'(\d{4})', resp['release_date']):
         return resp['artists'][0]['name'],\
@@ -432,13 +356,14 @@ def get_album_name(session, album_id):
 
 def spotify_get_album_tracks(session, album_id):
     logger.info(f"Get tracks from album by id '{album_id}'")
-    access_token = session.tokens().get("user-read-email")
+    token = session.tokens().get("user-read-email")
     songs = []
     offset = 0
     limit = 50
     include_groups = 'album,compilation'
 
     while True:
+        headers = {"Authorization": f"Bearer {token}"}
         params = {
             'limit': limit,
             'include_groups': include_groups,
@@ -446,7 +371,7 @@ def spotify_get_album_tracks(session, album_id):
             }
         resp = make_call(
             f'https://api.spotify.com/v1/albums/{album_id}/tracks',
-            token=access_token,
+            headers=headers,
             params=params
             )
         offset += limit
@@ -466,7 +391,6 @@ def spotify_get_search_results(session, search_term, content_types):
     if content_types is None:
         content_types = ["track", "album", "playlist", "artist", "show", "episode", "audiobook"]
     token = session.tokens().get("user-read-email")
-    print(token)
     data = requests.get(
         "https://api.spotify.com/v1/search",
         {
@@ -529,24 +453,21 @@ def spotify_get_search_results(session, search_term, content_types):
     return search_results
 
 
-
-
-
-
 def check_premium(session):
     return bool(
-        session.get_user_attribute("type") == "premium" or config.get("force_premium")
+        session.get_user_attribute("type") == "premium"
         )
 
 
 def spotify_get_track_metadata(session, item_id):
     print(session)
     token = session.tokens().get("user-read-email")
-    track_data = make_call(f'https://api.spotify.com/v1/tracks?ids={item_id}&market=from_token', token=token)
-    credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{item_id}/credits', token=token)
-    track_audio_data = make_call(f'https://api.spotify.com/v1/audio-features/{item_id}', token=token)
-    album_data = make_call(track_data['tracks'][0]['album']['href'], token=token)
-    artist_data = make_call(track_data['tracks'][0]['artists'][0]['href'], token=token)
+    headers = {"Authorization": f"Bearer {token}"}
+    track_data = make_call(f'https://api.spotify.com/v1/tracks?ids={item_id}&market=from_token', headers=headers)
+    credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{item_id}/credits', headers=headers)
+    track_audio_data = make_call(f'https://api.spotify.com/v1/audio-features/{item_id}', headers=headers)
+    album_data = make_call(track_data['tracks'][0]['album']['href'], headers=headers)
+    artist_data = make_call(track_data['tracks'][0]['artists'][0]['href'], headers=headers)
 
     info = {}
 
@@ -647,7 +568,8 @@ def spotify_get_track_metadata(session, item_id):
 def spotify_get_episode_metadata(token, episode_id_str):
     logger.info(f"Get episode info for episode by id '{episode_id_str}'")
     token = token.tokens().get("user-read-email")
-    episode_data = make_call("https://api.spotify.com/v1/episodes/" + episode_id_str, token=token)
+    headers = {"Authorization": f"Bearer {token}"}
+    episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id_str}", headers=headers)
     info = {}
 
     languages = []
@@ -672,45 +594,18 @@ def spotify_get_episode_metadata(token, episode_id_str):
 
 def spotify_get_show_episodes(session, show_id_str):
     logger.info(f"Get episodes for show by id '{show_id_str}'")
-    access_token = session.tokens().get("user-read-email")
+    token = session.tokens().get("user-read-email")
     episodes = []
     offset = 0
     limit = 50
     while True:
-        headers = {'Authorization': f'Bearer {access_token}'}
+        headers = {'Authorization': f'Bearer {token}'}
         params = {'limit': limit, 'offset': offset}
-        resp = make_call(f'https://api.spotify.com/v1/shows/{show_id_str}/episodes', token=access_token, params=params)
+        resp = make_call(f'https://api.spotify.com/v1/shows/{show_id_str}/episodes', headers=headers, params=params)
         offset += limit
         for episode in resp["items"]:
             episodes.append(episode["external_urls"]["spotify"])
 
         if len(resp['items']) < limit:
             break
-
     return episodes
-
-def make_call(url, token, params=None, headers=None, skip_cache=False):
-    if params is None:
-        params = {}
-    if headers is None:
-        headers = {"Authorization": f"Bearer {token}"}
-    if not skip_cache:
-        request_key = md5(f'{url}'.encode()).hexdigest()
-        req_cache_file = os.path.join(config.get('_cache_dir'), 'reqcache', request_key+'.otcache')
-        os.makedirs(os.path.dirname(req_cache_file), exist_ok=True)
-        if os.path.isfile(req_cache_file):
-            logger.debug(f'URL "{url}" cache found ! HASH: {request_key}')
-            try:
-                with open(req_cache_file, 'r', encoding='utf-8') as cf:
-                    json_data = json.load(cf)
-                return json_data
-            except json.JSONDecodeError:
-                logger.error(f'URL "{url}" cache has invalid data, retring request !')
-                pass
-        logger.debug(f'URL "{url}" has cache miss ! HASH: {request_key}; Fetching data')
-    response = requests.get(url, headers=headers, params=params)
-    if response.status_code == 200:
-        if not skip_cache:
-            with open(req_cache_file, 'w', encoding='utf-8') as cf:
-                cf.write(response.text)
-        return json.loads(response.text)
