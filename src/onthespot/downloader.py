@@ -171,9 +171,12 @@ class DownloadWorker(QThread):
                 convert_audio_format(file_path, bitrate, default_format)
 
                 # Set Audio Tags
-                if self.gui:
-                    self.progress.emit(item, self.tr("Embedding Metadata"), 99)
-                set_audio_tags(file_path, item_metadata, item_id)
+                try:
+                    if self.gui:
+                        self.progress.emit(item, self.tr("Embedding Metadata"), 99)
+                    set_audio_tags(file_path, item_metadata, item_id)
+                except PermissionError:
+                    logger.info('Failed to embed metadata, permission error in track path')
 
                 # Thumbnail
                 if self.gui:
