@@ -30,14 +30,19 @@ jobs:
           pip install pyinstaller
 
       - name: Run Windows Build Script
-        run: scripts/workflow/build_windows.bat
+        run: scripts\build_windows.bat
         shell: cmd
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload Windows Executable to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: windows-build
-          path: artifacts/windows/
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/*.exe  # Upload .exe from dist/
+          asset_name: onthespot_windows.exe
+          asset_content_type: application/octet-stream
 
   # Linux Build
   linux-build:
@@ -49,23 +54,36 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf fuse libfuse2
+          sudo apt-get install -y patchelf fuse libfuse2 wget
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+          pip install build
 
-      - name: Make Build Script Executable
-        run: chmod +x scripts/workflow/build_linux.sh
+      - name: Make Build Scripts Executable
+        run: |
+          chmod +x scripts/build_linux.sh
+          chmod +x scripts/build_appimage.sh
 
       - name: Run Linux Build Script
-        run: scripts/workflow/build_linux.sh
+        run: scripts/build_linux.sh
         shell: bash
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Create Linux tar.gz
+        run: |
+          cd dist
+          tar -czvf onthespot_linux.tar.gz onthespot_linux
+
+      - name: Upload Linux Executable to Release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: linux-build
-          path: artifacts/linux/
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/onthespot_linux.tar.gz  # Upload .tar.gz from dist/
+          asset_name: onthespot_linux.tar.gz
+          asset_content_type: application/gzip
 
   # macOS Build
   macos-build:
@@ -79,94 +97,13 @@ jobs:
           brew install pyinstaller
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
 
       - name: Make Build Script Executable
-        run: chmod +x scripts/workflow/build_mac.sh
+        run: chmod +x scripts/build_mac.sh
 
       - name: Run macOS Build Script
-        run: scripts/workflow/build_mac.sh
+        run: scripts/build_mac.sh
         shell: bash
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: macos-build
-          path: artifacts/macos/
-
-  # Collect Artifacts
-  collect-artifacts:
-    name: Collect Artifacts
-    needs: [windows-build, linux-build, macos-build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Windows Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: windows-build
-          path: artifacts/windows/
-
-      - name: Download Linux Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: linux-build
-          path: artifacts/linux/
-
-      - name: Download macOS Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: macos-build
-          path: artifacts/macos/
-
-      - name: Upload Combined Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: OnTheSpot-Builds
-          path: artifacts/
-
-      - name: Create Release
-        if: github.event_name == 'release'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.event.release.tag_name }}
-          release_name: ${{ github.event.release.name }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Windows Executable to Release
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/windows/onthespot_windows.exe
-          asset_name: onthespot_windows.exe
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux Tar.gz to Release
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/linux/onthespot_linux.tar.gz
-          asset_name: onthespot_linux.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Linux AppImage to Release
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/linux/OnTheSpot.AppImage
-          asset_name: OnTheSpot.AppImage
-          asset_content_type: application/octet-stream
 
       - name: Upload macOS DMG to Release
         if: github.event_name == 'release'
@@ -175,6 +112,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: artifacts/macos/OnTheSpot.dmg
+          asset_path: dist/*.dmg  # Upload .dmg from dist/
           asset_name: OnTheSpot.dmg
           asset_content_type: application/x-apple-diskimage
+
