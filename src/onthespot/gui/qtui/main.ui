@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
-    <height>584</height>
+    <width>687</width>
+    <height>527</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -569,9 +569,9 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-401</y>
-             <width>630</width>
-             <height>3263</height>
+             <y>-1370</y>
+             <width>631</width>
+             <height>3181</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1822,23 +1822,23 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QGroupBox" name="groupBox_129">
+                   <widget class="QGroupBox" name="groupBox_8">
                     <property name="title">
                      <string/>
                     </property>
                     <property name="flat">
                      <bool>false</bool>
                     </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_236">
+                    <layout class="QHBoxLayout" name="horizontalLayout_19">
                      <item>
-                      <widget class="QLabel" name="lb_max_recdl_delay_3">
+                      <widget class="QLabel" name="lb_chunk_size">
                        <property name="text">
-                        <string>Max Download Workers</string>
+                        <string> Download Chunk Size</string>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <spacer name="horizontalSpacer_47">
+                      <spacer name="horizontalSpacer_2">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
@@ -1851,15 +1851,18 @@
                       </spacer>
                      </item>
                      <item>
-                      <widget class="QSpinBox" name="inp_max_threads">
+                      <widget class="QSpinBox" name="inp_chunk_size">
                        <property name="minimumSize">
                         <size>
-                         <width>80</width>
+                         <width>0</width>
                          <height>0</height>
                         </size>
                        </property>
+                       <property name="minimum">
+                        <number>10000</number>
+                       </property>
                        <property name="maximum">
-                        <number>999999</number>
+                        <number>10000000</number>
                        </property>
                       </widget>
                      </item>
@@ -1878,54 +1881,6 @@
                   <bool>true</bool>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_231">
-                  <item>
-                   <widget class="QGroupBox" name="groupBox_130">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <property name="flat">
-                     <bool>false</bool>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_238">
-                     <item>
-                      <widget class="QLabel" name="lb_chunk_size_4">
-                       <property name="text">
-                        <string>Max Retries</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_48">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QSpinBox" name="inp_max_retries">
-                       <property name="minimumSize">
-                        <size>
-                         <width>0</width>
-                         <height>0</height>
-                        </size>
-                       </property>
-                       <property name="minimum">
-                        <number>1</number>
-                       </property>
-                       <property name="maximum">
-                        <number>99</number>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
                   <item>
                    <widget class="QGroupBox" name="groupBox_131">
                     <property name="title">
@@ -1968,66 +1923,6 @@
                        </property>
                        <property name="maximum">
                         <number>50</number>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb1_22">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_237">
-                  <item>
-                   <widget class="QGroupBox" name="groupBox_8">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <property name="flat">
-                     <bool>false</bool>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_19">
-                     <item>
-                      <widget class="QLabel" name="lb_chunk_size">
-                       <property name="text">
-                        <string> Download Chunk Size</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_2">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QSpinBox" name="inp_chunk_size">
-                       <property name="minimumSize">
-                        <size>
-                         <width>0</width>
-                         <height>0</height>
-                        </size>
-                       </property>
-                       <property name="minimum">
-                        <number>10000</number>
-                       </property>
-                       <property name="maximum">
-                        <number>10000000</number>
                        </property>
                       </widget>
                      </item>
@@ -2083,29 +1978,32 @@
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="gb1_5">
+                <widget class="QGroupBox" name="gb1_22">
                  <property name="title">
                   <string/>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_41">
+                 <layout class="QHBoxLayout" name="horizontalLayout_237">
                   <item>
-                   <widget class="QGroupBox" name="groupBox_23">
+                   <widget class="QGroupBox" name="groupBox_130">
                     <property name="title">
                      <string/>
                     </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_23">
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_238">
                      <item>
-                      <widget class="QLabel" name="lb_dl_endskip">
+                      <widget class="QLabel" name="lb_chunk_size_4">
                        <property name="text">
-                        <string> Skip Bytes at End</string>
+                        <string>Max Retries</string>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <spacer name="horizontalSpacer_15">
+                      <spacer name="horizontalSpacer_48">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
@@ -2118,15 +2016,18 @@
                       </spacer>
                      </item>
                      <item>
-                      <widget class="QSpinBox" name="inp_dl_endskip">
+                      <widget class="QSpinBox" name="inp_max_retries">
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
                          <height>0</height>
                         </size>
                        </property>
+                       <property name="minimum">
+                        <number>1</number>
+                       </property>
                        <property name="maximum">
-                        <number>999999999</number>
+                        <number>99</number>
                        </property>
                       </widget>
                      </item>

@@ -38,7 +38,6 @@ def load_config(self):
 
     # Text
     self.inp_language.setCurrentIndex(config.get("language_index"))
-    self.inp_max_threads.setValue(config.get("max_threads"))
     self.inp_explicit_label.setText(config.get("explicit_label"))
     self.inp_download_root.setText(config.get("download_root"))
     self.inp_download_delay.setValue(config.get("download_delay"))
@@ -54,7 +53,6 @@ def load_config(self):
     self.inp_m3u_name_formatter.setText(config.get("m3u_name_formatter"))
     self.inp_album_cover_format.setText(config.get("album_cover_format"))
     self.inp_max_recdl_delay.setValue(config.get("recoverable_fail_wait_delay"))
-    self.inp_dl_endskip.setValue(config.get("dl_end_padding_bytes"))
     self.inp_search_thumb_height.setValue(config.get("search_thumb_height"))
     self.inp_metadata_seperator.setText(config.get("metadata_seperator"))
 
@@ -115,7 +113,6 @@ def load_config(self):
 def save_config(self):
     # Missing Theme
     config.set_('language_index', self.inp_language.currentIndex())
-    config.set_('max_threads', self.inp_max_threads.value())
     config.set_('explicit_label', self.inp_explicit_label.text())
     config.set_('download_root', self.inp_download_root.text())
     config.set_('track_path_formatter', self.inp_track_formatter.text())
@@ -126,7 +123,6 @@ def save_config(self):
     config.set_('download_delay', self.inp_download_delay.value())
     config.set_('chunk_size', self.inp_chunk_size.value())
     config.set_('recoverable_fail_wait_delay', self.inp_max_recdl_delay.value())
-    config.set_('dl_end_padding_bytes', self.inp_dl_endskip.value())
     config.set_('search_thumb_height', self.inp_search_thumb_height.value())
     config.set_('max_retries', self.inp_max_retries.value())
     config.set_('disable_bulk_dl_notices', self.inp_disable_bulk_popup.isChecked())

@@ -50,7 +50,7 @@ class DownloadWorker(QThread):
                 if self.gui:
                     self.progress.emit(item, self.tr("Downloading"), 0)
 
-                token = get_account_token()
+                token = get_account_token(download=True)
 
                 try:
                     item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)

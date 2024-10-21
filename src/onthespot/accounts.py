@@ -59,18 +59,15 @@ class FillAccountPool(QThread):
 
 
 def get_account_token(download=False):
-    parsing_index = config.get('parsing_acc_sn') - 1
+    parsing_index = config.get('parsing_acc_sn')
     service = account_pool[parsing_index]['service']
-    
+
     if config.get("rotate_acc_sn") is True and download is True:
-        #for account in account_pool:
-        #    if account["service"] == service:
-        #    print(account["uuid"])  # Print the UUID
-        #if download == True and parsing_index < (len(config.get('accounts'))-1):
-        #    config.set_('parsing_acc_sn', parsing_index + 1)
-        #else:
-        #    config.set_('parsing_acc_sn', 0)
-        selected_uuid = config.get('accounts')[parsing_index][0]
+        for i in range(parsing_index + 1, parsing_index + len(account_pool) + 1):
+            index = i % len(account_pool)
+            if account_pool[index]['service'] == service:
+                config.set_('parsing_acc_sn', index)
+                config.update
+                return globals()[f"{service}_get_token"](index)
     else:
-        token = globals()[f"{service}_get_token"](parsing_index)
-    return token
+        return globals()[f"{service}_get_token"](parsing_index)

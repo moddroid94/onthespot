@@ -457,7 +457,6 @@ def check_premium(session):
 
 
 def spotify_get_track_metadata(session, item_id):
-    print(session)
     token = session.tokens().get("user-read-email")
     headers = {"Authorization": f"Bearer {token}"}
     track_data = make_call(f'https://api.spotify.com/v1/tracks?ids={item_id}&market=from_token', headers=headers)

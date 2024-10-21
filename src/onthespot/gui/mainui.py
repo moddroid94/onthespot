@@ -53,8 +53,8 @@ class MainWindow(QMainWindow):
             rows = self.tbl_sessions.rowCount()
 
             radiobutton = QRadioButton()
-            radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow() + 1) and config.update())
-            if sn == config.get("parsing_acc_sn"):
+            radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow()) and config.update())
+            if sn == config.get("parsing_acc_sn") + 1:
                 radiobutton.setChecked(True)
 
             btn = QPushButton(self.tbl_sessions)
@@ -539,6 +539,11 @@ class MainWindow(QMainWindow):
                 self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
 
     def user_table_remove_click(self, index):
+        if config.get('parsing_acc_sn') == self.tbl_sessions.currentRow():
+            config.set_('parsing_acc_sn', self.tbl_sessions.currentRow() - 1)
+            self.tbl_sessions.cellWidget(self.tbl_sessions.currentRow() - 1, 0).setChecked(True)
+        if config.get('parsing_acc_sn') == "0":
+            self.tbl_sessions.cellWidget(0, 0).setChecked(True)
         accounts = config.get('accounts').copy()
         del accounts[index]
         config.set_('accounts', accounts)
