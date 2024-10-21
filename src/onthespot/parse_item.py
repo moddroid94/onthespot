@@ -17,7 +17,6 @@ SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(intl-([a-zA-Z]
 def parse_url(url):
     accounts = config.get('accounts')
     account_service = accounts[config.get('parsing_acc_sn') - 1]['service']
-    print(account_service)
     if account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
         item_type, item_id = soundcloud_parse_url(url)
         item_service = "soundcloud"
@@ -36,20 +35,18 @@ def parse_url(url):
         'item_id': item_id
     }
 
-# Worker function to process items in the tasks list  
 def worker():
     time.sleep(8)
     while True:
-        # Check if there are tasks to process  
         if parsing:
-            # Pop the first item from the tasks list
-            item_id = next(iter(parsing))  # Get the first key  
+            item_id = next(iter(parsing))
             item = parsing.pop(item_id)
 
-            if item_id in pending:
+            if item_id in pending or item_id in download_queue:
                 logger.info(f"Item Already Parsed: {item}")
+                print(parsing)
+                continue
             else:
-                # Print the service type and ID  
                 logger.info(f"Parsing: {item}")
 
                 current_service = item['item_service']
@@ -110,7 +107,6 @@ def worker():
                             }
                         continue
 
-                    # Fix ME
                     elif current_type in ['show', 'audiobook']:
                         episode_urls = spotify_get_show_episodes(token, current_id)
                         for index, episode_url in enumerate(episode_urls):
@@ -131,7 +127,7 @@ def worker():
 
                     if current_type in ["album", "playlist"]:
                         # Items are added to pending in function to avoid complexity
-                        track_urls = soundcloud_get_set_items(token, item['item_url'])
+                        soundcloud_get_set_items(token, item['item_url'])
 
         else:
             time.sleep(4)

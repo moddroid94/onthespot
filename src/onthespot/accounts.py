@@ -53,9 +53,7 @@ class FillAccountPool(QThread):
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['client_id']), True)
                     continue
- 
-                print("s")
-        print(account_pool)
+
         self.finished.emit()
 
 

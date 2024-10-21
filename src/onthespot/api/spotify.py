@@ -490,7 +490,11 @@ def spotify_get_track_metadata(session, item_id):
         info['album_type'] = album_data['album_type']
         info['album_artists'] = album_data['artists'][0]['name']
         info['title'] = track_data['tracks'][0]['name']
-        info['image_url'] = track_data['tracks'][0]['album']['images'][0]['url']
+        try:
+            info['image_url'] = track_data['tracks'][0]['album']['images'][0]['url']
+        except IndexError:
+            info['image_url'] = ''
+            logger.info('Invalid thumbnail')
         info['release_year'] = track_data['tracks'][0]['album']['release_date'].split("-")[0]
         info['track_number'] = track_data['tracks'][0]['track_number']
         info['total_tracks'] = track_data['tracks'][0]['album']['total_tracks']

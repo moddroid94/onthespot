@@ -2,7 +2,7 @@ import re
 import requests
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool, pending
-from ..utils import sanitize_data, make_call
+from ..utils import sanitize_data, make_call, translate
 
 SOUNDCLOUD_BASE = "https://api-v2.soundcloud.com"
 
@@ -25,9 +25,7 @@ def soundcloud_parse_url(url):
         resp = requests.get(f"{SOUNDCLOUD_BASE}/resolve", headers=headers, params=params).json()
 
         item_id = str(resp["id"])
-        print(item_id)
         item_type = resp["kind"]
-        print(item_type)
         return item_type, item_id
 
 def soundcloud_login_user(account):

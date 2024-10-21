@@ -11,31 +11,9 @@ from .post_download import convert_audio_format, set_audio_tags, set_music_thumb
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_format_track_path, spotify_format_episode_path, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_format_track_path
 from .accounts import get_account_token
+from .utils import sanitize_data
 
 logger = get_logger("spotify.downloader")
-
-
-def sanitize_data(value, allow_path_separators=False, escape_quotes=False):
-    logger.info(
-        f'Sanitising string: "{value}"; '
-        f'Allow path separators: {allow_path_separators}'
-        )
-    if value is None:
-        return ''
-    char = config.get("illegal_character_replacement")
-    if os.name == 'nt':
-        value = value.replace('\\', char)
-        value = value.replace('/', char)
-        value = value.replace(':', char)
-        value = value.replace('*', char)
-        value = value.replace('?', char)
-        value = value.replace('"', char)
-        value = value.replace('<', char)
-        value = value.replace('>', char)
-        value = value.replace('|', char)
-    else:
-        value = value.replace('/', char)
-    return value
 
 
 class DownloadWorker(QThread):
@@ -113,7 +91,7 @@ class DownloadWorker(QThread):
                 if not item_metadata['is_playable']:
                     logger.error(f"Track is unavailable, track id '{item_id}'")
                     if self.gui:
-                        self.progress.emit([item_id, self.tr("Unavailable"), [0, 100]])
+                        self.progress.emit(item, self.tr("Unavailable"), 0)
                     continue
 
                 # Downloading the file here is necessary to animate progress bar through pyqtsignal.
