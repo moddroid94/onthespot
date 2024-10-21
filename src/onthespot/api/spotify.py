@@ -216,7 +216,7 @@ def spotify_get_artist_albums(session, artist_id):
     logger.info(f"Get albums for artist by id '{artist_id}'")
     token = session.tokens().get("user-read-email")
     headers = {"Authorization": f"Bearer {token}"}
-    resp = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', token=token) #%2Cappears_on%2Ccompilation
+    resp = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', headers=headers) #%2Cappears_on%2Ccompilation
     return [resp['items'][i]['external_urls']['spotify'] for i in range(len(resp['items']))]
 
 
