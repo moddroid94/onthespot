@@ -17,19 +17,8 @@ def main():
     app = QApplication(sys.argv)
     
     # Set Application Version
-    version = "v0.7.1"
+    version = "v1.0.0"
     logger.info(f'OnTheSpot Version: {version}')
-
-    # Migration (<v0.7.0)
-    if config.get("version") != "":
-        if int(version.replace('v', '').replace('.', '')) > int(str(config.get("version")).replace('v', '').replace('.', '')):
-            if " " not in config.get("metadata_seperator"):
-                config.set_("metadata_seperator", config.get("metadata_seperator")+" ")
-            config.set_("download_play_btn", False)
-    if config.get("theme") == "Dark":
-        config.set_("theme", "dark")
-    if config.get("theme") == "Light":
-        config.set_("theme", "light")
 
     config.set_("version", version)
 
