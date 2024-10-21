@@ -16,7 +16,7 @@ SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(intl-([a-zA-Z]
 
 def parse_url(url):
     accounts = config.get('accounts')
-    account_service = accounts[config.get('parsing_acc_sn') - 1]['service']
+    account_service = accounts[config.get('parsing_acc_sn')]['service']
     if account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
         item_type, item_id = soundcloud_parse_url(url)
         item_service = "soundcloud"

@@ -412,9 +412,9 @@ class MainWindow(QMainWindow):
         window_width = self.width()
         logger.info(f"Setting table item properties {window_width}")
         # Sessions table
+        self.tbl_sessions.setSortingEnabled(True)
         self.tbl_sessions.horizontalHeader().setSectionsMovable(True)
         self.tbl_sessions.horizontalHeader().setSectionsClickable(True)
-        self.tbl_sessions.horizontalHeader().setSortIndicatorShown(True)
         self.tbl_sessions.horizontalHeader().resizeSection(0, 16)
         self.tbl_sessions.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.tbl_sessions.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
@@ -423,18 +423,18 @@ class MainWindow(QMainWindow):
         self.tbl_sessions.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
         self.tbl_sessions.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         # Search results table
+        self.tbl_search_results.setSortingEnabled(True)
         self.tbl_search_results.horizontalHeader().setSectionsMovable(True)
         self.tbl_search_results.horizontalHeader().setSectionsClickable(True)
-        self.tbl_search_results.horizontalHeader().setSortIndicatorShown(True)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         # Download progress table
+        self.tbl_dl_progress.setSortingEnabled(True)
         self.tbl_dl_progress.horizontalHeader().setSectionsMovable(True)
         self.tbl_dl_progress.horizontalHeader().setSectionsClickable(True)
-        self.tbl_dl_progress.horizontalHeader().setSortIndicatorShown(True)
         if config.get("debug_mode"):
             self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
         else:
@@ -604,12 +604,12 @@ class MainWindow(QMainWindow):
             self.tbl_search_results.removeRow(0)
         search_term = self.inp_search_term.text().strip()
         content_types = []
+        if self.inp_enable_search_tracks.isChecked():
+            content_types.append('track')
         if self.inp_enable_search_playlists.isChecked():
             content_types.append('playlist')
         if self.inp_enable_search_albums.isChecked():
             content_types.append('album')
-        if self.inp_enable_search_tracks.isChecked():
-            content_types.append('track')
         if self.inp_enable_search_artists.isChecked():
             content_types.append('artist')
         if self.inp_enable_search_shows.isChecked():

@@ -399,7 +399,8 @@ def spotify_get_search_results(session, search_term, content_types):
         },
         headers={"Authorization": "Bearer %s" % token},
     ).json()
-
+    print(",".join(c_type for c_type in content_types))
+    print(data)
     search_results = []
 
     # Iterate over the keys in the response  
@@ -425,15 +426,15 @@ def spotify_get_search_results(session, search_term, content_types):
                     item_name = item['name'] + f"  |  GENERES: {'/'.join(item['genres'])}"
                 item_by = f"{item['name']}"
                 item_thumbnail_url = item['images'][-1]["url"] if len(item['images']) > 0 else ""
-            elif item_type == "shows":
+            elif item_type == "show":
                 item_name = f"{config.get('explicit_label') if item['explicit'] else ''} {item['name']}"
                 item_by = f"{item['publisher']}"
                 item_thumbnail_url = item['images'][-1]["url"] if len(item['images']) > 0 else ""
-            elif item_type == "episodes":
+            elif item_type == "episode":
                 item_name = f"{config.get('explicit_label') if item['explicit'] else ''} {item['name']}"
                 item_by = ""
                 item_thumbnail_url = item['images'][-1]["url"] if len(item['images']) > 0 else ""
-            elif item_type == "audiobooks":
+            elif item_type == "audiobook":
                 item_name = f"{config.get('explicit_label') if item['explicit'] else ''} {item['name']}"
                 item_by = f"{item['publisher']}"
                 item_thumbnail_url = item['images'][-1]["url"] if len(item['images']) > 0 else ""

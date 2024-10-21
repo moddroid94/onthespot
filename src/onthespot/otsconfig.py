@@ -46,7 +46,7 @@ class Config:
             "language": "en_US", # Language
             "language_index": 0, # Language Index
             "max_threads": 1, # Maximum number of thread we can spawn
-            "parsing_acc_sn": 1, # Serial number of account that will be used for parsing links
+            "parsing_acc_sn": 0, # Serial number of account that will be used for parsing links
             "rotate_acc_sn": False, # Rotate active account for parsing and downloading tracks
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
             "download_delay": 3, # Seconds to wait before next download attempt
