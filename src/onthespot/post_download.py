@@ -154,7 +154,7 @@ def set_audio_tags(filename, metadata, track_id_str):
         elif key == 'label' and config.get("embed_label"):
             if filetype == '.mp3':
                 EasyID3.RegisterTextKey('publisher', 'TPUB')
-            tags['publisher'] = value if value is not None else ""
+            tags['publisher'] = value
 
         elif key == 'copyright' and config.get("embed_copyright"):
             tags['copyright'] = conv_list_format(value)
@@ -162,7 +162,7 @@ def set_audio_tags(filename, metadata, track_id_str):
         elif key == 'description' and config.get("embed_description"):
             if filetype == '.mp3':
                 EasyID3.RegisterTextKey('comment', 'COMM')
-            tags['comment'] = str(value) if value is not None else ""
+            tags['comment'] = str(value)
 
         elif key == 'language' and config.get("embed_language"):
             tags['language'] = value

@@ -468,128 +468,103 @@ def spotify_get_track_metadata(session, item_id):
 
     info = {}
 
-    # Add Default Track Keys
+    artists = []
+    for data in track_data.get('tracks', [{}])[0].get('artists', []):
+        artists.append(data.get('name', ''))
+
+    credits = {}
+    for credit_block in credits_data.get('roleCredits', []):
+        role_title = credit_block.get('roleTitle', '').lower()
+        credits[role_title] = [
+            artist.get('name', '') for artist in credit_block.get('artists', [])
+        ]
+
+    info['artists'] = artists  
+    info['album_name'] = track_data.get('tracks', [{}])[0].get('album', {}).get("name", '')
+    info['album_type'] = album_data.get('album_type', '')
+    info['album_artists'] = album_data.get('artists', [{}])[0].get('name', '')
+    info['title'] = track_data.get('tracks', [{}])[0].get('name', '')
+
     try:
-        # Format Artists
-        artists = []
-        for data in track_data['tracks'][0]['artists']:
-            artists.append(data['name'])
+        info['image_url'] = track_data.get('tracks', [{}])[0].get('album', {}).get('images', [{}])[0].get('url', '')
+    except IndexError:
+        info['image_url'] = ''
+        logger.info('Invalid thumbnail')
 
-        # Format Credits
-        credits = {}
-        for credit_block in credits_data.get('roleCredits', []):
-            credits[credit_block['roleTitle'].lower()] = [
-                    artist['name']
-                    for artist
-                    in
-                    credit_block['artists']
-                ]
+    info['release_year'] = track_data.get('tracks', [{}])[0].get('album', {}).get('release_date', '').split("-")[0]
+    info['track_number'] = track_data.get('tracks', [{}])[0].get('track_number', '')
+    info['total_tracks'] = track_data.get('tracks', [{}])[0].get('album', {}).get('total_tracks', '')
+    info['disc_number'] = track_data.get('tracks', [{}])[0].get('disc_number', '')
 
-        info['artists'] = artists
-        info['album_name'] = track_data['tracks'][0]['album']["name"]
-        info['album_type'] = album_data['album_type']
-        info['album_artists'] = album_data['artists'][0]['name']
-        info['title'] = track_data['tracks'][0]['name']
-        try:
-            info['image_url'] = track_data['tracks'][0]['album']['images'][0]['url']
-        except IndexError:
-            info['image_url'] = ''
-            logger.info('Invalid thumbnail')
-        info['release_year'] = track_data['tracks'][0]['album']['release_date'].split("-")[0]
-        info['track_number'] = track_data['tracks'][0]['track_number']
-        info['total_tracks'] = track_data['tracks'][0]['album']['total_tracks']
-        info['disc_number'] = track_data['tracks'][0]['disc_number']
-        info['total_discs'] = sorted([trk['disc_number'] for trk in album_data['tracks']['items']])[-1] if 'tracks' in album_data else 1
-        # https://developer.spotify.com/documentation/web-api/reference/get-track
-        # List of genre is supposed to be here, genre from album API is deprecated and it always seems to be unavailable
-        # Use artist endpoint to get artist's genre instead
-        info['genre'] = artist_data['genres']
-        info['performers'] = [item for item in credits['performers'] if isinstance(item, str)]
-        info['producers'] = [item for item in credits['producers'] if isinstance(item, str)]
-        info['writers'] = [item for item in credits['writers'] if isinstance(item, str)]
-        info['label'] = album_data['label']
-        info['copyright'] = [holder['text'] for holder in album_data['copyrights']]
-        info['explicit'] = track_data['tracks'][0]['explicit']
-        info['isrc'] = track_data['tracks'][0]['external_ids'].get('isrc', '')
-        info['length'] = track_data['tracks'][0]['duration_ms']
-        info['item_url'] = track_data['tracks'][0]['external_urls']['spotify']
-        info['popularity'] = track_data['tracks'][0]['popularity'] # unused
-        info['scraped_song_id'] = track_data['tracks'][0]['id']
-        info['is_playable'] = track_data['tracks'][0]['is_playable']
-    except TypeError:
-        logger.info('Caught a TypeError: Something went wrong in the default track keys, please file a bug report.')
+    info['total_discs'] = sorted([trk.get('disc_number', 0) for trk in album_data.get('tracks', {}).get('items', [])])[-1] if 'tracks' in album_data else 1
 
-    # Add Audio Analysis Keys
-    try:
-        # Format Key
-        if track_audio_data['key'] == 0:
-            key = "C"
-        elif track_audio_data['key'] == 1:
-            key = "C♯/D♭"
-        elif track_audio_data['key'] == 2:
-            key = "D"
-        elif track_audio_data['key'] == 3:
-            key = "D♯/E♭"
-        elif track_audio_data['key'] == 4:
-            key = "E"
-        elif track_audio_data['key'] == 5:
-            key = "F"
-        elif track_audio_data['key'] == 6:
-            key = "F♯/G♭"
-        elif track_audio_data['key'] == 7:
-            key = "G"
-        elif track_audio_data['key'] == 8:
-            key = "G♯/A♭"
-        elif track_audio_data['key'] == 9:
-            key = "A"
-        elif track_audio_data['key'] == 10:
-            key = "A♯/B♭"
-        elif track_audio_data['key'] == 11:
-            key = "B"
-        else:
-            key = ""
+    info['genre'] = artist_data.get('genres', [])
+    info['performers'] = [item for item in credits.get('performers', []) if isinstance(item, str)]
+    info['producers'] = [item for item in credits.get('producers', []) if isinstance(item, str)]
+    info['writers'] = [item for item in credits.get('writers', []) if isinstance(item, str)]
+    info['label'] = album_data.get('label', '')
+    info['copyright'] = [holder.get('text', '') for holder in album_data.get('copyrights', [])]
+    info['explicit'] = track_data.get('tracks', [{}])[0].get('explicit', False)
+    info['isrc'] = track_data.get('tracks', [{}])[0].get('external_ids', {}).get('isrc', '')
+    info['length'] = track_data.get('tracks', [{}])[0].get('duration_ms', '')
+    info['item_url'] = track_data.get('tracks', [{}])[0].get('external_urls', {}).get('spotify', '')
+    info['popularity'] = track_data.get('tracks', [{}])[0].get('popularity', '')  # unused  
+    info['scraped_song_id'] = track_data.get('tracks', [{}])[0].get('id', '')
+    info['is_playable'] = track_data.get('tracks', [{}])[0].get('is_playable', False)
 
-        info['bpm'] = track_audio_data['tempo']
-        info['key'] = key
-        info['time_signature'] = track_audio_data['time_signature']
-        info['acousticness'] = track_audio_data['acousticness']
-        info['danceability'] = track_audio_data['danceability']
-        info['energy'] = track_audio_data['energy']
-        info['instrumentalness'] = track_audio_data['instrumentalness']
-        info['liveness'] = track_audio_data['liveness']
-        info['loudness'] = track_audio_data['loudness']
-        info['speechiness'] = track_audio_data['speechiness']
-        info['valence'] = track_audio_data['valence']
-    except TypeError:
-        logger.info('Caught a TypeError: Audio analysis likely does not exist for this track.')
+    key_mapping = {
+        0: "C",
+        1: "C♯/D♭",
+        2: "D",
+        3: "D♯/E♭",
+        4: "E",
+        5: "F",
+        6: "F♯/G♭",
+        7: "G",
+        8: "G♯/A♭",
+        9: "A",
+        10: "A♯/B♭",
+        11: "B"
+    }
+
+    info['bpm'] = track_audio_data.get('tempo', '')
+    info['key'] = key_mapping.get(track_audio_data.get('key', ''), '')
+    info['time_signature'] = track_audio_data.get('time_signature', '')
+    info['acousticness'] = track_audio_data.get('acousticness', '')
+    info['danceability'] = track_audio_data.get('danceability', '')
+    info['energy'] = track_audio_data.get('energy', '')
+    info['instrumentalness'] = track_audio_data.get('instrumentalness', '')
+    info['liveness'] = track_audio_data.get('liveness', '')
+    info['loudness'] = track_audio_data.get('loudness', '')
+    info['speechiness'] = track_audio_data.get('speechiness', '')
+    info['valence'] = track_audio_data.get('valence', '')
     return info
-
 
 def spotify_get_episode_metadata(token, episode_id_str):
     logger.info(f"Get episode info for episode by id '{episode_id_str}'")
+
     token = token.tokens().get("user-read-email")
     headers = {"Authorization": f"Bearer {token}"}
+ 
     episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id_str}", headers=headers)
     info = {}
 
-    languages = []
-    for language in episode_data['languages']:
-        languages.append(language)
+    languages = episode_data.get('languages', [])
 
-    info['album_name'] = episode_data["show"]["name"]
-    info['title'] = episode_data['name']
-    info['image_url'] = episode_data['images'][0]['url']
-    info['release_year'] = episode_data['release_date']
-    info['total_tracks'] = episode_data['show']['total_episodes']
-    info['artists'] = [episode_data['show']['publisher']]
+    info['album_name'] = episode_data.get("show", {}).get("name", "")
+    info['title'] = episode_data.get('name', "")
+    info['image_url'] = episode_data.get('images', [{}])[0].get('url', "")
+    info['release_year'] = episode_data.get('release_date', "")
+    info['total_tracks'] = episode_data.get('show', {}).get('total_episodes', 0)
+    info['artists'] = [episode_data.get('show', {}).get('publisher', "")]
     info['language'] = conv_list_format(languages)
-    info['description'] = episode_data['description'] if episode_data['description'] != "" else info['show']['description'], 
-    info['copyright'] = episode_data['show']['copyrights']
-    info['length'] = episode_data['duration_ms']
-    info['explicit'] = episode_data['explicit']
-    info['is_playable'] = episode_data['is_playable']
+    info['description'] = episode_data.get('description', "") if episode_data.get('description', "") != "" else ""
+    info['copyright'] = episode_data.get('show', {}).get('copyrights', [])
+    info['length'] = episode_data.get('duration_ms', 0)
+    info['explicit'] = episode_data.get('explicit', '')
+    info['is_playable'] = episode_data.get('is_playable', '')
+    
     return info
-
 
 def spotify_get_show_episodes(session, show_id_str):
     logger.info(f"Get episodes for show by id '{show_id_str}'")
