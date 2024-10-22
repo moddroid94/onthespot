@@ -45,7 +45,6 @@ class Config:
             "check_for_updates": True, # Check for updates
             "language": "en_US", # Language
             "language_index": 0, # Language Index
-            "max_threads": 1, # Maximum number of thread we can spawn
             "parsing_acc_sn": 0, # Serial number of account that will be used for parsing links
             "rotate_acc_sn": False, # Rotate active account for parsing and downloading tracks
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
@@ -55,7 +54,6 @@ class Config:
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name}", # Playlist path format string
             "m3u_name_formatter": "M3U" + os.path.sep + "{name} by {owner}", # M3U name format string
             "watch_bg_for_spotify": 0, # Detect and download songs playing on spotify client,
-            "dl_end_padding_bytes": 167,
             "max_retries": 3, # Number of times to retry before giving up on download
             "max_search_results": 10, # Number of search results to display of each type
             "media_format": "mp3", # Song track media format
@@ -116,9 +114,6 @@ class Config:
             "embed_speechiness": False,
             "embed_valence": False,
             "download_copy_btn": False, # Add copy button to downloads
-            "download_save_btn": False, # Add save button to downloads
-            "download_queue_btn": False, # Add queue button to downloads
-            "download_play_btn": False, # Add play button to downloads
             "download_open_btn": True, # Add open button to downloads
             "download_locate_btn": True, # Add locate button to downloads
             "download_delete_btn": False, # Add delete button to downloads

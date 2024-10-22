@@ -28,7 +28,7 @@ class DownloadWorker(QThread):
             download_delay = config.get("download_delay")
             if download_queue:
                 try:
-                    try:
+                    try: 
                         item = download_queue.pop(next(iter(download_queue)))
                         item_service = item['item_service']
                         item_type = item['item_type']
@@ -48,6 +48,7 @@ class DownloadWorker(QThread):
                     except (RuntimeError, OSError):
                         # Item likely cleared from download queue.
                         continue
+
                     if self.gui:
                         self.progress.emit(item, self.tr("Downloading"), 0)
 

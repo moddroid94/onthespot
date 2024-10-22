@@ -244,7 +244,7 @@ def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
             }
 
-            resp = make_call(url, token, headers=headers, params=params)
+            resp = make_call(url, headers=headers, params=params)
             if resp == None:
                 logger.info(f"Failed to find lyrics for {item_type}: {item_id}")
                 return None

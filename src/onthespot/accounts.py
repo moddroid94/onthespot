@@ -26,12 +26,16 @@ class FillAccountPool(QThread):
             if service == 'spotify':
                 if self.gui is True:
                     self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['username']), True)
-
-                if spotify_login_user(account) is True:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['username']), True)
-                    continue
-                else:
+                try:
+                    if spotify_login_user(account) is True:
+                        if self.gui is True:
+                            self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['username']), True)
+                        continue
+                    else:
+                        if self.gui is True:
+                            self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
+                        continue
+                except Exception as e:
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
                     continue
