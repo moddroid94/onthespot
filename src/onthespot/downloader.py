@@ -2,6 +2,7 @@ import os
 import traceback
 import time
 import subprocess
+from requests.exceptions import MissingSchema
 from PyQt6.QtCore import QThread, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
