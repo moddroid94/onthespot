@@ -254,39 +254,43 @@ class MainWindow(QMainWindow):
             return
 
     def remove_completed_from_download_list(self):
-        row_count = self.tbl_dl_progress.rowCount()
-        while row_count > 0:
-            item_id = self.tbl_dl_progress.item(row_count - 1, 0).text()
-            for key, item in list(download_queue.items()):
-                if str(key) == str(item_id):
-                    if item['gui']['progress_bar'].value() == 100 or item['gui']['status_label'].text() == self.tr("Cancelled"):
-                        self.tbl_dl_progress.removeRow(row_count - 1)
-                        del download_queue[key]
-                    row_count -= 1
-
+        check_row = 0
+        while check_row < self.tbl_dl_progress.rowCount():
+            item_id = self.tbl_dl_progress.item(check_row, 0).text()
+            logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
+            if item_id in download_queue:
+                progress = download_queue[item_id]['gui']["progress_bar"].value()
+                status = download_queue[item_id]['gui']["status_label"].text().lower()
+                if progress == 100 or status == self.tr("cancelled"):
+                    self.tbl_dl_progress.removeRow(check_row)
+                    download_queue.pop(item_id)
+                else:
+                    check_row = check_row + 1
+            else:
+                check_row = check_row + 1
 
     def cancel_all_downloads(self):
         row_count = self.tbl_dl_progress.rowCount()
         while row_count > 0:
-            item_id = self.tbl_dl_progress.item(row_count - 1, 0).text()
-            for key, item in list(download_queue.items()):
-                if str(key) == str(item_id):
-                    if item['gui']['status_label'].text() == self.tr("Waiting"):
-                        item['gui']['status_label'].setText(self.tr("Cancelled"))
-                        item['gui']['progress_bar'].setValue(0)
-                        item['gui']["btn"]['cancel'].hide()
-                        item['gui']["btn"]['retry'].show()
-                    row_count -= 1
+            for item_id in download_queue.keys():
+                logger.info(f'Trying to cancel : {item_id}')
+                if download_queue[item_id]['gui']['status_label'].text() == self.tr("Waiting"):
+                    download_queue[item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
+                    download_queue[item_id]['gui']['progress_bar'].setValue(0)
+                    download_queue[item_id]['gui']["btn"]['cancel'].hide()
+                    download_queue[item_id]['gui']["btn"]['retry'].show()
+                row_count -= 1
 
     def retry_all_failed_downloads(self):
         row_count = self.tbl_dl_progress.rowCount()
         while row_count > 0:
-            item_id = self.tbl_dl_progress.item(row_count - 1, 0).text()
-            for key, item in list(download_queue.items()):
-                if str(key) == str(item_id):
-                    if item['gui']['progress_bar'].value() == self.tr("Failed"):
-                        item['gui']['progress_bar'].setValue(self.tr("Waiting"))
-                    row_count -= 1
+            for item_id in download_queue.keys():
+                logger.info(f'Trying to cancel : {item_id}')
+                if download_queue[item_id]['gui']['status_label'].text() == self.tr("Failed"):
+                    download_queue[item_id]['gui']['status_label'].setText(self.tr("Waiting"))
+                    download_queue[item_id]['gui']["btn"]['cancel'].show()
+                    download_queue[item_id]['gui']["btn"]['retry'].hide()
+                row_count -= 1
 
 
     # Remove Later
