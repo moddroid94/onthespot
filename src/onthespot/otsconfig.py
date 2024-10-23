@@ -52,7 +52,7 @@ class Config:
             "track_path_formatter": "Tracks" + os.path.sep + "{artist}" + os.path.sep + "[{rel_year}] {album}" + os.path.sep + "{track_number}. {name}", # Track path format string
             "podcast_path_formatter": "Episodes" + os.path.sep + "{album}" + os.path.sep + "{name}", # Episode path format string
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name}", # Playlist path format string
-            "m3u_name_formatter": "M3U" + os.path.sep + "{name} by {owner}", # M3U name format string
+            "m3u_name_formatter": "M3U" + os.path.sep + "{playlist_name} by {playlist_owner}", # M3U name format string
             "watch_bg_for_spotify": 0, # Detect and download songs playing on spotify client,
             "max_retries": 3, # Number of times to retry before giving up on download
             "max_search_results": 10, # Number of search results to display of each type

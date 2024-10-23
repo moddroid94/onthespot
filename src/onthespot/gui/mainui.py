@@ -6,7 +6,7 @@ from PyQt6 import uic, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton
-from ..utils import re_init_session, latest_release, open_item
+from ..utils import latest_release, open_item
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from ..otsconfig import config
@@ -409,8 +409,7 @@ class MainWindow(QMainWindow):
         self.btn_progress_clear_complete.clicked.connect(self.remove_completed_from_download_list)
         self.btn_search_filter_toggle.clicked.connect(lambda toggle: self.group_search_items.show() if self.group_search_items.isHidden() else self.group_search_items.hide())
         self.btn_search_filter_toggle.clicked.connect(lambda switch: self.btn_search_filter_toggle.setIcon(collapse_down_icon) if self.group_search_items.isHidden() else self.btn_search_filter_toggle.setIcon(collapse_up_icon))
-        # Connect checkbox state change signals
-        self.inp_create_playlists.stateChanged.connect(self.__m3u_maker_set)
+
 
     def set_table_props(self):
         window_width = self.width()
@@ -450,64 +449,10 @@ class MainWindow(QMainWindow):
         self.set_login_fields()
         return True
 
-    def __m3u_maker_set(self):
-        logger.info("Playlist generator watcher set clicked")
-        maker_enabled = self.inp_create_playlists.isChecked()
-        if maker_enabled and self.__playlist_maker is None:
-            logger.info("Starting media watcher thread, no active watcher")
-            self.__playlist_maker = PlayListMaker()
-            self.__playlist_maker_thread = QThread(parent=self)
-            self.__playlist_maker.moveToThread(self.__playlist_maker_thread)
-            self.__playlist_maker_thread.started.connect(self.__playlist_maker.run)
-            self.__playlist_maker.finished.connect(self.__playlist_maker_thread.quit)
-            self.__playlist_maker.finished.connect(self.__playlist_maker.deleteLater)
-            self.__playlist_maker.finished.connect(self.__playlist_maker_stopped)
-            self.__playlist_maker_thread.finished.connect(self.__playlist_maker_thread.deleteLater)
-            self.__playlist_maker_thread.start()
-            logger.info("Playlist thread started")
-        if maker_enabled is False and self.__playlist_maker is not None:
-            logger.info("Active playlist maker, stopping it")
-            self.__playlist_maker.stop()
-            time.sleep(2)
-            self.__playlist_maker = None
-            self.__playlist_maker_thread = None
-
-    def __media_watcher_set(self):
-        logger.info("Media watcher set clicked")
-        media_watcher_enabled = self.inp_enable_spot_watch.isChecked()
-        if media_watcher_enabled and self.__media_watcher is None:
-            logger.info("Starting media watcher thread, no active watcher")
-            self.__media_watcher = MediaWatcher()
-            self.__media_watcher_thread = QThread(parent=self)
-            self.__media_watcher.moveToThread(self.__media_watcher_thread)
-            self.__media_watcher_thread.started.connect(self.__media_watcher.run)
-            self.__media_watcher.finished.connect(self.__media_watcher_thread.quit)
-            self.__media_watcher.finished.connect(self.__media_watcher.deleteLater)
-            self.__media_watcher.finished.connect(self.sig_media_track_end)
-            # FIX ME self.__media_watcher.changed_media.connect(self.__download_by_url)
-            self.__media_watcher_thread.finished.connect(self.__media_watcher_thread.deleteLater)
-            self.__media_watcher_thread.start()
-            logger.info("Media watcher thread started")
-        if media_watcher_enabled is False and self.__media_watcher is not None:
-            logger.info("Active watcher, stopping it")
-            self.__media_watcher.stop()
-            time.sleep(2)
-            self.__media_watcher = None
-            self.__media_watcher_thread = None
-
-    def sig_media_track_end(self):
-        logger.info("Watcher stopped")
-        if self.inp_create_playlists.isChecked():
-            self.inp_create_playlists.setChecked(False)
 
     def reset_app_config(self):
         config.rollback()
         self.__show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
-
-    def __playlist_maker_stopped(self):
-        logger.info("Watcher stopped")
-        if self.inp_enable_spot_watch.isChecked():
-            self.inp_enable_spot_watch.setChecked(False)
 
     def __select_dir(self):
         dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))

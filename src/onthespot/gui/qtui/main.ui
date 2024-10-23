@@ -569,7 +569,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-1258</y>
+             <y>-930</y>
              <width>631</width>
              <height>3181</height>
             </rect>
@@ -1413,7 +1413,7 @@
                      <item>
                       <widget class="QCheckBox" name="inp_create_playlists">
                        <property name="enabled">
-                        <bool>false</bool>
+                        <bool>true</bool>
                        </property>
                        <property name="layoutDirection">
                         <enum>Qt::RightToLeft</enum>
@@ -1448,7 +1448,7 @@
                      <item>
                       <widget class="QLabel" name="lb_m3u_name_formatter">
                        <property name="enabled">
-                        <bool>false</bool>
+                        <bool>true</bool>
                        </property>
                        <property name="text">
                         <string> M3U Path</string>
@@ -1458,7 +1458,7 @@
                      <item>
                       <widget class="QLineEdit" name="inp_m3u_name_formatter">
                        <property name="enabled">
-                        <bool>false</bool>
+                        <bool>true</bool>
                        </property>
                       </widget>
                      </item>

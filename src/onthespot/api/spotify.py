@@ -14,10 +14,9 @@ from mutagen.id3 import APIC, TXXX, USLT, WOAS
 from mutagen.mp4 import MP4, MP4Cover
 from mutagen.oggvorbis import OggVorbis
 from ..otsconfig import config, cache_dir
-from ..post_download import conv_list_format
 from ..runtimedata import get_logger, account_pool
 from ..post_download import set_audio_tags
-from ..utils import sanitize_data, make_call, translate
+from ..utils import sanitize_data, make_call, translate, conv_list_format
 from ..otsconfig import cache_dir, config
 from ..runtimedata import get_logger
 

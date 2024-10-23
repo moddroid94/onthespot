@@ -9,37 +9,8 @@ from librespot.core import Session
 from .otsconfig import config, config_dir
 from .runtimedata import get_logger
 
-
 logger = get_logger("utils")
 
-def re_init_session(session_pool: dict, session_uuid: str, wait_connectivity: bool = False,
-                    connectivity_test_url: str = 'https://spotify.com', timeout=60) -> bool:
-    start = int(time.time())
-    session_json_path = os.path.join(os.path.join(cache_dir(), 'onthespot', 'sessions'),
-                                     f"ots_login_{session_uuid}.json")
-    if not os.path.isfile(session_json_path):
-        return False
-    if wait_connectivity:
-        status = 0
-        while status != 200 and int(time.time()) - start < timeout:
-            try:
-                r = requests.get(connectivity_test_url)
-                status = r.status_code
-                logger.info(f'Connectivity check done ! Status code "{status}" ')
-            except:
-                logger.info('Connectivity issue ! Waiting ... ')
-        if status == 0:
-            return False
-    try:
-        config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
-        logger.debug("Session config created")
-        session = Session.Builder(conf=config).stored_file(session_json_path).create()
-        logger.debug("Session re init done")
-        session_pool[session_uuid] = session
-    except:
-        logger.error('Failed to re init session !')
-        return False
-    return True
 
 def latest_release():
     url = "https://api.github.com/repos/justin025/onthespot/releases/latest"
@@ -112,3 +83,9 @@ def make_call(url, params=None, headers=None, skip_cache=False):
             with open(req_cache_file, 'w', encoding='utf-8') as cf:
                 cf.write(response.text)
         return json.loads(response.text)
+
+def conv_list_format(items):
+    formatted = ""
+    for item in items:
+        formatted += item + config.get('metadata_seperator')
+    return formatted[:-2].strip()

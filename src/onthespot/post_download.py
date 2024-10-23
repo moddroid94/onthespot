@@ -13,6 +13,7 @@ from mutagen.mp4 import MP4, MP4Cover
 from mutagen.oggvorbis import OggVorbis
 from .otsconfig import config
 from .runtimedata import get_logger
+from .utils import conv_list_format
 
 logger = get_logger("worker.media")
 
@@ -59,14 +60,6 @@ def convert_audio_format(filename, bitrate, default_format):
         os.remove(temp_name)
     else:
         raise FileNotFoundError
-
-
-def conv_list_format(items):
-    formatted = ""
-    for item in items:
-        formatted += item + config.get('metadata_seperator')
-    return formatted[:-2].strip()
-
 
 def set_audio_tags(filename, metadata, track_id_str):
     logger.info(

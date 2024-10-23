@@ -12,7 +12,7 @@ from .post_download import convert_audio_format, set_audio_tags, set_music_thumb
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_format_track_path, spotify_format_episode_path, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_format_track_path
 from .accounts import get_account_token
-from .utils import sanitize_data
+from .utils import sanitize_data, conv_list_format
 
 logger = get_logger("spotify.downloader")
 
@@ -170,6 +170,36 @@ class DownloadWorker(QThread):
                         if self.gui:
                             self.progress.emit(item, self.tr("Getting Lyrics"), 99)
                         globals()[f"{item_service}_get_lyrics"](token, item_id, item_type, item_metadata, file_path)
+
+                    # M3U
+                    if config.get('create_m3u_playlists') and item['is_playlist_item']:
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Adding To M3U"), 99)
+
+                        path = config.get("m3u_name_formatter")
+                        m3u_file = path.format(
+                        playlist_name=sanitize_data(item['playlist_name']),
+                        playlist_owner=sanitize_data(item['playlist_by']),
+                        )
+
+                        m3u_file += ".m3u"
+
+                        dl_root = config.get("download_root")
+                        m3u_path = os.path.join(dl_root, m3u_file)
+
+                        os.makedirs(os.path.dirname(m3u_path), exist_ok=True)
+
+                        if not os.path.exists(m3u_path):
+                            with open(m3u_path, 'w') as m3u_file:
+                                m3u_file.write("#EXTM3U\n")
+
+                        # Check if the item_path is already in the M3U file  
+                        with open(m3u_path, 'r') as m3u_file:
+                            m3u_contents = m3u_file.readlines()
+
+                            if file_path not in [line.strip() for line in m3u_contents]:
+                                with open(m3u_path, 'a') as m3u_file:
+                                    m3u_file.write(f"#EXTINF:-1, {conv_list_format(item_metadata['artists'])} - {item_metadata['title']}\n{file_path}\n")
 
                     if self.gui:
                         self.progress.emit(item, self.tr("Downloaded"), 100)
