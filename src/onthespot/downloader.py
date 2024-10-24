@@ -26,10 +26,9 @@ class DownloadWorker(QThread):
 
     def run(self):
         while True:
-            download_delay = config.get("download_delay")
             if download_queue:
                 try:
-                    try: 
+                    try:
                         item = download_queue.pop(next(iter(download_queue)))
                         item_service = item['item_service']
                         item_type = item['item_type']
@@ -44,7 +43,7 @@ class DownloadWorker(QThread):
                             self.tr("Downloaded"),
                             self.tr("Already Exists")
                         ):
-                            time.sleep(1)
+                            time.sleep(0.2)
                             continue
                     except (RuntimeError, OSError):
                         # Item likely cleared from download queue.
@@ -57,7 +56,7 @@ class DownloadWorker(QThread):
 
                     try:
                         item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
-                        
+
                         item_path = format_track_path(item_metadata, item_service, item_type, item['is_playlist_item'], item['playlist_name'], item['playlist_by'])
 
                     except (Exception, KeyError):
@@ -72,7 +71,7 @@ class DownloadWorker(QThread):
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
                     item['file_path'] = file_path
-                    
+
                     # Skip file if exists under different extension
                     file_directory = os.path.dirname(file_path)
                     base_file_path = os.path.splitext(os.path.basename(file_path))[0]
@@ -86,7 +85,7 @@ class DownloadWorker(QThread):
                                 if item['gui']['status_label'].text() == self.tr("Downloading"):
                                     self.progress.emit(item, self.tr("Already Exists"), 100)  # Emit progress
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
-                            time.sleep(download_delay)
+                            time.sleep(0.2)
                             continue
                     except FileNotFoundError:
                         logger.info(f"File does not already exist.")
@@ -203,10 +202,10 @@ class DownloadWorker(QThread):
 
                     if self.gui:
                         self.progress.emit(item, self.tr("Downloaded"), 100)
-                    time.sleep(download_delay)
+                    time.sleep(config.get("download_delay"))
                 except Exception as e:
                     self.progress.emit(item, self.tr("Failed"), 0)
                     logger.error(f"Unknown Exception: {str(e)}")
                     continue
             else:
-                time.sleep(download_delay)
+                time.sleep(0.2)

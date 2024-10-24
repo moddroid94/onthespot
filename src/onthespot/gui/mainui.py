@@ -581,7 +581,7 @@ class MainWindow(QMainWindow):
             self.inp_search_term.setText('')
             return
         elif results is False:
-            self.__splash_dialog.run(self.tr("Invalid item, please check your account settings"))
+            self.__splash_dialog.run(self.tr("Invalid item, please check your query or account settings"))
             self.inp_search_term.setText('')
             return
 

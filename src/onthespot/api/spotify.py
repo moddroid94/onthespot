@@ -95,7 +95,7 @@ def spotify_login_user(account):
         config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
         # For some reason initialising session as None prevents premature application exit
         session = None
-        session = Session.Builder().stored_file(session_json_path).create()
+        session = Session.Builder(conf=config).stored_file(session_json_path).create()
         logger.debug("Session created") 
         logger.info(f"Login successful for user '{username[:4]}*******'")
         account_type = session.get_user_attribute("type")
@@ -309,9 +309,6 @@ def spotify_get_search_results(session, search_term, content_types):
     logger.info(
         f"Get search result for term '{search_term}'"
         )
-    if search_term.strip() == "":
-        logger.warning(f"Returning empty data as query is empty !")
-        return ''
     if content_types is None:
         content_types = ["track", "album", "playlist", "artist", "show", "episode", "audiobook"]
     token = session.tokens().get("user-read-email")
