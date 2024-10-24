@@ -185,7 +185,7 @@ def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
                     lyrics.append(f'[ti:{title}]')
 
                 elif key == 'artists' and config.get("embed_artist"):
-                    artist = conv_list_format(value)
+                    artist = value
                     lyrics.append(f'[ar:{artist}]')
 
                 elif key in ['album_name', 'album'] and config.get("embed_album"):
@@ -193,7 +193,7 @@ def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
                     lyrics.append(f'[al:{album}]')
 
                 elif key in ['writers'] and config.get("embed_writers"):
-                    author = conv_list_format(value)
+                    author = value
                     lyrics.append(f'[au:{author}]')
 
             if item_type == "track":
@@ -297,10 +297,11 @@ def spotify_get_album_tracks(session, album_id):
             headers=headers,
             params=params
             )
+
         offset += limit
         songs.extend(resp['items'])
 
-        if len(resp['items']) < limit:
+        if resp['total'] <= offset:
             break
     return songs
 
