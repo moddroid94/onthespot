@@ -2,7 +2,7 @@ import re
 import requests
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool, pending
-from ..utils import sanitize_data, make_call, translate
+from ..utils import make_call, conv_list_format
 
 SOUNDCLOUD_BASE = "https://api-v2.soundcloud.com"
 
@@ -206,10 +206,12 @@ def soundcloud_get_track_metadata(token, item_id):
     # Many soundcloud songs are missing publisher metadata, parse if exists.
 
     # Artists
-    try:
-        artists = [item.strip() for item in track_data['publisher_metadata']['artist'].split(',')]
-    except (KeyError, TypeError):
-        artists = [track_data['user']['username']]
+    artists = []
+    for item in track_data.get('publisher_metadata', {}).get('artist', '').split(','):
+        artists.append(item.strip())
+    artists = conv_list_format(artists)
+    if artists == '':
+        artists = track_data.get('user', {}).get('username', '')
     # Track Number
     try:
         total_tracks = album_data['track_count']
@@ -233,64 +235,33 @@ def soundcloud_get_track_metadata(token, item_id):
         if album_name.startswith("Users who like"):
             album_name = track_data['title']
 
-    copyright = [item.strip() for item in track_data['publisher_metadata'].get('c_line', '').split(',')] if track_data.get('publisher_metadata', {}).get('c_line') else ""
+    publisher_metadata = track_data.get('publisher_metadata')
+    copyright = [item.strip() for item in publisher_metadata.get('c_line', '').split(',')] if publisher_metadata and publisher_metadata.get('c_line') else ""
+    copyright = conv_list_format(copyright)
 
     info['image_url'] = track_data.get("artwork_url", "")
-    info['description'] = track_data.get("description", "")
-    info['genre'] = [track_data.get('genre', "")]
+    info['description'] = str(track_data.get("description", ""))
+    info['genre'] = conv_list_format([track_data.get('genre', [])])
 
     label = track_data.get('label_name', "")
     if label:
         info['label'] = label
     info['item_url'] = track_data.get('permalink_url', "")
 
-    release_date = track_data.get("release_date", track_data.get("last_modified", ""))
-    info['release_year'] = release_date.split("-")[0] if release_date else ""
+    release_date = track_data.get("release_date", "")
+    last_modified = track_data.get("last_modified", "")
+    info['release_year'] = release_date.split("-")[0] if release_date else last_modified.split("-")[0]
 
     info['title'] = track_data.get("title", "")
     info['track_number'] = track_number
     info['total_tracks'] = total_tracks
     info['file_url'] = track_file.get("url", "")
-    info['length'] = track_data.get("media", {}).get("transcodings", [{}])[0].get("duration", 0)
+    info['length'] = str(track_data.get("media", {}).get("transcodings", [{}])[0].get("duration", 0))
     info['artists'] = artists
     info['album_name'] = album_name
-    info['explicit'] = track_data['publisher_metadata'].get('explicit', False)  
+    info['album_artists'] = track_data.get('user', {}).get('username', '')
+    info['explicit'] = publisher_metadata.get('explicit', False) if publisher_metadata else False
     info['copyright'] = copyright
     info['is_playable'] = track_data.get('streamable', '')
 
     return info
-
-def soundcloud_format_track_path(item_metadata, is_playlist_item, playlist_name, playlist_by):
-    if config.get("translate_file_path"):
-        _name = translate(item_metadata['title'])
-        _album = translate(item_metadata['album_name'])
-    else:
-        _name = item_metadata['title']
-        _album=item_metadata['album_name']
-
-    _artist = item_metadata['artists'][0]
-    
-    if is_playlist_item is True and config.get("use_playlist_path"):
-        path = config.get("playlist_path_formatter")
-    else:
-        path = config.get("track_path_formatter")
-    item_path = path.format(
-        artist = sanitize_data(_artist),
-        album = sanitize_data(_album),
-        name = sanitize_data(_name),
-        rel_year = sanitize_data(item_metadata['release_year']),
-        disc_number = "",
-        track_number = item_metadata['track_number'],
-        genre = sanitize_data(item_metadata['genre'][0] if len(item_metadata['genre']) > 0 else ''),
-        explicit = sanitize_data(str(config.get('explicit')) if item_metadata['explicit'] else ''),
-        trackcount = item_metadata['total_tracks'],
-        disccount = "",
-        playlist_name = sanitize_data(playlist_name),
-        playlist_owner = sanitize_data(playlist_by),
-    )
-    if not config.get("force_raw"):
-        item_path = item_path + "." + config.get("media_format")
-    else:
-        item_path = item_path + ".mp3"
-    return item_path
-

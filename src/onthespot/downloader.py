@@ -9,10 +9,10 @@ from librespot.metadata import TrackId, EpisodeId
 from .runtimedata import get_logger, download_queue
 from .otsconfig import config
 from .post_download import convert_audio_format, set_audio_tags, set_music_thumbnail
-from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_format_track_path, spotify_format_episode_path, spotify_get_lyrics
-from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_format_track_path
+from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
+from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .accounts import get_account_token
-from .utils import sanitize_data, conv_list_format
+from .utils import sanitize_data, conv_list_format, format_track_path
 
 logger = get_logger("spotify.downloader")
 
@@ -58,7 +58,7 @@ class DownloadWorker(QThread):
                     try:
                         item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
                         
-                        item_path = globals()[f"{item_service}_format_{item_type}_path"](item_metadata, item['is_playlist_item'], item['playlist_name'], item['playlist_by'])
+                        item_path = format_track_path(item_metadata, item_service, item_type, item['is_playlist_item'], item['playlist_name'], item['playlist_by'])
 
                     except (Exception, KeyError):
                         logger.error(
@@ -172,7 +172,7 @@ class DownloadWorker(QThread):
                         globals()[f"{item_service}_get_lyrics"](token, item_id, item_type, item_metadata, file_path)
 
                     # M3U
-                    if config.get('create_m3u_playlists') and item['is_playlist_item']:
+                    if config.get('create_m3u_playlists') and item.get('is_playlist_item', False):
                         if self.gui:
                             self.progress.emit(item, self.tr("Adding To M3U"), 99)
 

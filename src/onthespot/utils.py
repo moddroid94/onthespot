@@ -85,7 +85,52 @@ def make_call(url, params=None, headers=None, skip_cache=False):
         return json.loads(response.text)
 
 def conv_list_format(items):
+    if len(items) == 0:
+        return ''
+    if len(items) == 1:
+        return items[0]
     formatted = ""
     for item in items:
         formatted += item + config.get('metadata_seperator')
     return formatted[:-2].strip()
+
+def format_track_path(item_metadata, item_service, item_type, is_playlist_item, playlist_name, playlist_by):
+    if config.get("translate_file_path"):
+        name = translate(item_metadata.get('title', ''))
+        album = translate(item_metadata.get('album_name', ''))
+    else:
+        name = item_metadata.get('title', '')
+        album = item_metadata.get('album_name', '')
+
+    if is_playlist_item and config.get("use_playlist_path"):
+        path = config.get("playlist_path_formatter")
+    elif item_type == 'track':
+        path = config.get("playlist_path_formatter")
+    elif item_type == 'episode':
+        path = config.get("podcast_path_formatter")
+
+    item_path = path.format(
+        artist=sanitize_data(item_metadata.get('artists', '')),
+        album=sanitize_data(album),
+        album_artist=sanitize_data(item_metadata.get('album_artists', '')),
+        name=sanitize_data(name),
+        year=sanitize_data(item_metadata.get('release_year', '')),
+        disc_number=item_metadata.get('disc_number', ''),
+        track_number=item_metadata.get('track_number', ''),
+        genre=sanitize_data(item_metadata.get('genre', '')),
+        label=sanitize_data(item_metadata.get('label', '')),
+        explicit=sanitize_data(str(config.get('explicit_label')) if item_metadata.get('explicit') else ''),
+        trackcount=item_metadata.get('total_tracks', ''),
+        disccount=item_metadata.get('total_discs', ''),
+        playlist_name=sanitize_data(playlist_name),
+        playlist_owner=sanitize_data(playlist_by),
+    )
+
+    if item_service == 'soundcloud' and config.get("force_raw"):
+        item_path += ".mp3"
+    if item_service == 'spotify' and config.get("force_raw"):
+        item_path += ".ogg"
+    else:
+        item_path += "." + config.get("media_format")
+
+    return item_path

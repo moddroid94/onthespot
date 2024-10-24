@@ -14,7 +14,6 @@ from ..runtimedata import get_logger, parsing, pending, download_queue, account_
 from .thumb_listitem import LabelWithThumb
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
-from ..post_download import conv_list_format
 from ..accounts import get_account_token, FillAccountPool
 from ..search import get_search_results
 from ..downloader import DownloadWorker
@@ -181,7 +180,7 @@ class MainWindow(QMainWindow):
         # Add To List
         self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
         self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
-        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(conv_list_format(item_metadata['artists'])))
+        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
         self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(service_label))
         self.tbl_dl_progress.setCellWidget(rows, 4, status_label)
         self.tbl_dl_progress.setCellWidget(rows, 5, actions)
@@ -259,9 +258,13 @@ class MainWindow(QMainWindow):
             item_id = self.tbl_dl_progress.item(check_row, 0).text()
             logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
             if item_id in download_queue:
-                progress = download_queue[item_id]['gui']["progress_bar"].value()
-                status = download_queue[item_id]['gui']["status_label"].text().lower()
-                if progress == 100 or status == self.tr("cancelled"):
+                status = download_queue[item_id]['gui']["status_label"].text()
+                if status in (
+                            self.tr("Cancelled"),
+                            self.tr("Downloaded"),
+                            self.tr("Already Exists")
+                        ):
+                    logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
                     self.tbl_dl_progress.removeRow(check_row)
                     download_queue.pop(item_id)
                 else:

@@ -13,7 +13,6 @@ from mutagen.mp4 import MP4, MP4Cover
 from mutagen.oggvorbis import OggVorbis
 from .otsconfig import config
 from .runtimedata import get_logger
-from .utils import conv_list_format
 
 logger = get_logger("worker.media")
 
@@ -86,9 +85,9 @@ def set_audio_tags(filename, metadata, track_id_str):
 
         if key == 'artists' and config.get("embed_artist"):
             if filetype == '.m4a':
-                tags['\xa9ART'] = conv_list_format(value)
+                tags['\xa9ART'] = value
             else:
-                tags['artist'] = conv_list_format(value)
+                tags['artist'] = value
 
         elif key in ['album_name', 'album'] and config.get("embed_album"):
             if filetype == '.m4a':
@@ -130,20 +129,20 @@ def set_audio_tags(filename, metadata, track_id_str):
             if 'Podcast' in value or 'podcast' in value:
                 type_ = 'episode'
             if filetype == '.m4a':
-                tags['\xa9gen'] = conv_list_format(value)
+                tags['\xa9gen'] = value
             else:
-                tags['genre'] = conv_list_format(value)
+                tags['genre'] = value
 
         elif key == 'performers' and config.get("embed_performers"):
-            tags['performer'] = conv_list_format(value)
+            tags['performer'] = value
 
         elif key == 'producers' and config.get("embed_producers"):
             if filetype == '.mp3':
                 EasyID3.RegisterTextKey('producer', 'TIPL')
-            tags['producer'] = conv_list_format(value)
+            tags['producer'] = value
 
         elif key == 'writers' and config.get("embed_writers"):
-            tags['author'] = conv_list_format(value)
+            tags['author'] = value
 
         elif key == 'label' and config.get("embed_label"):
             if filetype == '.mp3':
@@ -151,12 +150,12 @@ def set_audio_tags(filename, metadata, track_id_str):
             tags['publisher'] = value
 
         elif key == 'copyright' and config.get("embed_copyright"):
-            tags['copyright'] = conv_list_format(value)
+            tags['copyright'] = value
 
         elif key == 'description' and config.get("embed_description"):
             if filetype == '.mp3':
                 EasyID3.RegisterTextKey('comment', 'COMM')
-            tags['comment'] = str(value)
+            tags['comment'] = value
 
         elif key == 'language' and config.get("embed_language"):
             tags['language'] = value
@@ -165,15 +164,15 @@ def set_audio_tags(filename, metadata, track_id_str):
             tags['isrc'] = value
 
         elif key == 'length' and config.get("embed_length"):
-            tags['length'] = str(value)
+            tags['length'] = value
 
         elif key == 'bpm' and config.get("embed_bpm"):
-            tags['bpm'] = str(value)
+            tags['bpm'] = value
 
         elif key == 'key' and config.get("embed_key"):
             if filetype == '.mp3':
                 EasyID3.RegisterTextKey('key', 'TKEY')
-            tags['key'] = str(value)
+            tags['key'] = value
 
         elif key == 'album_type' and config.get("embed_compilation"):
             if filetype == '.mp3':

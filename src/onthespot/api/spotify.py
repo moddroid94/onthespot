@@ -16,9 +16,7 @@ from mutagen.oggvorbis import OggVorbis
 from ..otsconfig import config, cache_dir
 from ..runtimedata import get_logger, account_pool
 from ..post_download import set_audio_tags
-from ..utils import sanitize_data, make_call, translate, conv_list_format
-from ..otsconfig import cache_dir, config
-from ..runtimedata import get_logger
+from ..utils import make_call, conv_list_format
 
 logger = get_logger("spotify.api")
 
@@ -76,7 +74,6 @@ def spotify_new_session():
                 return True
 
 
-
 def spotify_login_user(account):
     # I'd prefer to use 'Session.Builder().stored(credentials).create but
     # it seems to be broken, loading from credentials file instead
@@ -86,7 +83,7 @@ def spotify_login_user(account):
     session_dir = os.path.join(cache_dir(), "onthespot", "sessions")
     os.makedirs(session_dir, exist_ok=True)
     session_json_path = os.path.join(session_dir, f"ots_login_{uuid}.json")
-
+    print(session_json_path)
     try:
         with open(session_json_path, 'w') as file:
             json.dump(account['login'], file)
@@ -137,77 +134,6 @@ def spotify_login_user(account):
 def spotify_get_token(parsing_index):
     return account_pool[parsing_index]['login']['session']
 
-def spotify_format_track_path(item_metadata, is_playlist_item, playlist_name, playlist_by):
-    if config.get("translate_file_path"):
-        _name = translate(item_metadata.get('title', ''))
-        _album = translate(item_metadata.get('album_name', ''))
-    else:
-        _name = item_metadata.get('title', '')
-        _album = item_metadata.get('album_name', '')
-
-    _artist = item_metadata['artists'][0]
-
-    if is_playlist_item and config.get("use_playlist_path"):
-        path = config.get("playlist_path_formatter")
-    else:
-        path = config.get("track_path_formatter")
-
-    item_path = path.format(
-        artist=sanitize_data(_artist),
-        album=sanitize_data(_album),
-        name=sanitize_data(_name),
-        rel_year=sanitize_data(item_metadata.get('release_year', '')),
-        disc_number=item_metadata.get('disc_number', 0),
-        track_number=item_metadata.get('track_number', 0),
-        genre=sanitize_data(item_metadata['genre'][0] if item_metadata.get('genre') else ''),
-        label=sanitize_data(item_metadata.get('label', '')),
-        explicit=sanitize_data(str(config.get('explicit')) if item_metadata.get('explicit') else ''),
-        trackcount=item_metadata.get('total_tracks', 0),
-        disccount=item_metadata.get('total_discs', 0),
-        playlist_name=sanitize_data(playlist_name),
-        playlist_owner=sanitize_data(playlist_by),
-    )
-
-    if not config.get("force_raw"):
-        item_path += "." + config.get("media_format")
-    else:
-        item_path += ".ogg"
-
-    return item_path
-
-def spotify_format_episode_path(item_metadata, is_playlist_item, playlist_name, playlist_by):
-    if config.get("translate_file_path"):
-        _name = translate(item_metadata.get('title', ''))
-        _album = translate(item_metadata.get('album_name', ''))
-    else:
-        _name = item_metadata.get('title', '')
-        _album = item_metadata.get('album_name', '')
-
-    _artist = item_metadata['artists'][0]
-
-    if is_playlist_item and config.get("use_playlist_path"):
-        path = config.get("playlist_path_formatter")
-    else:
-        path = config.get("podcast_path_formatter")
-
-    item_path = path.format(
-        artist=sanitize_data(_artist),
-        album=sanitize_data(_album),
-        name=sanitize_data(_name),
-        rel_year=sanitize_data(item_metadata.get('release_year', '')),
-        explicit=sanitize_data(str(config.get('explicit')) if item_metadata.get('explicit') else ''),
-        total_episodes=item_metadata.get('total_tracks', 0),
-        language=item_metadata.get('language', 'unknown'),
-        playlist_name=sanitize_data(playlist_name),
-        playlist_owner=sanitize_data(playlist_by),
-    )
-
-    if not config.get("force_raw"):
-        item_path = item_path + "." + config.get("media_format")
-    else:
-        item_path = item_path + ".ogg"
-
-    return item_path
 
 def spotify_get_artist_albums(session, artist_id):
     logger.info(f"Get albums for artist by id '{artist_id}'")
@@ -274,7 +200,7 @@ def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
                 lyrics.append(f'[by:{resp["lyrics"]["provider"]}]')
 
             if config.get("embed_length"):
-                l_ms = metadata['length']
+                l_ms = int(metadata['length'])
                 if round((l_ms/1000)/60) < 10:
                     digit="0"
                 else:
@@ -378,13 +304,14 @@ def spotify_get_album_tracks(session, album_id):
             break
     return songs
 
+
 def spotify_get_search_results(session, search_term, content_types):
     logger.info(
         f"Get search result for term '{search_term}'"
         )
     if search_term.strip() == "":
         logger.warning(f"Returning empty data as query is empty !")
-        return results
+        return ''
     if content_types is None:
         content_types = ["track", "album", "playlist", "artist", "show", "episode", "audiobook"]
     token = session.tokens().get("user-read-email")
@@ -401,8 +328,7 @@ def spotify_get_search_results(session, search_term, content_types):
     print(",".join(c_type for c_type in content_types))
     print(data)
     search_results = []
-
-    # Iterate over the keys in the response  
+ 
     for key in data.keys():
         for item in data[key]["items"]:
             item_type = item['type']
@@ -470,6 +396,7 @@ def spotify_get_track_metadata(session, item_id):
     artists = []
     for data in track_data.get('tracks', [{}])[0].get('artists', []):
         artists.append(data.get('name', ''))
+    artists = conv_list_format(artists)
 
     credits = {}
     for credit_block in credits_data.get('roleCredits', []):
@@ -477,6 +404,7 @@ def spotify_get_track_metadata(session, item_id):
         credits[role_title] = [
             artist.get('name', '') for artist in credit_block.get('artists', [])
         ]
+    
 
     info['artists'] = artists  
     info['album_name'] = track_data.get('tracks', [{}])[0].get('album', {}).get("name", '')
@@ -497,15 +425,15 @@ def spotify_get_track_metadata(session, item_id):
 
     info['total_discs'] = sorted([trk.get('disc_number', 0) for trk in album_data.get('tracks', {}).get('items', [])])[-1] if 'tracks' in album_data else 1
 
-    info['genre'] = artist_data.get('genres', [])
-    info['performers'] = [item for item in credits.get('performers', []) if isinstance(item, str)]
-    info['producers'] = [item for item in credits.get('producers', []) if isinstance(item, str)]
-    info['writers'] = [item for item in credits.get('writers', []) if isinstance(item, str)]
+    info['genre'] = conv_list_format(artist_data.get('genres', []))
+    info['performers'] = conv_list_format([item for item in credits.get('performers', []) if isinstance(item, str)])
+    info['producers'] = conv_list_format([item for item in credits.get('producers', []) if isinstance(item, str)])
+    info['writers'] = conv_list_format([item for item in credits.get('writers', []) if isinstance(item, str)])
     info['label'] = album_data.get('label', '')
     info['copyright'] = [holder.get('text', '') for holder in album_data.get('copyrights', [])]
     info['explicit'] = track_data.get('tracks', [{}])[0].get('explicit', False)
     info['isrc'] = track_data.get('tracks', [{}])[0].get('external_ids', {}).get('isrc', '')
-    info['length'] = track_data.get('tracks', [{}])[0].get('duration_ms', '')
+    info['length'] = str(track_data.get('tracks', [{}])[0].get('duration_ms', ''))
     info['item_url'] = track_data.get('tracks', [{}])[0].get('external_urls', {}).get('spotify', '')
     info['popularity'] = track_data.get('tracks', [{}])[0].get('popularity', '')  # unused  
     info['scraped_song_id'] = track_data.get('tracks', [{}])[0].get('id', '')
@@ -526,8 +454,8 @@ def spotify_get_track_metadata(session, item_id):
         11: "B"
     }
 
-    info['bpm'] = track_audio_data.get('tempo', '')
-    info['key'] = key_mapping.get(track_audio_data.get('key', ''), '')
+    info['bpm'] = str(track_audio_data.get('tempo', ''))
+    info['key'] = str(key_mapping.get(track_audio_data.get('key', ''), ''))
     info['time_signature'] = track_audio_data.get('time_signature', '')
     info['acousticness'] = track_audio_data.get('acousticness', '')
     info['danceability'] = track_audio_data.get('danceability', '')
@@ -538,6 +466,7 @@ def spotify_get_track_metadata(session, item_id):
     info['speechiness'] = track_audio_data.get('speechiness', '')
     info['valence'] = track_audio_data.get('valence', '')
     return info
+
 
 def spotify_get_episode_metadata(token, episode_id_str):
     logger.info(f"Get episode info for episode by id '{episode_id_str}'")
@@ -555,15 +484,17 @@ def spotify_get_episode_metadata(token, episode_id_str):
     info['image_url'] = episode_data.get('images', [{}])[0].get('url', "")
     info['release_year'] = episode_data.get('release_date', "")
     info['total_tracks'] = episode_data.get('show', {}).get('total_episodes', 0)
-    info['artists'] = [episode_data.get('show', {}).get('publisher', "")]
+    info['artists'] = conv_list_format([episode_data.get('show', {}).get('publisher', "")])
+    info['album_artists'] = conv_list_format([episode_data.get('show', {}).get('publisher', "")])
     info['language'] = conv_list_format(languages)
-    info['description'] = episode_data.get('description', "") if episode_data.get('description', "") != "" else ""
+    info['description'] = str(episode_data.get('description', "") if episode_data.get('description', "") != "" else "")
     info['copyright'] = episode_data.get('show', {}).get('copyrights', [])
-    info['length'] = episode_data.get('duration_ms', 0)
+    info['length'] = str(episode_data.get('duration_ms', ''))
     info['explicit'] = episode_data.get('explicit', '')
     info['is_playable'] = episode_data.get('is_playable', '')
     
     return info
+
 
 def spotify_get_show_episodes(session, show_id_str):
     logger.info(f"Get episodes for show by id '{show_id_str}'")
