@@ -43,7 +43,7 @@ class DownloadWorker(QThread):
                             self.tr("Downloaded"),
                             self.tr("Already Exists")
                         ):
-                            time.sleep(0.2)
+                            time.sleep(1)
                             continue
                     except (RuntimeError, OSError):
                         # Item likely cleared from download queue.
@@ -85,7 +85,7 @@ class DownloadWorker(QThread):
                                 if item['gui']['status_label'].text() == self.tr("Downloading"):
                                     self.progress.emit(item, self.tr("Already Exists"), 100)  # Emit progress
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
-                            time.sleep(0.2)
+                            time.sleep(1)
                             continue
                     except FileNotFoundError:
                         logger.info(f"File does not already exist.")
@@ -208,4 +208,4 @@ class DownloadWorker(QThread):
                     logger.error(f"Unknown Exception: {str(e)}")
                     continue
             else:
-                time.sleep(0.2)
+                time.sleep(1)
