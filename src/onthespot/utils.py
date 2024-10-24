@@ -102,12 +102,12 @@ def format_track_path(item_metadata, item_service, item_type, is_playlist_item, 
         name = item_metadata.get('title', '')
         album = item_metadata.get('album_name', '')
 
-    if item_type == 'track':
+    if is_playlist_item and config.get("use_playlist_path"):
+        path = config.get("playlist_path_formatter")
+    elif item_type == 'track':
         path = config.get("track_path_formatter")
     elif item_type == 'episode':
         path = config.get("podcast_path_formatter")
-    elif is_playlist_item and config.get("use_playlist_path"):
-        path = config.get("playlist_path_formatter")
 
     item_path = path.format(
         artist=sanitize_data(item_metadata.get('artists', '')),

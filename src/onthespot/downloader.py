@@ -72,7 +72,38 @@ class DownloadWorker(QThread):
 
                     item['file_path'] = file_path
 
-                    # Skip file if exists under different extension
+                    # M3U
+                    if config.get('create_m3u_playlists') and item.get('is_playlist_item', False):
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Adding To M3U"), 0)
+
+                        path = config.get("m3u_name_formatter")
+                        m3u_file = path.format(
+                        playlist_name=sanitize_data(item['playlist_name']),
+                        playlist_owner=sanitize_data(item['playlist_by']),
+                        )
+
+                        m3u_file += "." + config.get("m3u_format")
+
+                        dl_root = config.get("download_root")
+                        m3u_path = os.path.join(dl_root, m3u_file)
+
+                        os.makedirs(os.path.dirname(m3u_path), exist_ok=True)
+
+                        if not os.path.exists(m3u_path):
+                            with open(m3u_path, 'w') as m3u_file:
+                                m3u_file.write("#EXTM3U\n")
+
+                        # Check if the item_path is already in the M3U file  
+                        with open(m3u_path, 'r') as m3u_file:
+                            m3u_contents = m3u_file.readlines()
+
+                            if file_path not in [line.strip() for line in m3u_contents]:
+                                with open(m3u_path, 'a') as m3u_file:
+                                    m3u_file.write(f"#EXTINF:-1, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
+
+
+                    # Skip download if file exists under different extension
                     file_directory = os.path.dirname(file_path)
                     base_file_path = os.path.splitext(os.path.basename(file_path))[0]
 
@@ -169,36 +200,6 @@ class DownloadWorker(QThread):
                         if self.gui:
                             self.progress.emit(item, self.tr("Getting Lyrics"), 99)
                         globals()[f"{item_service}_get_lyrics"](token, item_id, item_type, item_metadata, file_path)
-
-                    # M3U
-                    if config.get('create_m3u_playlists') and item.get('is_playlist_item', False):
-                        if self.gui:
-                            self.progress.emit(item, self.tr("Adding To M3U"), 99)
-
-                        path = config.get("m3u_name_formatter")
-                        m3u_file = path.format(
-                        playlist_name=sanitize_data(item['playlist_name']),
-                        playlist_owner=sanitize_data(item['playlist_by']),
-                        )
-
-                        m3u_file += ".m3u"
-
-                        dl_root = config.get("download_root")
-                        m3u_path = os.path.join(dl_root, m3u_file)
-
-                        os.makedirs(os.path.dirname(m3u_path), exist_ok=True)
-
-                        if not os.path.exists(m3u_path):
-                            with open(m3u_path, 'w') as m3u_file:
-                                m3u_file.write("#EXTM3U\n")
-
-                        # Check if the item_path is already in the M3U file  
-                        with open(m3u_path, 'r') as m3u_file:
-                            m3u_contents = m3u_file.readlines()
-
-                            if file_path not in [line.strip() for line in m3u_contents]:
-                                with open(m3u_path, 'a') as m3u_file:
-                                    m3u_file.write(f"#EXTINF:-1, {conv_list_format(item_metadata['artists'])} - {item_metadata['title']}\n{file_path}\n")
 
                     if self.gui:
                         self.progress.emit(item, self.tr("Downloaded"), 100)
