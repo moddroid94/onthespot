@@ -625,7 +625,7 @@ class MainWindow(QMainWindow):
                 item_label.setText(result['item_name'])
 
             self.tbl_search_results.setCellWidget(rows, 0, item_label)
-            self.tbl_search_results.setItem(rows, 1, QTableWidgetItem(result['item_by']))
+            self.tbl_search_results.setItem(rows, 1, QTableWidgetItem(str(result['item_by'])))
             self.tbl_search_results.setItem(rows, 2, QTableWidgetItem(result['item_type'].title()))
             self.tbl_search_results.setItem(rows, 3, service)
             self.tbl_search_results.setCellWidget(rows, 4, btn)
