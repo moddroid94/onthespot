@@ -121,6 +121,10 @@ class DownloadWorker(QObject):
                             if file_path not in [line.strip() for line in m3u_contents]:
                                 with open(m3u_path, 'a') as m3u_file:
                                     m3u_file.write(f"#EXTINF:-1, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
+                            else:
+                                logger.info(f"{file_path} already exists in the M3U file.")  # Log or handle the existing entry case
+
+
 
 
                     # Skip download if file exists under different extension
@@ -132,10 +136,13 @@ class DownloadWorker(QObject):
                         matching_files = [file for file in files_in_directory if file.startswith(base_file_path) and not file.endswith('.lrc')]
                         
                         if matching_files:
-                            item['item_status'] = 'Already Exists'
                             if self.gui:
-                                if item['gui']['status_label'].text() == self.tr("Downloading"):
+                                if item['item_status'] in (
+                                "Downloading",
+                                "Adding To M3U"
+                                ):
                                     self.progress.emit(item, self.tr("Already Exists"), 100)  # Emit progress
+                            item['item_status'] = 'Already Exists'
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
                             time.sleep(1)
                             self.readd_item_to_download_queue(item)

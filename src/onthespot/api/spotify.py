@@ -252,48 +252,78 @@ def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
 
 def spotify_get_playlist_items(token, playlist_id):
     logger.info(f"Getting items in playlist: '{playlist_id}'")
-    token = token.tokens().get("playlist-read-private")
-    headers = {'Authorization': f'Bearer {token}'}
-    url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode'
-    resp = make_call(url, headers=headers, skip_cache=True)
-    return resp
-
-def spotify_get_liked_songs(token):
-    logger.info(f"Getting liked songs")
-    songs = []
+    items = []
     offset = 0
     limit = 50
-    token = token.tokens().get("user-library-read")
-    headers = {'Authorization': f'Bearer {token}'}
-    url = f'https://api.spotify.com/v1/me/tracks'
+    token = token.tokens().get("playlist-read-private")
+    url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode'
+ 
+
     while True:
-        resp = make_call(url, headers=headers, skip_cache=True)
+        headers = {'Authorization': f'Bearer {token}'}
+        params = {
+            'limit': limit,
+            'offset': offset
+            }
+
+        resp = make_call(url, headers=headers, params=params, skip_cache=True)
 
         offset += limit
-        songs.extend(resp['items'])
+        items.extend(resp['items'])
 
         if resp['total'] <= offset:
             break
-    return songs
+    return items
+
+
+def spotify_get_liked_songs(token):
+    logger.info("Getting liked songs")
+    items = []
+    offset = 0
+    limit = 50
+    token = token.tokens().get("user-library-read")
+    url = f'https://api.spotify.com/v1/me/tracks'
+
+    while True:
+        headers = {'Authorization': f'Bearer {token}'}
+        params = {
+            'limit': limit,
+            'offset': offset
+            }
+
+        resp = make_call(url, headers=headers, params=params, skip_cache=True)
+
+        offset += limit
+        items.extend(resp['items'])
+
+        if resp['total'] <= offset:
+            break
+    return items
 
 
 def spotify_get_your_episodes(token):
-    logger.info(f"Getting your episodes")
-    songs = []
+    logger.info("Getting your episodes")
+    items = []
     offset = 0
     limit = 50
     token = token.tokens().get("user-library-read")
-    headers = {'Authorization': f'Bearer {token}'}
     url = f'https://api.spotify.com/v1/me/shows'
+
     while True:
-        resp = make_call(url, headers=headers, skip_cache=True)
+        headers = {'Authorization': f'Bearer {token}'}
+        params = {
+            'limit': limit,
+            'offset': offset
+            }
+
+        resp = make_call(url, headers=headers, params=params, skip_cache=True)
 
         offset += limit
-        songs.extend(resp['items'])
+        items.extend(resp['items'])
 
         if resp['total'] <= offset:
             break
-    return songs
+    return items
 
 def get_album_name(session, album_id):
     logger.info(f"Get album info from album by id ''{album_id}'")

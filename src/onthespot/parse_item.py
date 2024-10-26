@@ -86,11 +86,11 @@ def parsingworker():
                         continue
 
                     elif current_type == "playlist":
-                        data = spotify_get_playlist_items(token, current_id)
+                        items = spotify_get_playlist_items(token, current_id)
                         playlist_name, playlist_by = spotify_get_playlist_data(token, current_id)
-                        for index, track in enumerate(data["items"]):
-                            item_id = track['track']['id']
-                            item_type = track['track']['type']
+                        for index, item in enumerate(items):
+                            item_id = item['track']['id']
+                            item_type = item['track']['type']
                             pending[item_id] = {
                                 'item_service': 'spotify',
                                 'item_type': item_type,
@@ -123,7 +123,6 @@ def parsingworker():
                         continue
 
                     elif current_type == "liked_songs":
-                        print(token)
                         tracks = spotify_get_liked_songs(token)
                         for index, track in enumerate(tracks):
                             item_id = track['track']['id']
