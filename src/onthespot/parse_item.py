@@ -1,7 +1,7 @@
 import re
 import time
 from .otsconfig import config
-from .api.spotify import spotify_get_token, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
+from .api.spotify import spotify_get_token, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .runtimedata import get_logger, parsing, download_queue, pending
 from .accounts import get_account_token
@@ -24,6 +24,16 @@ def parse_url(url):
         match = re.search(SPOTIFY_URL_REGEX, url)
         item_id = match.group("ID")
         item_type = match.group("Type")
+        item_service = "spotify"
+    # Spotify Liked Songs
+    elif account_service == 'spotify' and url == 'https://open.spotify.com/collection/tracks':
+        item_id = None
+        item_type = 'liked_songs'
+        item_service = "spotify"
+    # Spotify Your Episodes
+    elif account_service == 'spotify' and url == 'https://open.spotify.com/collection/your-episodes':
+        item_id = None
+        item_type = 'your_episodes'
         item_service = "spotify"
     else:
         logger.info(f'Invalid Url: {url}')
@@ -110,6 +120,35 @@ def parsingworker():
                         episode_urls = spotify_get_show_episodes(token, current_id)
                         for index, episode_url in enumerate(episode_urls):
                             parse_url(episode_url)
+                        continue
+
+                    elif current_type == "liked_songs":
+                        print(token)
+                        tracks = spotify_get_liked_songs(token)
+                        for index, track in enumerate(tracks):
+                            item_id = track['track']['id']
+                            pending[item_id] = {
+                                'item_service': 'spotify',
+                                'item_type': 'track',
+                                'item_id': item_id,
+                                'is_playlist_item': True,
+                                'playlist_name': 'Liked Songs',
+                                'playlist_by': 'me'
+                                }
+                        continue
+
+                    elif current_type == "your_episodes":
+                        tracks = spotify_get_your_episodes(token)
+                        for index, track in enumerate(tracks):
+                            item_id = track['show']['id']
+                            pending[item_id] = {
+                                'item_service': 'spotify',
+                                'item_type': 'episode',
+                                'item_id': item_id,
+                                'is_playlist_item': True,
+                                'playlist_name': 'Your Episodes',
+                                'playlist_by': 'me'
+                                }
                         continue
 
                 elif current_service == "soundcloud":

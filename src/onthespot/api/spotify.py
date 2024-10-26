@@ -258,6 +258,42 @@ def spotify_get_playlist_items(token, playlist_id):
     resp = make_call(url, headers=headers, skip_cache=True)
     return resp
 
+def spotify_get_liked_songs(token):
+    logger.info(f"Getting liked songs")
+    songs = []
+    offset = 0
+    limit = 50
+    token = token.tokens().get("user-library-read")
+    headers = {'Authorization': f'Bearer {token}'}
+    url = f'https://api.spotify.com/v1/me/tracks'
+    while True:
+        resp = make_call(url, headers=headers, skip_cache=True)
+
+        offset += limit
+        songs.extend(resp['items'])
+
+        if resp['total'] <= offset:
+            break
+    return songs
+
+
+def spotify_get_your_episodes(token):
+    logger.info(f"Getting your episodes")
+    songs = []
+    offset = 0
+    limit = 50
+    token = token.tokens().get("user-library-read")
+    headers = {'Authorization': f'Bearer {token}'}
+    url = f'https://api.spotify.com/v1/me/shows'
+    while True:
+        resp = make_call(url, headers=headers, skip_cache=True)
+
+        offset += limit
+        songs.extend(resp['items'])
+
+        if resp['total'] <= offset:
+            break
+    return songs
 
 def get_album_name(session, album_id):
     logger.info(f"Get album info from album by id ''{album_id}'")
