@@ -35,7 +35,7 @@ def parse_url(url):
         'item_id': item_id
     }
 
-def worker():
+def parsingworker():
     time.sleep(8)
     while True:
         if parsing:
@@ -44,7 +44,6 @@ def worker():
 
             if item_id in pending or item_id in download_queue:
                 logger.info(f"Item Already Parsed: {item}")
-                print(parsing)
                 continue
             else:
                 logger.info(f"Parsing: {item}")

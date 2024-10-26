@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+import threading
 from logging.handlers import RotatingFileHandler
 from .otsconfig import config
 
@@ -21,6 +22,8 @@ parsing = {}
 pending = {}
 download_queue = {}
 account_pool = []
+
+download_queue_lock = threading.Lock()  # Create a global lock
 
 loglevel = int(os.environ.get("LOG_LEVEL", 20))
 

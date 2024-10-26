@@ -323,8 +323,7 @@ def spotify_get_search_results(session, search_term, content_types):
         },
         headers={"Authorization": "Bearer %s" % token},
     ).json()
-    print(",".join(c_type for c_type in content_types))
-    print(data)
+    
     search_results = []
  
     for key in data.keys():

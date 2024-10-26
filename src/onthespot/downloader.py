@@ -3,52 +3,67 @@ import traceback
 import time
 import subprocess
 from requests.exceptions import MissingSchema
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
-from .runtimedata import get_logger, download_queue
+from .runtimedata import get_logger, download_queue, download_queue_lock
 from .otsconfig import config
 from .post_download import convert_audio_format, set_audio_tags, set_music_thumbnail
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .accounts import get_account_token
 from .utils import sanitize_data, conv_list_format, format_track_path
+import threading
 
 logger = get_logger("spotify.downloader")
 
 
-class DownloadWorker(QThread):
+class DownloadWorker(QObject):
     progress = pyqtSignal(dict, str, int)
     def __init__(self, gui=False):
-        self.gui = gui
         super().__init__()
+        self.gui = gui
+        self.thread = threading.Thread(target=self.run)  # Create a thread for the run method
+        self.is_running = True  # Flag to control the thread's execution
+
+    def start(self):
+        self.thread.start()  # Start the thread
+
+    def readd_item_to_download_queue(self, item):
+        with download_queue_lock:
+            try:
+                del download_queue[item['item_id']]
+                download_queue[item['item_id']] = item
+            except (KeyError):
+                # Item likely cleared from queue
+                return
 
 
     def run(self):
-        while True:
+        while self.is_running:
             if download_queue:
                 try:
                     try:
-                        item = download_queue.pop(next(iter(download_queue)))
+                        item = download_queue[next(iter(download_queue))]
                         item_service = item['item_service']
                         item_type = item['item_type']
                         item_id = item['item_id']
-                        # Move item to bottom of download list after processing
-                        download_queue[item_id] = item
-                        status = item['gui']['status_label'].text()
-                        if status in (
-                            self.tr("Cancelled"),
-                            self.tr("Failed"),
-                            self.tr("Unavailable"),
-                            self.tr("Downloaded"),
-                            self.tr("Already Exists")
+                    
+                        if item['item_status'] in (
+                            "Cancelled",
+                            "Failed",
+                            "Unavailable",
+                            "Downloaded",
+                            "Already Exists"
                         ):
                             time.sleep(1)
+                            self.readd_item_to_download_queue(item)
                             continue
                     except (RuntimeError, OSError):
                         # Item likely cleared from download queue.
                         continue
 
+                    item['item_status'] = "Downloading"
                     if self.gui:
                         self.progress.emit(item, self.tr("Downloading"), 0)
 
@@ -60,9 +75,13 @@ class DownloadWorker(QThread):
                         item_path = format_track_path(item_metadata, item_service, item_type, item['is_playlist_item'], item['playlist_name'], item['playlist_by'])
 
                     except (Exception, KeyError):
+                        item['item_status'] = "Failed"
                         logger.error(
                             f"Metadata fetching failed for track by id '{item_id}', {traceback.format_exc()}")
-                        self.progress.emit(item, self.tr("Failed"), 0)
+                        self.tr("Failed")
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Failed"), 0)
+                        self.readd_item_to_download_queue(item)
                         continue
 
                     dl_root = config.get("download_root")
@@ -74,6 +93,7 @@ class DownloadWorker(QThread):
 
                     # M3U
                     if config.get('create_m3u_playlists') and item.get('is_playlist_item', False):
+                        item['item_status'] = 'Adding To M3U'
                         if self.gui:
                             self.progress.emit(item, self.tr("Adding To M3U"), 0)
 
@@ -112,19 +132,23 @@ class DownloadWorker(QThread):
                         matching_files = [file for file in files_in_directory if file.startswith(base_file_path) and not file.endswith('.lrc')]
                         
                         if matching_files:
+                            item['item_status'] = 'Already Exists'
                             if self.gui:
                                 if item['gui']['status_label'].text() == self.tr("Downloading"):
                                     self.progress.emit(item, self.tr("Already Exists"), 100)  # Emit progress
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
                             time.sleep(1)
+                            self.readd_item_to_download_queue(item)
                             continue
                     except FileNotFoundError:
                         logger.info(f"File does not already exist.")
 
                     if not item_metadata['is_playable']:
                         logger.error(f"Track is unavailable, track id '{item_id}'")
+                        item['item_status'] = 'Unavailable'
                         if self.gui:
                             self.progress.emit(item, self.tr("Unavailable"), 0)
+                        self.readd_item_to_download_queue(item)
                         continue
 
                     # Downloading the file here is necessary to animate progress bar through pyqtsignal.
@@ -174,20 +198,26 @@ class DownloadWorker(QThread):
                     except (RuntimeError):
                         # Likely Ratelimit
                         logger.info("Download failed: {item}")
-                        self.progress.emit(item, self.tr("Failed"), 0)
+                        item['item_status'] = 'Failed'
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Failed"), 0)
+                        self.readd_item_to_download_queue(item)
                         continue
 
                     # Convert File Format
+                    item['item_status'] = 'Converting'
                     if self.gui:
                         self.progress.emit(item, self.tr("Converting"), 99)
                     convert_audio_format(file_path, bitrate, default_format)
 
                     # Set Audio Tags
+                    item['item_status'] = 'Embedding Metadata'
                     if self.gui:
                         self.progress.emit(item, self.tr("Embedding Metadata"), 99)
                     set_audio_tags(file_path, item_metadata, item_id)
 
                     # Thumbnail
+                    item['item_status'] = 'Setting Thumbnail'
                     if self.gui:
                         self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
                     try:
@@ -196,17 +226,28 @@ class DownloadWorker(QThread):
                         self.progress.emit(item, self.tr("Failed To Set Thumbnail"), 99)
 
                     # Lyrics
+                    item['item_status'] = 'Getting Lyrics'
                     if item_service == "spotify":
                         if self.gui:
                             self.progress.emit(item, self.tr("Getting Lyrics"), 99)
                         globals()[f"{item_service}_get_lyrics"](token, item_id, item_type, item_metadata, file_path)
 
+                    item['item_status'] = 'Downloaded'
+                    logger.info("Item Successfully Downloaded")
                     if self.gui:
                         self.progress.emit(item, self.tr("Downloaded"), 100)
+
                     time.sleep(config.get("download_delay"))
                 except Exception as e:
                     self.progress.emit(item, self.tr("Failed"), 0)
                     logger.error(f"Unknown Exception: {str(e)}")
-                    continue
+
+                self.readd_item_to_download_queue(item)
+
             else:
                 time.sleep(1)
+
+    def stop(self):
+        logger.info('Stopping Download Worker')
+        self.is_running = False  # Set the flag to stop the thread
+        self.thread.join()  # Wait for the thread to finish

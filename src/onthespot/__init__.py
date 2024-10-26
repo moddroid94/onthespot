@@ -8,8 +8,7 @@ from .gui.mainui import MainWindow
 from .gui.minidialog import MiniDialog
 from .runtimedata import get_logger
 from .otsconfig import config
-from .parse_item import worker
-
+from .parse_item import parsingworker
 
 def main():
     logger = get_logger('__init__')
@@ -42,7 +41,7 @@ def main():
     app.installTranslator(translator)
 
     # Start Item Parser
-    thread = threading.Thread(target=worker)
+    thread = threading.Thread(target=parsingworker)
     thread.daemon = True
     thread.start()
 
@@ -60,6 +59,7 @@ def main():
     app.setDesktopFileName('org.onthespot.OnTheSpot')
     app.exec()
     logger.info('Good bye ..')
+    os._exit(0)
 
 
 if __name__ == '__main__':

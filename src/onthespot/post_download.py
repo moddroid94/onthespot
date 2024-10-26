@@ -23,7 +23,6 @@ def convert_audio_format(filename, bitrate, default_format):
         temp_name = os.path.join(
             target_path.parent, ".~"+target_path.stem
             )
-        print(temp_name)
         if os.path.isfile(temp_name):
             os.remove(temp_name)
         os.rename(filename, temp_name)

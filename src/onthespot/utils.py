@@ -12,7 +12,7 @@ from .runtimedata import get_logger
 logger = get_logger("utils")
 
 
-def latest_release():
+def is_latest_release():
     url = "https://api.github.com/repos/justin025/onthespot/releases/latest"
     response = requests.get(url)
     if response.status_code == 200:

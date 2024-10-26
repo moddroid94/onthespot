@@ -6,11 +6,11 @@ from PyQt6 import uic, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton
-from ..utils import latest_release, open_item
+from ..utils import is_latest_release, open_item
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from ..otsconfig import config
-from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool
+from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock
 from .thumb_listitem import LabelWithThumb
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
@@ -78,222 +78,230 @@ class MainWindow(QMainWindow):
         logger.info("Accounts table was populated !")
 
     def add_item_to_download_list(self, item, item_metadata):
-        # Skip rendering QButtons if they are not in use
-        copy_btn = None
-        play_btn = None
-        save_btn = None
-        queue_btn = None
-        open_btn = None
-        locate_btn = None
-        delete_btn = None
+        with download_queue_lock:
+            # Skip rendering QButtons if they are not in use
+            copy_btn = None
+            play_btn = None
+            save_btn = None
+            queue_btn = None
+            open_btn = None
+            locate_btn = None
+            delete_btn = None
 
-        # Items
-        pbar = QProgressBar()
-        pbar.setValue(0)
-        pbar.setMinimumHeight(30)
-        if config.get("download_copy_btn"):
-            copy_btn = QPushButton()
-            #copy_btn.setText('Retry')
-            copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
-            copy_btn.setIcon(copy_icon)
-            copy_btn.setToolTip(self.tr('Copy'))
-            copy_btn.setMinimumHeight(30)
-            copy_btn.hide()
-        cancel_btn = QPushButton()
-        # cancel_btn.setText('Cancel')
-        cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
-        cancel_btn.setIcon(cancel_icon)
-        cancel_btn.setToolTip(self.tr('Cancel'))
-        cancel_btn.setMinimumHeight(30)
-        retry_btn = QPushButton()
-        #retry_btn.setText('Retry')
-        retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
-        retry_btn.setIcon(retry_icon)
-        retry_btn.setToolTip(self.tr('Retry'))
-        retry_btn.setMinimumHeight(30)
-        retry_btn.hide()
-        if config.get("download_play_btn"):
-            play_btn = QPushButton()
-            #play_btn.setText('Play')
-            play_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'play.png'))
-            play_btn.setIcon(play_icon)
-            play_btn.setToolTip(self.tr('Play'))
-            play_btn.setMinimumHeight(30)
-            play_btn.hide()
-        if config.get("download_save_btn"):
-            save_btn = QPushButton()
-            #save_btn.setText('Save')
-            #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
-            #save_btn.setIcon(save_icon)
-            save_btn.setToolTip(self.tr('Save'))
-            save_btn.setMinimumHeight(30)
-            save_btn.hide()
-        if config.get("download_queue_btn"):
-            queue_btn = QPushButton()
-            #queue_btn.setText('Queue')
-            queue_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'queue.png'))
-            queue_btn.setIcon(queue_icon)
-            queue_btn.setToolTip(self.tr('Queue'))
-            queue_btn.setMinimumHeight(30)
-            queue_btn.hide()
-        if config.get("download_open_btn"):
-            open_btn = QPushButton()
-            #open_btn.setText('Open')
-            open_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'file.png'))
-            open_btn.setIcon(open_icon)
-            open_btn.setToolTip(self.tr('Open'))
-            open_btn.setMinimumHeight(30)
-            open_btn.hide()
-        if config.get("download_locate_btn"):
-            locate_btn = QPushButton()
-            #locate_btn.setText('Locate')
-            locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
-            locate_btn.setIcon(locate_icon)
-            locate_btn.setToolTip(self.tr('Locate'))
-            locate_btn.setMinimumHeight(30)
-            locate_btn.hide()
-        if config.get("download_delete_btn"):
-            delete_btn = QPushButton()
-            #delete_btn.setText('Delete')
-            delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'delete.png'))
-            delete_btn.setIcon(delete_icon)
-            delete_btn.setToolTip(self.tr('Delete'))
-            delete_btn.setMinimumHeight(30)
-            delete_btn.hide()
-        
-        item_service = item["item_service"]
-        service_label = QTableWidgetItem(str(item_service).title())
-        service_label.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{item_service}.png')))
+            # Items
+            pbar = QProgressBar()
+            pbar.setValue(0)
+            pbar.setMinimumHeight(30)
+            if config.get("download_copy_btn"):
+                copy_btn = QPushButton()
+                #copy_btn.setText('Retry')
+                copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
+                copy_btn.setIcon(copy_icon)
+                copy_btn.setToolTip(self.tr('Copy'))
+                copy_btn.setMinimumHeight(30)
+                copy_btn.hide()
+            cancel_btn = QPushButton()
+            # cancel_btn.setText('Cancel')
+            cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
+            cancel_btn.setIcon(cancel_icon)
+            cancel_btn.setToolTip(self.tr('Cancel'))
+            cancel_btn.setMinimumHeight(30)
+            retry_btn = QPushButton()
+            #retry_btn.setText('Retry')
+            retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
+            retry_btn.setIcon(retry_icon)
+            retry_btn.setToolTip(self.tr('Retry'))
+            retry_btn.setMinimumHeight(30)
+            retry_btn.hide()
+            if config.get("download_play_btn"):
+                play_btn = QPushButton()
+                #play_btn.setText('Play')
+                play_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'play.png'))
+                play_btn.setIcon(play_icon)
+                play_btn.setToolTip(self.tr('Play'))
+                play_btn.setMinimumHeight(30)
+                play_btn.hide()
+            if config.get("download_save_btn"):
+                save_btn = QPushButton()
+                #save_btn.setText('Save')
+                #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
+                #save_btn.setIcon(save_icon)
+                save_btn.setToolTip(self.tr('Save'))
+                save_btn.setMinimumHeight(30)
+                save_btn.hide()
+            if config.get("download_queue_btn"):
+                queue_btn = QPushButton()
+                #queue_btn.setText('Queue')
+                queue_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'queue.png'))
+                queue_btn.setIcon(queue_icon)
+                queue_btn.setToolTip(self.tr('Queue'))
+                queue_btn.setMinimumHeight(30)
+                queue_btn.hide()
+            if config.get("download_open_btn"):
+                open_btn = QPushButton()
+                #open_btn.setText('Open')
+                open_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'file.png'))
+                open_btn.setIcon(open_icon)
+                open_btn.setToolTip(self.tr('Open'))
+                open_btn.setMinimumHeight(30)
+                open_btn.hide()
+            if config.get("download_locate_btn"):
+                locate_btn = QPushButton()
+                #locate_btn.setText('Locate')
+                locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
+                locate_btn.setIcon(locate_icon)
+                locate_btn.setToolTip(self.tr('Locate'))
+                locate_btn.setMinimumHeight(30)
+                locate_btn.hide()
+            if config.get("download_delete_btn"):
+                delete_btn = QPushButton()
+                #delete_btn.setText('Delete')
+                delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'delete.png'))
+                delete_btn.setIcon(delete_icon)
+                delete_btn.setToolTip(self.tr('Delete'))
+                delete_btn.setMinimumHeight(30)
+                delete_btn.hide()
+            
+            item_service = item["item_service"]
+            service_label = QTableWidgetItem(str(item_service).title())
+            service_label.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{item_service}.png')))
 
-        status_label = QLabel(self.tbl_dl_progress)
-        status_label.setText(self.tr("Waiting"))
-        actions = DownloadActionsButtons(item['item_id'], pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
+            status_label = QLabel(self.tbl_dl_progress)
+            status_label.setText(self.tr("Waiting"))
+            actions = DownloadActionsButtons(item['item_id'], pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
 
-        rows = self.tbl_dl_progress.rowCount()
-        self.tbl_dl_progress.insertRow(rows)
-        if config.get('show_download_thumbnails'):
-            self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
-            item_label = LabelWithThumb(item_metadata['title'], item_metadata['image_url'])
-        else:
-            item_label = QLabel(self.tbl_dl_progress)
-            item_label.setText(item_metadata['title'])
-        # Add To List
-        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
-        self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
-        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
-        self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(service_label))
-        self.tbl_dl_progress.setCellWidget(rows, 4, status_label)
-        self.tbl_dl_progress.setCellWidget(rows, 5, actions)
+            rows = self.tbl_dl_progress.rowCount()
+            self.tbl_dl_progress.insertRow(rows)
+            if config.get('show_download_thumbnails'):
+                self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
+                item_label = LabelWithThumb(item_metadata['title'], item_metadata['image_url'])
+            else:
+                item_label = QLabel(self.tbl_dl_progress)
+                item_label.setText(item_metadata['title'])
+            # Add To List
+            self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
+            self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
+            self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
+            self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(service_label))
+            self.tbl_dl_progress.setCellWidget(rows, 4, status_label)
+            self.tbl_dl_progress.setCellWidget(rows, 5, actions)
 
-        if item['is_playlist_item'] is True:
-            playlist_name = item['playlist_name']
-            playlist_by = item['playlist_by']
-        else:
-            playlist_name = ''
-            playlist_by = ''
+            if item['is_playlist_item'] is True:
+                playlist_name = item['playlist_name']
+                playlist_by = item['playlist_by']
+            else:
+                playlist_name = ''
+                playlist_by = ''
 
-        download_queue[item['item_id']] = {
-            "item_service": item["item_service"],
-            "item_type": item["item_type"],
-            'item_id': item['item_id'],
-            "file_path": "n/a",
-            'is_playlist_item': item['is_playlist_item'],
-            'playlist_name': playlist_name,
-            'playlist_by': playlist_by,
-            "gui": {
-                "status_label": status_label,
-                "progress_bar": pbar,
-                "btn": {
-                    "copy": copy_btn,
-                    "cancel": cancel_btn,
-                    "retry": retry_btn,
-                    "play": play_btn,
-                    "save": save_btn,
-                    "queue": queue_btn,
-                    "open": open_btn,
-                    "locate": locate_btn,
-                    "delete": delete_btn
+            download_queue[item['item_id']] = {
+                "item_service": item["item_service"],
+                "item_type": item["item_type"],
+                'item_id': item['item_id'],
+                'item_status': 'Waiting',
+                "file_path": None,
+                'is_playlist_item': item['is_playlist_item'],
+                'playlist_name': playlist_name,
+                'playlist_by': playlist_by,
+                "gui": {
+                    "status_label": status_label,
+                    "progress_bar": pbar,
+                    "btn": {
+                        "copy": copy_btn,
+                        "cancel": cancel_btn,
+                        "retry": retry_btn,
+                        "play": play_btn,
+                        "save": save_btn,
+                        "queue": queue_btn,
+                        "open": open_btn,
+                        "locate": locate_btn,
+                        "delete": delete_btn
+                        }
                     }
                 }
-            }
 
 
     def update_item_in_download_list(self, item, status, progress):
-        item['gui']['status_label'].setText(status)
-        item['gui']['progress_bar'].setValue(progress)
-        if progress == 0:
-            item['gui']["btn"]['cancel'].hide()
-            if config.get("download_copy_btn"):
-                item['gui']['btn']['copy'].show()
-            item['gui']["btn"]['retry'].show()
-            return
-        elif progress == 100:
-            item['gui']['btn']['cancel'].hide()
-            item['gui']['btn']['retry'].hide()
-            if config.get("download_copy_btn"):
-                item['gui']['btn']['copy'].show()
-            if config.get("download_play_btn"):
-                item['gui']['btn']['play'].show()
-            if config.get("download_save_btn"):
-                item['gui']['btn']['save'].show()
-            if config.get("download_queue_btn"):
-                item['gui']['btn']['queue'].show()
-            if config.get("download_open_btn"):
-                item['gui']['btn']['open'].show()
-            if config.get("download_locate_btn"):
-                item['gui']['btn']['locate'].show()
-            if config.get("download_delete_btn"):
-                item['gui']['btn']['delete'].show()
-            return
-        elif progress != 0:
-            item['gui']["btn"]['retry'].hide()
-            if config.get("download_copy_btn"):
-                item['gui']['btn']['copy'].show()
-            item['gui']["btn"]['cancel'].show()
-            return
+        with download_queue_lock:
+            item['gui']['status_label'].setText(status)
+            item['gui']['progress_bar'].setValue(progress)
+            if progress == 0:
+                item['gui']["btn"]['cancel'].hide()
+                if config.get("download_copy_btn"):
+                    item['gui']['btn']['copy'].show()
+                item['gui']["btn"]['retry'].show()
+                return
+            elif progress == 100:
+                item['gui']['btn']['cancel'].hide()
+                item['gui']['btn']['retry'].hide()
+                if config.get("download_copy_btn"):
+                    item['gui']['btn']['copy'].show()
+                if config.get("download_play_btn"):
+                    item['gui']['btn']['play'].show()
+                if config.get("download_save_btn"):
+                    item['gui']['btn']['save'].show()
+                if config.get("download_queue_btn"):
+                    item['gui']['btn']['queue'].show()
+                if config.get("download_open_btn"):
+                    item['gui']['btn']['open'].show()
+                if config.get("download_locate_btn"):
+                    item['gui']['btn']['locate'].show()
+                if config.get("download_delete_btn"):
+                    item['gui']['btn']['delete'].show()
+                return
+            elif progress != 0:
+                item['gui']["btn"]['retry'].hide()
+                if config.get("download_copy_btn"):
+                    item['gui']['btn']['copy'].show()
+                item['gui']["btn"]['cancel'].show()
+                return
 
     def remove_completed_from_download_list(self):
-        check_row = 0
-        while check_row < self.tbl_dl_progress.rowCount():
-            item_id = self.tbl_dl_progress.item(check_row, 0).text()
-            logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
-            if item_id in download_queue:
-                status = download_queue[item_id]['gui']["status_label"].text()
-                if status in (
-                            self.tr("Cancelled"),
-                            self.tr("Downloaded"),
-                            self.tr("Already Exists")
-                        ):
-                    logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
-                    self.tbl_dl_progress.removeRow(check_row)
-                    download_queue.pop(item_id)
+        with download_queue_lock:
+            check_row = 0
+            while check_row < self.tbl_dl_progress.rowCount():
+                item_id = self.tbl_dl_progress.item(check_row, 0).text()
+                logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
+                if item_id in download_queue:
+                    if download_queue[item_id]['item_status'] in (
+                                "Cancelled",
+                                "Downloaded",
+                                "Already Exists"
+                            ):
+                        logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
+                        self.tbl_dl_progress.removeRow(check_row)
+                        download_queue.pop(item_id)
+                    else:
+                        check_row = check_row + 1
                 else:
                     check_row = check_row + 1
-            else:
-                check_row = check_row + 1
 
     def cancel_all_downloads(self):
-        row_count = self.tbl_dl_progress.rowCount()
-        while row_count > 0:
-            for item_id in download_queue.keys():
-                logger.info(f'Trying to cancel : {item_id}')
-                if download_queue[item_id]['gui']['status_label'].text() == self.tr("Waiting"):
-                    download_queue[item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
-                    download_queue[item_id]['gui']['progress_bar'].setValue(0)
-                    download_queue[item_id]['gui']["btn"]['cancel'].hide()
-                    download_queue[item_id]['gui']["btn"]['retry'].show()
-                row_count -= 1
+        with download_queue_lock:
+            row_count = self.tbl_dl_progress.rowCount()
+            while row_count > 0:
+                for item_id in download_queue.keys():
+                    logger.info(f'Trying to cancel : {item_id}')
+                    if download_queue[item_id]['item_status'] == "Waiting":
+                        download_queue[item_id]['item_status'] = "Cancelled"
+                        download_queue[item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
+                        download_queue[item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
+                        download_queue[item_id]['gui']['progress_bar'].setValue(0)
+                        download_queue[item_id]['gui']["btn"]['cancel'].hide()
+                        download_queue[item_id]['gui']["btn"]['retry'].show()
+                    row_count -= 1
 
     def retry_all_failed_downloads(self):
-        row_count = self.tbl_dl_progress.rowCount()
-        while row_count > 0:
-            for item_id in download_queue.keys():
-                logger.info(f'Trying to cancel : {item_id}')
-                if download_queue[item_id]['gui']['status_label'].text() == self.tr("Failed"):
-                    download_queue[item_id]['gui']['status_label'].setText(self.tr("Waiting"))
-                    download_queue[item_id]['gui']["btn"]['cancel'].show()
-                    download_queue[item_id]['gui']["btn"]['retry'].hide()
-                row_count -= 1
+        with download_queue_lock:
+            row_count = self.tbl_dl_progress.rowCount()
+            while row_count > 0:
+                for item_id in download_queue.keys():
+                    logger.info(f'Trying to cancel : {item_id}')
+                    if download_queue[item_id]['item_status'] == "Failed":
+                        download_queue[item_id]['item_status'] = "Waiting"
+                        download_queue[item_id]['gui']['status_label'].setText(self.tr("Waiting"))
+                        download_queue[item_id]['gui']["btn"]['cancel'].show()
+                        download_queue[item_id]['gui']["btn"]['retry'].hide()
+                    row_count -= 1
 
 
     # Remove Later
@@ -341,8 +349,9 @@ class MainWindow(QMainWindow):
         queueworker.start()
 
         downloadworker = DownloadWorker(gui=True)
-        downloadworker.progress.connect(self.update_item_in_download_list)  # Connect signal to update_table method  
-        downloadworker.start()
+        downloadworker.progress.connect(self.update_item_in_download_list)  # Connect the signal to the update method
+        downloadworker.start()  # Start the download worker thread
+
 
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
@@ -487,7 +496,7 @@ class MainWindow(QMainWindow):
         self.start_url = ''
         # Update Checker
         if config.get("check_for_updates"):
-            if latest_release() == False:
+            if is_latest_release() == False:
                 self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
 
     def user_table_remove_click(self, index):
