@@ -86,6 +86,9 @@ class DownloadWorker(QObject):
 
                     dl_root = config.get("download_root")
                     file_path = os.path.join(dl_root, item_path)
+                    directory, file_name = os.path.split(file_path)
+                    temp_file_path = os.path.join(directory, '~' + file_name)
+
 
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
@@ -178,7 +181,7 @@ class DownloadWorker(QObject):
                             downloaded = 0
                             _CHUNK_SIZE = config.get("chunk_size")
 
-                            with open(file_path, 'wb') as file:
+                            with open(temp_file_path, 'wb') as file:
                                 while downloaded < total_size:
                                     data = stream.input_stream.stream().read(_CHUNK_SIZE)
                                     downloaded += len(data)
@@ -192,7 +195,7 @@ class DownloadWorker(QObject):
                             bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
 
                         elif item_service == "soundcloud":
-                            command = [config.get('_ffmpeg_bin_path'), "-loglevel", "error", "-i", f"{item_metadata['file_url']}", "-c", "copy", file_path]
+                            command = [config.get('_ffmpeg_bin_path'), "-loglevel", "error", "-i", f"{item_metadata['file_url']}", "-c", "copy", temp_file_path]
                             if os.name == 'nt':
                                 subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
                             else:
@@ -215,22 +218,25 @@ class DownloadWorker(QObject):
                     item['item_status'] = 'Converting'
                     if self.gui:
                         self.progress.emit(item, self.tr("Converting"), 99)
-                    convert_audio_format(file_path, bitrate, default_format)
+                    convert_audio_format(temp_file_path, bitrate, default_format)
 
                     # Set Audio Tags
                     item['item_status'] = 'Embedding Metadata'
                     if self.gui:
                         self.progress.emit(item, self.tr("Embedding Metadata"), 99)
-                    set_audio_tags(file_path, item_metadata, item_id)
+                    set_audio_tags(temp_file_path, item_metadata, item_id)
 
                     # Thumbnail
                     item['item_status'] = 'Setting Thumbnail'
                     if self.gui:
                         self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
                     try:
-                        set_music_thumbnail(file_path, item_metadata['image_url'])
+                        set_music_thumbnail(temp_file_path, item_metadata['image_url'])
                     except MissingSchema:
                         self.progress.emit(item, self.tr("Failed To Set Thumbnail"), 99)
+
+                    # Temp file finished, convert to regular format
+                    os.rename(temp_file_path, file_path)
 
                     # Lyrics
                     item['item_status'] = 'Getting Lyrics'

@@ -128,9 +128,11 @@ def format_track_path(item_metadata, item_service, item_type, is_playlist_item, 
 
     if item_service == 'soundcloud' and config.get("force_raw"):
         item_path += ".mp3"
-    if item_service == 'spotify' and config.get("force_raw"):
+    elif item_service == 'spotify' and config.get("force_raw"):
         item_path += ".ogg"
-    else:
+    elif item_type == 'track':
         item_path += "." + config.get("media_format")
+    elif item_type == 'episode':
+        item_path += "." + config.get("podcast_media_format")
 
     return item_path
