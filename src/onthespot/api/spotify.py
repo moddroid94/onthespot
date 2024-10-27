@@ -516,18 +516,18 @@ def spotify_get_track_metadata(session, item_id):
         10: "A♯/B♭",
         11: "B"
     }
-
-    info['bpm'] = str(track_audio_data.get('tempo', ''))
-    info['key'] = str(key_mapping.get(track_audio_data.get('key', ''), ''))
-    info['time_signature'] = track_audio_data.get('time_signature', '')
-    info['acousticness'] = track_audio_data.get('acousticness', '')
-    info['danceability'] = track_audio_data.get('danceability', '')
-    info['energy'] = track_audio_data.get('energy', '')
-    info['instrumentalness'] = track_audio_data.get('instrumentalness', '')
-    info['liveness'] = track_audio_data.get('liveness', '')
-    info['loudness'] = track_audio_data.get('loudness', '')
-    info['speechiness'] = track_audio_data.get('speechiness', '')
-    info['valence'] = track_audio_data.get('valence', '')
+    if track_audio_data is not None:
+        info['bpm'] = str(track_audio_data.get('tempo', ''))
+        info['key'] = str(key_mapping.get(track_audio_data.get('key', ''), ''))
+        info['time_signature'] = track_audio_data.get('time_signature', '')
+        info['acousticness'] = track_audio_data.get('acousticness', '')
+        info['danceability'] = track_audio_data.get('danceability', '')
+        info['energy'] = track_audio_data.get('energy', '')
+        info['instrumentalness'] = track_audio_data.get('instrumentalness', '')
+        info['liveness'] = track_audio_data.get('liveness', '')
+        info['loudness'] = track_audio_data.get('loudness', '')
+        info['speechiness'] = track_audio_data.get('speechiness', '')
+        info['valence'] = track_audio_data.get('valence', '')
     return info
 
 
