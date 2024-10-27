@@ -224,6 +224,12 @@ class MainWindow(QMainWindow):
         with download_queue_lock:
             item['gui']['status_label'].setText(status)
             item['gui']['progress_bar'].setValue(progress)
+            if item['item_status'] == 'Unavailable':
+                item['gui']["btn"]['cancel'].hide()
+                if config.get("download_copy_btn"):
+                    item['gui']['btn']['copy'].show()
+                item['gui']["btn"]['retry'].hide()
+                return
             if progress == 0:
                 item['gui']["btn"]['cancel'].hide()
                 if config.get("download_copy_btn"):
