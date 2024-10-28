@@ -481,6 +481,11 @@
           </column>
           <column>
            <property name="text">
+            <string>Item Category</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Service</string>
            </property>
           </column>
@@ -569,7 +574,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-930</y>
+             <y>0</y>
              <width>631</width>
              <height>3181</height>
             </rect>

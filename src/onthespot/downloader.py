@@ -72,7 +72,7 @@ class DownloadWorker(QObject):
                     try:
                         item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
 
-                        item_path = format_track_path(item_metadata, item_service, item_type, item['is_playlist_item'], item['playlist_name'], item['playlist_by'])
+                        item_path = format_track_path(item_metadata, item_service, item_type, item['parent_category'], item['playlist_name'], item['playlist_by'])
 
                     except (Exception, KeyError):
                         item['item_status'] = "Failed"
@@ -95,7 +95,7 @@ class DownloadWorker(QObject):
                     item['file_path'] = file_path
 
                     # M3U
-                    if config.get('create_m3u_playlists') and item.get('is_playlist_item', False):
+                    if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
                         item['item_status'] = 'Adding To M3U'
                         if self.gui:
                             self.progress.emit(item, self.tr("Adding To M3U"), 0)
@@ -123,7 +123,7 @@ class DownloadWorker(QObject):
 
                             if file_path not in [line.strip() for line in m3u_contents]:
                                 with open(m3u_path, 'a') as m3u_file:
-                                    m3u_file.write(f"#EXTINF:-1, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
+                                    m3u_file.write(f"#EXTINF:{int(item_metadata['length'])/1000}, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
                             else:
                                 logger.info(f"{file_path} already exists in the M3U file.")  # Log or handle the existing entry case
 

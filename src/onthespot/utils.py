@@ -94,7 +94,7 @@ def conv_list_format(items):
         formatted += item + config.get('metadata_seperator')
     return formatted[:-2].strip()
 
-def format_track_path(item_metadata, item_service, item_type, is_playlist_item, playlist_name, playlist_by):
+def format_track_path(item_metadata, item_service, item_type, parent_category, playlist_name, playlist_by):
     if config.get("translate_file_path"):
         name = translate(item_metadata.get('title', ''))
         album = translate(item_metadata.get('album_name', ''))
@@ -102,7 +102,7 @@ def format_track_path(item_metadata, item_service, item_type, is_playlist_item, 
         name = item_metadata.get('title', '')
         album = item_metadata.get('album_name', '')
 
-    if is_playlist_item and config.get("use_playlist_path"):
+    if parent_category == 'playlist' and config.get("use_playlist_path"):
         path = config.get("playlist_path_formatter")
     elif item_type == 'track':
         path = config.get("track_path_formatter")

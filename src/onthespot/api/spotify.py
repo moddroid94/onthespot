@@ -571,7 +571,7 @@ def spotify_get_show_episodes(session, show_id_str):
         resp = make_call(f'https://api.spotify.com/v1/shows/{show_id_str}/episodes', headers=headers, params=params)
         offset += limit
         for episode in resp["items"]:
-            episodes.append(episode["external_urls"]["spotify"])
+            episodes.append(episode["id"])
 
         if len(resp['items']) < limit:
             break

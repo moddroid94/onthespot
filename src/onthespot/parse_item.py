@@ -69,7 +69,7 @@ def parsingworker():
                             'item_service': current_service,
                             'item_type': current_type,
                             'item_id': item_id,
-                            'is_playlist_item': False,
+                            'parent_category': 'track'
                             }
                         continue
 
@@ -81,7 +81,7 @@ def parsingworker():
                                 'item_service': 'spotify',
                                 'item_type': 'track',
                                 'item_id': item_id,
-                                'is_playlist_item': False,
+                                'parent_category': 'album'
                                 }
                         continue
 
@@ -95,7 +95,7 @@ def parsingworker():
                                 'item_service': 'spotify',
                                 'item_type': item_type,
                                 'item_id': item_id,
-                                'is_playlist_item': True,
+                                'parent_category': 'playlist',
                                 'playlist_name': playlist_name,
                                 'playlist_by': playlist_by
                                 }
@@ -112,14 +112,19 @@ def parsingworker():
                             'item_service': current_service,
                             'item_type': current_type,
                             'item_id': item_id,
-                            'is_playlist_item': False,
+                            'parent_category': 'episode'
                             }
                         continue
 
                     elif current_type in ['show', 'audiobook']:
-                        episode_urls = spotify_get_show_episodes(token, current_id)
-                        for index, episode_url in enumerate(episode_urls):
-                            parse_url(episode_url)
+                        episode_ids = spotify_get_show_episodes(token, current_id)
+                        for index, episode_id in enumerate(episode_ids):
+                            pending[episode_id] = {
+                                'item_service': 'spotify',
+                                'item_type': 'episode',
+                                'item_id': episode_id,
+                                'parent_category': current_type
+                                }
                         continue
 
                     elif current_type == "liked_songs":
@@ -130,7 +135,7 @@ def parsingworker():
                                 'item_service': 'spotify',
                                 'item_type': 'track',
                                 'item_id': item_id,
-                                'is_playlist_item': True,
+                                'parent_category': 'playlist',
                                 'playlist_name': 'Liked Songs',
                                 'playlist_by': 'me'
                                 }
@@ -144,7 +149,7 @@ def parsingworker():
                                 'item_service': 'spotify',
                                 'item_type': 'episode',
                                 'item_id': item_id,
-                                'is_playlist_item': True,
+                                'parent_category': 'playlist',
                                 'playlist_name': 'Your Episodes',
                                 'playlist_by': 'me'
                                 }
@@ -157,7 +162,7 @@ def parsingworker():
                             'item_service': current_service,
                             'item_type': current_type,
                             'item_id': item_id,
-                            'is_playlist_item': False,
+                            'parent_category': 'track'
                             }
                         time.sleep(4)
                         continue

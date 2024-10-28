@@ -174,7 +174,7 @@ def soundcloud_get_set_items(token, url):
                 'item_service': 'soundcloud',
                 'item_type': 'track', 
                 'item_id': track.get('id'),
-                'is_playlist_item': not set_data['is_album'],
+                'parent_category': 'playlist' if not set_data['is_album'] else 'album',
                 'playlist_name': set_data['title'],
                 'playlist_by': set_data['user']['username']
             }

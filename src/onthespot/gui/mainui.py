@@ -161,7 +161,18 @@ class MainWindow(QMainWindow):
                 delete_btn.setToolTip(self.tr('Delete'))
                 delete_btn.setMinimumHeight(30)
                 delete_btn.hide()
-            
+
+            playlist_name = ''
+            playlist_by = ''
+            if item['parent_category'] == 'playlist':
+                item_category = f'Playlist: {item["playlist_name"]}'
+                playlist_name = item['playlist_name']
+                playlist_by = item['playlist_by']
+            elif item['parent_category'] in ('album', 'show', 'audiobook'):
+                item_category = f'{item["parent_category"].title()}: {item_metadata["album_name"]}'
+            else:
+                item_category = f'{item["parent_category"].title()}: {item_metadata["title"]}'
+
             item_service = item["item_service"]
             service_label = QTableWidgetItem(str(item_service).title())
             service_label.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{item_service}.png')))
@@ -182,16 +193,12 @@ class MainWindow(QMainWindow):
             self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
             self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
             self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
-            self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(service_label))
-            self.tbl_dl_progress.setCellWidget(rows, 4, status_label)
-            self.tbl_dl_progress.setCellWidget(rows, 5, actions)
+            self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(item_category))
+            self.tbl_dl_progress.setItem(rows, 4, QTableWidgetItem(service_label))
+            self.tbl_dl_progress.setCellWidget(rows, 5, status_label)
+            self.tbl_dl_progress.setCellWidget(rows, 6, actions)
 
-            if item['is_playlist_item'] is True:
-                playlist_name = item['playlist_name']
-                playlist_by = item['playlist_by']
-            else:
-                playlist_name = ''
-                playlist_by = ''
+
 
             download_queue[item['item_id']] = {
                 "item_service": item["item_service"],
@@ -199,7 +206,7 @@ class MainWindow(QMainWindow):
                 'item_id': item['item_id'],
                 'item_status': 'Waiting',
                 "file_path": None,
-                'is_playlist_item': item['is_playlist_item'],
+                'parent_category': item['parent_category'],
                 'playlist_name': playlist_name,
                 'playlist_by': playlist_by,
                 "gui": {
