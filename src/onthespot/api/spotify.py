@@ -131,27 +131,43 @@ def spotify_login_user(account):
         return False
 
 
+def spotify_re_init_session(account):
+    session_json_path = os.path.join(cache_dir(), "onthespot", "sessions", f"ots_login_{account['uuid']}.json")
+    try:
+        config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
+        logger.debug("Session config created")
+        session = Session.Builder(conf=config).stored_file(session_json_path).create()
+        logger.debug("Session re init done")
+        account['login']['session'] = session
+    except:
+        logger.error('Failed to re init session !')
+
+
 def spotify_get_token(parsing_index):
-    return account_pool[parsing_index]['login']['session']
+    try: 
+        token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
+    except OSError:
+        logger.info(f'Failed to retreive token for {account_pool[parsing_index]["username"]}, attempting to reinit session.')
+        spotify_re_init_session(account_pool[parsing_index])
+        token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
+    return token
 
 
-def spotify_get_artist_albums(session, artist_id):
+def spotify_get_artist_albums(token, artist_id):
     logger.info(f"Get albums for artist by id '{artist_id}'")
-    token = session.tokens().get("user-read-email")
     headers = {"Authorization": f"Bearer {token}"}
     resp = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', headers=headers) #%2Cappears_on%2Ccompilation
     return [resp['items'][i]['external_urls']['spotify'] for i in range(len(resp['items']))]
 
 
-def spotify_get_playlist_data(session, playlist_id):
+def spotify_get_playlist_data(token, playlist_id):
     logger.info(f"Get playlist dump for '{playlist_id}'")
-    token = session.tokens().get("user-read-email")
     headers = {"Authorization": f"Bearer {token}"}
     resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers, skip_cache=True)
     return resp['name'], resp['owner']['display_name']
 
 
-def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
+def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
     if config.get('inp_enable_lyrics'):
         lyrics = []
         try:
@@ -160,7 +176,6 @@ def spotify_get_lyrics(session, item_id, item_type, metadata, filepath):
             elif item_type == "episode":
                 url = f"https://spclient.wg.spotify.com/transcript-read-along/v2/episode/{item_id}"
 
-            token = session.tokens().get("user-read-email")
             params = 'format=json&market=from_token'
 
             headers = {
@@ -255,7 +270,6 @@ def spotify_get_playlist_items(token, playlist_id):
     items = []
     offset = 0
     limit = 50
-    token = token.tokens().get("playlist-read-private")
     url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode'
  
 
@@ -281,7 +295,8 @@ def spotify_get_liked_songs(token):
     items = []
     offset = 0
     limit = 50
-    token = token.tokens().get("user-library-read")
+    token = account_pool[config.get('parsing_acc_sn')]['login']['session'].tokens().get("user-library-read")
+
     url = f'https://api.spotify.com/v1/me/tracks'
 
     while True:
@@ -306,7 +321,7 @@ def spotify_get_your_episodes(token):
     items = []
     offset = 0
     limit = 50
-    token = token.tokens().get("user-library-read")
+    token = account_pool[config.get('parsing_acc_sn')]['login']['session'].tokens().get("user-library-read")
     url = f'https://api.spotify.com/v1/me/shows'
 
     while True:
@@ -325,9 +340,8 @@ def spotify_get_your_episodes(token):
             break
     return items
 
-def get_album_name(session, album_id):
+def get_album_name(token, album_id):
     logger.info(f"Get album info from album by id ''{album_id}'")
-    token = session.tokens().get("user-read-email")
     headers = {"Authorization": f"Bearer {token}"}
     resp = make_call(
         f'https://api.spotify.com/v1/albums/{album_id}',
@@ -343,9 +357,8 @@ def get_album_name(session, album_id):
             resp['total_tracks']
 
 
-def spotify_get_album_tracks(session, album_id):
+def spotify_get_album_tracks(token, album_id):
     logger.info(f"Get tracks from album by id '{album_id}'")
-    token = session.tokens().get("user-read-email")
     songs = []
     offset = 0
     limit = 50
@@ -372,13 +385,12 @@ def spotify_get_album_tracks(session, album_id):
     return songs
 
 
-def spotify_get_search_results(session, search_term, content_types):
+def spotify_get_search_results(token, search_term, content_types):
     logger.info(
         f"Get search result for term '{search_term}'"
         )
     if content_types is None:
         content_types = ["track", "album", "playlist", "artist", "show", "episode", "audiobook"]
-    token = session.tokens().get("user-read-email")
     data = requests.get(
         "https://api.spotify.com/v1/search",
         {
@@ -439,14 +451,7 @@ def spotify_get_search_results(session, search_term, content_types):
     return search_results
 
 
-def check_premium(session):
-    return bool(
-        session.get_user_attribute("type") == "premium"
-        )
-
-
-def spotify_get_track_metadata(session, item_id):
-    token = session.tokens().get("user-read-email")
+def spotify_get_track_metadata(token, item_id):
     headers = {"Authorization": f"Bearer {token}"}
     track_data = make_call(f'https://api.spotify.com/v1/tracks?ids={item_id}&market=from_token', headers=headers)
     credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{item_id}/credits', headers=headers)
@@ -534,7 +539,6 @@ def spotify_get_track_metadata(session, item_id):
 def spotify_get_episode_metadata(token, episode_id_str):
     logger.info(f"Get episode info for episode by id '{episode_id_str}'")
 
-    token = token.tokens().get("user-read-email")
     headers = {"Authorization": f"Bearer {token}"}
  
     episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id_str}", headers=headers)
@@ -559,9 +563,8 @@ def spotify_get_episode_metadata(token, episode_id_str):
     return info
 
 
-def spotify_get_show_episodes(session, show_id_str):
+def spotify_get_show_episodes(token, show_id_str):
     logger.info(f"Get episodes for show by id '{show_id_str}'")
-    token = session.tokens().get("user-read-email")
     episodes = []
     offset = 0
     limit = 50

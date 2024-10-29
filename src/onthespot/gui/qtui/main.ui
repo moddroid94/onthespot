@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
+    <width>683</width>
     <height>527</height>
    </rect>
   </property>
@@ -419,7 +419,7 @@
              </column>
              <column>
               <property name="text">
-               <string>Content Type</string>
+               <string>Type</string>
               </property>
              </column>
              <column>
@@ -443,7 +443,7 @@
        <attribute name="title">
         <string>Downloads</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QTableWidget" name="tbl_dl_progress">
           <property name="editTriggers">
@@ -481,7 +481,7 @@
           </column>
           <column>
            <property name="text">
-            <string>Item Category</string>
+            <string>Type</string>
            </property>
           </column>
           <column>
@@ -515,19 +515,7 @@
           <property name="flat">
            <bool>true</bool>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_27">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QPushButton" name="btn_progress_clear_complete">
              <property name="text">
@@ -548,6 +536,100 @@
               <string>Retry Failed</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_download_filter_toggle">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="group_download_items">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_236">
+           <item>
+            <widget class="QCheckBox" name="inp_download_queue_show_waiting">
+             <property name="text">
+              <string>Show Waiting</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="inp_download_queue_show_failed">
+             <property name="text">
+              <string>Show Failed</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="inp_download_queue_show_cancelled">
+             <property name="text">
+              <string>Show Cancelled</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="inp_download_queue_show_unavailable">
+             <property name="text">
+              <string>Show Unavailable</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="inp_download_queue_show_completed">
+             <property name="text">
+              <string>Show Completed</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_12">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -575,7 +657,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>631</width>
+             <width>630</width>
              <height>3181</height>
             </rect>
            </property>

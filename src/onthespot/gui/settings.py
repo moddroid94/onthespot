@@ -4,6 +4,9 @@ from ..otsconfig import config
 
 
 def load_config(self):
+    # Hide Popups
+    self.group_search_items.hide()
+    self.group_download_items.hide()
     # Icons
     en_US_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'en_US.png'))
     self.inp_language.insertItem(0, en_US_icon, "English")
@@ -33,8 +36,9 @@ def load_config(self):
     search_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'search.png'))
     self.btn_search.setIcon(search_icon)
     collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
+    collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
     self.btn_search_filter_toggle.setIcon(collapse_down_icon)
-
+    self.btn_download_filter_toggle.setIcon(collapse_up_icon)
 
     # Text
     self.inp_language.setCurrentIndex(config.get("language_index"))

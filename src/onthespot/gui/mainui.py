@@ -198,7 +198,8 @@ class MainWindow(QMainWindow):
             self.tbl_dl_progress.setCellWidget(rows, 5, status_label)
             self.tbl_dl_progress.setCellWidget(rows, 6, actions)
 
-
+            # Hide if filter is applied
+            self.update_table_visibility()
 
             download_queue[item['item_id']] = {
                 "item_service": item["item_service"],
@@ -231,6 +232,7 @@ class MainWindow(QMainWindow):
         with download_queue_lock:
             item['gui']['status_label'].setText(status)
             item['gui']['progress_bar'].setValue(progress)
+            self.update_table_visibility()
             if item['item_status'] == 'Unavailable':
                 item['gui']["btn"]['cancel'].hide()
                 if config.get("download_copy_btn"):
@@ -302,6 +304,7 @@ class MainWindow(QMainWindow):
                         download_queue[item_id]['gui']["btn"]['cancel'].hide()
                         download_queue[item_id]['gui']["btn"]['retry'].show()
                     row_count -= 1
+                self.update_table_visibility()
 
     def retry_all_failed_downloads(self):
         with download_queue_lock:
@@ -315,6 +318,7 @@ class MainWindow(QMainWindow):
                         download_queue[item_id]['gui']["btn"]['cancel'].show()
                         download_queue[item_id]['gui']["btn"]['retry'].hide()
                     row_count -= 1
+                self.update_table_visibility()
 
 
     # Remove Later
@@ -336,7 +340,6 @@ class MainWindow(QMainWindow):
         self.inp_version.setText(config.get("version"))
         self.inp_session_uuid.setText(config.session_uuid)
         logger.info(f"Initialising main window, logging session : {config.session_uuid}")
-        self.group_search_items.hide()
         # Bind button click
         self.bind_button_inputs()
 
@@ -416,9 +419,6 @@ class MainWindow(QMainWindow):
 
     def bind_button_inputs(self):
         # Connect button click signals
-        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
-        collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
-
         self.btn_search.clicked.connect(self.fill_search_table)
 
         self.inp_login_service.currentIndexChanged.connect(self.set_login_fields)
@@ -432,9 +432,26 @@ class MainWindow(QMainWindow):
         self.btn_download_tmp_browse.clicked.connect(self.__select_tmp_dir)
         self.inp_search_term.returnPressed.connect(self.fill_search_table)
         self.btn_progress_clear_complete.clicked.connect(self.remove_completed_from_download_list)
+
+        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
+        collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
         self.btn_search_filter_toggle.clicked.connect(lambda toggle: self.group_search_items.show() if self.group_search_items.isHidden() else self.group_search_items.hide())
         self.btn_search_filter_toggle.clicked.connect(lambda switch: self.btn_search_filter_toggle.setIcon(collapse_down_icon) if self.group_search_items.isHidden() else self.btn_search_filter_toggle.setIcon(collapse_up_icon))
+        self.btn_download_filter_toggle.clicked.connect(lambda toggle: self.group_download_items.show() if self.group_download_items.isHidden() else self.group_download_items.hide())
+        self.btn_download_filter_toggle.clicked.connect(lambda switch: self.btn_download_filter_toggle.setIcon(collapse_up_icon) if self.group_download_items.isHidden() else self.btn_download_filter_toggle.setIcon(collapse_down_icon))
 
+        self.inp_download_queue_show_waiting.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_failed.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_unavailable.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
+
+
+        self.inp_download_queue_show_waiting.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_failed.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_unavailable.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
 
     def set_table_props(self):
         window_width = self.width()
@@ -471,6 +488,8 @@ class MainWindow(QMainWindow):
         self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         self.set_login_fields()
         return True
 
@@ -653,3 +672,25 @@ class MainWindow(QMainWindow):
             self.tbl_search_results.setCellWidget(rows, 4, btn)
             self.tbl_search_results.horizontalHeader().resizeSection(0, 450)
         self.inp_search_term.setText('')
+
+    def update_table_visibility(self):
+        show_waiting = self.inp_download_queue_show_waiting.isChecked()
+        show_failed = self.inp_download_queue_show_failed.isChecked()
+        show_unavailable = self.inp_download_queue_show_unavailable.isChecked()
+        show_cancelled = self.inp_download_queue_show_cancelled.isChecked()
+        show_completed = self.inp_download_queue_show_completed.isChecked()
+
+        for row in range(self.tbl_dl_progress.rowCount()):
+            label = self.tbl_dl_progress.cellWidget(row, 5)  # Check the Status column
+            if label:
+                status = label.text()
+                # Determine visibility based on checkboxes
+                if (status == self.tr("Waiting") and not show_waiting) or \
+                   (status == self.tr("Failed") and not show_failed) or \
+                   (status == self.tr("Unavailable") and not show_unavailable) or \
+                   (status == self.tr("Cancelled") and not show_cancelled) or \
+                   (status == self.tr("Already Exists") and not show_completed) or \
+                   (status == self.tr("Downloaded") and not show_completed):
+                    self.tbl_dl_progress.hideRow(row)  # Hide the row
+                else:
+                    self.tbl_dl_progress.showRow(row)  # Show the row if the status is allowed

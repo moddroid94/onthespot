@@ -62,11 +62,11 @@ class FillAccountPool(QThread):
 
 
 
-def get_account_token(download=False):
+def get_account_token():
     parsing_index = config.get('parsing_acc_sn')
     service = account_pool[parsing_index]['service']
 
-    if config.get("rotate_acc_sn") is True and download is True:
+    if config.get("rotate_acc_sn") is True:
         for i in range(parsing_index + 1, parsing_index + len(account_pool) + 1):
             index = i % len(account_pool)
             if account_pool[index]['service'] == service:

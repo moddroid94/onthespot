@@ -6,7 +6,7 @@ from requests.exceptions import MissingSchema
 from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
-from .runtimedata import get_logger, download_queue, download_queue_lock
+from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
 from .otsconfig import config
 from .post_download import convert_audio_format, set_audio_tags, set_music_thumbnail
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
@@ -67,7 +67,7 @@ class DownloadWorker(QObject):
                     if self.gui:
                         self.progress.emit(item, self.tr("Downloading"), 0)
 
-                    token = get_account_token(download=True)
+                    token = get_account_token()
 
                     try:
                         item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
@@ -123,7 +123,7 @@ class DownloadWorker(QObject):
 
                             if file_path not in [line.strip() for line in m3u_contents]:
                                 with open(m3u_path, 'a') as m3u_file:
-                                    m3u_file.write(f"#EXTINF:{int(item_metadata['length'])/1000}, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
+                                    m3u_file.write(f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
                             else:
                                 logger.info(f"{file_path} already exists in the M3U file.")  # Log or handle the existing entry case
 
@@ -166,16 +166,17 @@ class DownloadWorker(QObject):
                     # item['gui']['progressbar'] and self.gui into a download_track function.
                     try:
                         if item_service == "spotify":
+                            account = account_pool[config.get('parsing_acc_sn')]['login']['session']
                             if item_type == "track":
                                 audio_key = TrackId.from_base62(item_id)
                             elif item_type == "episode":
                                 audio_key = EpisodeId.from_base62(item_id)
 
                             quality = AudioQuality.HIGH
-                            if token.get_user_attribute("type") == "premium" and item_type == 'track':
+                            if account.get_user_attribute("type") == "premium" and item_type == 'track':
                                 quality = AudioQuality.VERY_HIGH
 
-                            stream = token.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
+                            stream = account.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
 
                             total_size = stream.input_stream.size
                             downloaded = 0

@@ -83,6 +83,8 @@ def make_call(url, params=None, headers=None, skip_cache=False):
             with open(req_cache_file, 'w', encoding='utf-8') as cf:
                 cf.write(response.text)
         return json.loads(response.text)
+    else:
+        logger.info(f"Request status error {response.status_code}")
 
 def conv_list_format(items):
     if len(items) == 0:
