@@ -138,7 +138,14 @@ def spotify_re_init_session(account):
         logger.debug("Session config created")
         session = Session.Builder(conf=config).stored_file(session_json_path).create()
         logger.debug("Session re init done")
+        account['login']['session_path'] = session_json_path
         account['login']['session'] = session
+        account['status'] = 'active'
+        account['account_type'] = session.get_user_attribute("type")
+        bitrate = "160k"
+        if account_type == "premium":
+            bitrate = "320k"
+        account['bitrate'] = bitrate
     except:
         logger.error('Failed to re init session !')
 

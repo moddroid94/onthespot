@@ -41,6 +41,218 @@ class QueueWorker(QThread):
 
 class MainWindow(QMainWindow):
 
+    # Remove Later
+    def contribute(self):
+        if self.inp_language.currentIndex() == self.inp_language.count() - 1:
+            from ..queue import add_item_to_download_list
+            url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
+            open_item(url)
+
+    def __init__(self, _dialog, start_url=''):
+        super(MainWindow, self).__init__()
+        self.path = os.path.dirname(os.path.realpath(__file__))
+        icon_path = os.path.join(config.app_root, 'resources', 'icons', 'onthespot.png')
+        QApplication.setStyle("fusion")
+        uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
+        self.setWindowIcon(QtGui.QIcon(icon_path))
+
+        self.start_url = start_url
+        self.inp_version.setText(config.get("version"))
+        self.inp_session_uuid.setText(config.session_uuid)
+        logger.info(f"Initialising main window, logging session : {config.session_uuid}")
+        # Bind button click
+        self.bind_button_inputs()
+
+
+        self.__users = []
+        self.last_search = None
+
+        # Fill the value from configs
+        logger.info("Loading configurations..")
+        load_config(self)
+
+        self.__splash_dialog = _dialog
+
+        # Start/create session builder and queue processor
+        fillaccountpool = FillAccountPool(gui=True)  
+        fillaccountpool.finished.connect(self.session_load_done)
+        fillaccountpool.progress.connect(self.__show_popup_dialog)
+        fillaccountpool.start()
+
+
+        queueworker = QueueWorker()
+        queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method  
+        queueworker.start()
+
+        downloadworker = DownloadWorker(gui=True)
+        downloadworker.progress.connect(self.update_item_in_download_list)  # Connect the signal to the update method
+        downloadworker.start()  # Start the download worker thread
+
+
+        fill_account_pool.wait()
+
+        # Set application theme
+        self.toggle_theme_button.clicked.connect(self.toggle_theme)
+        self.theme = config.get("theme")
+        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
+        if self.theme == "dark":
+            self.toggle_theme_button.setText(self.tr(" Light Theme"))
+            theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'light.png'))
+        elif self.theme == "light":
+            self.toggle_theme_button.setText(self.tr(" Dark Theme"))
+            theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'dark.png'))
+        self.toggle_theme_button.setIcon(theme_icon)
+
+        with open(self.theme_path, 'r') as f:
+              theme = f.read()
+              self.setStyleSheet(theme)
+        logger.info(f"Set theme {self.theme}!")
+
+        # Set the table header properties
+        self.set_table_props()
+        logger.info("Main window init completed !")
+
+
+    def load_dark_theme(self):
+        self.theme = "dark"
+        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
+        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', f'light.png'))
+        self.toggle_theme_button.setIcon(theme_icon)
+        self.toggle_theme_button.setText(self.tr(" Light Theme"))
+        with open(self.theme_path, 'r') as f:
+            dark_theme = f.read()
+            self.setStyleSheet(dark_theme)
+
+    def load_light_theme(self):
+        self.theme = "light"
+        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
+        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', f'dark.png'))
+        self.toggle_theme_button.setIcon(theme_icon)
+        self.toggle_theme_button.setText(self.tr(" Dark Theme"))
+        with open(self.theme_path, 'r') as f:
+            light_theme = f.read()
+            self.setStyleSheet(light_theme)
+
+    def toggle_theme(self):
+        if self.theme == "light":
+            self.load_dark_theme()
+        elif self.theme == "dark":
+            self.load_light_theme()
+
+    def bind_button_inputs(self):
+        # Connect button click signals
+        self.btn_search.clicked.connect(self.fill_search_table)
+
+        self.inp_login_service.currentIndexChanged.connect(self.set_login_fields)
+
+        self.btn_save_config.clicked.connect(self.update_config)
+        self.btn_reset_config.clicked.connect(self.reset_app_config)
+
+        self.btn_progress_retry_all.clicked.connect(self.retry_all_failed_downloads)
+        self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
+        self.btn_download_root_browse.clicked.connect(self.__select_dir)
+        self.btn_download_tmp_browse.clicked.connect(self.__select_tmp_dir)
+        self.inp_search_term.returnPressed.connect(self.fill_search_table)
+        self.btn_progress_clear_complete.clicked.connect(self.remove_completed_from_download_list)
+
+        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
+        collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
+        self.btn_search_filter_toggle.clicked.connect(lambda toggle: self.group_search_items.show() if self.group_search_items.isHidden() else self.group_search_items.hide())
+        self.btn_search_filter_toggle.clicked.connect(lambda switch: self.btn_search_filter_toggle.setIcon(collapse_down_icon) if self.group_search_items.isHidden() else self.btn_search_filter_toggle.setIcon(collapse_up_icon))
+        self.btn_download_filter_toggle.clicked.connect(lambda toggle: self.group_download_items.show() if self.group_download_items.isHidden() else self.group_download_items.hide())
+        self.btn_download_filter_toggle.clicked.connect(lambda switch: self.btn_download_filter_toggle.setIcon(collapse_up_icon) if self.group_download_items.isHidden() else self.btn_download_filter_toggle.setIcon(collapse_down_icon))
+
+        self.inp_download_queue_show_waiting.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_failed.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_unavailable.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
+
+
+        self.inp_download_queue_show_waiting.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_failed.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_unavailable.stateChanged.connect(self.update_table_visibility)
+        self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
+
+    def set_table_props(self):
+        window_width = self.width()
+        logger.info(f"Setting table item properties {window_width}")
+        # Sessions table
+        self.tbl_sessions.setSortingEnabled(True)
+        self.tbl_sessions.horizontalHeader().setSectionsMovable(True)
+        self.tbl_sessions.horizontalHeader().setSectionsClickable(True)
+        self.tbl_sessions.horizontalHeader().resizeSection(0, 16)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        self.tbl_sessions.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
+        # Search results table
+        self.tbl_search_results.setSortingEnabled(True)
+        self.tbl_search_results.horizontalHeader().setSectionsMovable(True)
+        self.tbl_search_results.horizontalHeader().setSectionsClickable(True)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.tbl_search_results.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        # Download progress table
+        self.tbl_dl_progress.setSortingEnabled(True)
+        self.tbl_dl_progress.horizontalHeader().setSectionsMovable(True)
+        self.tbl_dl_progress.horizontalHeader().setSectionsClickable(True)
+        if config.get("debug_mode"):
+            self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
+        else:
+            self.tbl_dl_progress.setColumnWidth(0, 0)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
+        self.set_login_fields()
+        return True
+
+
+    def reset_app_config(self):
+        config.rollback()
+        self.__show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
+
+    def __select_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
+        if dir_path.strip() != '':
+            self.inp_download_root.setText(QDir.toNativeSeparators(dir_path))
+
+    def __select_tmp_dir(self):
+        dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
+        if dir_path.strip() != '':
+            self.inp_tmp_dl_root.setText(QDir.toNativeSeparators(dir_path))
+
+    def __show_popup_dialog(self, txt, btn_hide=False):
+        self.__splash_dialog.lb_main.setText(str(txt))
+        if btn_hide:
+            self.__splash_dialog.btn_close.hide()
+        else:
+            self.__splash_dialog.btn_close.show()
+        self.__splash_dialog.show()
+
+    def session_load_done(self):
+        self.__splash_dialog.hide()
+        self.__splash_dialog.btn_close.show()
+        self.fill_account_table()
+        self.show()
+        if self.start_url.strip() != '':
+            logger.info(f'Session was started with query of {self.start_url}')
+            self.inp_search_term.setText(self.start_url.strip())
+            self.fill_search_table()
+        self.start_url = ''
+        # Update Checker
+        if config.get("check_for_updates"):
+            if is_latest_release() == False:
+                self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
+
     def fill_account_table(self):
 
         # Clear the table
@@ -321,227 +533,19 @@ class MainWindow(QMainWindow):
                 self.update_table_visibility()
 
 
-    # Remove Later
-    def contribute(self):
-        if self.inp_language.currentIndex() == self.inp_language.count() - 1:
-            from ..queue import add_item_to_download_list
-            url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
-            open_item(url)
-
-    def __init__(self, _dialog, start_url=''):
-        super(MainWindow, self).__init__()
-        self.path = os.path.dirname(os.path.realpath(__file__))
-        icon_path = os.path.join(config.app_root, 'resources', 'icons', 'onthespot.png')
-        QApplication.setStyle("fusion")
-        uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
-        self.setWindowIcon(QtGui.QIcon(icon_path))
-
-        self.start_url = start_url
-        self.inp_version.setText(config.get("version"))
-        self.inp_session_uuid.setText(config.session_uuid)
-        logger.info(f"Initialising main window, logging session : {config.session_uuid}")
-        # Bind button click
-        self.bind_button_inputs()
-
-
-        self.__users = []
-        self.last_search = None
-
-        # Fill the value from configs
-        logger.info("Loading configurations..")
-        load_config(self)
-
-        self.__splash_dialog = _dialog
-
-        # Start/create session builder and queue processor
-        fillaccountpool = FillAccountPool(gui=True)  
-        fillaccountpool.finished.connect(self.session_load_done)
-        fillaccountpool.progress.connect(self.__show_popup_dialog)
-        fillaccountpool.start()
-
-
-        queueworker = QueueWorker()
-        queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method  
-        queueworker.start()
-
-        downloadworker = DownloadWorker(gui=True)
-        downloadworker.progress.connect(self.update_item_in_download_list)  # Connect the signal to the update method
-        downloadworker.start()  # Start the download worker thread
-
-
-        # Set application theme
-        self.toggle_theme_button.clicked.connect(self.toggle_theme)
-        self.theme = config.get("theme")
-        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
-        if self.theme == "dark":
-            self.toggle_theme_button.setText(self.tr(" Light Theme"))
-            theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'light.png'))
-        elif self.theme == "light":
-            self.toggle_theme_button.setText(self.tr(" Dark Theme"))
-            theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'dark.png'))
-        self.toggle_theme_button.setIcon(theme_icon)
-
-        with open(self.theme_path, 'r') as f:
-              theme = f.read()
-              self.setStyleSheet(theme)
-        logger.info(f"Set theme {self.theme}!")
-
-        # Set the table header properties
-        self.set_table_props()
-        logger.info("Main window init completed !")
-
-
-    def load_dark_theme(self):
-        self.theme = "dark"
-        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
-        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', f'light.png'))
-        self.toggle_theme_button.setIcon(theme_icon)
-        self.toggle_theme_button.setText(self.tr(" Light Theme"))
-        with open(self.theme_path, 'r') as f:
-            dark_theme = f.read()
-            self.setStyleSheet(dark_theme)
-
-    def load_light_theme(self):
-        self.theme = "light"
-        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
-        theme_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', f'dark.png'))
-        self.toggle_theme_button.setIcon(theme_icon)
-        self.toggle_theme_button.setText(self.tr(" Dark Theme"))
-        with open(self.theme_path, 'r') as f:
-            light_theme = f.read()
-            self.setStyleSheet(light_theme)
-
-    def toggle_theme(self):
-        if self.theme == "light":
-            self.load_dark_theme()
-        elif self.theme == "dark":
-            self.load_light_theme()
-
-    def bind_button_inputs(self):
-        # Connect button click signals
-        self.btn_search.clicked.connect(self.fill_search_table)
-
-        self.inp_login_service.currentIndexChanged.connect(self.set_login_fields)
-
-        self.btn_save_config.clicked.connect(self.update_config)
-        self.btn_reset_config.clicked.connect(self.reset_app_config)
-
-        self.btn_progress_retry_all.clicked.connect(self.retry_all_failed_downloads)
-        self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
-        self.btn_download_root_browse.clicked.connect(self.__select_dir)
-        self.btn_download_tmp_browse.clicked.connect(self.__select_tmp_dir)
-        self.inp_search_term.returnPressed.connect(self.fill_search_table)
-        self.btn_progress_clear_complete.clicked.connect(self.remove_completed_from_download_list)
-
-        collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
-        collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
-        self.btn_search_filter_toggle.clicked.connect(lambda toggle: self.group_search_items.show() if self.group_search_items.isHidden() else self.group_search_items.hide())
-        self.btn_search_filter_toggle.clicked.connect(lambda switch: self.btn_search_filter_toggle.setIcon(collapse_down_icon) if self.group_search_items.isHidden() else self.btn_search_filter_toggle.setIcon(collapse_up_icon))
-        self.btn_download_filter_toggle.clicked.connect(lambda toggle: self.group_download_items.show() if self.group_download_items.isHidden() else self.group_download_items.hide())
-        self.btn_download_filter_toggle.clicked.connect(lambda switch: self.btn_download_filter_toggle.setIcon(collapse_up_icon) if self.group_download_items.isHidden() else self.btn_download_filter_toggle.setIcon(collapse_down_icon))
-
-        self.inp_download_queue_show_waiting.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_failed.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_unavailable.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
-
-
-        self.inp_download_queue_show_waiting.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_failed.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_unavailable.stateChanged.connect(self.update_table_visibility)
-        self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
-
-    def set_table_props(self):
-        window_width = self.width()
-        logger.info(f"Setting table item properties {window_width}")
-        # Sessions table
-        self.tbl_sessions.setSortingEnabled(True)
-        self.tbl_sessions.horizontalHeader().setSectionsMovable(True)
-        self.tbl_sessions.horizontalHeader().setSectionsClickable(True)
-        self.tbl_sessions.horizontalHeader().resizeSection(0, 16)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
-        # Search results table
-        self.tbl_search_results.setSortingEnabled(True)
-        self.tbl_search_results.horizontalHeader().setSectionsMovable(True)
-        self.tbl_search_results.horizontalHeader().setSectionsClickable(True)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        # Download progress table
-        self.tbl_dl_progress.setSortingEnabled(True)
-        self.tbl_dl_progress.horizontalHeader().setSectionsMovable(True)
-        self.tbl_dl_progress.horizontalHeader().setSectionsClickable(True)
-        if config.get("debug_mode"):
-            self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
-        else:
-            self.tbl_dl_progress.setColumnWidth(0, 0)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
-        self.set_login_fields()
-        return True
-
-
-    def reset_app_config(self):
-        config.rollback()
-        self.__show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
-
-    def __select_dir(self):
-        dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
-        if dir_path.strip() != '':
-            self.inp_download_root.setText(QDir.toNativeSeparators(dir_path))
-
-    def __select_tmp_dir(self):
-        dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
-        if dir_path.strip() != '':
-            self.inp_tmp_dl_root.setText(QDir.toNativeSeparators(dir_path))
-
-    def __show_popup_dialog(self, txt, btn_hide=False):
-        self.__splash_dialog.lb_main.setText(str(txt))
-        if btn_hide:
-            self.__splash_dialog.btn_close.hide()
-        else:
-            self.__splash_dialog.btn_close.show()
-        self.__splash_dialog.show()
-
-    def session_load_done(self):
-        self.__splash_dialog.hide()
-        self.__splash_dialog.btn_close.show()
-        self.fill_account_table()
-        self.show()
-        if self.start_url.strip() != '':
-            logger.info(f'Session was started with query of {self.start_url}')
-            self.inp_search_term.setText(self.start_url.strip())
-            self.fill_search_table()
-        self.start_url = ''
-        # Update Checker
-        if config.get("check_for_updates"):
-            if is_latest_release() == False:
-                self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
-
     def user_table_remove_click(self, index):
-        if config.get('parsing_acc_sn') == self.tbl_sessions.currentRow():
-            config.set_('parsing_acc_sn', self.tbl_sessions.currentRow() - 1)
-            self.tbl_sessions.cellWidget(self.tbl_sessions.currentRow() - 1, 0).setChecked(True)
-        if config.get('parsing_acc_sn') == "0":
-            self.tbl_sessions.cellWidget(0, 0).setChecked(True)
         accounts = config.get('accounts').copy()
         del accounts[index]
         config.set_('accounts', accounts)
         config.update()
         del account_pool[index]
+
+        if config.get('parsing_acc_sn') == self.tbl_sessions.currentRow():
+            config.set_('parsing_acc_sn', len(account_pool) - 1)
+            try:
+                self.tbl_sessions.cellWidget(len(account_pool) - 1, 0).setChecked(True)
+            except:
+                logger.info('Account Pool Empty')
         self.tbl_sessions.removeRow(index)
         self.__splash_dialog.run(self.tr("Account was removed successfully."))
 
@@ -585,7 +589,7 @@ class MainWindow(QMainWindow):
         if session == True:
             self.__splash_dialog.run(self.tr("Account added, please restart the app."))
             self.btn_login_add.setText(self.tr("Please Restart The App"))
-            config.set_('parsing_acc_sn', config.get('parsing_acc_sn') + 1)
+            config.set_('parsing_acc_sn', len(account_pool))
             config.update()
         elif session == False:
             self.__splash_dialog.run(self.tr("Account already exists."))

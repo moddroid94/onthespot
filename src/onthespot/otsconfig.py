@@ -117,7 +117,6 @@ class Config:
             "download_locate_btn": True, # Add locate button to downloads
             "download_delete_btn": False, # Add delete button to downloads
             "theme": "dark", # Light\Dark
-            "free_soundcloud_account": True, # Application version
             "accounts": [
                 {
                     "uuid": "public_soundcloud",

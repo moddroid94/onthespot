@@ -66,7 +66,7 @@ class DownloadWorker(QObject):
 
                     item['item_status'] = "Downloading"
                     if self.gui:
-                        self.progress.emit(item, self.tr("Downloading"), 0)
+                        self.progress.emit(item, self.tr("Downloading"), 1)
 
                     token = get_account_token()
 
@@ -99,7 +99,7 @@ class DownloadWorker(QObject):
                     if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
                         item['item_status'] = 'Adding To M3U'
                         if self.gui:
-                            self.progress.emit(item, self.tr("Adding To M3U"), 0)
+                            self.progress.emit(item, self.tr("Adding To M3U"), 1)
 
                         path = config.get("m3u_name_formatter")
                         m3u_file = path.format(
@@ -250,12 +250,14 @@ class DownloadWorker(QObject):
                         self.progress.emit(item, self.tr("Downloaded"), 100)
 
                     time.sleep(config.get("download_delay"))
+                    self.readd_item_to_download_queue(item)
+                    continue
                 except Exception as e:
-                    self.progress.emit(item, self.tr("Failed"), 0)
                     logger.error(f"Unknown Exception: {str(e)}")
-
-                self.readd_item_to_download_queue(item)
-
+                    if self.gui:
+                        self.progress.emit(item, self.tr("Failed"), 0)
+                    self.readd_item_to_download_queue(item)
+                    continue
             else:
                 time.sleep(1)
 
