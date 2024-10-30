@@ -110,7 +110,7 @@ def soundcloud_login_user(account):
             "uuid": "public_soundcloud",
             "username": "N/A",
             "service": "soundcloud",
-            "status": "active",
+            "status": "error",
             "account_type": "N/A",
             "bitrate": "N/A",
             "login": {

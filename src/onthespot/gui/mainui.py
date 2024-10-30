@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
         downloadworker.start()  # Start the download worker thread
 
 
-        fill_account_pool.wait()
+        fillaccountpool.wait()
 
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
