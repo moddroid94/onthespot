@@ -88,9 +88,6 @@ class MainWindow(QMainWindow):
         downloadworker.progress.connect(self.update_item_in_download_list)  # Connect the signal to the update method
         downloadworker.start()  # Start the download worker thread
 
-
-        fillaccountpool.wait()
-
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
         self.theme = config.get("theme")
