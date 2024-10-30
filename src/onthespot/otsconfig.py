@@ -51,7 +51,7 @@ class Config:
             "download_delay": 3, # Seconds to wait before next download attempt
             "track_path_formatter": "Tracks" + os.path.sep + "{album_artist}" + os.path.sep + "[{year}] {album}" + os.path.sep + "{track_number}. {name}", # Track path format string
             "podcast_path_formatter": "Episodes" + os.path.sep + "{album}" + os.path.sep + "{name}", # Episode path format string
-            "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name}", # Playlist path format string
+            "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name} - {artist}", # Playlist path format string
             "m3u_name_formatter": "M3U" + os.path.sep + "{playlist_name} by {playlist_owner}", # M3U name format string
             "m3u_format": "m3u8", # M3U file format
             "max_retries": 3, # Number of times to retry before giving up on download

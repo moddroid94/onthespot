@@ -87,7 +87,7 @@ def spotify_login_user(account):
     try:
         with open(session_json_path, 'w') as file:
             json.dump(account['login'], file)
-        print(f"Login information for '{username}' written to {session_json_path}")
+        print(f"Login information for '{username[:4]}*******' written to {session_json_path}")
     except IOError as e:
         print(f"Error writing to file {session_json_path}: {e}")
 
@@ -146,7 +146,7 @@ def spotify_re_init_session(account):
 def spotify_get_token(parsing_index):
     try: 
         token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
-    except OSError:
+    except (OSError, AttributeError):
         logger.info(f'Failed to retreive token for {account_pool[parsing_index]["username"]}, attempting to reinit session.')
         spotify_re_init_session(account_pool[parsing_index])
         token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")

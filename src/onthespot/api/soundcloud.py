@@ -30,81 +30,96 @@ def soundcloud_parse_url(url):
 
 def soundcloud_login_user(account):
 
-    # Add support for logging in
-    if account['uuid'] == 'public_soundcloud':
-        response = requests.get("https://soundcloud.com")
+    try:
+        # Add support for logging in
+        if account['uuid'] == 'public_soundcloud':
+            response = requests.get("https://soundcloud.com")
 
 
-        page_text = response.text
+            page_text = response.text
 
-        client_id_url_match = re.finditer(
-            r"<script\s+crossorigin\s+src=\"([^\"]+)\"",
+            client_id_url_match = re.finditer(
+                r"<script\s+crossorigin\s+src=\"([^\"]+)\"",
+                    page_text,
+                )
+
+            *_, client_id_url_match = client_id_url_match
+
+            #if client_id_url_match:
+                #logger.info("Found client_id_url:", client_id_url_match.group(1))  # Access the captured group  
+            #else:
+                #logger.info(f"Failed to fetch free soundcloud client_id: {response.status_code}")
+
+            client_id_url = client_id_url_match.group(1)
+
+            app_version_match = re.search(
+                r'<script>window\.__sc_version="(\d+)"</script>',
                 page_text,
             )
+            if app_version_match is None:
+                raise Exception("Could not find app version in %s" % client_id_url)
 
-        *_, client_id_url_match = client_id_url_match
+            app_version = app_version_match.group(1)
 
-        #if client_id_url_match:
-            #logger.info("Found client_id_url:", client_id_url_match.group(1))  # Access the captured group  
-        #else:
-            #logger.info(f"Failed to fetch free soundcloud client_id: {response.status_code}")
+            response2 = requests.get(client_id_url)
 
-        client_id_url = client_id_url_match.group(1)
+            page_text2 = response2.text
 
-        app_version_match = re.search(
-            r'<script>window\.__sc_version="(\d+)"</script>',
-            page_text,
-        )
-        if app_version_match is None:
-            raise Exception("Could not find app version in %s" % client_id_url)
+            client_id_match = re.search(r'client_id:\s*"(\w+)"', page_text2)
+            assert client_id_match is not None  
+            client_id = client_id_match.group(1)
 
-        app_version = app_version_match.group(1)
+            accounts = config.get('accounts') 
+            # Remove public from list
+            accounts = [account for account in accounts if account["uuid"] != "public_soundcloud"]
 
-        response2 = requests.get(client_id_url)
-
-        page_text2 = response2.text
-
-        client_id_match = re.search(r'client_id:\s*"(\w+)"', page_text2)
-        assert client_id_match is not None  
-        client_id = client_id_match.group(1)
-
-        accounts = config.get('accounts') 
-        # Remove public from list
-        accounts = [account for account in accounts if account["uuid"] != "public_soundcloud"]
-
-        new_user = {
-            "uuid": "public_soundcloud",
-            "service": "soundcloud",
-            "active": True,
-            "login": {
-                "client_id": client_id,
-                "app_version": app_version,
-                "app_locale": "en",
+            new_user = {
+                "uuid": "public_soundcloud",
+                "service": "soundcloud",
+                "active": True,
+                "login": {
+                    "client_id": client_id,
+                    "app_version": app_version,
+                    "app_locale": "en",
+                }
             }
-        }
-        accounts.insert(0, new_user)
+            accounts.insert(0, new_user)
 
-        config.set_('accounts', accounts)
-        config.update()
+            config.set_('accounts', accounts)
+            config.update()
 
+            account_pool.append({
+                "uuid": "public_soundcloud",
+                "username": client_id,
+                "service": "soundcloud",
+                "status": "active",
+                "account_type": "public",
+                "bitrate": "128k",
+                "login": {
+                    "client_id": client_id,
+                    "app_version": app_version,
+                    "app_locale": "en",
+                }
+            })
+
+
+            logger.info(f"Refreshed SoundCloud tokens as {client_id} {app_version}")
+            return True
+    except:
         account_pool.append({
             "uuid": "public_soundcloud",
-            "username": client_id,
+            "username": "N/A",
             "service": "soundcloud",
-            "status": "active",
-            "account_type": "public",
-            "bitrate": "128k",
+            "status": "Error",
+            "account_type": "N/A",
+            "bitrate": "N/A",
             "login": {
-                "client_id": client_id,
-                "app_version": app_version,
+                "client_id": "N/A",
+                "app_version": "N/A",
                 "app_locale": "en",
             }
         })
-
-
-        logger.info(f"Refreshed SoundCloud tokens as {client_id} {app_version}")
-        return True
-
+        return False
 def soundcloud_get_token(parsing_index):
     accounts = config.get("accounts")
     client_id = accounts[parsing_index]['login']["client_id"]

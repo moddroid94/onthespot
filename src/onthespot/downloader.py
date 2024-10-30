@@ -29,6 +29,7 @@ class DownloadWorker(QObject):
     def start(self):
         self.thread.start()  # Start the thread
 
+
     def readd_item_to_download_queue(self, item):
         with download_queue_lock:
             try:
@@ -56,7 +57,7 @@ class DownloadWorker(QObject):
                             "Downloaded",
                             "Already Exists"
                         ):
-                            time.sleep(1)
+                            time.sleep(0.1)
                             self.readd_item_to_download_queue(item)
                             continue
                     except (RuntimeError, OSError):
@@ -126,9 +127,6 @@ class DownloadWorker(QObject):
                                     m3u_file.write(f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
                             else:
                                 logger.info(f"{file_path} already exists in the M3U file.")  # Log or handle the existing entry case
-
-
-
 
                     # Skip download if file exists under different extension
                     file_directory = os.path.dirname(file_path)
