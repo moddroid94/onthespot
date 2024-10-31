@@ -45,13 +45,16 @@ class DownloadActionsButtons(QWidget):
         pyperclip.copy("FIX ME")
 
     def cancel_item(self):
+        download_queue[self.item_id]['item_status'] = "Cancelled"
         download_queue[self.item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
         download_queue[self.item_id]['gui']['progress_bar'].setValue(0)
         self.cancel_btn.hide()
         self.retry_btn.show()
 
     def retry_item(self):
+        download_queue[self.item_id]['item_status'] = "Waiting"
         download_queue[self.item_id]['gui']['status_label'].setText(self.tr("Waiting"))
+        download_queue[self.item_id]['gui']['progress_bar'].setValue(0)
         self.retry_btn.hide()
         self.cancel_btn.show()
 
