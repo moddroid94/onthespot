@@ -4,7 +4,7 @@ from .otsconfig import config
 from PyQt6.QtCore import QThread, pyqtSignal
 from .api.spotify import spotify_login_user, spotify_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
-
+from .api.deezer import deezer_login_user, deezer_get_token
 
 logger = get_logger("spotify.downloader")
 
@@ -23,7 +23,24 @@ class FillAccountPool(QThread):
             if not account['active']:
                 continue
 
-            if service == 'spotify':
+            if service == 'deezer':
+                if self.gui is True:
+                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['uuid']), True)
+                try:
+                    if deezer_login_user(account) is True:
+                        if self.gui is True:
+                            self.progress.emit(self.tr('Session created for\n{0}!').format(account['uuid']), True)
+                        continue
+                    else:
+                        if self.gui is True:
+                            self.progress.emit(self.tr('Login failed for \n{0}!').format(account['uuid']), True)
+                        continue
+                except Exception as e:
+                    if self.gui is True:
+                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['uuid']), True)
+                    continue
+
+            elif service == 'spotify':
                 if self.gui is True:
                     self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['username']), True)
                 try:

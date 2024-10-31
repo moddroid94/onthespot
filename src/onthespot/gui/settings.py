@@ -19,14 +19,19 @@ def load_config(self):
     self.inp_language.insertItem(999, pirate_icon, "Contribute")
     self.inp_language.currentIndexChanged.connect(self.contribute)
 
+    deezer_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'deezer.png'))
+    self.inp_login_service.insertItem(0, deezer_icon, "")
+    #self.btn_login_add_soundcloud.setIcon(soundcloud_icon)
+
     spotify_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png'))
-    self.inp_login_service.insertItem(0, spotify_icon, "")
+    self.inp_login_service.insertItem(1, spotify_icon, "")
     #self.btn_login_add_spotify.setIcon(spotify_icon)
 
 
     soundcloud_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'soundcloud.png'))
-    self.inp_login_service.insertItem(1, soundcloud_icon, "")
+    self.inp_login_service.insertItem(2, soundcloud_icon, "")
     #self.btn_login_add_soundcloud.setIcon(soundcloud_icon)
+
 
     save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'save.png'))
     self.btn_save_config.setIcon(save_icon)

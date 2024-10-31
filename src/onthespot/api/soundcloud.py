@@ -6,10 +6,6 @@ from ..utils import make_call, conv_list_format
 
 SOUNDCLOUD_BASE = "https://api-v2.soundcloud.com"
 
-SOUNDCLOUD_CLIENT_ID = "AADp6RRMinJzmrc26qh92jqzJOF69SwF"
-SOUNDCLOUD_APP_VERSION = "1728640498"
-SOUNDCLOUD_APP_LOCALE = "en"
-
 logger = get_logger("worker.utility")
 
 def soundcloud_parse_url(url):

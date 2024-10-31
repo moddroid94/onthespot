@@ -2,49 +2,30 @@
 
 echo "========= OnTheSpot Linux Build Script ========="
 
-# Check the current folder and change directory if necessary
-FOLDER_NAME=$(basename "$PWD")
 
-if [ "$FOLDER_NAME" == "scripts" ]; then
-    echo "You are in the scripts folder. Changing to the parent directory..."
-    cd ..
-elif [ "$FOLDER_NAME" != "onthespot" ]; then
-    echo "Make sure that you are inside the project folder. Current folder is: $FOLDER_NAME"
-    exit 1
-fi
-
-# Clean up previous builds
-echo " => Cleaning up!"
+echo " => Cleaning up previous builds!"
 rm -f ./dist/onthespot_linux ./dist/onthespot_linux_ffm
 
-# Create virtual environment
-echo " => Creating virtual environment..."
-python3 -m venv venv
 
-# Activate virtual environment
-echo " => Activating virtual environment..."
+echo " => Creating and activating virtual environment..."
+python3 -m venv venv
 source ./venv/bin/activate
 
-# Upgrade pip and install dependencies using Bash
+
 echo " => Upgrading pip and installing necessary dependencies..."
 venv/bin/pip install --upgrade pip wheel pyinstaller
-
-# Install project-specific dependencies
-echo " => Installing project-specific dependencies..."
 venv/bin/pip install -r requirements.txt
 
-# Check for FFmpeg and set build options
+FFBIN=""
+NAME="onthespot-gui"
 if [ -f "ffbin_nix/ffmpeg" ]; then
     echo " => Found 'ffbin_nix' directory and ffmpeg binary. Including FFmpeg in the build."
     FFBIN="--add-binary=ffbin_nix/*:onthespot/bin/ffmpeg"
-    NAME="onthespot_linux_ffm"
-else
-    echo " => FFmpeg binary not found. Building without it."
-    FFBIN=""
-    NAME="onthespot_linux"
+    NAME="onthespot-gui-ffm"
 fi
 
-# Run PyInstaller
+
+echo " => Running PyInstaller to create executable..."
 pyinstaller --onefile \
     --hidden-import="zeroconf._utils.ipaddress" \
     --hidden-import="zeroconf._handlers.answers" \
@@ -58,13 +39,14 @@ pyinstaller --onefile \
     --icon="src/onthespot/resources/icons/onthespot.png" \
     src/portable.py
 
-# Set executable permissions
-echo " => Setting executable permissions..."
-[ -f ./dist/onthespot_linux ] && chmod +x ./dist/onthespot_linux
-[ -f ./dist/onthespot_linux_ffm ] && chmod +x ./dist/onthespot_linux_ffm
+echo " => Packaging executable as tar.gz archive..."
+cd dist
+tar -czvf OnTheSpot.tar.gz $NAME
+cd ..
 
-# Clean up unnecessary files
+
 echo " => Cleaning up temporary files..."
 rm -rf __pycache__ build venv *.spec
 
-echo " => Done!"
+
+echo " => Done! Packaged tar.gz is available in 'dist/OnTheSpot.tar.gz'."

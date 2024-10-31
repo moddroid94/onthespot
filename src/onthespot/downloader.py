@@ -254,6 +254,7 @@ class DownloadWorker(QObject):
                     continue
                 except Exception as e:
                     logger.error(f"Unknown Exception: {str(e)}")
+                    item['item_status'] = "Failed"
                     if self.gui:
                         self.progress.emit(item, self.tr("Failed"), 0)
                     self.readd_item_to_download_queue(item)
