@@ -89,12 +89,7 @@ def make_call(url, params=None, headers=None, skip_cache=False):
 def conv_list_format(items):
     if len(items) == 0:
         return ''
-    if len(items) == 1:
-        return items[0]
-    formatted = ""
-    for item in items:
-        formatted += item + config.get('metadata_seperator')
-    return formatted[:-2].strip()
+    return (config.get('metadata_seperator')).join(items)
 
 def format_track_path(item_metadata, item_service, item_type, parent_category, playlist_name, playlist_by):
     if config.get("translate_file_path"):

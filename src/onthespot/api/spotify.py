@@ -7,15 +7,8 @@ import requests
 from librespot.audio.decoders import AudioQuality
 from librespot.core import Session
 from librespot.zeroconf import ZeroconfServer
-from mutagen import File
-from mutagen.easyid3 import EasyID3, ID3
-from mutagen.flac import Picture, FLAC
-from mutagen.id3 import APIC, TXXX, USLT, WOAS
-from mutagen.mp4 import MP4, MP4Cover
-from mutagen.oggvorbis import OggVorbis
 from ..otsconfig import config, cache_dir
 from ..runtimedata import get_logger, account_pool
-from ..post_download import set_audio_tags
 from ..utils import make_call, conv_list_format
 
 logger = get_logger("spotify.api")
@@ -265,9 +258,11 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
                     f.write(merged_lyrics)
             if config.get('embed_lyrics'):
                 if item_type == "track":
-                    set_audio_tags(filepath, {"lyrics": merged_lyrics, "language": resp['lyrics']['language']}, item_id)
+                    return {"lyrics": merged_lyrics, "language": resp['lyrics']['language']}
                 if item_type == "episode":
-                    set_audio_tags(filepath, {"lyrics": merged_lyrics}, item_id)
+                    return {"lyrics": merged_lyrics}
+            else:
+                return True
     else:
         return False
 
@@ -505,7 +500,7 @@ def spotify_get_track_metadata(token, item_id):
     info['producers'] = conv_list_format([item for item in credits.get('producers', []) if isinstance(item, str)])
     info['writers'] = conv_list_format([item for item in credits.get('writers', []) if isinstance(item, str)])
     info['label'] = album_data.get('label', '')
-    info['copyright'] = [holder.get('text', '') for holder in album_data.get('copyrights', [])]
+    info['copyright'] = conv_list_format([holder.get('text', '') for holder in album_data.get('copyrights', [])])
     info['explicit'] = track_data.get('tracks', [{}])[0].get('explicit', False)
     info['isrc'] = track_data.get('tracks', [{}])[0].get('external_ids', {}).get('isrc', '')
     info['length'] = str(track_data.get('tracks', [{}])[0].get('duration_ms', ''))

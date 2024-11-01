@@ -8,7 +8,7 @@ from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
 from .otsconfig import config
-from .post_download import convert_audio_format, set_audio_tags, set_music_thumbnail
+from .post_download import convert_audio_format
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .accounts import get_account_token
@@ -189,7 +189,7 @@ class DownloadWorker(QObject):
                                         if self.gui:
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
                                     if len(data) == 0:
-                                        break  # Exit if no more data is being read  
+                                        break  # Exit if no more data is being read
                             default_format = ".ogg"
                             bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
 
@@ -213,36 +213,23 @@ class DownloadWorker(QObject):
                         self.readd_item_to_download_queue(item)
                         continue
 
-                    # Convert File Format
+                    # Lyrics
+                    if item_service == "spotify":
+                        item['item_status'] = 'Getting Lyrics'
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Getting Lyrics"), 99)
+                        extra_metadata = globals()[f"{item_service}_get_lyrics"](token, item_id, item_type, item_metadata, file_path)
+                        if isinstance(extra_metadata, dict):
+                            item_metadata.update(extra_metadata)
+
+                    # Convert file format and embed metadata
                     item['item_status'] = 'Converting'
                     if self.gui:
                         self.progress.emit(item, self.tr("Converting"), 99)
-                    convert_audio_format(temp_file_path, bitrate, default_format)
-
-                    # Set Audio Tags
-                    item['item_status'] = 'Embedding Metadata'
-                    if self.gui:
-                        self.progress.emit(item, self.tr("Embedding Metadata"), 99)
-                    set_audio_tags(temp_file_path, item_metadata, item_id)
-
-                    # Thumbnail
-                    item['item_status'] = 'Setting Thumbnail'
-                    if self.gui:
-                        self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
-                    try:
-                        set_music_thumbnail(temp_file_path, item_metadata['image_url'])
-                    except MissingSchema:
-                        self.progress.emit(item, self.tr("Failed To Set Thumbnail"), 99)
+                    convert_audio_format(temp_file_path, item_metadata, bitrate, default_format)
 
                     # Temp file finished, convert to regular format
                     os.rename(temp_file_path, file_path)
-
-                    # Lyrics
-                    item['item_status'] = 'Getting Lyrics'
-                    if item_service == "spotify":
-                        if self.gui:
-                            self.progress.emit(item, self.tr("Getting Lyrics"), 99)
-                        globals()[f"{item_service}_get_lyrics"](token, item_id, item_type, item_metadata, file_path)
 
                     item['item_status'] = 'Downloaded'
                     logger.info("Item Successfully Downloaded")
