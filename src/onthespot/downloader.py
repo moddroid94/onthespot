@@ -8,7 +8,7 @@ from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
 from .otsconfig import config
-from .post_download import convert_audio_format
+from .post_download import convert_audio_format, set_music_thumbnail
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .accounts import get_account_token
@@ -223,10 +223,18 @@ class DownloadWorker(QObject):
                             item_metadata.update(extra_metadata)
 
                     # Convert file format and embed metadata
-                    item['item_status'] = 'Converting'
-                    if self.gui:
-                        self.progress.emit(item, self.tr("Converting"), 99)
-                    convert_audio_format(temp_file_path, item_metadata, bitrate, default_format)
+                    if not config.get('force_raw')
+                        item['item_status'] = 'Converting'
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Converting"), 99)
+                        convert_audio_format(temp_file_path, item_metadata, bitrate, default_format)
+
+                        # Thumbnail
+                        if config.get('save_album_cover') or config.get('embed_cover'):
+                            item['item_status'] = 'Setting Thumbnail'
+                            if self.gui:
+                                self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
+                            set_music_thumbnail(temp_file_path, item_metadata)
 
                     # Temp file finished, convert to regular format
                     os.rename(temp_file_path, file_path)

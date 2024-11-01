@@ -1,6 +1,5 @@
 import os
 import subprocess
-from pathlib import Path
 from io import BytesIO
 import requests
 from PIL import Image
@@ -12,53 +11,30 @@ logger = get_logger("worker.media")
 
 def convert_audio_format(filename, metadata, bitrate, default_format):
     if os.path.isfile(os.path.abspath(filename)):
-        target_path = Path(filename)
-        filetype = target_path.suffix
-        temp_name = os.path.join(
-            target_path.parent, "."+target_path.stem
-            )
+        target_path = os.path.abspath(filename)
+        file_name = os.path.basename(target_path)
+        filetype = os.path.splitext(file_name)[1]
+        file_stem = os.path.splitext(file_name)[0]
+
+        temp_name = os.path.join(os.path.dirname(target_path), "." + file_stem + filetype)
+
         if os.path.isfile(temp_name):
             os.remove(temp_name)
+
         os.rename(filename, temp_name)
         # Prepare default parameters
         # Existing command initialization
-        command = [
-            config.get('_ffmpeg_bin_path'),
-            '-i', temp_name
-        ]
+        command = [config.get('_ffmpeg_bin_path'), '-i', temp_name]
 
         # Set log level based on environment variable
         if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
-            command = command + ['-loglevel', 'error', '-hide_banner', '-nostats']
-
-        # Fetch thumbnail
-        if config.get('save_album_cover') or config.get('embed_cover'):
-            image_path = os.path.join(os.path.dirname(filename), 'cover')
-            image_path += "." + config.get("album_cover_format")
-            logger.info(f"Fetching item thumbnail")
-            img = Image.open(BytesIO(requests.get(metadata['image_url']).content))
-            buf = BytesIO()
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-            img.save(buf, format=config.get("album_cover_format"))
-            buf.seek(0)
-
-            with open(image_path, 'wb') as cover:
-                cover.write(buf.read())
-            if config.get('embed_cover') and filetype != '.wav':
-                command += [
-                    '-i', image_path, '-map', '0:a', '-map', '1:v', '-metadata:s:v:0', 'comment=Cover (front)'
-                    ]
-                if filetype == '.flac':
-                    command += ['-disposition:v', 'attached_pic']
-                else:
-                    command += ['-disposition:v:1', 'attached_pic']
+            command += ['-loglevel', 'error', '-hide_banner', '-nostats']
 
         # Check if media format is service default
         if filetype == default_format:
-            command = command + ['-c:a', 'copy']
+            command += ['-c:a', 'copy']
         else:
-            command = command + ['-ar', '44100', '-ac', '2', '-b:a', bitrate]
+            command += ['-ar', '44100', '-ac', '2', '-b:a', bitrate]
 
         # Add user defined parameters
         for param in config.get('ffmpeg_args'):
@@ -210,8 +186,56 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
             subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
         else:
             subprocess.check_call(command, shell=False)
-        os.remove(temp_name)
-        if not config.get('save_album_cover'):
-            os.remove(image_path)
     else:
         raise FileNotFoundError
+
+
+def set_music_thumbnail(filename, metadata):
+        target_path = os.path.abspath(filename)
+        file_name = os.path.basename(target_path)
+        filetype = os.path.splitext(file_name)[1]
+        file_stem = os.path.splitext(file_name)[0]
+
+        temp_name = os.path.join(os.path.dirname(target_path), "." + file_stem + filetype)
+
+        # Fetch thumbnail
+        image_path = os.path.join(os.path.dirname(filename), 'cover')
+        image_path += "." + config.get("album_cover_format")
+        logger.info(f"Fetching item thumbnail")
+        img = Image.open(BytesIO(requests.get(metadata['image_url']).content))
+        buf = BytesIO()
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        img.save(buf, format=config.get("album_cover_format"))
+        buf.seek(0)
+        with open(image_path, 'wb') as cover:
+            cover.write(buf.read())
+
+        if config.get('embed_cover') and filetype not in ('.wav', 'ogg'):
+            if os.path.isfile(temp_name):
+                os.remove(temp_name)
+
+            os.rename(filename, temp_name)
+
+            command = [config.get('_ffmpeg_bin_path'), '-i', temp_name]
+
+            # Set log level based on environment variable
+            if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
+                command += ['-loglevel', 'error', '-hide_banner', '-nostats']
+
+            command += [
+                '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic', 
+                '-metadata:s:v', 'title=Album Cover', '-metadata:s:v', 'comment=Cover (front)'
+                ]
+
+            command.append(filename)
+
+            if os.name == 'nt':
+                subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
+            else:
+                subprocess.check_call(command, shell=False)
+
+            os.remove(temp_name)
+
+        if not config.get('save_album_cover'):
+            os.remove(image_path)
