@@ -3,8 +3,8 @@ import json
 import html.parser
 import uuid
 import requests
-from Crypto.Hash import MD5
-from Crypto.Cipher import AES, Blowfish
+from Cryptodome.Hash import MD5
+from Cryptodome.Cipher import AES, Blowfish
 from binascii import a2b_hex, b2a_hex
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool
