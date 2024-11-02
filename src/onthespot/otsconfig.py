@@ -58,6 +58,7 @@ class Config:
             "max_search_results": 10, # Number of search results to display of each type
             "media_format": "mp3", # Song track media format
             "podcast_media_format": "mp3", # Podcast track media format
+            "file_bitrate": "320k",
             "illegal_character_replacement": "-", # Character used to replace illegal characters or values in path
             "force_raw": False, # Skip media conversion and metadata writing
             "chunk_size": 50000, # Chunk size in bytes to download in

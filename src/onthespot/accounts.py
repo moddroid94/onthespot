@@ -25,19 +25,19 @@ class FillAccountPool(QThread):
 
             if service == 'deezer':
                 if self.gui is True:
-                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['uuid']), True)
+                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['arl']), True)
                 try:
                     if deezer_login_user(account) is True:
                         if self.gui is True:
-                            self.progress.emit(self.tr('Session created for\n{0}!').format(account['uuid']), True)
+                            self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['arl']), True)
                         continue
                     else:
                         if self.gui is True:
-                            self.progress.emit(self.tr('Login failed for \n{0}!').format(account['uuid']), True)
+                            self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['arl']), True)
                         continue
                 except Exception as e:
                     if self.gui is True:
-                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['uuid']), True)
+                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['arl']), True)
                     continue
 
             elif service == 'spotify':

@@ -186,10 +186,8 @@ def genurlkey(songid, md5origin, mediaver=4, fmt=1):
 
 def deezer_login_user(account):
     uuid = account['uuid']
-    bitrate = 'Wip'
-    account_type = 'Wip'
     arl = account['login']['arl']
-    header = {
+    headers = {
         'Pragma': 'no-cache',
         'Origin': 'https://www.deezer.com',
         'Accept-Encoding': 'gzip, deflate, br',
@@ -204,8 +202,43 @@ def deezer_login_user(account):
         'DNT': '1',
     }
     session = requests.session()
-    session.headers.update(header)
+    session.headers.update(headers)
     session.cookies.update({'arl': arl, 'comeback': '1'})
+
+    api_token = None  
+
+    # Prepare to call the API  
+    method = 'deezer.getUserData'  
+    args = {}  
+    params = {}  
+
+    # Main API call logic  
+
+    p = {  
+        'api_version': "1.0",  
+        'api_token': 'null',
+        'input': '3',  
+        'method': method  
+    }  
+    p.update(params)  
+    
+
+    resp = session.post(  
+        "http://www.deezer.com/ajax/gw-light.php",  
+        params=p,  
+        timeout=30,  
+        json=args,  
+        headers=headers
+    )
+
+    user_data = resp.json()
+    with open('resp.json', 'w') as json_file:  
+        json.dump(resp.json(), json_file, indent=4)  # Save with 
+    bitrate = '128k'
+    if user_data["results"]["USER"]["OPTIONS"]["web_lossless"]:
+        bitrate = '1411k'
+    elif user_data["results"]["USER"]["OPTIONS"]["web_hq"]:
+        bitrate = '320k'
 
     try:
         account_pool.append({
@@ -213,10 +246,11 @@ def deezer_login_user(account):
             "username": arl,
             "service": "deezer",
             "status": "active",
-            "account_type": account_type,
+            "account_type": "premium" if user_data["results"]["USER"]["OPTIONS"]["web_lossless"] else "free",
             "bitrate": bitrate,
             "login": {
                 "arl": arl,
+                "license_token": user_data["results"]["USER"]["OPTIONS"]["license_token"],
                 "session": session
             }
         })
@@ -225,19 +259,20 @@ def deezer_login_user(account):
         account_pool.append({
             "uuid": uuid,
             "username": username,
-            "service": "spotify",
+            "service": "deezer",
             "status": "error",
             "account_type": "N/A",
             "bitrate": "N/A",
             "login": {
                 "arl": "",
+                "license_token": "",
                 "session": "",
             }
         })
         return False
 
 def deezer_get_token(parsing_index):
-    return ''
+    return account_pool[config.get('parsing_acc_sn')]['login']['session']
 
 def deezer_get_search_results(token, search_term, content_types):
     params = {}
