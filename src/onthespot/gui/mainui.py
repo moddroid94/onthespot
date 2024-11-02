@@ -14,10 +14,10 @@ from ..runtimedata import get_logger, parsing, pending, download_queue, account_
 from .thumb_listitem import LabelWithThumb
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
+from ..api.deezer import deezer_get_track_metadata, deezer_add_account
 from ..accounts import get_account_token, FillAccountPool
 from ..search import get_search_results
 from ..downloader import DownloadWorker
-
 logger = get_logger('gui.main_ui')
 
 
@@ -44,7 +44,6 @@ class MainWindow(QMainWindow):
     # Remove Later
     def contribute(self):
         if self.inp_language.currentIndex() == self.inp_language.count() - 1:
-            from ..queue import add_item_to_download_list
             url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
             open_item(url)
 
@@ -484,6 +483,10 @@ class MainWindow(QMainWindow):
             check_row = 0
             while check_row < self.tbl_dl_progress.rowCount():
                 item_id = self.tbl_dl_progress.item(check_row, 0).text()
+                try:
+                    item_id = int(item_id)
+                except ValueError:
+                    pass
                 logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
                 if item_id in download_queue:
                     if download_queue[item_id]['item_status'] in (
@@ -550,15 +553,21 @@ class MainWindow(QMainWindow):
         save_config(self)
 
     def set_login_fields(self):
-        # Spotify
+        # Deezer
         if self.inp_login_service.currentIndex() == 0:
             self.lb_login_username.hide()
             self.inp_login_username.hide()
-            self.lb_login_password.hide()
-            self.inp_login_password.hide()
+            self.lb_login_password.show()
+            self.lb_login_password.setText(self.tr("ARL"))
+            self.inp_login_password.show()
+            self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
-            self.btn_login_add.setText(self.tr("Add Spotify Account"))
-            self.btn_login_add.clicked.connect(self.add_spotify_account)
+            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.clicked.connect(lambda:
+                (self.__splash_dialog.run(self.tr("Account added, please restart the app.")) or True) and
+                deezer_add_account(self.inp_login_password.text()) and
+                self.lb_login_password.clear()
+                )
 
         # Soundcloud
         elif self.inp_login_service.currentIndex() == 1:
@@ -568,8 +577,24 @@ class MainWindow(QMainWindow):
             self.lb_login_password.show()
             self.lb_login_password.setText(self.tr("Token"))
             self.inp_login_password.show()
+            self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
             self.btn_login_add.setText(self.tr("Add Account"))
+
+        # Spotify
+        if self.inp_login_service.currentIndex() == 2:
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.hide()
+            self.inp_login_password.hide()
+            try:
+                self.btn_login_add.clicked.disconnect()
+            except TypeError:
+                # Default value does not have disconnect
+                pass
+            self.btn_login_add.show()
+            self.btn_login_add.setText(self.tr("Add Spotify Account"))
+            self.btn_login_add.clicked.connect(self.add_spotify_account)
 
     def add_spotify_account(self):
         logger.info('Add spotify account clicked ')

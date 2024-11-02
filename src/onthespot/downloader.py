@@ -2,6 +2,8 @@ import os
 import traceback
 import time
 import subprocess
+import threading
+import requests
 from requests.exceptions import MissingSchema
 from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
@@ -11,9 +13,10 @@ from .otsconfig import config
 from .post_download import convert_audio_format, set_music_thumbnail
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
+from .api.deezer import deezer_get_track_metadata, get_song_infos_from_deezer_website, genurlkey, calcbfkey, decryptfile
 from .accounts import get_account_token
 from .utils import sanitize_data, conv_list_format, format_track_path
-import threading
+
 
 logger = get_logger("spotify.downloader")
 
@@ -23,8 +26,8 @@ class DownloadWorker(QObject):
     def __init__(self, gui=False):
         super().__init__()
         self.gui = gui
-        self.thread = threading.Thread(target=self.run)  # Create a thread for the run method
-        self.is_running = True  # Flag to control the thread's execution
+        self.thread = threading.Thread(target=self.run)
+        self.is_running = True
 
     def start(self):
         self.thread.start()  # Start the thread
@@ -133,7 +136,7 @@ class DownloadWorker(QObject):
                     base_file_path = os.path.splitext(os.path.basename(file_path))[0]
 
                     try:
-                        files_in_directory = os.listdir(file_directory)  # Attempt to list files  
+                        files_in_directory = os.listdir(file_directory)
                         matching_files = [file for file in files_in_directory if file.startswith(base_file_path) and not file.endswith('.lrc')]
                         
                         if matching_files:
@@ -142,7 +145,7 @@ class DownloadWorker(QObject):
                                 "Downloading",
                                 "Adding To M3U"
                                 ):
-                                    self.progress.emit(item, self.tr("Already Exists"), 100)  # Emit progress
+                                    self.progress.emit(item, self.tr("Already Exists"), 100)
                             item['item_status'] = 'Already Exists'
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
                             time.sleep(1)
@@ -189,7 +192,7 @@ class DownloadWorker(QObject):
                                         if self.gui:
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
                                     if len(data) == 0:
-                                        break  # Exit if no more data is being read
+                                        break
                             default_format = ".ogg"
                             bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
 
@@ -203,6 +206,80 @@ class DownloadWorker(QObject):
 
                             default_format = ".mp3"
                             bitrate = "128k"
+
+
+                        elif item_service == 'deezer':
+                            song = get_song_infos_from_deezer_website(item['item_id'])
+
+                            song_quality = 1
+                            if int(song.get("FILESIZE_FLAC")) > 0:
+                                song_quality = 9
+                            elif int(song.get("FILESIZE_MP3_320")) > 0:
+                                song_quality = 3
+                            elif int(song.get("FILESIZE_MP3_256")) > 0:
+                                song_quality = 5
+
+                            urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
+                            key = calcbfkey(song["SNG_ID"])
+                            url = "https://e-cdns-proxy-%s.dzcdn.net/mobile/1/%s" % (song["MD5_ORIGIN"][0], urlkey.decode())
+                            fh = requests.get(url)
+
+                            logger.info(f"Deezer song returned, attempting fallback {fh.status_code}")
+                            # Sometimes it is because we asked for a song quality that is actually not available
+                            if fh.status_code == 403:
+                                if song.get("FALLBACK"):
+                                    song = song.get("FALLBACK")
+                                    song_quality = 1
+                                    if int(song.get("FILESIZE_FLAC")) > 0:
+                                        song_quality = 9
+                                    elif int(song.get("FILESIZE_MP3_320")) > 0:
+                                        song_quality = 3
+                                    elif int(song.get("FILESIZE_MP3_256")) > 0:
+                                        song_quality = 5
+                                    print(song_quality)
+                                else:
+                                    song_quality = 1
+                                urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
+                                url = "https://e-cdns-proxy-%s.dzcdn.net/mobile/1/%s" % (song["MD5_ORIGIN"][0], urlkey.decode())
+                                fh = requests.get(url)
+
+                            logger.info(f"Deezer fallback returned, attempting lowest quality: {fh.status_code}")
+                            # if song fallback and song quality other than one not available we can attempt song_quality 1 again...
+                            if fh.status_code == 403:
+                                song_quality = 1
+                                urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
+                                url = "https://e-cdns-proxy-%s.dzcdn.net/mobile/1/%s" % (song["MD5_ORIGIN"][0], urlkey.decode())
+                                fh = requests.get(url)
+
+                            if fh.status_code != 200:
+                                # I don't why this happens. to reproduce:
+                                # go to https://www.deezer.com/de/playlist/1180748301
+                                # search for Moby
+                                # open in a new tab the song Moby - Honey
+                                # this will give you a 404!?
+                                # but you can play the song in the browser
+                                logger.info(f"Deezer download attempts failed: {fh.status_code}")
+                                item['item_status'] = "Failed"
+                                if self.gui:
+                                    self.progress.emit(item, self.tr("Failed"), 0)
+                                self.readd_item_to_download_queue(item)
+                                continue
+
+
+                            with open(temp_file_path, "w+b") as fo:
+                                # add songcover and DL first 30 sec's that are unencrypted
+                                decryptfile(fh, key, fo)
+
+                            print(song_quality)
+                            default_format = ".mp3"
+                            bitrate = "128k"
+                            if song_quality == 9:
+                                default_format = ".flac"
+                                bitrate = "1411k"
+                            elif song_quality == 5:
+                                bitrate = "320k"
+                            elif song_quality == 3:
+                                bitrate = "256k"
 
                     except (RuntimeError):
                         # Likely Ratelimit
@@ -259,5 +336,5 @@ class DownloadWorker(QObject):
 
     def stop(self):
         logger.info('Stopping Download Worker')
-        self.is_running = False  # Set the flag to stop the thread
-        self.thread.join()  # Wait for the thread to finish
+        self.is_running = False
+        self.thread.join()

@@ -561,6 +561,8 @@ def spotify_get_episode_metadata(token, episode_id_str):
     info['length'] = str(episode_data.get('duration_ms', ''))
     info['explicit'] = episode_data.get('explicit', '')
     info['is_playable'] = episode_data.get('is_playable', '')
+    info['item_url'] = episode_data.get('show', [{}])[0].get('external_urls', {}).get('spotify', '')
+
     
     return info
 

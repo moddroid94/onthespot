@@ -7,6 +7,7 @@ from .parse_item import parsingworker
 from .search import get_search_results
 from .api.spotify import spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
 from .api.soundcloud import soundcloud_get_track_metadata
+from ..api.deezer import deezer_get_track_metadata, deezer_add_account
 from .downloader import DownloadWorker
 from .casualsnek import start_snake_game
 import threading
@@ -109,6 +110,7 @@ class CLI(Cmd):
         elif arg == "add_account":
             print("soundcloud")
             print("spotify")
+            print("deezer")
 
         elif arg == "add_account spotify":
             print("\033[32mLogin service started, select 'OnTheSpot' under devices in the Spotify Desktop App.\033[0m")
@@ -128,6 +130,12 @@ class CLI(Cmd):
 
         elif arg == "add_account soundcloud":
             print("not implemented yet")
+
+        elif arg == "add_account deezer":
+            print("\033[32madd_account deezer [arl]\033[0m")
+
+        elif len(parts) == 3 and parts[0] == "add_account" and parts[1] == "deezer":
+            deezer_add_account(parts[2])
 
         elif len(parts) == 2 and parts[0] == "select_account":
 

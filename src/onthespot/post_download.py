@@ -178,7 +178,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                 command += ['-metadata', 'valence={}'.format(value)]
 
         # Add output parameter at last
-        command.append(filename)
+        command += [filename]
         logger.info(
             f'Converting media with ffmpeg. Built commandline {command}'
             )
@@ -234,7 +234,7 @@ def set_music_thumbnail(filename, metadata):
                     '-metadata:s:v', 'title=Cover', '-metadata:s:v', 'comment=Cover (front)'
                     ]
 
-            command.append(filename)
+            command += [filename]
 
             if os.name == 'nt':
                 subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)

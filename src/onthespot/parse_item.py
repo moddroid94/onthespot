@@ -3,41 +3,49 @@ import time
 from .otsconfig import config
 from .api.spotify import spotify_get_token, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
-from .runtimedata import get_logger, parsing, download_queue, pending
+from .runtimedata import get_logger, parsing, download_queue, pending, account_pool
 from .accounts import get_account_token
-
+from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deezer_get_playlist_data, deezer_get_artist_albums
 
 logger = get_logger('gui.main_ui')
 
 SOUNDCLOUD_URL_REGEX = re.compile(r"https://soundcloud.com/[-\w:/]+")
-SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(intl-([a-zA-Z]+)/|)(?P<Type>track|album|artist|playlist|episode|show)/(?P<ID>[0-9a-zA-Z]{22})(\?si=.+?)?$")
+SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<ID>[0-9a-zA-Z]{22})(\?si=.+?)?$")
+DEEZER_URL_REGEX = re.compile(r'https:\/\/www\.deezer\.com\/(?:[a-z]{2}\/)?(?P<type>album|playlist|track|artist)\/(?P<id>\d+)')
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 #YOUTUBE_URL_REGEX = re.compile(r"https://www\.youtube\.com/watch\?v=[-\w]")
 
 def parse_url(url):
-    accounts = config.get('accounts')
-    account_service = accounts[config.get('parsing_acc_sn')]['service']
+    account_service = account_pool[config.get('parsing_acc_sn')]['service']
+
     if account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
         item_type, item_id = soundcloud_parse_url(url)
         item_service = "soundcloud"
+
     elif account_service == 'spotify' and re.match(SPOTIFY_URL_REGEX, url):
         match = re.search(SPOTIFY_URL_REGEX, url)
-        item_id = match.group("ID")
-        item_type = match.group("Type")
+        item_id = match.group("id")
+        item_type = match.group("type")
         item_service = "spotify"
-    # Spotify Liked Songs
     elif account_service == 'spotify' and url == 'https://open.spotify.com/collection/tracks':
         item_id = None
         item_type = 'liked_songs'
         item_service = "spotify"
-    # Spotify Your Episodes
     elif account_service == 'spotify' and url == 'https://open.spotify.com/collection/your-episodes':
         item_id = None
         item_type = 'your_episodes'
         item_service = "spotify"
+
+    elif account_service == 'deezer' and re.match(DEEZER_URL_REGEX, url):
+        match = re.search(DEEZER_URL_REGEX, url)
+        item_id = match.group("id")
+        item_type = match.group("type")
+        item_service = 'deezer'
+
     else:
         logger.info(f'Invalid Url: {url}')
         return False
+
     parsing[item_id] = {
         'item_url': url, 
         'item_service': item_service,
@@ -46,7 +54,6 @@ def parse_url(url):
     }
 
 def parsingworker():
-    time.sleep(8)
     while True:
         if parsing:
             item_id = next(iter(parsing))
@@ -171,5 +178,45 @@ def parsingworker():
                         # Items are added to pending in function to avoid complexity
                         soundcloud_get_set_items(token, item['item_url'])
 
+                elif current_service == "deezer":
+
+                    if current_type == "track":
+                        pending[item_id] = {
+                            'item_service': current_service,
+                            'item_type': current_type,
+                            'item_id': item_id,
+                            'parent_category': 'track'
+                            }
+                        continue
+                    elif current_type == "album":
+                        tracks = deezer_get_album_items(current_id)
+                        for index, track in enumerate(tracks):
+                            item_id = track['id']
+                            pending[item_id] = {
+                                'item_service': 'deezer',
+                                'item_type': 'track',
+                                'item_id': item_id,
+                                'parent_category': 'album'
+                                }
+                        continue
+                    elif current_type == "playlist":
+                        tracks = deezer_get_playlist_items(current_id)
+                        playlist_name, playlist_by = deezer_get_playlist_data(current_id)
+                        for index, track in enumerate(tracks):
+                            item_id = track['id']
+                            pending[item_id] = {
+                                'item_service': 'deezer',
+                                'item_type': 'track',
+                                'item_id': item_id,
+                                'parent_category': 'playlist',
+                                'playlist_name': playlist_name,
+                                'playlist_by': playlist_by
+                                }
+                        continue
+                    elif current_type == "artist":
+                        album_urls = deezer_get_artist_albums(current_id)
+                        for index, album_url in enumerate(album_urls):
+                            parse_url(album_url)
+                        continue
         else:
             time.sleep(4)
