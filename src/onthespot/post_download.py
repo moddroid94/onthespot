@@ -1,6 +1,7 @@
 import os
 import subprocess
 from io import BytesIO
+import base64
 import requests
 from PIL import Image
 from .otsconfig import config
@@ -211,7 +212,7 @@ def set_music_thumbnail(filename, metadata):
         with open(image_path, 'wb') as cover:
             cover.write(buf.read())
 
-        if config.get('embed_cover') and filetype not in ('.wav', 'ogg'):
+        if config.get('embed_cover') and filetype != '.wav':
             if os.path.isfile(temp_name):
                 os.remove(temp_name)
 
@@ -223,10 +224,15 @@ def set_music_thumbnail(filename, metadata):
             if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
                 command += ['-loglevel', 'error', '-hide_banner', '-nostats']
 
-            command += [
-                '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic', 
-                '-metadata:s:v', 'title=Album Cover', '-metadata:s:v', 'comment=Cover (front)'
-                ]
+            if filetype == '.ogg':
+                command += [
+                    "-acodec", "copy", "-map", "0:a", "-metadata:s:a", f"METADATA_BLOCK_PICTURE={base64.b64encode(buf.read()).decode('utf-8')}"
+                    ]
+            else:
+                command += [
+                    '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic', 
+                    '-metadata:s:v', 'title=Cover', '-metadata:s:v', 'comment=Cover (front)'
+                    ]
 
             command.append(filename)
 

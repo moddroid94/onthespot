@@ -223,7 +223,7 @@ class DownloadWorker(QObject):
                             item_metadata.update(extra_metadata)
 
                     # Convert file format and embed metadata
-                    if not config.get('force_raw')
+                    if not config.get('force_raw'):
                         item['item_status'] = 'Converting'
                         if self.gui:
                             self.progress.emit(item, self.tr("Converting"), 99)
