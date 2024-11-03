@@ -230,7 +230,7 @@ class DownloadWorker(QObject):
                             headers = {
                                 'Pragma': 'no-cache',
                                 'Origin': 'https://www.deezer.com',
-                                'Accept-Encoding': 'gzip, deflate, br',
+                                'Accept-Encoding': 'utf-8',
                                 'Accept-Language': 'en-US,en;q=0.9',
                                 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
                                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
