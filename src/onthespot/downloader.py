@@ -15,7 +15,7 @@ from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_infos_from_deezer_website, genurlkey, calcbfkey, decryptfile
 from .accounts import get_account_token
-from .utils import sanitize_data, conv_list_format, format_track_path
+from .utils import sanitize_data, format_track_path
 
 
 logger = get_logger("spotify.downloader")
@@ -203,16 +203,30 @@ class DownloadWorker(QObject):
                             else:
                                 subprocess.check_call(command, shell=False)
 
-
                             default_format = ".mp3"
                             bitrate = "128k"
-
 
                         elif item_service == 'deezer':
                             song = get_song_infos_from_deezer_website(item['item_id'])
 
-                            print(song)
-                            print(song["TRACK_TOKEN"])
+                            song_quality = 1
+                            song_format = 'MP3_128'
+                            bitrate = "128k"
+                            default_format = ".mp3"
+                            if int(song.get("FILESIZE_FLAC")) > 0:
+                                song_quality = 9
+                                song_format ='FLAC'
+                                bitrate = "1411k"
+                                default_format = ".flac"
+                            elif int(song.get("FILESIZE_MP3_320")) > 0:
+                                song_quality = 3
+                                song_format = 'MP3_320'
+                                bitrate = "320k"
+                            elif int(song.get("FILESIZE_MP3_256")) > 0:
+                                song_quality = 5
+                                song_format = 'MP3_256'
+                                bitrate = "256k"
+
                             headers = {
                                 'Pragma': 'no-cache',
                                 'Origin': 'https://www.deezer.com',
@@ -242,39 +256,23 @@ class DownloadWorker(QObject):
                                 },
                                 headers = headers
                             ).json()
-                            print(track_data)
-                            url = track_data['data'][0]['media'][0]['sources'][0]['url']
-                            print(url)
-                            fh = requests.get(url)
 
-                            song_quality = 1
-                            song_format = 'MP3_128'
-                            bitrate = "128k"
-                            default_format = ".mp3"
-                            if int(song.get("FILESIZE_FLAC")) > 0:
-                                song_quality = 9
-                                song_format ='FLAC'
-                                bitrate = "1411k"
-                                default_format = ".flac"
-                            elif int(song.get("FILESIZE_MP3_320")) > 0:
-                                song_quality = 3
-                                song_format = 'MP3_320'
-                                bitrate = "320k"
-                            elif int(song.get("FILESIZE_MP3_256")) > 0:
-                                song_quality = 5
-                                song_format = 'MP3_256'
-                                bitrate = "256k"
+                            url = track_data['data'][0]['media'][0]['sources'][0]['url']
+                            fh = requests.get(url)
 
                             urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
                             key = calcbfkey(song["SNG_ID"])
 
                             # if song fallback and song quality other than one not available we can attempt song_quality 1 again...
-                            if fh.status_code == 403:
-                                logger.info(f"Deezer fallback returned, attempting lowest quality: {fh.status_code}")
-                                song_quality = 1
-                                urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
-                                url = "https://e-cdns-proxy-%s.dzcdn.net/mobile/1/%s" % (song["MD5_ORIGIN"][0], urlkey.decode())
-                                fh = requests.get(url)
+                            #if fh.status_code == 403:
+                                #logger.info(f"Deezer fallback returned, attempting lowest quality: {fh.status_code}")
+                                #song_quality = 1
+                                #song_format = 'MP3_128'
+                                #bitrate = "128k"
+                                #default_format = ".mp3"
+                                #urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
+                                #url = "https://e-cdns-proxy-%s.dzcdn.net/mobile/1/%s" % (song["MD5_ORIGIN"][0], urlkey.decode())
+                                #fh = requests.get(url)
 
                             if fh.status_code != 200:
                                 logger.info(f"Deezer download attempts failed: {fh.status_code}")

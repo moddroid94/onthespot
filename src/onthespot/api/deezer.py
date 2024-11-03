@@ -201,7 +201,7 @@ def deezer_login_user(account):
         'Referer': 'https://www.deezer.com/login',
         'DNT': '1',
     }
-    session = requests.session()
+    session = requests.Session()
     session.headers.update(headers)
     session.cookies.update({'arl': arl, 'comeback': '1'})
 
@@ -232,8 +232,7 @@ def deezer_login_user(account):
     )
 
     user_data = resp.json()
-    with open('resp.json', 'w') as json_file:  
-        json.dump(resp.json(), json_file, indent=4)  # Save with 
+
     bitrate = '128k'
     if user_data["results"]["USER"]["OPTIONS"]["web_lossless"]:
         bitrate = '1411k'
