@@ -121,7 +121,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
             elif key == 'bpm' and config.get("embed_bpm"):
                 if filetype == '.mp3':
                     command += ['-metadata', 'TBPM={}'.format(value)]
-                if filetype == '.m4a':
+                elif filetype == '.m4a':
                     command += ['-metadata', 'tmpo={}'.format(value)]
                 else:
                     command += ['-metadata', 'bpm={}'.format(value)]
@@ -148,7 +148,10 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                     command += ['-metadata', 'explicit={}'.format(value)]
 
             elif key == 'lyrics' and config.get("embed_lyrics"):
-                command += ['-metadata', 'lyrics={}'.format(value)]
+                if filetype == '.mp3':
+                    command += ['-metadata', 'USLT={}'.format(value)]
+                else:
+                    command += ['-metadata', 'lyrics={}'.format(value)]
 
             elif key == 'time_signature' and config.get("embed_timesignature"):
                 command += ['-metadata', 'timesignature={}'.format(value)]
@@ -225,8 +228,22 @@ def set_music_thumbnail(filename, metadata):
                 command += ['-loglevel', 'error', '-hide_banner', '-nostats']
 
             if filetype == '.ogg':
+                #with open(image_path, "rb") as image_file:
+                #    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+                #
+                # Argument list too long, downscale the image instead
+
+                with Image.open(image_path) as img:
+                    new_size = (250, 250) # 250 seems to be the max
+                    img = img.resize(new_size, Image.Resampling.LANCZOS)
+                    with BytesIO() as output:
+                        img.save(output, format=config.get("album_cover_format"))
+                        output.seek(0)
+                        base64_image = base64.b64encode(output.read()).decode('utf-8')
+
+                # METADATA_BLOCK_PICTURE is a better supported format but I don't know how to write it
                 command += [
-                    "-acodec", "copy", "-map", "0:a", "-metadata:s:a", f"METADATA_BLOCK_PICTURE={base64.b64encode(buf.read()).decode('utf-8')}"
+                    "-c", "copy", "-metadata", f"coverart={base64_image}", "-metadata", f"coverartmime=image/{config.get('album_cover_format')}"
                     ]
             else:
                 command += [
