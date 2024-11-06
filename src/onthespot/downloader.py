@@ -18,7 +18,7 @@ from .accounts import get_account_token
 from .utils import sanitize_data, format_track_path
 
 
-logger = get_logger("spotify.downloader")
+logger = get_logger("downloader")
 
 
 class DownloadWorker(QObject):

@@ -18,6 +18,7 @@ from ..api.deezer import deezer_get_track_metadata, deezer_add_account
 from ..accounts import get_account_token, FillAccountPool
 from ..search import get_search_results
 from ..downloader import DownloadWorker
+
 logger = get_logger('gui.main_ui')
 
 

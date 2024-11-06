@@ -11,7 +11,7 @@ from ..otsconfig import config, cache_dir
 from ..runtimedata import get_logger, account_pool
 from ..utils import make_call, conv_list_format
 
-logger = get_logger("spotify.api")
+logger = get_logger("api.spotify")
 
 
 def spotify_new_session():

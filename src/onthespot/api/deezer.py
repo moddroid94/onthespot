@@ -10,7 +10,7 @@ from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool
 from ..utils import conv_list_format, make_call
 
-logger = get_logger("spotify.api")
+logger = get_logger("api.deezer")
 
 DEEZER_BASE = "https://api.deezer.com/"
 

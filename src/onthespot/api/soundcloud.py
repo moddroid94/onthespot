@@ -6,7 +6,7 @@ from ..utils import make_call, conv_list_format
 
 SOUNDCLOUD_BASE = "https://api-v2.soundcloud.com"
 
-logger = get_logger("worker.utility")
+logger = get_logger("api.soundcloud")
 
 def soundcloud_parse_url(url):
         headers = {}

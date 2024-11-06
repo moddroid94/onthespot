@@ -7,7 +7,7 @@ from PIL import Image
 from .otsconfig import config
 from .runtimedata import get_logger
 
-logger = get_logger("worker.media")
+logger = get_logger("post_download")
 
 
 def convert_audio_format(filename, metadata, bitrate, default_format):

@@ -6,7 +6,7 @@ from .api.spotify import spotify_login_user, spotify_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
 from .api.deezer import deezer_login_user, deezer_get_token
 
-logger = get_logger("spotify.downloader")
+logger = get_logger("accounts")
 
 class FillAccountPool(QThread):
     finished = pyqtSignal()

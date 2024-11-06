@@ -7,7 +7,7 @@ from .runtimedata import get_logger, parsing, download_queue, pending, account_p
 from .accounts import get_account_token
 from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deezer_get_playlist_data, deezer_get_artist_albums
 
-logger = get_logger('gui.main_ui')
+logger = get_logger('parse_item')
 
 SOUNDCLOUD_URL_REGEX = re.compile(r"https://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
