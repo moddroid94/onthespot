@@ -1,21 +1,22 @@
 import logging
-import sys  
-from .runtimedata import account_pool, pending, download_queue, download_queue_lock # Import account_pool  
+import sys
+import threading
+from cmd import Cmd
+import os
+import time
+import curses
+from .runtimedata import account_pool, pending, download_queue, download_queue_lock # Import account_pool
 from .otsconfig import config_dir, config
-from .accounts import FillAccountPool, get_account_token  # Adjust the import based on your structure  
-from .parse_item import parsingworker  
+from .accounts import FillAccountPool, get_account_token  # Adjust the import based on your structure
+from .parse_item import parsingworker
 from .search import get_search_results
 from .api.spotify import spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
 from .api.soundcloud import soundcloud_get_track_metadata
 from ..api.deezer import deezer_get_track_metadata, deezer_add_account
 from .downloader import DownloadWorker
 from .casualsnek import start_snake_game
-import threading
-from cmd import Cmd
-import os
 from .parse_item import parse_url
-import time
-import curses
+
 
 logging.disable(logging.CRITICAL)
 
@@ -210,7 +211,7 @@ class CLI(Cmd):
 
     def display_queue(self, stdscr):
         keep_running = True
-        #curses.curs_set(0) 
+        #curses.curs_set(0)
         curses.start_color()
         curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)

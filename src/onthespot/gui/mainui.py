@@ -32,7 +32,7 @@ class QueueWorker(QThread):
         while True:
             if pending:
                 try:
-                    item_id = next(iter(pending)) 
+                    item_id = next(iter(pending))
                     item = pending.pop(item_id)
                     token = get_account_token()
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
@@ -79,14 +79,14 @@ class MainWindow(QMainWindow):
         self.__splash_dialog = _dialog
 
         # Start/create session builder and queue processor
-        fillaccountpool = FillAccountPool(gui=True)  
+        fillaccountpool = FillAccountPool(gui=True)
         fillaccountpool.finished.connect(self.session_load_done)
         fillaccountpool.progress.connect(self.__show_popup_dialog)
         fillaccountpool.start()
 
 
         queueworker = QueueWorker()
-        queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method  
+        queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method
         queueworker.start()
 
         downloadworker = DownloadWorker(gui=True)
@@ -273,7 +273,7 @@ class MainWindow(QMainWindow):
             trash_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'trash.png'))
             btn.setIcon(trash_icon)
             #btn.setText(self.tr(" Remove "))
-            
+
             btn.clicked.connect(lambda x, index=rows: self.user_table_remove_click(index))
             btn.setMinimumHeight(30)
 
@@ -672,19 +672,19 @@ class MainWindow(QMainWindow):
 
             def download_btn_clicked(item_name, item_url, item_service, item_type, item_id, ):
                 parsing[item_id] = {
-                    'item_url': item_url, 
+                    'item_url': item_url,
                     'item_service': item_service,
-                    'item_type': item_type, 
+                    'item_type': item_type,
                     'item_id': item_id
                 }
                 self.__splash_dialog.run(self.tr("{0} is being parsed and will be added to the download queue shortly.").format(f"{item_type.title()}: {item_name}"))
 
-            btn.clicked.connect(lambda x, 
-                            item_name=result['item_name'], 
-                            item_url=result['item_url'], 
-                            item_type=result['item_type'], 
-                            item_id=result['item_id'], 
-                            item_service=result['item_service']: 
+            btn.clicked.connect(lambda x,
+                            item_name=result['item_name'],
+                            item_url=result['item_url'],
+                            item_type=result['item_type'],
+                            item_id=result['item_id'],
+                            item_service=result['item_service']:
                             download_btn_clicked(item_name, item_url, item_service, item_type, item_id))
 
             btn.setMinimumHeight(30)

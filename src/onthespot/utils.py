@@ -58,7 +58,7 @@ def translate(string):
         )
         return response.json()["sentences"][0]["trans"]
     except (requests.exceptions.RequestException, KeyError, IndexError):
-        return string 
+        return string
 
 def make_call(url, params=None, headers=None, skip_cache=False):
     if not skip_cache:

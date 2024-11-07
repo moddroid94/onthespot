@@ -47,9 +47,9 @@ def parse_url(url):
         return False
 
     parsing[item_id] = {
-        'item_url': url, 
+        'item_url': url,
         'item_service': item_service,
-        'item_type': item_type, 
+        'item_type': item_type,
         'item_id': item_id
     }
 
@@ -69,7 +69,7 @@ def parsingworker():
                 current_type = item['item_type']
                 current_id = item['item_id']
                 token = get_account_token()
-                
+
                 if current_service == "spotify":
                     if current_type == "track":
                         pending[item_id] = {

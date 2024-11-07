@@ -52,7 +52,7 @@ class DownloadWorker(QObject):
                         item_service = item['item_service']
                         item_type = item['item_type']
                         item_id = item['item_id']
-                    
+
                         if item['item_status'] in (
                             "Cancelled",
                             "Failed",
@@ -95,8 +95,6 @@ class DownloadWorker(QObject):
 
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-                    item['file_path'] = file_path
-
                     # M3U
                     if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
                         item['item_status'] = 'Adding To M3U'
@@ -120,7 +118,7 @@ class DownloadWorker(QObject):
                             with open(m3u_path, 'w') as m3u_file:
                                 m3u_file.write("#EXTM3U\n")
 
-                        # Check if the item_path is already in the M3U file  
+                        # Check if the item_path is already in the M3U file
                         with open(m3u_path, 'r') as m3u_file:
                             m3u_contents = m3u_file.readlines()
 
@@ -137,7 +135,7 @@ class DownloadWorker(QObject):
                     try:
                         files_in_directory = os.listdir(file_directory)
                         matching_files = [file for file in files_in_directory if file.startswith(base_file_path) and not file.endswith('.lrc')]
-                        
+
                         if matching_files:
                             if self.gui:
                                 if item['item_status'] in (
@@ -263,10 +261,10 @@ class DownloadWorker(QObject):
                                 url = "https://e-cdns-proxy-%s.dzcdn.net/mobile/1/%s" % (song["MD5_ORIGIN"][0], urlkey.decode())
 
                             file = requests.get(url, stream=True)
-                            
+
                             if file.status_code == 200:
                                 total_size = int(file.headers.get('content-length', 0))
-                                downloaded = 0  
+                                downloaded = 0
                                 data_chunks = b''  # empty bytes object
 
                                 for data in file.iter_content(chunk_size=config.get("chunk_size")):
@@ -318,6 +316,7 @@ class DownloadWorker(QObject):
                         file_path += "." + config.get("podcast_media_format")
 
                     os.rename(temp_file_path, file_path)
+                    item['file_path'] = file_path
 
                     # Convert file format and embed metadata
                     if not config.get('force_raw'):
@@ -351,7 +350,7 @@ class DownloadWorker(QObject):
 
                     time.sleep(config.get("download_delay"))
                     self.readd_item_to_download_queue(item)
-                    
+
                     if os.path.exists(temp_file_path):
                         os.remove(temp_file_path)
                     if os.path.exists(file_path):

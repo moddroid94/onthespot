@@ -39,14 +39,14 @@ def spotify_new_session():
             else:
                 # I wish there was a way to get credentials without saving to
                 # a file and parsing it as so
-                try:  
-                    with open(session_json_path, 'r') as file:  
-                        zeroconf_login = json.load(file)  
-                except FileNotFoundError:  
-                    print(f"Error: The file {session_json_path} was not found.")  
-                except json.JSONDecodeError:  
-                    print("Error: Failed to decode JSON from the file.")  
-                except Exception as e:  
+                try:
+                    with open(session_json_path, 'r') as file:
+                        zeroconf_login = json.load(file)
+                except FileNotFoundError:
+                    print(f"Error: The file {session_json_path} was not found.")
+                except json.JSONDecodeError:
+                    print("Error: Failed to decode JSON from the file.")
+                except Exception as e:
                     print(f"An error occurred: {e}")
                 cfg_copy = config.get('accounts').copy()
                 new_user = {
@@ -90,7 +90,7 @@ def spotify_login_user(account):
         # For some reason initialising session as None prevents premature application exit
         session = None
         session = Session.Builder(conf=config).stored_file(session_json_path).create()
-        logger.debug("Session created") 
+        logger.debug("Session created")
         logger.info(f"Login successful for user '{username[:4]}*******'")
         account_type = session.get_user_attribute("type")
         bitrate = "160k"
@@ -146,7 +146,7 @@ def spotify_re_init_session(account):
 
 
 def spotify_get_token(parsing_index):
-    try: 
+    try:
         token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
     except (OSError, AttributeError):
         logger.info(f'Failed to retreive token for {account_pool[parsing_index]["username"]}, attempting to reinit session.')
@@ -275,7 +275,7 @@ def spotify_get_playlist_items(token, playlist_id):
     offset = 0
     limit = 100
     url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode'
- 
+
     while True:
         headers = {'Authorization': f'Bearer {token}'}
         params = {
@@ -404,9 +404,9 @@ def spotify_get_search_results(token, search_term, content_types):
         },
         headers={"Authorization": "Bearer %s" % token},
     ).json()
-    
+
     search_results = []
- 
+
     for key in data.keys():
         for item in data[key]["items"]:
             item_type = item['type']
@@ -475,9 +475,9 @@ def spotify_get_track_metadata(token, item_id):
         credits[role_title] = [
             artist.get('name', '') for artist in credit_block.get('artists', [])
         ]
-    
 
-    info['artists'] = artists  
+
+    info['artists'] = artists
     info['album_name'] = track_data.get('tracks', [{}])[0].get('album', {}).get("name", '')
     info['album_type'] = album_data.get('album_type', '')
     info['album_artists'] = album_data.get('artists', [{}])[0].get('name', '')
@@ -506,7 +506,7 @@ def spotify_get_track_metadata(token, item_id):
     info['isrc'] = track_data.get('tracks', [{}])[0].get('external_ids', {}).get('isrc', '')
     info['length'] = str(track_data.get('tracks', [{}])[0].get('duration_ms', ''))
     info['item_url'] = track_data.get('tracks', [{}])[0].get('external_urls', {}).get('spotify', '')
-    info['popularity'] = track_data.get('tracks', [{}])[0].get('popularity', '')  # unused  
+    info['popularity'] = track_data.get('tracks', [{}])[0].get('popularity', '')  # unused
     info['scraped_song_id'] = track_data.get('tracks', [{}])[0].get('id', '')
     info['is_playable'] = track_data.get('tracks', [{}])[0].get('is_playable', False)
 
@@ -543,7 +543,7 @@ def spotify_get_episode_metadata(token, episode_id_str):
     logger.info(f"Get episode info for episode by id '{episode_id_str}'")
 
     headers = {"Authorization": f"Bearer {token}"}
- 
+
     episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id_str}", headers=headers)
     info = {}
 
@@ -562,9 +562,8 @@ def spotify_get_episode_metadata(token, episode_id_str):
     info['length'] = str(episode_data.get('duration_ms', ''))
     info['explicit'] = episode_data.get('explicit', '')
     info['is_playable'] = episode_data.get('is_playable', '')
-    info['item_url'] = episode_data.get('show', [{}])[0].get('external_urls', {}).get('spotify', '')
+    info['item_url'] = episode_data.get('show', {}).get('external_urls', {}).get('spotify', '')
 
-    
     return info
 
 

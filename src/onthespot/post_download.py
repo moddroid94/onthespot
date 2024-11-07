@@ -247,7 +247,7 @@ def set_music_thumbnail(filename, metadata):
                     ]
             else:
                 command += [
-                    '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic', 
+                    '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic',
                     '-metadata:s:v', 'title=Cover', '-metadata:s:v', 'comment=Cover (front)'
                     ]
 

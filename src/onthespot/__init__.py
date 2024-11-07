@@ -14,7 +14,7 @@ def main():
     logger = get_logger('__init__')
     logger.info('Starting application in \n3\n2\n1')
     app = QApplication(sys.argv)
-    
+
     # Set Application Version
     version = "v1.0.1"
     logger.info(f'OnTheSpot Version: {version}')
