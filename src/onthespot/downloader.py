@@ -345,6 +345,10 @@ class DownloadWorker(QObject):
                     continue
                 except Exception as e:
                     logger.error(f"Unknown Exception: {str(e)}")
+                    if os.path.exists(temp_file_path):
+                        os.remove(temp_file_path)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
                     item['item_status'] = "Failed"
                     if self.gui:
                         self.progress.emit(item, self.tr("Failed"), 0)
