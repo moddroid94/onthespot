@@ -31,11 +31,14 @@ def open_item(item):
         subprocess.Popen(['xdg-open', item])
 
 
-def sanitize_data(value, allow_path_separators=False, escape_quotes=False):
-    logger.info(
-        f'Sanitising string: "{value}"; '
-        f'Allow path separators: {allow_path_separators}'
-        )
+def sanitize_data(value):
+    try:
+        logger.info(
+            f'Sanitising string: "{value}"; '
+            f'Allow path separators: {allow_path_separators}'
+            )
+    except UnicodeEncodeError:
+        pass
     if value is None:
         return ''
     char = config.get("illegal_character_replacement")
