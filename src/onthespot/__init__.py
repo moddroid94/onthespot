@@ -16,7 +16,7 @@ def main():
     app = QApplication(sys.argv)
     
     # Set Application Version
-    version = "v1.0.0"
+    version = "v1.0.1"
     logger.info(f'OnTheSpot Version: {version}')
 
     config.set_("version", version)
