@@ -572,7 +572,7 @@ class MainWindow(QMainWindow):
             self.btn_login_add.clicked.connect(lambda:
                 (self.__splash_dialog.run(self.tr("Account added, please restart the app.")) or True) and
                 deezer_add_account(self.inp_login_password.text()) and
-                self.lb_login_password.clear()
+                self.inp_login_password.clear()
                 )
 
         # Soundcloud
@@ -581,11 +581,16 @@ class MainWindow(QMainWindow):
             self.lb_login_username.setText(self.tr("Client ID"))
             self.inp_login_username.show()
             self.lb_login_password.show()
-            self.lb_login_password.setText(self.tr("Token"))
+            self.lb_login_password.setText(self.tr("App Version"))
             self.inp_login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
             self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.clicked.connect(lambda:
+                (self.__splash_dialog.run(self.tr("Currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
+                self.inp_login_username.clear() and
+                self.inp_login_password.clear()
+                )
 
         # Spotify
         if self.inp_login_service.currentIndex() == 2:

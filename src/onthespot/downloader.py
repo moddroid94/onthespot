@@ -13,7 +13,7 @@ from .otsconfig import config
 from .post_download import convert_audio_format, set_music_thumbnail
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
-from .api.deezer import deezer_get_track_metadata, get_song_infos_from_deezer_website, genurlkey, calcbfkey, decryptfile
+from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
 from .accounts import get_account_token
 from .utils import sanitize_data, format_track_path
 
@@ -207,7 +207,7 @@ class DownloadWorker(QObject):
                             bitrate = "128k"
 
                         elif item_service == 'deezer':
-                            song = get_song_infos_from_deezer_website(item['item_id'])
+                            song = get_song_info_from_deezer_website(item['item_id'])
 
                             song_quality = 1
                             song_format = 'MP3_128'
@@ -228,18 +228,9 @@ class DownloadWorker(QObject):
                                 bitrate = "256k"
 
                             headers = {
-                                'Pragma': 'no-cache',
                                 'Origin': 'https://www.deezer.com',
                                 'Accept-Encoding': 'utf-8',
-                                'Accept-Language': 'en-US,en;q=0.9',
-                                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                                'Accept': '*/*',
-                                'Cache-Control': 'no-cache',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Connection': 'keep-alive',
                                 'Referer': 'https://www.deezer.com/login',
-                                'DNT': '1',
                             }
 
                             track_data = token.post(
@@ -249,7 +240,7 @@ class DownloadWorker(QObject):
                                     'media': [{
                                         'type': "FULL",
                                         'formats': [
-                                            { 'cipher': "BF_CBC_STRIPE", 'format': 'FLAC' }
+                                            { 'cipher': "BF_CBC_STRIPE", 'format': song_format }
                                         ]
                                     }],
                                     'track_tokens': [song["TRACK_TOKEN"]]
@@ -259,30 +250,42 @@ class DownloadWorker(QObject):
 
                             try:
                                 url = track_data['data'][0]['media'][0]['sources'][0]['url']
-                                fh = requests.get(url)
-                                urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
                             except KeyError:
-                                # User is likely using a free account
+                                # Fallback to lowest quality
                                 song_quality = 1
                                 song_format = 'MP3_128'
                                 bitrate = "128k"
                                 default_format = ".mp3"
                                 urlkey = genurlkey(song["SNG_ID"], song["MD5_ORIGIN"], song["MEDIA_VERSION"], song_quality)
                                 url = "https://e-cdns-proxy-%s.dzcdn.net/mobile/1/%s" % (song["MD5_ORIGIN"][0], urlkey.decode())
-                                fh = requests.get(url)
 
-                            if fh.status_code != 200:
-                                logger.info(f"Deezer download attempts failed: {fh.status_code}")
+                            file = requests.get(url, stream=True)
+                            
+                            if file.status_code == 200:
+                                total_size = int(file.headers.get('content-length', 0))
+                                downloaded = 0  
+                                data_chunks = b''  # empty bytes object
+
+                                for data in file.iter_content(chunk_size=config.get("chunk_size")):
+                                    downloaded += len(data)
+                                    data_chunks += data
+
+                                    if self.gui and downloaded != total_size:
+                                        self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
+
+                                key = calcbfkey(song["SNG_ID"])
+
+                                if self.gui:
+                                    self.progress.emit(item, self.tr("Decrypting"), 99)
+                                with open(temp_file_path, "wb") as fo:
+                                    decryptfile(data_chunks, key, fo)
+
+                            else:
+                                logger.info(f"Deezer download attempts failed: {file.status_code}")
                                 item['item_status'] = "Failed"
                                 if self.gui:
                                     self.progress.emit(item, self.tr("Failed"), 0)
                                 self.readd_item_to_download_queue(item)
-                                continue
-
-                            key = calcbfkey(song["SNG_ID"])
-                            with open(temp_file_path, "w+b") as fo:
-                                decryptfile(fh, key, fo)
-
                     except (RuntimeError):
                         # Likely Ratelimit
                         logger.info("Download failed: {item}")

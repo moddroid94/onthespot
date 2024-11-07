@@ -68,23 +68,24 @@ def spotify_new_session():
 
 
 def spotify_login_user(account):
-    # I'd prefer to use 'Session.Builder().stored(credentials).create but
-    # it seems to be broken, loading from credentials file instead
-    uuid = account['uuid']
-    username = account['login']['username']
-
-    session_dir = os.path.join(cache_dir(), "onthespot", "sessions")
-    os.makedirs(session_dir, exist_ok=True)
-    session_json_path = os.path.join(session_dir, f"ots_login_{uuid}.json")
-    print(session_json_path)
     try:
-        with open(session_json_path, 'w') as file:
-            json.dump(account['login'], file)
-        print(f"Login information for '{username[:4]}*******' written to {session_json_path}")
-    except IOError as e:
-        print(f"Error writing to file {session_json_path}: {e}")
+        # I'd prefer to use 'Session.Builder().stored(credentials).create but
+        # it seems to be broken, loading from credentials file instead
+        uuid = account['uuid']
+        username = account['login']['username']
 
-    try:
+        session_dir = os.path.join(cache_dir(), "onthespot", "sessions")
+        os.makedirs(session_dir, exist_ok=True)
+        session_json_path = os.path.join(session_dir, f"ots_login_{uuid}.json")
+        print(session_json_path)
+        try:
+            with open(session_json_path, 'w') as file:
+                json.dump(account['login'], file)
+            print(f"Login information for '{username[:4]}*******' written to {session_json_path}")
+        except IOError as e:
+            print(f"Error writing to file {session_json_path}: {e}")
+
+
         config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
         # For some reason initialising session as None prevents premature application exit
         session = None
@@ -108,7 +109,8 @@ def spotify_login_user(account):
             }
         })
         return True
-    except ConnectionRefusedError:
+    except Exception as e:
+        logger.error(f"Unknown Exception: {str(e)}")
         account_pool.append({
             "uuid": uuid,
             "username": username,

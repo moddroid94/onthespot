@@ -103,7 +103,7 @@ def deezer_get_track_metadata(token, item_id):
 
     return info
 
-def get_song_infos_from_deezer_website(id):
+def get_song_info_from_deezer_website(id):
     url = f"https://www.deezer.com/us/track/{id}"
     session = account_pool[config.get('parsing_acc_sn')]['login']['session']
     resp = session.get(url)
@@ -151,18 +151,19 @@ def blowfishDecrypt(data, key):
     c = Blowfish.new(key.encode(), Blowfish.MODE_CBC, iv)
     return c.decrypt(data)
 
-def decryptfile(fh, key, fo):
+def decryptfile(data_chunks, key, fo):
     """
-    Decrypt data from file <fh>, and write to file <fo>.
-    decrypt using blowfish with <key>.
+    Decrypt data from bytes <data_chunks>, and write to file <fo>.
+    Decrypt using blowfish with <key>.
     Only every third 2048 byte block is encrypted.
     """
-    blockSize = 2048
-    i = 0
+    blockSize = 2048  
+    i = 0  
+    total_length = len(data_chunks)
 
-    for data in fh.iter_content(blockSize):
-        if not data:
-            break
+    for start in range(0, total_length, blockSize):
+        end = min(start + blockSize, total_length)
+        data = data_chunks[start:end]
 
         isEncrypted = ((i % 3) == 0)
         isWholeBlock = len(data) == blockSize
@@ -185,61 +186,41 @@ def genurlkey(songid, md5origin, mediaver=4, fmt=1):
     return hexaescrypt(data, "jo6aey6haid2Teih")
 
 def deezer_login_user(account):
-    uuid = account['uuid']
-    arl = account['login']['arl']
-    headers = {
-        'Pragma': 'no-cache',
-        'Origin': 'https://www.deezer.com',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': '*/*',
-        'Cache-Control': 'no-cache',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Connection': 'keep-alive',
-        'Referer': 'https://www.deezer.com/login',
-        'DNT': '1',
-    }
-    session = requests.Session()
-    session.headers.update(headers)
-    session.cookies.update({'arl': arl, 'comeback': '1'})
-
-    api_token = None  
-
-    # Prepare to call the API  
-    method = 'deezer.getUserData'  
-    args = {}  
-    params = {}  
-
-    # Main API call logic  
-
-    p = {  
-        'api_version': "1.0",  
-        'api_token': 'null',
-        'input': '3',  
-        'method': method  
-    }  
-    p.update(params)  
-    
-
-    resp = session.post(  
-        "http://www.deezer.com/ajax/gw-light.php",  
-        params=p,  
-        timeout=30,  
-        json=args,  
-        headers=headers
-    )
-
-    user_data = resp.json()
-
-    bitrate = '128k'
-    if user_data["results"]["USER"]["OPTIONS"]["web_lossless"]:
-        bitrate = '1411k'
-    elif user_data["results"]["USER"]["OPTIONS"]["web_hq"]:
-        bitrate = '320k'
-
     try:
+        uuid = account['uuid']
+        arl = account['login']['arl']
+        headers = {
+            'Origin': 'https://www.deezer.com',
+            'Accept-Encoding': 'utf-8',
+            'Referer': 'https://www.deezer.com/login',
+        }
+        session = requests.Session()
+        session.headers.update(headers)
+        session.cookies.update({'arl': arl, 'comeback': '1'})
+
+        api_token = None
+
+        # Prepare to call the API
+        method = 'deezer.getUserData'
+        params = {  
+            'api_version': "1.0",
+            'api_token': 'null',
+            'input': '3',
+            'method': 'deezer.getUserData'
+        }  
+
+        user_data = session.post(
+            "http://www.deezer.com/ajax/gw-light.php",
+            params=params,
+            headers=headers
+        ).json()
+
+        bitrate = '128k'
+        if user_data["results"]["USER"]["OPTIONS"]["web_lossless"]:
+            bitrate = '1411k'
+        elif user_data["results"]["USER"]["OPTIONS"]["web_hq"]:
+            bitrate = '320k'
+
         account_pool.append({
             "uuid": uuid,
             "username": arl,
@@ -254,10 +235,11 @@ def deezer_login_user(account):
             }
         })
         return True
-    except ConnectionRefusedError:
+    except Exception as e:
+        logger.error(f"Unknown Exception: {str(e)}")
         account_pool.append({
             "uuid": uuid,
-            "username": username,
+            "username": arl,
             "service": "deezer",
             "status": "error",
             "account_type": "N/A",

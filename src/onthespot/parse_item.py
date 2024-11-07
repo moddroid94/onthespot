@@ -171,7 +171,6 @@ def parsingworker():
                             'item_id': item_id,
                             'parent_category': 'track'
                             }
-                        time.sleep(4)
                         continue
 
                     if current_type in ["album", "playlist"]:
