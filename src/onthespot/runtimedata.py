@@ -51,7 +51,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 sys.excepthook = handle_exception
 
-def log_function_memory(func):
+def log_function_memory(wrap_func):
     tracemalloc.start()
     top_limit = 10
     def display_top(snapshot, snapshot_log_prefix, key_type='lineno'):

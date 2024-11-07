@@ -175,6 +175,7 @@ class DownloadWorker(QObject):
                             quality = AudioQuality.HIGH
                             if account.get_user_attribute("type") == "premium" and item_type == 'track':
                                 quality = AudioQuality.VERY_HIGH
+                            bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
 
                             stream = account.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
 
@@ -192,8 +193,9 @@ class DownloadWorker(QObject):
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
                                     if len(data) == 0:
                                         break
-
-                            bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
+                            stream.input_stream.stream().close()
+                            stream_internal = stream.input_stream.stream()
+                            del stream_internal, stream.input_stream
 
                         elif item_service == "soundcloud":
                             bitrate = "128k"

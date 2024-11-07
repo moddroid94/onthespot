@@ -2,6 +2,7 @@ import os
 import subprocess
 from io import BytesIO
 import base64
+import time
 import requests
 from PIL import Image
 from .otsconfig import config
@@ -64,7 +65,10 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                 command += ['-metadata', 'date={}'.format(value)]
 
             elif key in ['discnumber', 'disc_number', 'disknumber', 'disk_number'] and config.get("embed_discnumber"):
-                command += ['-metadata', 'disc={}/{}'.format(value, metadata['total_discs'])]
+                if filetype == '.mp3':
+                    command += ['-metadata', 'TPOS={}/{}'.format(value, metadata['total_discs'])]
+                else:
+                    command += ['-metadata', 'disc={}/{}'.format(value, metadata['total_discs'])]
 
             elif key in ['track_number', 'tracknumber'] and config.get("embed_tracknumber"):
                 command += ['-metadata', 'track={}/{}'.format(value, metadata['total_tracks'])]
@@ -256,6 +260,8 @@ def set_music_thumbnail(filename, metadata):
                 f'Setting thumbnail with ffmpeg. Built commandline {command}'
                 )
             if os.name == 'nt':
+                # Wait for windows file lock to release
+                time.sleep(0.5)
                 subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
             else:
                 subprocess.check_call(command, shell=False)
