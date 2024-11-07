@@ -170,7 +170,6 @@ class MainWindow(QMainWindow):
         self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
         self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
 
-
         self.inp_download_queue_show_waiting.stateChanged.connect(self.update_table_visibility)
         self.inp_download_queue_show_failed.stateChanged.connect(self.update_table_visibility)
         self.inp_download_queue_show_cancelled.stateChanged.connect(self.update_table_visibility)
@@ -181,7 +180,7 @@ class MainWindow(QMainWindow):
         window_width = self.width()
         logger.info(f"Setting table item properties {window_width}")
         # Sessions table
-        self.tbl_sessions.setSortingEnabled(True)
+        #self.tbl_sessions.setSortingEnabled(True)
         self.tbl_sessions.horizontalHeader().setSectionsMovable(True)
         self.tbl_sessions.horizontalHeader().setSectionsClickable(True)
         self.tbl_sessions.horizontalHeader().resizeSection(0, 16)
@@ -192,7 +191,7 @@ class MainWindow(QMainWindow):
         self.tbl_sessions.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
         self.tbl_sessions.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         # Search results table
-        self.tbl_search_results.setSortingEnabled(True)
+        #self.tbl_search_results.setSortingEnabled(True)
         self.tbl_search_results.horizontalHeader().setSectionsMovable(True)
         self.tbl_search_results.horizontalHeader().setSectionsClickable(True)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
@@ -201,7 +200,7 @@ class MainWindow(QMainWindow):
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         # Download progress table
-        self.tbl_dl_progress.setSortingEnabled(True)
+        #self.tbl_dl_progress.setSortingEnabled(True)
         self.tbl_dl_progress.horizontalHeader().setSectionsMovable(True)
         self.tbl_dl_progress.horizontalHeader().setSectionsClickable(True)
         if config.get("debug_mode"):

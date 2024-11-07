@@ -17,7 +17,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
         filetype = os.path.splitext(file_name)[1]
         file_stem = os.path.splitext(file_name)[0]
 
-        temp_name = os.path.join(os.path.dirname(target_path), "." + file_stem + filetype)
+        temp_name = os.path.join(os.path.dirname(target_path), "~" + file_stem + filetype)
 
         if os.path.isfile(temp_name):
             os.remove(temp_name)
@@ -200,7 +200,7 @@ def set_music_thumbnail(filename, metadata):
         filetype = os.path.splitext(file_name)[1]
         file_stem = os.path.splitext(file_name)[0]
 
-        temp_name = os.path.join(os.path.dirname(target_path), "." + file_stem + filetype)
+        temp_name = os.path.join(os.path.dirname(target_path), "~" + file_stem + filetype)
 
         # Fetch thumbnail
         image_path = os.path.join(os.path.dirname(filename), 'cover')

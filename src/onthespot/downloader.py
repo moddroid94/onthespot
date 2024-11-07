@@ -93,7 +93,6 @@ class DownloadWorker(QObject):
                     directory, file_name = os.path.split(file_path)
                     temp_file_path = os.path.join(directory, '~' + file_name)
 
-
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
                     item['file_path'] = file_path
@@ -168,6 +167,8 @@ class DownloadWorker(QObject):
                     try:
                         if item_service == "spotify":
                             account = account_pool[config.get('parsing_acc_sn')]['login']['session']
+                            default_format = ".ogg"
+                            temp_file_path += default_format
                             if item_type == "track":
                                 audio_key = TrackId.from_base62(item_id)
                             elif item_type == "episode":
@@ -193,18 +194,19 @@ class DownloadWorker(QObject):
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
                                     if len(data) == 0:
                                         break
-                            default_format = ".ogg"
+
                             bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
 
                         elif item_service == "soundcloud":
+                            bitrate = "128k"
+                            default_format = ".mp3"
+                            temp_file_path += default_format
+                            # Don't know how to emit progress from ffmpeg
                             command = [config.get('_ffmpeg_bin_path'), "-loglevel", "error", "-i", f"{item_metadata['file_url']}", "-c", "copy", temp_file_path]
                             if os.name == 'nt':
                                 subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
                             else:
                                 subprocess.check_call(command, shell=False)
-
-                            default_format = ".mp3"
-                            bitrate = "128k"
 
                         elif item_service == 'deezer':
                             song = get_song_info_from_deezer_website(item['item_id'])
@@ -226,6 +228,7 @@ class DownloadWorker(QObject):
                                 song_quality = 5
                                 song_format = 'MP3_256'
                                 bitrate = "256k"
+                            temp_file_path += default_format
 
                             headers = {
                                 'Origin': 'https://www.deezer.com',
@@ -307,22 +310,30 @@ class DownloadWorker(QObject):
                         if isinstance(extra_metadata, dict):
                             item_metadata.update(extra_metadata)
 
+                    if config.get('force_raw'):
+                        file_path += default_format
+                    elif item_type == "track":
+                        file_path += "." + config.get("media_format")
+                    elif item_type == "episode":
+                        file_path += "." + config.get("podcast_media_format")
+
+                    os.rename(temp_file_path, file_path)
+
                     # Convert file format and embed metadata
                     if not config.get('force_raw'):
+
                         item['item_status'] = 'Converting'
                         if self.gui:
                             self.progress.emit(item, self.tr("Converting"), 99)
-                        convert_audio_format(temp_file_path, item_metadata, bitrate, default_format)
+
+                        convert_audio_format(file_path, item_metadata, bitrate, default_format)
 
                         # Thumbnail
                         if config.get('save_album_cover') or config.get('embed_cover'):
                             item['item_status'] = 'Setting Thumbnail'
                             if self.gui:
                                 self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
-                            set_music_thumbnail(temp_file_path, item_metadata)
-
-                    # Temp file finished, convert to regular format
-                    os.rename(temp_file_path, file_path)
+                            set_music_thumbnail(file_path, item_metadata)
 
                     item['item_status'] = 'Downloaded'
                     logger.info("Item Successfully Downloaded")
