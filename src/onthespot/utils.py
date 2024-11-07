@@ -49,6 +49,8 @@ def sanitize_data(value, allow_path_separators=False, escape_quotes=False):
         value = value.replace('<', char)
         value = value.replace('>', char)
         value = value.replace('|', char)
+        while value.endswith('.'):
+            value = value[:-1]
     else:
         value = value.replace('/', char)
     return value
