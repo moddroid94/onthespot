@@ -273,10 +273,9 @@ def spotify_get_playlist_items(token, playlist_id):
     logger.info(f"Getting items in playlist: '{playlist_id}'")
     items = []
     offset = 0
-    limit = 50
+    limit = 100
     url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode'
  
-
     while True:
         headers = {'Authorization': f'Bearer {token}'}
         params = {

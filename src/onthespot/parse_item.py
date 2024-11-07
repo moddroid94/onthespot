@@ -96,16 +96,19 @@ def parsingworker():
                         items = spotify_get_playlist_items(token, current_id)
                         playlist_name, playlist_by = spotify_get_playlist_data(token, current_id)
                         for index, item in enumerate(items):
-                            item_id = item['track']['id']
-                            item_type = item['track']['type']
-                            pending[item_id] = {
-                                'item_service': 'spotify',
-                                'item_type': item_type,
-                                'item_id': item_id,
-                                'parent_category': 'playlist',
-                                'playlist_name': playlist_name,
-                                'playlist_by': playlist_by
-                                }
+                            try:
+                                item_id = item['track']['id']
+                                item_type = item['track']['type']
+                                pending[item_id] = {
+                                    'item_service': 'spotify',
+                                    'item_type': item_type,
+                                    'item_id': item_id,
+                                    'parent_category': 'playlist',
+                                    'playlist_name': playlist_name,
+                                    'playlist_by': playlist_by
+                                    }
+                            except TypeError:
+                                logger.error(f'TypeError for {item}')
                         continue
 
                     elif current_type == "artist":
