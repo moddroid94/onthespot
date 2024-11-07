@@ -32,13 +32,6 @@ def open_item(item):
 
 
 def sanitize_data(value):
-    try:
-        logger.info(
-            f'Sanitising string: "{value}"; '
-            f'Allow path separators: {allow_path_separators}'
-            )
-    except UnicodeEncodeError:
-        pass
     if value is None:
         return ''
     char = config.get("illegal_character_replacement")
