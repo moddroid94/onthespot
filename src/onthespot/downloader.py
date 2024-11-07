@@ -4,7 +4,6 @@ import time
 import subprocess
 import threading
 import requests
-from requests.exceptions import MissingSchema
 from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
@@ -16,7 +15,6 @@ from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
 from .accounts import get_account_token
 from .utils import sanitize_data, format_track_path
-
 
 logger = get_logger("downloader")
 
@@ -173,9 +171,10 @@ class DownloadWorker(QObject):
                                 audio_key = EpisodeId.from_base62(item_id)
 
                             quality = AudioQuality.HIGH
+                            bitrate = "160k"
                             if account.get_user_attribute("type") == "premium" and item_type == 'track':
                                 quality = AudioQuality.VERY_HIGH
-                            bitrate = "320k" if quality == AudioQuality.VERY_HIGH else "160k"
+                                bitrate = "320k"
 
                             stream = account.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
 

@@ -63,7 +63,6 @@ class DownloadActionsButtons(QWidget):
         file = os.path.abspath(file_path)
         open_item(file)
 
-
     def locate_file(self):
         file_path = download_queue[self.item_id]['file_path']
         file_dir = os.path.dirname(file_path)
