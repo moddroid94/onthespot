@@ -182,7 +182,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
 
         # Add output parameter at last
         command += [filename]
-        logger.info(
+        logger.debug(
             f'Converting media with ffmpeg. Built commandline {command}'
             )
         # Run subprocess with CREATE_NO_WINDOW flag on Windows
@@ -252,7 +252,9 @@ def set_music_thumbnail(filename, metadata):
                     ]
 
             command += [filename]
-
+            logger.debug(
+                f'Setting thumbnail with ffmpeg. Built commandline {command}'
+                )
             if os.name == 'nt':
                 subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
             else:
