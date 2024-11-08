@@ -194,6 +194,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
             subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
         else:
             subprocess.check_call(command, shell=False)
+        os.remove(temp_name)
     else:
         raise FileNotFoundError
 

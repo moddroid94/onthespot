@@ -135,6 +135,7 @@ class DownloadWorker(QObject):
                         matching_files = [file for file in files_in_directory if file.startswith(base_file_path) and not file.endswith('.lrc')]
 
                         if matching_files:
+                            item['file_path'] = os.path.join(file_directory, matching_files[0])
                             if self.gui:
                                 if item['item_status'] in (
                                 "Downloading",
