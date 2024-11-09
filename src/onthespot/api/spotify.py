@@ -138,6 +138,7 @@ def spotify_re_init_session(account):
         account['status'] = 'active'
         account['account_type'] = session.get_user_attribute("type")
         bitrate = "160k"
+        account_type = session.get_user_attribute("type")
         if account_type == "premium":
             bitrate = "320k"
         account['bitrate'] = bitrate
@@ -256,7 +257,7 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
             if len(lyrics) <= 2:
                 return False
             if config.get('use_lrc_file'):
-                with open(filepath[0:-len(config.get('media_format'))] + 'lrc', 'w', encoding='utf-8') as f:
+                with open(filepath + '.lrc', 'w', encoding='utf-8') as f:
                     f.write(merged_lyrics)
             if config.get('embed_lyrics'):
                 if item_type == "track":
@@ -547,7 +548,7 @@ def spotify_get_episode_metadata(token, episode_id_str):
     episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id_str}", headers=headers)
     info = {}
 
-    languages = episode_data.get('languages', [])
+    languages = episode_data.get('languages', '')
 
     info['album_name'] = episode_data.get("show", {}).get("name", "")
     info['title'] = episode_data.get('name', "")
@@ -558,7 +559,7 @@ def spotify_get_episode_metadata(token, episode_id_str):
     info['album_artists'] = conv_list_format([episode_data.get('show', {}).get('publisher', "")])
     info['language'] = conv_list_format(languages)
     info['description'] = str(episode_data.get('description', "") if episode_data.get('description', "") != "" else "")
-    info['copyright'] = episode_data.get('show', {}).get('copyrights', [])
+    info['copyright'] = conv_list_format(episode_data.get('show', {}).get('copyrights', ''))
     info['length'] = str(episode_data.get('duration_ms', ''))
     info['explicit'] = episode_data.get('explicit', '')
     info['is_playable'] = episode_data.get('is_playable', '')

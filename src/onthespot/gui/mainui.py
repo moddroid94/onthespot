@@ -42,7 +42,7 @@ class QueueWorker(QThread):
                     logger.error(f"Unknown Exception for {item}: {str(e)}")
                     pending[item_id] = item
             else:
-                time.sleep(4)
+                time.sleep(0.5)
 
 
 class MainWindow(QMainWindow):
@@ -369,7 +369,7 @@ class MainWindow(QMainWindow):
             if config.get("download_delete_btn"):
                 delete_btn = QPushButton()
                 #delete_btn.setText('Delete')
-                delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'delete.png'))
+                delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'trash.png'))
                 delete_btn.setIcon(delete_icon)
                 delete_btn.setToolTip(self.tr('Delete'))
                 delete_btn.setMinimumHeight(30)
@@ -392,7 +392,7 @@ class MainWindow(QMainWindow):
 
             status_label = QLabel(self.tbl_dl_progress)
             status_label.setText(self.tr("Waiting"))
-            actions = DownloadActionsButtons(item['item_id'], pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
+            actions = DownloadActionsButtons(item['item_id'], item_metadata, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
 
             rows = self.tbl_dl_progress.rowCount()
             self.tbl_dl_progress.insertRow(rows)

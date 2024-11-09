@@ -1,4 +1,5 @@
 librespot
+mutagen
 Pillow
 pyperclip
 PyQt6

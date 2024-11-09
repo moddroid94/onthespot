@@ -2,9 +2,10 @@ import os
 import subprocess
 from io import BytesIO
 import base64
-import time
 import requests
 from PIL import Image
+from mutagen.flac import Picture
+from mutagen.oggvorbis import OggVorbis
 from .otsconfig import config
 from .runtimedata import get_logger
 
@@ -43,6 +44,10 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
             command.append(param)
 
         # Append metadata
+        if config.get("embed_branding"):
+            branding = "Downloaded by OnTheSpot, https://github.com/justin025/onthespot"
+            command += ['-metadata', 'comment={}'.format(branding)]
+
         for key in metadata.keys():
             value = metadata[key]
 
@@ -99,10 +104,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                 command += ['-metadata', 'copyright={}'.format(value)]
 
             elif key == 'description' and config.get("embed_description"):
-                if filetype == '.mp3':
-                    command += ['-metadata', 'COMM={}'.format(value)]
-                else:
-                    command += ['-metadata', 'comment={}'.format(value)]
+                command += ['-metadata', 'COMM={}'.format(value)]
 
             elif key == 'language' and config.get("embed_language"):
                 if filetype == '.mp3':
@@ -195,8 +197,8 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
         else:
             subprocess.check_call(command, shell=False)
         os.remove(temp_name)
-    else:
-        raise FileNotFoundError
+        # Delete
+
 
 
 def set_music_thumbnail(filename, metadata):
@@ -220,7 +222,7 @@ def set_music_thumbnail(filename, metadata):
         with open(image_path, 'wb') as cover:
             cover.write(buf.read())
 
-        if config.get('embed_cover') and filetype != '.wav':
+        if config.get('embed_cover') and filetype not in ('.wav', '.ogg'):
             if os.path.isfile(temp_name):
                 os.remove(temp_name)
 
@@ -232,41 +234,56 @@ def set_music_thumbnail(filename, metadata):
             if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
                 command += ['-loglevel', 'error', '-hide_banner', '-nostats']
 
-            if filetype == '.ogg':
-                #with open(image_path, "rb") as image_file:
-                #    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
-                #
-                # Argument list too long, downscale the image instead
-
-                with Image.open(image_path) as img:
-                    new_size = (250, 250) # 250 seems to be the max
-                    img = img.resize(new_size, Image.Resampling.LANCZOS)
-                    with BytesIO() as output:
-                        img.save(output, format=config.get("album_cover_format"))
-                        output.seek(0)
-                        base64_image = base64.b64encode(output.read()).decode('utf-8')
-
-                # METADATA_BLOCK_PICTURE is a better supported format but I don't know how to write it
-                command += [
-                    "-c", "copy", "-metadata", f"coverart={base64_image}", "-metadata", f"coverartmime=image/{config.get('album_cover_format')}"
-                    ]
-            else:
-                command += [
-                    '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic',
-                    '-metadata:s:v', 'title=Cover', '-metadata:s:v', 'comment=Cover (front)'
-                    ]
+            # Windows equivilant of argument list too long
+            #if filetype == '.ogg':
+            #    #with open(image_path, "rb") as image_file:
+            #    #    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+            #    #
+            #    # Argument list too long, downscale the image instead
+            #
+            #    with Image.open(image_path) as img:
+            #        new_size = (250, 250) # 250 seems to be the max
+            #        img = img.resize(new_size, Image.Resampling.LANCZOS)
+            #        with BytesIO() as output:
+            #            img.save(output, format=config.get("album_cover_format"))
+            #            output.seek(0)
+            #            base64_image = base64.b64encode(output.read()).decode('utf-8')
+            #
+            #    # METADATA_BLOCK_PICTURE is a better supported format but I don't know how to write it
+            #    command += [
+            #        "-c", "copy", "-metadata", f"coverart={base64_image}", "-metadata", f"coverartmime=image/{config.get('album_cover_format')}"
+            #        ]
+            #else:
+            command += [
+                '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic',
+                '-metadata:s:v', 'title=Cover', '-metadata:s:v', 'comment=Cover (front), -id3v2_version 1'
+                ]
 
             command += [filename]
             logger.debug(
                 f'Setting thumbnail with ffmpeg. Built commandline {command}'
                 )
             if os.name == 'nt':
-                # Wait for windows file lock to release
-                time.sleep(0.5)
                 subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
             else:
                 subprocess.check_call(command, shell=False)
 
+        if config.get('embed_cover') and filetype == '.ogg':
+            with open(image_path, 'rb') as image_file:
+                image_data = image_file.read()
+            tags = OggVorbis(filename)
+            picture = Picture()
+            picture.data = image_data
+            picture.type = 3
+            picture.desc = "Cover"
+            picture.mime = f"image/{config.get('album_cover_format')}"
+            picture_data = picture.write()
+            encoded_data = base64.b64encode(picture_data)
+            vcomment_value = encoded_data.decode("ascii")
+            tags["metadata_block_picture"] = [vcomment_value]
+            tags.save()
+
+        if os.path.exists(temp_name):
             os.remove(temp_name)
 
         if not config.get('save_album_cover'):

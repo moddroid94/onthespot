@@ -10,9 +10,10 @@ logger = get_logger("worker.utility")
 
 
 class DownloadActionsButtons(QWidget):
-    def __init__(self, item_id, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn, parent=None):
+    def __init__(self, item_id, item_metadata, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn, parent=None):
         super(DownloadActionsButtons, self).__init__(parent)
         self.item_id = item_id
+        self.item_metadata = item_metadata
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -42,7 +43,7 @@ class DownloadActionsButtons(QWidget):
         self.setLayout(layout)
 
     def copy_link(self):
-        pyperclip.copy("FIX ME")
+        pyperclip.copy(self.item_metadata['item_url'])
 
     def cancel_item(self):
         download_queue[self.item_id]['item_status'] = "Cancelled"
@@ -72,10 +73,7 @@ class DownloadActionsButtons(QWidget):
         file_path = download_queue[self.item_id]['file_path']
         file = os.path.abspath(file_path)
         os.remove(file)
-        self.item["gui"]["status_label"].setText(self.tr("Deleted"))
-        self.play_btn.hide()
-        self.save_btn.hide()
-        self.queue_btn.hide()
+        download_queue[self.item_id]["gui"]["status_label"].setText(self.tr("Deleted"))
         self.open_btn.hide()
         self.locate_btn.hide()
         self.delete_btn.hide()

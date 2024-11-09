@@ -359,7 +359,7 @@ class DownloadWorker(QObject):
                         os.remove(file_path)
                     continue
             else:
-                time.sleep(1)
+                time.sleep(0.5)
 
     def stop(self):
         logger.info('Stopping Download Worker')
