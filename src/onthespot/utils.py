@@ -22,6 +22,7 @@ def is_latest_release():
             logger.info(f"Update Available: {int(latest_version)} > {int(current_version)}")
             return False
 
+
 def open_item(item):
     if platform.system() == 'Windows':
         os.startfile(item)
@@ -51,6 +52,7 @@ def sanitize_data(value):
         value = value.replace('/', char)
     return value
 
+
 def translate(string):
     try:
         response = requests.get(
@@ -59,6 +61,7 @@ def translate(string):
         return response.json()["sentences"][0]["trans"]
     except (requests.exceptions.RequestException, KeyError, IndexError):
         return string
+
 
 def make_call(url, params=None, headers=None, skip_cache=False):
     if not skip_cache:
@@ -84,10 +87,12 @@ def make_call(url, params=None, headers=None, skip_cache=False):
     else:
         logger.info(f"Request status error {response.status_code}")
 
+
 def conv_list_format(items):
     if len(items) == 0:
         return ''
     return (config.get('metadata_seperator')).join(items)
+
 
 def format_track_path(item_metadata, item_service, item_type, parent_category, playlist_name, playlist_by):
     if config.get("translate_file_path"):

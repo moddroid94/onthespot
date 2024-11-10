@@ -58,7 +58,7 @@ class DownloadWorker(QObject):
                             "Downloaded",
                             "Already Exists"
                         ):
-                            time.sleep(0.1)
+                            time.sleep(0.2)
                             self.readd_item_to_download_queue(item)
                             continue
                     except (RuntimeError, OSError):
@@ -128,14 +128,15 @@ class DownloadWorker(QObject):
 
                     # Skip download if file exists under different extension
                     file_directory = os.path.dirname(file_path)
-                    base_file_path = os.path.splitext(os.path.basename(file_path))[0]
+                    base_filename = os.path.basename(file_path)
 
-                    try:
-                        files_in_directory = os.listdir(file_directory)
-                        matching_files = [file for file in files_in_directory if file.startswith(base_file_path) and not file.endswith('.lrc')]
+                    for entry in os.listdir(file_directory):
+                        full_path = os.path.join(file_directory, entry)  # Construct the full file path
 
-                        if matching_files:
-                            item['file_path'] = os.path.join(file_directory, matching_files[0])
+                        # Check if the entry is a file and if its name matches the base filename
+                        if os.path.isfile(full_path) and os.path.splitext(entry)[0] == base_filename:
+
+                            item['file_path'] = os.path.join(file_directory, entry)
                             if self.gui:
                                 if item['item_status'] in (
                                 "Downloading",
@@ -144,11 +145,12 @@ class DownloadWorker(QObject):
                                     self.progress.emit(item, self.tr("Already Exists"), 100)
                             item['item_status'] = 'Already Exists'
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
-                            time.sleep(1)
+                            time.sleep(0.2)
                             self.readd_item_to_download_queue(item)
-                            continue
-                    except FileNotFoundError:
-                        logger.info(f"File does not already exist.")
+                            break
+
+                    if item['item_status'] == 'Already Exists':
+                        continue
 
                     if not item_metadata['is_playable']:
                         logger.error(f"Track is unavailable, track id '{item_id}'")
@@ -359,7 +361,7 @@ class DownloadWorker(QObject):
                         os.remove(file_path)
                     continue
             else:
-                time.sleep(0.5)
+                time.sleep(0.2)
 
     def stop(self):
         logger.info('Stopping Download Worker')

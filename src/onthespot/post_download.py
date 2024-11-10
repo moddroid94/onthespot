@@ -6,8 +6,10 @@ import requests
 from PIL import Image
 from mutagen.flac import Picture
 from mutagen.oggvorbis import OggVorbis
+import music_tag
 from .otsconfig import config
 from .runtimedata import get_logger
+from mutagen.id3 import ID3, ID3NoHeaderError, WOAS, USLT, TCMP, COMM
 
 logger = get_logger("post_download")
 
@@ -46,7 +48,11 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
         # Append metadata
         if config.get("embed_branding"):
             branding = "Downloaded by OnTheSpot, https://github.com/justin025/onthespot"
-            command += ['-metadata', 'comment={}'.format(branding)]
+            if filetype == '.mp3':
+                # Incorrectly embedded to TXXX:TCMP, patch sent upstream
+                command += ['-metadata', 'COMM={}'.format(branding)]
+            else:
+                command += ['-metadata', 'comment={}'.format(branding)]
 
         for key in metadata.keys():
             value = metadata[key]
@@ -104,7 +110,11 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                 command += ['-metadata', 'copyright={}'.format(value)]
 
             elif key == 'description' and config.get("embed_description"):
-                command += ['-metadata', 'COMM={}'.format(value)]
+                if filetype == '.mp3':
+                    # Incorrectly embedded to TXXX:TCMP, patch sent upstream
+                    command += ['-metadata', 'COMM={}'.format(value)]
+                if filetype == '.mp3':
+                    command += ['-metadata', 'comment={}'.format(value)]
 
             elif key == 'language' and config.get("embed_language"):
                 if filetype == '.mp3':
@@ -139,10 +149,15 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                     command += ['-metadata', 'initialkey={}'.format(value)]
 
             elif key == 'album_type' and config.get("embed_compilation"):
-                command += ['-metadata', 'compilation={}'.format(int(value == 'compilation'))]
+                if filetype == '.mp3':
+                    # Incorrectly embedded to TXXX:TCMP, patch sent upstream
+                    command += ['-metadata', 'TCMP={}'.format(int(value == 'compilation'))]
+                else:
+                    command += ['-metadata', 'compilation={}'.format(int(value == 'compilation'))]
 
             elif key == 'item_url' and config.get("embed_url"):
                 if filetype == '.mp3':
+                    # Incorrectly embedded to TXXX:WOAS, patch sent upstream
                     command += ['-metadata', 'WOAS={}'.format(value)]
                 else:
                     command += ['-metadata', 'website={}'.format(value)]
@@ -155,6 +170,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
 
             elif key == 'lyrics' and config.get("embed_lyrics"):
                 if filetype == '.mp3':
+                    # Incorrectly embedded to TXXX:USLT, patch sent upstream
                     command += ['-metadata', 'USLT={}'.format(value)]
                 else:
                     command += ['-metadata', 'lyrics={}'.format(value)]
@@ -197,8 +213,6 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
         else:
             subprocess.check_call(command, shell=False)
         os.remove(temp_name)
-        # Delete
-
 
 
 def set_music_thumbnail(filename, metadata):
@@ -222,7 +236,16 @@ def set_music_thumbnail(filename, metadata):
         with open(image_path, 'wb') as cover:
             cover.write(buf.read())
 
-        if config.get('embed_cover') and filetype not in ('.wav', '.ogg'):
+        # I have no idea why music tag manages to display covers
+        # in file explorer but raw mutagen and ffmpeg do not.
+        if config.get('embed_cover') and filetype == '.mp3' and os.name == 'nt':
+            with open(image_path, 'rb') as image_file:
+                image_data = image_file.read()
+            tags = music_tag.load_file(filename)
+            tags['artwork'] = image_data
+            tags.save()
+
+        elif config.get('embed_cover') and filetype not in ('.wav', '.ogg'):
             if os.path.isfile(temp_name):
                 os.remove(temp_name)
 
@@ -268,7 +291,7 @@ def set_music_thumbnail(filename, metadata):
             else:
                 subprocess.check_call(command, shell=False)
 
-        if config.get('embed_cover') and filetype == '.ogg':
+        elif config.get('embed_cover') and filetype == '.ogg':
             with open(image_path, 'rb') as image_file:
                 image_data = image_file.read()
             tags = OggVorbis(filename)

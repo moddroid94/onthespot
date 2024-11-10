@@ -28,10 +28,10 @@ BDEPEND="
 "
 
 RDEPEND="
-        dev-python/googletrans
 	dev-python/librespot
+	dev-python/music-tag
 	dev-python/pillow
-        dev-python/pyperclip
+	dev-python/pyperclip
 	dev-python/PyQt6[network,widgets]
 	dev-python/requests
 	dev-python/urllib3

@@ -1,12 +1,12 @@
 pkgname=onthespot-git
-pkgver=1.0.1
+pkgver=1.0.2
 _branch="main"
 pkgrel=1
 pkgdesc="Qt based music downloader written in python"
 arch=('any')
 url="https://github.com/justin025/onthespot"
 license=('GPLv2')
-depends=('ffmpeg' 'python-requests' 'python_urllib3' 'python-mutagen' 'python-pyqt6' 'python-pillow' 'python-pyperclip' 'python-librespot' 'python-googletrans')
+depends=('ffmpeg' 'python-requests' 'python_urllib3' 'python-musictag' 'python-mutagen' 'python-pyqt6' 'python-pillow' 'python-pyperclip' 'python-librespot' 'python-googletrans')
 conflicts=('onthespot')
 provides=('onthespot')
 makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
@@ -26,6 +26,5 @@ package() {
   install -dm 755 "$pkgdir/usr/share/icons/hicolor/"{256x256,scalable}"/apps/"
   install -Dm 644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
   install -Dm 644 "src/onthespot/resources/org.onthespot.OnTheSpot.desktop" "$pkgdir/usr/share/applications/"
-  install -Dm 644 "src/onthespot/resources/icons/onthespot.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/onthespot.svg"
   install -Dm 644 "src/onthespot/resources/icons/onthespot.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/onthespot.png"
 }

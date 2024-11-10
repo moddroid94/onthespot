@@ -42,7 +42,7 @@ def soundcloud_login_user(account):
             *_, client_id_url_match = client_id_url_match
 
             #if client_id_url_match:
-                #logger.info("Found client_id_url:", client_id_url_match.group(1))  # Access the captured group  
+                #logger.info("Found client_id_url:", client_id_url_match.group(1))  # Access the captured group
             #else:
                 #logger.info(f"Failed to fetch free soundcloud client_id: {response.status_code}")
 
@@ -62,10 +62,10 @@ def soundcloud_login_user(account):
             page_text2 = response2.text
 
             client_id_match = re.search(r'client_id:\s*"(\w+)"', page_text2)
-            assert client_id_match is not None  
+            assert client_id_match is not None
             client_id = client_id_match.group(1)
 
-            accounts = config.get('accounts') 
+            accounts = config.get('accounts')
             # Remove public from list
             accounts = [account for account in accounts if account["uuid"] != "public_soundcloud"]
 
@@ -99,7 +99,7 @@ def soundcloud_login_user(account):
             })
 
 
-            logger.info(f"Refreshed SoundCloud tokens as {client_id} {app_version}")
+            logger.info(f"Refreshed SoundCloud tokens as {client_id[:8]}******** {app_version[:8]}********")
             return True
     except:
         account_pool.append({
@@ -181,9 +181,9 @@ def soundcloud_get_set_items(token, url):
 
         for track in set_data.get('tracks'):
             pending[track.get('id')] = {
-                'item_url': track.get('permalink_url'), 
+                'item_url': track.get('permalink_url'),
                 'item_service': 'soundcloud',
-                'item_type': 'track', 
+                'item_type': 'track',
                 'item_id': track.get('id'),
                 'parent_category': 'playlist' if not set_data['is_album'] else 'album',
                 'playlist_name': set_data['title'],

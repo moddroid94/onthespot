@@ -1,12 +1,13 @@
 import os
+import re
 from PyQt6 import uic
 from PyQt6.QtWidgets import QDialog
 from PyQt6.QtCore import Qt
 from ..runtimedata import get_logger
 from ..otsconfig import config
+from ..utils import open_item
 
 logger = get_logger('gui.minidialog')
-
 
 class MiniDialog(QDialog):
     def __init__(self, parent=None):
@@ -18,33 +19,28 @@ class MiniDialog(QDialog):
 
         # Set theme
         self.theme = config.get("theme")
-        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
+        self.theme_path = os.path.join(config.app_root, 'resources', 'themes', f'{self.theme}.qss')
         if self.theme == "dark":
-          with open(self.theme_path, 'r') as f:
-              dark_theme = f.read()
-              self.setStyleSheet(dark_theme)
-        elif self.theme == "light":
-          with open(self.theme_path, 'r') as f:
-              light_theme = f.read()
-              self.setStyleSheet(light_theme)
-
-        def load_dark_theme(self):
-            with open(self.dark_theme_path, 'r') as f:
+            with open(self.theme_path, 'r') as f:
                 dark_theme = f.read()
                 self.setStyleSheet(dark_theme)
-            self.theme = "dark"
-
-        def load_light_theme(self):
-            with open(self.light_theme_path, 'r') as f:
+        elif self.theme == "light":
+            with open(self.theme_path, 'r') as f:
                 light_theme = f.read()
                 self.setStyleSheet(light_theme)
-            self.theme = "dark"
 
-        def toggle_theme(self):
-            if self.theme == "light":
-                self.load_dark_theme()
-            elif self.theme == "dark":
-                self.load_light_theme()
+        self.lb_main.mousePressEvent = self.on_label_click
+
+    def on_label_click(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            match = re.search(r"href='(https?://[^']+)'", self.lb_main.text())
+            try:
+                url = match.group(1)
+                if url:
+                    logger.info(f"Update URL Clicked, {match.group(1)}")
+                    open_item(match.group(1))
+            except Exception:
+                pass
 
     def run(self, content, btn_hidden=False):
         if btn_hidden:

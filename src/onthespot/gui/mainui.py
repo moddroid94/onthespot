@@ -42,7 +42,7 @@ class QueueWorker(QThread):
                     logger.error(f"Unknown Exception for {item}: {str(e)}")
                     pending[item_id] = item
             else:
-                time.sleep(0.5)
+                time.sleep(0.2)
 
 
 class MainWindow(QMainWindow):
@@ -246,6 +246,7 @@ class MainWindow(QMainWindow):
         self.show()
         if self.start_url.strip() != '':
             logger.info(f'Session was started with query of {self.start_url}')
+            self.tabview.setCurrentIndex(1)
             self.inp_search_term.setText(self.start_url.strip())
             self.fill_search_table()
         self.start_url = ''
@@ -319,37 +320,15 @@ class MainWindow(QMainWindow):
             cancel_btn.setIcon(cancel_icon)
             cancel_btn.setToolTip(self.tr('Cancel'))
             cancel_btn.setMinimumHeight(30)
+            cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             retry_btn = QPushButton()
             #retry_btn.setText('Retry')
             retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
             retry_btn.setIcon(retry_icon)
             retry_btn.setToolTip(self.tr('Retry'))
             retry_btn.setMinimumHeight(30)
+            retry_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             retry_btn.hide()
-            if config.get("download_play_btn"):
-                play_btn = QPushButton()
-                #play_btn.setText('Play')
-                play_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'play.png'))
-                play_btn.setIcon(play_icon)
-                play_btn.setToolTip(self.tr('Play'))
-                play_btn.setMinimumHeight(30)
-                play_btn.hide()
-            if config.get("download_save_btn"):
-                save_btn = QPushButton()
-                #save_btn.setText('Save')
-                #save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'filled_heart.png'))
-                #save_btn.setIcon(save_icon)
-                save_btn.setToolTip(self.tr('Save'))
-                save_btn.setMinimumHeight(30)
-                save_btn.hide()
-            if config.get("download_queue_btn"):
-                queue_btn = QPushButton()
-                #queue_btn.setText('Queue')
-                queue_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'queue.png'))
-                queue_btn.setIcon(queue_icon)
-                queue_btn.setToolTip(self.tr('Queue'))
-                queue_btn.setMinimumHeight(30)
-                queue_btn.hide()
             if config.get("download_open_btn"):
                 open_btn = QPushButton()
                 #open_btn.setText('Open')
@@ -357,6 +336,7 @@ class MainWindow(QMainWindow):
                 open_btn.setIcon(open_icon)
                 open_btn.setToolTip(self.tr('Open'))
                 open_btn.setMinimumHeight(30)
+                open_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 open_btn.hide()
             if config.get("download_locate_btn"):
                 locate_btn = QPushButton()
@@ -365,6 +345,7 @@ class MainWindow(QMainWindow):
                 locate_btn.setIcon(locate_icon)
                 locate_btn.setToolTip(self.tr('Locate'))
                 locate_btn.setMinimumHeight(30)
+                locate_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 locate_btn.hide()
             if config.get("download_delete_btn"):
                 delete_btn = QPushButton()
@@ -373,6 +354,7 @@ class MainWindow(QMainWindow):
                 delete_btn.setIcon(delete_icon)
                 delete_btn.setToolTip(self.tr('Delete'))
                 delete_btn.setMinimumHeight(30)
+                delete_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 delete_btn.hide()
 
             playlist_name = ''
@@ -396,12 +378,16 @@ class MainWindow(QMainWindow):
 
             rows = self.tbl_dl_progress.rowCount()
             self.tbl_dl_progress.insertRow(rows)
+            if item_metadata['explicit']:  # Check if the item is explicit
+                title = config.get('explicit_label', '') + ' ' + item_metadata['title']
+            else:
+                title = item_metadata['title']
             if config.get('show_download_thumbnails'):
                 self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
-                item_label = LabelWithThumb(item_metadata['title'], item_metadata['image_url'])
+                item_label = LabelWithThumb(title, item_metadata['image_url'])
             else:
                 item_label = QLabel(self.tbl_dl_progress)
-                item_label.setText(item_metadata['title'])
+                item_label.setText(title)
             # Add To List
             self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
             self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
