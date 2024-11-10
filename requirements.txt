@@ -1,4 +1,5 @@
 librespot
+music-tag
 mutagen
 Pillow
 pyperclip
