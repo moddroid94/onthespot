@@ -65,11 +65,7 @@ class MainWindow(QMainWindow):
         self.inp_version.setText(config.get("version"))
         self.inp_session_uuid.setText(config.session_uuid)
         logger.info(f"Initialising main window, logging session : {config.session_uuid}")
-        # Bind button click
-        self.bind_button_inputs()
 
-        self.__users = []
-        self.last_search = None
 
         # Fill the value from configs
         logger.info("Loading configurations..")
@@ -94,6 +90,12 @@ class MainWindow(QMainWindow):
         self.mirrorplayback = MirrorSpotifyPlayback()
         if config.get('mirror_spotify_playback'):
             self.mirrorplayback.start()
+
+        # Bind button click
+        self.bind_button_inputs()
+
+        self.__users = []
+        self.last_search = None
 
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
