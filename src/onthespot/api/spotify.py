@@ -3,15 +3,93 @@ import re
 import time
 import uuid
 import json
+import threading
 import requests
 from librespot.audio.decoders import AudioQuality
 from librespot.core import Session
 from librespot.zeroconf import ZeroconfServer
+from PyQt6.QtCore import QObject
 from ..otsconfig import config, cache_dir
-from ..runtimedata import get_logger, account_pool
+from ..runtimedata import get_logger, account_pool, pending, download_queue
 from ..utils import make_call, conv_list_format
 
 logger = get_logger("api.spotify")
+
+
+class MirrorSpotifyPlayback(QObject):
+    def __init__(self):
+        super().__init__()
+        self.thread = None
+        self.is_running = False
+
+    def start(self):
+        if self.thread is None:
+            logger.info('Starting SpotifyMirrorPlayback')
+            self.is_running = True
+            self.thread = threading.Thread(target=self.run)
+            self.thread.start()
+        else:
+            logger.warning('SpotifyMirrorPlayback is already running.')
+
+    def stop(self):
+        if self.thread is not None:
+            logger.info('Stopping SpotifyMirrorPlayback')
+            self.is_running = False
+            self.thread.join()
+            self.thread = None
+        else:
+            logger.warning('SpotifyMirrorPlayback is not running.')
+
+    def run(self):
+        while self.is_running:
+            time.sleep(3)
+            try:
+                parsing_index = config.get('parsing_acc_sn')
+                if account_pool[parsing_index]['service'] != 'spotify':
+                    continue
+                token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-currently-playing")
+            except IndexError:
+                time.sleep(2)
+                continue
+            except Exception:
+                spotify_re_init_session(account_pool[parsing_index])
+                token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-currently-playing")
+            url = "https://api.spotify.com/v1/me/player/currently-playing"
+            resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
+            if resp.status_code == 200:
+                data = resp.json()
+                if data['currently_playing_type'] == 'track':
+                    item_id = data['item']['id']
+                    if item_id not in pending and item_id not in download_queue:
+                        parent_category = 'track'
+                        playlist_name = ''
+                        playlist_by = ''
+                        if data['context']['type'] == 'playlist':
+                            token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
+                            playlist_name, playlist_by = spotify_get_playlist_data(token, data['item']['id'])
+                            parent_category = 'playlist'
+                        elif data['context']['type'] == 'collection':
+                            playlist_name = 'Liked Songs'
+                            playlist_by = 'me'
+                            parent_category = 'playlist'
+                        elif data['context']['type'] in ('album', 'artist'):
+                            parent_category = 'album'
+
+                        pending[item_id] = {
+                        'item_service': 'spotify',
+                        'item_type': 'track',
+                        'item_id': item_id,
+                        'parent_category': parent_category,
+                        'playlist_name': playlist_name,
+                        'playlist_by': playlist_by
+                        }
+                        logger.info(f'Mirror Spotify Playback added track to download queue: https://open.spotify.com/track/{item_id}')
+                        continue
+                else:
+                    logger.info('Spotify API does not return enough data to parse currently playing episodes.')
+                    continue
+            else:
+                continue
 
 
 def spotify_new_session():

@@ -28,7 +28,7 @@ class DownloadWorker(QObject):
         self.is_running = True
 
     def start(self):
-        self.thread.start()  # Start the thread
+        self.thread.start()
 
 
     def readd_item_to_download_queue(self, item):

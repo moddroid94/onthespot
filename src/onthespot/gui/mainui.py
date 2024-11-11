@@ -12,7 +12,7 @@ from .settings import load_config, save_config
 from ..otsconfig import config
 from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock
 from .thumb_listitem import LabelWithThumb
-from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
+from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session, MirrorSpotifyPlayback
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from ..api.deezer import deezer_get_track_metadata, deezer_add_account
 from ..accounts import get_account_token, FillAccountPool
@@ -68,7 +68,6 @@ class MainWindow(QMainWindow):
         # Bind button click
         self.bind_button_inputs()
 
-
         self.__users = []
         self.last_search = None
 
@@ -84,7 +83,6 @@ class MainWindow(QMainWindow):
         fillaccountpool.progress.connect(self.__show_popup_dialog)
         fillaccountpool.start()
 
-
         queueworker = QueueWorker()
         queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method
         queueworker.start()
@@ -92,6 +90,10 @@ class MainWindow(QMainWindow):
         downloadworker = DownloadWorker(gui=True)
         downloadworker.progress.connect(self.update_item_in_download_list)  # Connect the signal to the update method
         downloadworker.start()  # Start the download worker thread
+
+        self.mirrorplayback = MirrorSpotifyPlayback()
+        if config.get('mirror_spotify_playback'):
+            self.mirrorplayback.start()
 
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
@@ -176,6 +178,8 @@ class MainWindow(QMainWindow):
         self.inp_download_queue_show_unavailable.stateChanged.connect(self.update_table_visibility)
         self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
 
+        self.inp_mirror_spotify_playback.stateChanged.connect(self.manage_mirror_spotify_playback)
+
     def set_table_props(self):
         window_width = self.width()
         logger.info(f"Setting table item properties {window_width}")
@@ -215,7 +219,6 @@ class MainWindow(QMainWindow):
         self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         self.set_login_fields()
         return True
-
 
     def reset_app_config(self):
         config.rollback()
@@ -716,3 +719,9 @@ class MainWindow(QMainWindow):
                     self.tbl_dl_progress.hideRow(row)  # Hide the row
                 else:
                     self.tbl_dl_progress.showRow(row)  # Show the row if the status is allowed
+
+    def manage_mirror_spotify_playback(self):
+        if self.inp_mirror_spotify_playback.isChecked():
+            self.mirrorplayback.start()
+        else:
+            self.mirrorplayback.stop()

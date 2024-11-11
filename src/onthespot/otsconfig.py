@@ -79,6 +79,7 @@ class Config:
             "explicit_label": "🅴", # Explicit label in app and download path
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
             "metadata_seperator": "; ", # Seperator used for metadata fields that have multiple values
+            "mirror_spotify_playback": False, # Mirror spotify playback
             "embed_branding": False,
             "embed_cover": True,
             "embed_artist": True,
