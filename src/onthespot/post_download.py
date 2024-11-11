@@ -311,3 +311,19 @@ def set_music_thumbnail(filename, metadata):
 
         if not config.get('save_album_cover'):
             os.remove(image_path)
+
+def fix_mp3_metadata(filename, metadata):
+    id3 = ID3(filename)
+    if 'TXXX:WOAS' in id3:
+        id3['WOAS'] = WOAS(url=id3['TXXX:WOAS'].text[0])
+        del id3['TXXX:WOAS']
+    if 'TXXX:USLT' in id3:
+        id3.add(USLT(encoding=3, lang=u'und', desc=u'desc', text=id3['TXXX:USLT'].text[0]))
+        del id3['TXXX:USLT']
+    if 'TXXX:COMM' in id3:
+        id3['COMM'] = COMM(encoding=3, lang='und', text=id3['TXXX:COMM'].text[0])
+        del id3['TXXX:COMM']
+    if 'TXXX:TCMP' in id3:
+        id3['TCMP'] = TCMP(encoding=3, text=id3['TXXX:TCMP'].text[0])
+        del id3['TXXX:TCMP']
+    id3.save()

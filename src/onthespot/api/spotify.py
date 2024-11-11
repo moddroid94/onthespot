@@ -65,8 +65,13 @@ class MirrorSpotifyPlayback(QObject):
                         playlist_name = ''
                         playlist_by = ''
                         if data['context']['type'] == 'playlist':
+                            match = re.search(r'spotify:playlist:(\w+)', data['context']['uri'])
+                            if match:
+                                playlist_id = match.group(1)
+                            else:
+                                continue
                             token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
-                            playlist_name, playlist_by = spotify_get_playlist_data(token, data['item']['id'])
+                            playlist_name, playlist_by = spotify_get_playlist_data(token, playlist_id)
                             parent_category = 'playlist'
                         elif data['context']['type'] == 'collection':
                             playlist_name = 'Liked Songs'

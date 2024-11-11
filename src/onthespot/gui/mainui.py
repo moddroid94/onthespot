@@ -36,7 +36,8 @@ class QueueWorker(QThread):
                     item = pending.pop(item_id)
                     token = get_account_token()
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                    self.add_item_to_download_list.emit(item, item_metadata)
+                    if item_id not in download_queue:
+                        self.add_item_to_download_list.emit(item, item_metadata)
                     continue
                 except Exception as e:
                     logger.error(f"Unknown Exception for {item}: {str(e)}")

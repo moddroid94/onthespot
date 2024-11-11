@@ -9,7 +9,7 @@ from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
 from .otsconfig import config
-from .post_download import convert_audio_format, set_music_thumbnail
+from .post_download import convert_audio_format, set_music_thumbnail, fix_mp3_metadata
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
@@ -93,39 +93,6 @@ class DownloadWorker(QObject):
 
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-                    # M3U
-                    if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
-                        item['item_status'] = 'Adding To M3U'
-                        if self.gui:
-                            self.progress.emit(item, self.tr("Adding To M3U"), 1)
-
-                        path = config.get("m3u_name_formatter")
-                        m3u_file = path.format(
-                        playlist_name=sanitize_data(item['playlist_name']),
-                        playlist_owner=sanitize_data(item['playlist_by']),
-                        )
-
-                        m3u_file += "." + config.get("m3u_format")
-
-                        dl_root = config.get("download_root")
-                        m3u_path = os.path.join(dl_root, m3u_file)
-
-                        os.makedirs(os.path.dirname(m3u_path), exist_ok=True)
-
-                        if not os.path.exists(m3u_path):
-                            with open(m3u_path, 'w') as m3u_file:
-                                m3u_file.write("#EXTM3U\n")
-
-                        # Check if the item_path is already in the M3U file
-                        with open(m3u_path, 'r') as m3u_file:
-                            m3u_contents = m3u_file.readlines()
-
-                            if file_path not in [line.strip() for line in m3u_contents]:
-                                with open(m3u_path, 'a') as m3u_file:
-                                    m3u_file.write(f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
-                            else:
-                                logger.info(f"{file_path} already exists in the M3U file.")  # Log or handle the existing entry case
-
                     # Skip download if file exists under different extension
                     file_directory = os.path.dirname(file_path)
                     base_filename = os.path.basename(file_path)
@@ -134,14 +101,11 @@ class DownloadWorker(QObject):
                         full_path = os.path.join(file_directory, entry)  # Construct the full file path
 
                         # Check if the entry is a file and if its name matches the base filename
-                        if os.path.isfile(full_path) and os.path.splitext(entry)[0] == base_filename:
+                        if os.path.isfile(full_path) and os.path.splitext(entry)[0] == base_filename and os.path.splitext(entry)[1] != '.lrc':
 
                             item['file_path'] = os.path.join(file_directory, entry)
                             if self.gui:
-                                if item['item_status'] in (
-                                "Downloading",
-                                "Adding To M3U"
-                                ):
+                                if item['item_status'] == "Downloading":
                                     self.progress.emit(item, self.tr("Already Exists"), 100)
                             item['item_status'] = 'Already Exists'
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
@@ -337,6 +301,42 @@ class DownloadWorker(QObject):
                             if self.gui:
                                 self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
                             set_music_thumbnail(file_path, item_metadata)
+
+                        if os.path.splitext(file_path)[1] == '.mp3':
+                            fix_mp3_metadata(file_path, item_metadata)
+
+                    # M3U
+                    if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
+                        item['item_status'] = 'Adding To M3U'
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Adding To M3U"), 1)
+
+                        path = config.get("m3u_name_formatter")
+                        m3u_file = path.format(
+                        playlist_name=sanitize_data(item['playlist_name']),
+                        playlist_owner=sanitize_data(item['playlist_by']),
+                        )
+
+                        m3u_file += "." + config.get("m3u_format")
+
+                        dl_root = config.get("download_root")
+                        m3u_path = os.path.join(dl_root, m3u_file)
+
+                        os.makedirs(os.path.dirname(m3u_path), exist_ok=True)
+
+                        if not os.path.exists(m3u_path):
+                            with open(m3u_path, 'w') as m3u_file:
+                                m3u_file.write("#EXTM3U\n")
+
+                        # Check if the item_path is already in the M3U file
+                        with open(m3u_path, 'r') as m3u_file:
+                            m3u_contents = m3u_file.readlines()
+
+                            if file_path not in [line.strip() for line in m3u_contents]:
+                                with open(m3u_path, 'a') as m3u_file:
+                                    m3u_file.write(f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item_metadata['artists']} - {item_metadata['title']}\n{file_path}\n")
+                            else:
+                                logger.info(f"{file_path} already exists in the M3U file.")
 
                     item['item_status'] = 'Downloaded'
                     logger.info("Item Successfully Downloaded")
