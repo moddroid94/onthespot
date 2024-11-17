@@ -5,11 +5,12 @@ import base64
 import requests
 from PIL import Image
 from mutagen.flac import Picture
+from mutagen.id3 import ID3, ID3NoHeaderError, WOAS, USLT, TCMP, COMM
 from mutagen.oggvorbis import OggVorbis
 import music_tag
 from .otsconfig import config
 from .runtimedata import get_logger
-from mutagen.id3 import ID3, ID3NoHeaderError, WOAS, USLT, TCMP, COMM
+from .utils import sanitize_data
 
 logger = get_logger("post_download")
 
@@ -327,3 +328,32 @@ def fix_mp3_metadata(filename, metadata):
         id3['TCMP'] = TCMP(encoding=3, text=id3['TXXX:TCMP'].text[0])
         del id3['TXXX:TCMP']
     id3.save()
+
+def add_to_m3u_file(item, item_metadata):
+    logger.info(f"Adding {item['file_path']} to m3u")
+    path = config.get("m3u_name_formatter")
+    m3u_file = path.format(
+    playlist_name=sanitize_data(item['playlist_name']),
+    playlist_owner=sanitize_data(item['playlist_by']),
+    )
+
+    m3u_file += "." + config.get("m3u_format")
+
+    dl_root = config.get("download_root")
+    m3u_path = os.path.join(dl_root, m3u_file)
+
+    os.makedirs(os.path.dirname(m3u_path), exist_ok=True)
+
+    if not os.path.exists(m3u_path):
+        with open(m3u_path, 'w') as m3u_file:
+            m3u_file.write("#EXTM3U\n")
+
+    # Check if the item_path is already in the M3U file
+    with open(m3u_path, 'r') as m3u_file:
+        m3u_contents = m3u_file.readlines()
+
+        if item['file_path'] not in [line.strip() for line in m3u_contents]:
+            with open(m3u_path, 'a') as m3u_file:
+                m3u_file.write(f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item_metadata['artists']} - {item_metadata['title']}\n{item['file_path']}\n")
+        else:
+            logger.info(f"{item['file_path']} already exists in the M3U file.")
