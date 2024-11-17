@@ -136,30 +136,33 @@ def soundcloud_get_search_results(token, search_term, content_types):
     track_url = f"{SOUNDCLOUD_BASE}/search/tracks"
     playlist_url = f"{SOUNDCLOUD_BASE}/search/playlists"
 
-    track_search = requests.get(track_url, headers=headers, params=params).json()
-    playlist_search = requests.get(playlist_url, headers=headers, params=params).json()
-
     search_results = []
-    for track in track_search['collection']:
-        search_results.append({
-            'item_id': track['id'],
-            'item_name': track['title'],
-            'item_by': track['user']['username'],
-            'item_type': "track",
-            'item_service': "soundcloud",
-            'item_url': track['permalink_url'],
-            'item_thumbnail_url': track["artwork_url"]
-        })
-    for playlist in playlist_search['collection']:
-        search_results.append({
-            'item_id': playlist['id'],
-            'item_name': playlist['title'],
-            'item_by': playlist['user']['username'],
-            'item_type': "playlist",
-            'item_service': "soundcloud",
-            'item_url': playlist['permalink_url'],
-            'item_thumbnail_url': playlist["artwork_url"]
-        })
+
+    if 'track' in content_types:
+        track_search = requests.get(track_url, headers=headers, params=params).json()
+        for track in track_search['collection']:
+            search_results.append({
+                'item_id': track['id'],
+                'item_name': track['title'],
+                'item_by': track['user']['username'],
+                'item_type': "track",
+                'item_service': "soundcloud",
+                'item_url': track['permalink_url'],
+                'item_thumbnail_url': track["artwork_url"]
+            })
+
+    if 'playlist' in content_types:
+        playlist_search = requests.get(playlist_url, headers=headers, params=params).json()
+        for playlist in playlist_search['collection']:
+            search_results.append({
+                'item_id': playlist['id'],
+                'item_name': playlist['title'],
+                'item_by': playlist['user']['username'],
+                'item_type': "playlist",
+                'item_service': "soundcloud",
+                'item_url': playlist['permalink_url'],
+                'item_thumbnail_url': playlist["artwork_url"]
+            })
 
     logger.info(search_results)
     return search_results

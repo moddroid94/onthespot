@@ -68,15 +68,15 @@ def deezer_get_artist_albums(artist_id):
 
 def deezer_get_track_metadata(token, item_id):
     logger.info(f"Get track info for: '{item_id}'")
- 
+
     track_data = make_call(f"{DEEZER_BASE}/track/{item_id}")
     album_data = make_call(f"{DEEZER_BASE}/album/{track_data.get('album', {}).get('id', '')}")
     info = {}
 
-    # Initialize an empty list to store contributor names  
+    # Initialize an empty list to store contributor names
     artists = []
 
-    # Append all contributor names to the list  
+    # Append all contributor names to the list
     for artist in track_data.get('contributors', ''):
         artists.append(artist['name'])
 
@@ -157,8 +157,8 @@ def decryptfile(data_chunks, key, fo):
     Decrypt using blowfish with <key>.
     Only every third 2048 byte block is encrypted.
     """
-    blockSize = 2048  
-    i = 0  
+    blockSize = 2048
+    i = 0
     total_length = len(data_chunks)
 
     for start in range(0, total_length, blockSize):
@@ -202,12 +202,12 @@ def deezer_login_user(account):
 
         # Prepare to call the API
         method = 'deezer.getUserData'
-        params = {  
+        params = {
             'api_version': "1.0",
             'api_token': 'null',
             'input': '3',
             'method': 'deezer.getUserData'
-        }  
+        }
 
         user_data = session.post(
             "http://www.deezer.com/ajax/gw-light.php",
@@ -265,52 +265,60 @@ def deezer_get_search_results(token, search_term, content_types):
     playlist_url = f"{DEEZER_BASE}/search/playlist"
     track_url = f"{DEEZER_BASE}/search/track"
 
-    album_search = requests.get(album_url, params=params).json()
-    artist_search = requests.get(artist_url, params=params).json()
-    playlist_search = requests.get(playlist_url, params=params).json()
-    track_search = requests.get(track_url, params=params).json()
-
     search_results = []
-    for album in album_search['data']:
-        search_results.append({
-            'item_id': album['id'],
-            'item_name': album['title'],
-            'item_by': album['artist']['name'],
-            'item_type': "album",
-            'item_service': "deezer",
-            'item_url': album['link'],
-            'item_thumbnail_url': album["cover"]
-        })
-    for artist in artist_search['data']:
-        search_results.append({
-            'item_id': artist['id'],
-            'item_name': artist['name'],
-            'item_by': artist['name'],
-            'item_type': "artist",
-            'item_service': "deezer",
-            'item_url': artist['link'],
-            'item_thumbnail_url': artist["picture"]
-        })
-    for playlist in playlist_search['data']:
-        search_results.append({
-            'item_id': playlist['id'],
-            'item_name': playlist['title'],
-            'item_by': playlist['user']['name'],
-            'item_type': "playlist",
-            'item_service': "deezer",
-            'item_url': playlist['link'],
-            'item_thumbnail_url': playlist["picture"]
-        })
-    for track in track_search['data']:
-        search_results.append({
-            'item_id': track['id'],
-            'item_name': track['title'],
-            'item_by': track['artist']['name'],
-            'item_type': "track",
-            'item_service': "deezer",
-            'item_url': track['link'],
-            'item_thumbnail_url': track["album"]["cover"]
-        })
+
+    if 'album' in content_types:
+        album_search = requests.get(album_url, params=params).json()
+        for album in album_search['data']:
+            search_results.append({
+                'item_id': album['id'],
+                'item_name': album['title'],
+                'item_by': album['artist']['name'],
+                'item_type': "album",
+                'item_service': "deezer",
+                'item_url': album['link'],
+                'item_thumbnail_url': album["cover"]
+            })
+
+
+    if 'artist' in content_types:
+        artist_search = requests.get(artist_url, params=params).json()
+        for artist in artist_search['data']:
+            search_results.append({
+                'item_id': artist['id'],
+                'item_name': artist['name'],
+                'item_by': artist['name'],
+                'item_type': "artist",
+                'item_service': "deezer",
+                'item_url': artist['link'],
+                'item_thumbnail_url': artist["picture"]
+            })
+
+    if 'playlist' in content_types:
+        playlist_search = requests.get(playlist_url, params=params).json()
+        for playlist in playlist_search['data']:
+            search_results.append({
+                'item_id': playlist['id'],
+                'item_name': playlist['title'],
+                'item_by': playlist['user']['name'],
+                'item_type': "playlist",
+                'item_service': "deezer",
+                'item_url': playlist['link'],
+                'item_thumbnail_url': playlist["picture"]
+            })
+
+    if 'track' in content_types:
+        track_search = requests.get(track_url, params=params).json()
+        for track in track_search['data']:
+            search_results.append({
+                'item_id': track['id'],
+                'item_name': track['title'],
+                'item_by': track['artist']['name'],
+                'item_type': "track",
+                'item_service': "deezer",
+                'item_url': track['link'],
+                'item_thumbnail_url': track["album"]["cover"]
+            })
 
 
     logger.info(search_results)

@@ -69,6 +69,14 @@ def load_config(self):
 
 
     # Checkboxes
+    self.inp_enable_search_tracks.setChecked(config.get("enable_search_tracks"))
+    self.inp_enable_search_albums.setChecked(config.get("enable_search_albums"))
+    self.inp_enable_search_artists.setChecked(config.get("enable_search_artists"))
+    self.inp_enable_search_playlists.setChecked(config.get("enable_search_playlists"))
+    self.inp_enable_search_episodes.setChecked(config.get("enable_search_episodes"))
+    self.inp_enable_search_shows.setChecked(config.get("enable_search_shows"))
+    self.inp_enable_search_audiobooks.setChecked(config.get("enable_search_audiobooks"))
+
     self.inp_show_download_thumbnails.setChecked(config.get("show_search_thumbnails"))
     self.inp_show_search_thumbnails.setChecked(config.get("show_search_thumbnails"))
     self.inp_use_lrc_file.setChecked(config.get("use_lrc_file"))
@@ -151,6 +159,14 @@ def save_config(self):
 
 
     # Checkboxes: config.set_('key', bool)
+    config.set_('enable_search_tracks', self.inp_enable_search_tracks.isChecked())
+    config.set_('enable_search_albums', self.inp_enable_search_albums.isChecked())
+    config.set_('enable_search_playlists', self.inp_enable_search_playlists.isChecked())
+    config.set_('enable_search_artists', self.inp_enable_search_artists.isChecked())
+    config.set_('enable_search_episodes', self.inp_enable_search_episodes.isChecked())
+    config.set_('enable_search_shows', self.inp_enable_search_shows.isChecked())
+    config.set_('enable_search_audiobooks', self.inp_enable_search_audiobooks.isChecked())
+
     config.set_('show_download_thumbnails', self.inp_show_search_thumbnails.isChecked())
     config.set_('show_search_thumbnails', self.inp_show_search_thumbnails.isChecked())
     config.set_('use_lrc_file', self.inp_use_lrc_file.isChecked())

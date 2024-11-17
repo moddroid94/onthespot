@@ -74,6 +74,13 @@ class Config:
             "create_m3u_playlists": False, # Create m3u based playlist
             "translate_file_path": False, # Translate downloaded file path to application language
             "ffmpeg_args": [], # Extra arguments for ffmpeg
+            "enable_search_tracks": True, # Enable listed category in search
+            "enable_search_albums": True, # Enable listed category in search
+            "enable_search_playlists": True, # Enable listed category in search
+            "enable_search_artists": True, # Enable listed category in search
+            "enable_search_episodes": True, # Enable listed category in search
+            "enable_search_shows": True, # Enable listed category in search
+            "enable_search_audiobooks": True, # Enable listed category in search
             "show_search_thumbnails": True, # Show thumbnails in search view
             "show_download_thumbnails": True, # Show thumbnails in download view
             "explicit_label": "🅴", # Explicit label in app and download path
