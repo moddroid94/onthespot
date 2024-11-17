@@ -415,6 +415,7 @@ class MainWindow(QMainWindow):
                 'parent_category': item['parent_category'],
                 'playlist_name': playlist_name,
                 'playlist_by': playlist_by,
+                'playlist_number': item.get('playlist_number', ''),
                 "gui": {
                     "status_label": status_label,
                     "progress_bar": pbar,

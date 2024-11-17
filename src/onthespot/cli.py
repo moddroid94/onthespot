@@ -50,6 +50,7 @@ class QueueWorker(threading.Thread):
                         'is_playlist_item': item['is_playlist_item'],
                         'playlist_name': playlist_name,
                         'playlist_by': playlist_by,
+                        'playlist_number': item['playlist_number']
                         }
                 time.sleep(1)
                 continue

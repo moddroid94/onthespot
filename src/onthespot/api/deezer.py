@@ -320,6 +320,5 @@ def deezer_get_search_results(token, search_term, content_types):
                 'item_thumbnail_url': track["album"]["cover"]
             })
 
-
     logger.info(search_results)
     return search_results

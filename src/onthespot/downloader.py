@@ -73,8 +73,7 @@ class DownloadWorker(QObject):
 
                     try:
                         item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
-
-                        item_path = format_track_path(item_metadata, item_service, item_type, item['parent_category'], item['playlist_name'], item['playlist_by'])
+                        item_path = format_track_path(item, item_metadata)
 
                     except (Exception, KeyError):
                         item['item_status'] = "Failed"

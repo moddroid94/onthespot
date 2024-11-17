@@ -105,8 +105,10 @@ def parsingworker():
                                     'item_id': item_id,
                                     'parent_category': 'playlist',
                                     'playlist_name': playlist_name,
-                                    'playlist_by': playlist_by
+                                    'playlist_by': playlist_by,
+                                    'playlist_number': str(index + 1)
                                     }
+                                print(pending)
                             except TypeError:
                                 logger.error(f'TypeError for {item}')
                         continue
@@ -147,7 +149,8 @@ def parsingworker():
                                 'item_id': item_id,
                                 'parent_category': 'playlist',
                                 'playlist_name': 'Liked Songs',
-                                'playlist_by': 'me'
+                                'playlist_by': 'me',
+                                'playlist_number': str(index + 1)
                                 }
                         continue
 
@@ -161,7 +164,8 @@ def parsingworker():
                                 'item_id': item_id,
                                 'parent_category': 'playlist',
                                 'playlist_name': 'Your Episodes',
-                                'playlist_by': 'me'
+                                'playlist_by': 'me',
+                                'playlist_number': str(index + 1)
                                 }
                         continue
 
@@ -212,7 +216,8 @@ def parsingworker():
                                 'item_id': item_id,
                                 'parent_category': 'playlist',
                                 'playlist_name': playlist_name,
-                                'playlist_by': playlist_by
+                                'playlist_by': playlist_by,
+                                'playlist_number': str(index + 1)
                                 }
                         continue
                     elif current_type == "artist":

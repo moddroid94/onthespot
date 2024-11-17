@@ -94,7 +94,7 @@ def conv_list_format(items):
     return (config.get('metadata_seperator')).join(items)
 
 
-def format_track_path(item_metadata, item_service, item_type, parent_category, playlist_name, playlist_by):
+def format_track_path(item, item_metadata):
     if config.get("translate_file_path"):
         name = translate(item_metadata.get('title', ''))
         album = translate(item_metadata.get('album_name', ''))
@@ -102,14 +102,15 @@ def format_track_path(item_metadata, item_service, item_type, parent_category, p
         name = item_metadata.get('title', '')
         album = item_metadata.get('album_name', '')
 
-    if parent_category == 'playlist' and config.get("use_playlist_path"):
+    if item['parent_category'] == 'playlist' and config.get("use_playlist_path"):
         path = config.get("playlist_path_formatter")
-    elif item_type == 'track':
+    elif item['item_type'] == 'track':
         path = config.get("track_path_formatter")
-    elif item_type == 'episode':
+    elif item['item_type'] == 'episode':
         path = config.get("podcast_path_formatter")
 
     item_path = path.format(
+        service=sanitize_data(item.get('item_service', '')).title(),
         artist=sanitize_data(item_metadata.get('artists', '')),
         album=sanitize_data(album),
         album_artist=sanitize_data(item_metadata.get('album_artists', '')),
@@ -122,8 +123,9 @@ def format_track_path(item_metadata, item_service, item_type, parent_category, p
         explicit=sanitize_data(str(config.get('explicit_label')) if item_metadata.get('explicit') else ''),
         trackcount=item_metadata.get('total_tracks', ''),
         disccount=item_metadata.get('total_discs', ''),
-        playlist_name=sanitize_data(playlist_name),
-        playlist_owner=sanitize_data(playlist_by),
+        playlist_name=sanitize_data(item.get('playlist_name', '')),
+        playlist_owner=sanitize_data(item.get('playlist_by', '')),
+        playlist_number=sanitize_data(item.get('playlist_number', '')),
     )
 
     return item_path
