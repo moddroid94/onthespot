@@ -108,7 +108,6 @@ def parsingworker():
                                     'playlist_by': playlist_by,
                                     'playlist_number': str(index + 1)
                                     }
-                                print(pending)
                             except TypeError:
                                 logger.error(f'TypeError for {item}')
                         continue
