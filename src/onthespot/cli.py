@@ -33,7 +33,7 @@ class QueueWorker(threading.Thread):
                     item = pending.pop(item_id)
                     token = get_account_token()
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                    if item['is_playlist_item'] is True:
+                    if item['parent_category'] == 'playlist':
                         playlist_name = item['playlist_name']
                         playlist_by = item['playlist_by']
                     else:
@@ -50,7 +50,7 @@ class QueueWorker(threading.Thread):
                         'is_playlist_item': item['is_playlist_item'],
                         'playlist_name': playlist_name,
                         'playlist_by': playlist_by,
-                        'playlist_number': item['playlist_number']
+                        'playlist_number': item.get('playlist_number', '')
                         }
                 time.sleep(1)
                 continue
