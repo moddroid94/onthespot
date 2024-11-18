@@ -33,12 +33,7 @@ class QueueWorker(threading.Thread):
                     item = pending.pop(item_id)
                     token = get_account_token()
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                    if item['parent_category'] == 'playlist':
-                        playlist_name = item['playlist_name']
-                        playlist_by = item['playlist_by']
-                    else:
-                        playlist_name = ''
-                        playlist_by = ''
+
                     download_queue[item['item_id']] = {
                         "item_service": item["item_service"],
                         "item_type": item["item_type"],
@@ -47,9 +42,9 @@ class QueueWorker(threading.Thread):
                         "file_path": None,
                         "item_name": item_metadata["title"],
                         "item_by": item_metadata["artists"],
-                        'is_playlist_item': item['is_playlist_item'],
-                        'playlist_name': playlist_name,
-                        'playlist_by': playlist_by,
+                        'parent_category': item['parent_category'],
+                        'playlist_name': item.get('playlist_name', ''),
+                        'playlist_by': item.get('playlist_by', ''),
                         'playlist_number': item.get('playlist_number', '')
                         }
                 time.sleep(1)
