@@ -46,6 +46,41 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
         for param in config.get('ffmpeg_args'):
             command.append(param)
 
+        # Add output parameter at last
+        command += [filename]
+        logger.debug(
+            f'Converting media with ffmpeg. Built commandline {command}'
+            )
+        # Run subprocess with CREATE_NO_WINDOW flag on Windows
+        if os.name == 'nt':
+            subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
+        else:
+            subprocess.check_call(command, shell=False)
+        os.remove(temp_name)
+
+
+def embed_metadata(item, metadata):
+    if os.path.isfile(os.path.abspath(item['file_path'])):
+        target_path = os.path.abspath(item['file_path'])
+        file_name = os.path.basename(target_path)
+        filetype = os.path.splitext(file_name)[1]
+        file_stem = os.path.splitext(file_name)[0]
+
+        temp_name = os.path.join(os.path.dirname(target_path), "~" + file_stem + filetype)
+
+        if os.path.isfile(temp_name):
+            os.remove(temp_name)
+
+        os.rename(item['file_path'], temp_name)
+        # Prepare default parameters
+        # Existing command initialization
+        command = [config.get('_ffmpeg_bin_path'), '-i', temp_name]
+
+        if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
+            command += ['-loglevel', 'error', '-hide_banner', '-nostats']
+
+        command += ['-c:a', 'copy']
+
         # Append metadata
         if config.get("embed_branding"):
             branding = "Downloaded by OnTheSpot, https://github.com/justin025/onthespot"
@@ -54,6 +89,9 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                 command += ['-metadata', 'COMM={}'.format(branding)]
             else:
                 command += ['-metadata', 'comment={}'.format(branding)]
+
+        if config.get("embed_service_id"):
+            command += ['-metadata', f'{item['item_service']}id={item['item_id']}']
 
         for key in metadata.keys():
             value = metadata[key]
@@ -112,9 +150,9 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
 
             elif key == 'description' and config.get("embed_description"):
                 if filetype == '.mp3':
-                    # Incorrectly embedded to TXXX:TCMP, patch sent upstream
+                    # Incorrectly embedded to TXXX:COMM, patch sent upstream
                     command += ['-metadata', 'COMM={}'.format(value)]
-                if filetype == '.mp3':
+                else:
                     command += ['-metadata', 'comment={}'.format(value)]
 
             elif key == 'language' and config.get("embed_language"):
@@ -204,9 +242,9 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
                 command += ['-metadata', 'valence={}'.format(value)]
 
         # Add output parameter at last
-        command += [filename]
+        command += [item['file_path']]
         logger.debug(
-            f'Converting media with ffmpeg. Built commandline {command}'
+            f'Embed metadata with ffmpeg. Built commandline {command}'
             )
         # Run subprocess with CREATE_NO_WINDOW flag on Windows
         if os.name == 'nt':
@@ -239,7 +277,7 @@ def set_music_thumbnail(filename, metadata):
 
         # I have no idea why music tag manages to display covers
         # in file explorer but raw mutagen and ffmpeg do not.
-        if config.get('embed_cover') and filetype == '.mp3' and os.name == 'nt':
+        if config.get('embed_cover') and config.get('windows_10_explorer_thumbnails'):
             with open(image_path, 'rb') as image_file:
                 image_data = image_file.read()
             tags = music_tag.load_file(filename)
@@ -313,7 +351,7 @@ def set_music_thumbnail(filename, metadata):
         if not config.get('save_album_cover'):
             os.remove(image_path)
 
-def fix_mp3_metadata(filename, metadata):
+def fix_mp3_metadata(filename):
     id3 = ID3(filename)
     if 'TXXX:WOAS' in id3:
         id3['WOAS'] = WOAS(url=id3['TXXX:WOAS'].text[0])
@@ -324,6 +362,8 @@ def fix_mp3_metadata(filename, metadata):
     if 'TXXX:COMM' in id3:
         id3['COMM'] = COMM(encoding=3, lang='und', text=id3['TXXX:COMM'].text[0])
         del id3['TXXX:COMM']
+    if 'TXXX:comment' in id3:
+        del id3['TXXX:comment']
     if 'TXXX:TCMP' in id3:
         id3['TCMP'] = TCMP(encoding=3, text=id3['TXXX:TCMP'].text[0])
         del id3['TXXX:TCMP']
@@ -357,3 +397,39 @@ def add_to_m3u_file(item, item_metadata):
                 m3u_file.write(f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item_metadata['artists']} - {item_metadata['title']}\n{item['file_path']}\n")
         else:
             logger.info(f"{item['file_path']} already exists in the M3U file.")
+
+def strip_metadata(item):
+    if os.path.isfile(os.path.abspath(item['file_path'])):
+        target_path = os.path.abspath(item['file_path'])
+        file_name = os.path.basename(target_path)
+        filetype = os.path.splitext(file_name)[1]
+        file_stem = os.path.splitext(file_name)[0]
+
+        temp_name = os.path.join(os.path.dirname(target_path), "~" + file_stem + filetype)
+
+        if os.path.isfile(temp_name):
+            os.remove(temp_name)
+
+        os.rename(item['file_path'], temp_name)
+        # Prepare default parameters
+        # Existing command initialization
+        command = [config.get('_ffmpeg_bin_path'), '-i', temp_name]
+
+        if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
+            command += ['-loglevel', 'error', '-hide_banner', '-nostats']
+
+        command += ['-c:a', 'copy']
+
+        command += ['-map_metadata', '-1']
+
+        # Add output parameter at last
+        command += [item['file_path']]
+        logger.debug(
+            f'Strip metadata with ffmpeg. Built commandline {command}'
+            )
+        # Run subprocess with CREATE_NO_WINDOW flag on Windows
+        if os.name == 'nt':
+            subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
+        else:
+            subprocess.check_call(command, shell=False)
+        os.remove(temp_name)

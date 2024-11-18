@@ -9,7 +9,7 @@ from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
 from .otsconfig import config
-from .post_download import convert_audio_format, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file
+from .post_download import convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
@@ -104,6 +104,21 @@ class DownloadWorker(QObject):
 
                             item['file_path'] = os.path.join(file_directory, entry)
 
+                            if config.get('overwrite_existing_metadata'):
+                                logger.info('Overwriting Existing Metadata')
+                                strip_metadata(item)
+                                embed_metadata(item, item_metadata)
+
+                                # Thumbnail
+                                if config.get('save_album_cover') or config.get('embed_cover'):
+                                    item['item_status'] = 'Setting Thumbnail'
+                                    if self.gui:
+                                        self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
+                                    set_music_thumbnail(item['file_path'], item_metadata)
+
+                                if os.path.splitext(item['file_path'])[1] == '.mp3':
+                                    fix_mp3_metadata(item['file_path'])
+
                             # M3U
                             if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
                                 item['item_status'] = 'Adding To M3U'
@@ -112,7 +127,7 @@ class DownloadWorker(QObject):
                                     add_to_m3u_file(item, item_metadata)
 
                             if self.gui:
-                                if item['item_status'] in ('Downloading', 'Adding To M3U'):
+                                if item['item_status'] in ('Downloading', 'Setting Thumbnail', 'Adding To M3U'):
                                     self.progress.emit(item, self.tr("Already Exists"), 100)
                             item['item_status'] = 'Already Exists'
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
@@ -302,6 +317,8 @@ class DownloadWorker(QObject):
 
                         convert_audio_format(file_path, item_metadata, bitrate, default_format)
 
+                        embed_metadata(item, item_metadata)
+
                         # Thumbnail
                         if config.get('save_album_cover') or config.get('embed_cover'):
                             item['item_status'] = 'Setting Thumbnail'
@@ -310,7 +327,7 @@ class DownloadWorker(QObject):
                             set_music_thumbnail(file_path, item_metadata)
 
                         if os.path.splitext(file_path)[1] == '.mp3':
-                            fix_mp3_metadata(file_path, item_metadata)
+                            fix_mp3_metadata(file_path)
 
                     # M3U
                     if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':

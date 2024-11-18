@@ -12,13 +12,13 @@ from .parse_item import parsingworker
 from .search import get_search_results
 from .api.spotify import spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
 from .api.soundcloud import soundcloud_get_track_metadata
-from ..api.deezer import deezer_get_track_metadata, deezer_add_account
+from .api.deezer import deezer_get_track_metadata, deezer_add_account
 from .downloader import DownloadWorker
 from .casualsnek import start_snake_game
 from .parse_item import parse_url
 
-
 logging.disable(logging.CRITICAL)
+
 
 class QueueWorker(threading.Thread):
     def __init__(self):

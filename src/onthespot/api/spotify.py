@@ -86,7 +86,8 @@ class MirrorSpotifyPlayback(QObject):
                         'item_id': item_id,
                         'parent_category': parent_category,
                         'playlist_name': playlist_name,
-                        'playlist_by': playlist_by
+                        'playlist_by': playlist_by,
+                        'playlist_number': '?'
                         }
                         logger.info(f'Mirror Spotify Playback added track to download queue: https://open.spotify.com/track/{item_id}')
                         continue
@@ -560,7 +561,6 @@ def spotify_get_track_metadata(token, item_id):
             artist.get('name', '') for artist in credit_block.get('artists', [])
         ]
 
-
     info['artists'] = artists
     info['album_name'] = track_data.get('tracks', [{}])[0].get('album', {}).get("name", '')
     info['album_type'] = album_data.get('album_type', '')
@@ -591,7 +591,7 @@ def spotify_get_track_metadata(token, item_id):
     info['length'] = str(track_data.get('tracks', [{}])[0].get('duration_ms', ''))
     info['item_url'] = track_data.get('tracks', [{}])[0].get('external_urls', {}).get('spotify', '')
     info['popularity'] = track_data.get('tracks', [{}])[0].get('popularity', '')  # unused
-    info['scraped_song_id'] = track_data.get('tracks', [{}])[0].get('id', '')
+    info['item_id'] = track_data.get('tracks', [{}])[0].get('id', '')
     info['is_playable'] = track_data.get('tracks', [{}])[0].get('is_playable', False)
 
     key_mapping = {
