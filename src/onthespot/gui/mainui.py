@@ -298,114 +298,111 @@ class MainWindow(QMainWindow):
         logger.info("Accounts table was populated !")
 
     def add_item_to_download_list(self, item, item_metadata):
+        # Skip rendering QButtons if they are not in use
+        copy_btn = None
+        open_btn = None
+        locate_btn = None
+        delete_btn = None
+
+        # Items
+        pbar = QProgressBar()
+        pbar.setValue(0)
+        pbar.setMinimumHeight(30)
+        if config.get("download_copy_btn"):
+            copy_btn = QPushButton()
+            #copy_btn.setText('Retry')
+            copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
+            copy_btn.setIcon(copy_icon)
+            copy_btn.setToolTip(self.tr('Copy'))
+            copy_btn.setMinimumHeight(30)
+            copy_btn.hide()
+        cancel_btn = QPushButton()
+        # cancel_btn.setText('Cancel')
+        cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
+        cancel_btn.setIcon(cancel_icon)
+        cancel_btn.setToolTip(self.tr('Cancel'))
+        cancel_btn.setMinimumHeight(30)
+        cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        retry_btn = QPushButton()
+        #retry_btn.setText('Retry')
+        retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
+        retry_btn.setIcon(retry_icon)
+        retry_btn.setToolTip(self.tr('Retry'))
+        retry_btn.setMinimumHeight(30)
+        retry_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        retry_btn.hide()
+        if config.get("download_open_btn"):
+            open_btn = QPushButton()
+            #open_btn.setText('Open')
+            open_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'file.png'))
+            open_btn.setIcon(open_icon)
+            open_btn.setToolTip(self.tr('Open'))
+            open_btn.setMinimumHeight(30)
+            open_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            open_btn.hide()
+        if config.get("download_locate_btn"):
+            locate_btn = QPushButton()
+            #locate_btn.setText('Locate')
+            locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
+            locate_btn.setIcon(locate_icon)
+            locate_btn.setToolTip(self.tr('Locate'))
+            locate_btn.setMinimumHeight(30)
+            locate_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            locate_btn.hide()
+        if config.get("download_delete_btn"):
+            delete_btn = QPushButton()
+            #delete_btn.setText('Delete')
+            delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'trash.png'))
+            delete_btn.setIcon(delete_icon)
+            delete_btn.setToolTip(self.tr('Delete'))
+            delete_btn.setMinimumHeight(30)
+            delete_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            delete_btn.hide()
+
+        playlist_name = ''
+        playlist_by = ''
+        if item['parent_category'] == 'playlist':
+            item_category = f'Playlist: {item["playlist_name"]}'
+            playlist_name = item['playlist_name']
+            playlist_by = item['playlist_by']
+        elif item['parent_category'] in ('album', 'show', 'audiobook'):
+            item_category = f'{item["parent_category"].title()}: {item_metadata["album_name"]}'
+        else:
+            item_category = f'{item["parent_category"].title()}: {item_metadata["title"]}'
+
+        item_service = item["item_service"]
+        service_label = QTableWidgetItem(str(item_service).title())
+        service_label.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{item_service}.png')))
+
+        status_label = QLabel(self.tbl_dl_progress)
+        status_label.setText(self.tr("Waiting"))
+        actions = DownloadActionsButtons(item['item_id'], item_metadata, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
+
+        rows = self.tbl_dl_progress.rowCount()
+        self.tbl_dl_progress.insertRow(rows)
+        if item_metadata['explicit']:  # Check if the item is explicit
+            title = config.get('explicit_label', '') + ' ' + item_metadata['title']
+        else:
+            title = item_metadata['title']
+        if config.get('show_download_thumbnails'):
+            self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
+            item_label = LabelWithThumb(title, item_metadata['image_url'])
+        else:
+            item_label = QLabel(self.tbl_dl_progress)
+            item_label.setText(title)
+        # Add To List
+        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
+        self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
+        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
+        self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(item_category))
+        self.tbl_dl_progress.setItem(rows, 4, QTableWidgetItem(service_label))
+        self.tbl_dl_progress.setCellWidget(rows, 5, status_label)
+        self.tbl_dl_progress.setCellWidget(rows, 6, actions)
+
+        # Hide if filter is applied
+        self.update_table_visibility()
+
         with download_queue_lock:
-            # Skip rendering QButtons if they are not in use
-            copy_btn = None
-            play_btn = None
-            save_btn = None
-            queue_btn = None
-            open_btn = None
-            locate_btn = None
-            delete_btn = None
-
-            # Items
-            pbar = QProgressBar()
-            pbar.setValue(0)
-            pbar.setMinimumHeight(30)
-            if config.get("download_copy_btn"):
-                copy_btn = QPushButton()
-                #copy_btn.setText('Retry')
-                copy_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'link.png'))
-                copy_btn.setIcon(copy_icon)
-                copy_btn.setToolTip(self.tr('Copy'))
-                copy_btn.setMinimumHeight(30)
-                copy_btn.hide()
-            cancel_btn = QPushButton()
-            # cancel_btn.setText('Cancel')
-            cancel_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'stop.png'))
-            cancel_btn.setIcon(cancel_icon)
-            cancel_btn.setToolTip(self.tr('Cancel'))
-            cancel_btn.setMinimumHeight(30)
-            cancel_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-            retry_btn = QPushButton()
-            #retry_btn.setText('Retry')
-            retry_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'retry.png'))
-            retry_btn.setIcon(retry_icon)
-            retry_btn.setToolTip(self.tr('Retry'))
-            retry_btn.setMinimumHeight(30)
-            retry_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-            retry_btn.hide()
-            if config.get("download_open_btn"):
-                open_btn = QPushButton()
-                #open_btn.setText('Open')
-                open_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'file.png'))
-                open_btn.setIcon(open_icon)
-                open_btn.setToolTip(self.tr('Open'))
-                open_btn.setMinimumHeight(30)
-                open_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                open_btn.hide()
-            if config.get("download_locate_btn"):
-                locate_btn = QPushButton()
-                #locate_btn.setText('Locate')
-                locate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
-                locate_btn.setIcon(locate_icon)
-                locate_btn.setToolTip(self.tr('Locate'))
-                locate_btn.setMinimumHeight(30)
-                locate_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                locate_btn.hide()
-            if config.get("download_delete_btn"):
-                delete_btn = QPushButton()
-                #delete_btn.setText('Delete')
-                delete_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'trash.png'))
-                delete_btn.setIcon(delete_icon)
-                delete_btn.setToolTip(self.tr('Delete'))
-                delete_btn.setMinimumHeight(30)
-                delete_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                delete_btn.hide()
-
-            playlist_name = ''
-            playlist_by = ''
-            if item['parent_category'] == 'playlist':
-                item_category = f'Playlist: {item["playlist_name"]}'
-                playlist_name = item['playlist_name']
-                playlist_by = item['playlist_by']
-            elif item['parent_category'] in ('album', 'show', 'audiobook'):
-                item_category = f'{item["parent_category"].title()}: {item_metadata["album_name"]}'
-            else:
-                item_category = f'{item["parent_category"].title()}: {item_metadata["title"]}'
-
-            item_service = item["item_service"]
-            service_label = QTableWidgetItem(str(item_service).title())
-            service_label.setIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'{item_service}.png')))
-
-            status_label = QLabel(self.tbl_dl_progress)
-            status_label.setText(self.tr("Waiting"))
-            actions = DownloadActionsButtons(item['item_id'], item_metadata, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
-
-            rows = self.tbl_dl_progress.rowCount()
-            self.tbl_dl_progress.insertRow(rows)
-            if item_metadata['explicit']:  # Check if the item is explicit
-                title = config.get('explicit_label', '') + ' ' + item_metadata['title']
-            else:
-                title = item_metadata['title']
-            if config.get('show_download_thumbnails'):
-                self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
-                item_label = LabelWithThumb(title, item_metadata['image_url'])
-            else:
-                item_label = QLabel(self.tbl_dl_progress)
-                item_label.setText(title)
-            # Add To List
-            self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
-            self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
-            self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
-            self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(item_category))
-            self.tbl_dl_progress.setItem(rows, 4, QTableWidgetItem(service_label))
-            self.tbl_dl_progress.setCellWidget(rows, 5, status_label)
-            self.tbl_dl_progress.setCellWidget(rows, 6, actions)
-
-            # Hide if filter is applied
-            self.update_table_visibility()
-
             download_queue[item['item_id']] = {
                 "item_service": item["item_service"],
                 "item_type": item["item_type"],
@@ -423,9 +420,6 @@ class MainWindow(QMainWindow):
                         "copy": copy_btn,
                         "cancel": cancel_btn,
                         "retry": retry_btn,
-                        "play": play_btn,
-                        "save": save_btn,
-                        "queue": queue_btn,
                         "open": open_btn,
                         "locate": locate_btn,
                         "delete": delete_btn

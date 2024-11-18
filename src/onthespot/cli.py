@@ -28,12 +28,12 @@ class QueueWorker(threading.Thread):
     def run(self):
         while True:
             if pending:
-                with download_queue_lock:
-                    item_id = next(iter(pending))
-                    item = pending.pop(item_id)
-                    token = get_account_token()
-                    item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
+                item_id = next(iter(pending))
+                item = pending.pop(item_id)
+                token = get_account_token()
+                item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
 
+                with download_queue_lock:
                     download_queue[item['item_id']] = {
                         "item_service": item["item_service"],
                         "item_type": item["item_type"],
@@ -47,10 +47,8 @@ class QueueWorker(threading.Thread):
                         'playlist_by': item.get('playlist_by', ''),
                         'playlist_number': item.get('playlist_number', '')
                         }
-                time.sleep(1)
-                continue
             else:
-                time.sleep(4)
+                time.sleep(0.2)
 
 def main():
     print('\033[32mLogging In...\033[0m\n', end='', flush=True)
