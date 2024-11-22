@@ -236,7 +236,9 @@ class MainWindow(QMainWindow):
         if dir_path.strip() != '':
             self.inp_tmp_dl_root.setText(QDir.toNativeSeparators(dir_path))
 
-    def __show_popup_dialog(self, txt, btn_hide=False):
+    def __show_popup_dialog(self, txt, btn_hide=False, download=False):
+        if download and config.get('disable_bulk_dl_notices'):
+            return
         self.__splash_dialog.lb_main.setText(str(txt))
         if btn_hide:
             self.__splash_dialog.btn_close.hide()
@@ -258,7 +260,7 @@ class MainWindow(QMainWindow):
         # Update Checker
         if config.get("check_for_updates"):
             if is_latest_release() == False:
-                self.__splash_dialog.run(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
+                self.__show_popup_dialog(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
 
     def fill_account_table(self):
 
@@ -535,7 +537,7 @@ class MainWindow(QMainWindow):
             except:
                 logger.info('Account Pool Empty')
         self.tbl_sessions.removeRow(index)
-        self.__splash_dialog.run(self.tr("Account was removed successfully."))
+        self.__show_popup_dialog(self.tr("Account was removed successfully."))
 
     def update_config(self):
         save_config(self)
@@ -552,7 +554,7 @@ class MainWindow(QMainWindow):
             self.btn_login_add.show()
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
-                (self.__splash_dialog.run(self.tr("Account added, please restart the app.")) or True) and
+                (self.__show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
                 deezer_add_account(self.inp_login_password.text()) and
                 self.inp_login_password.clear()
                 )
@@ -569,7 +571,7 @@ class MainWindow(QMainWindow):
             self.btn_login_add.show()
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
-                (self.__splash_dialog.run(self.tr("Currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
+                (self.__show_popup_dialog(self.tr("Currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
                 self.inp_login_username.clear() and
                 self.inp_login_password.clear()
                 )
@@ -594,7 +596,7 @@ class MainWindow(QMainWindow):
         self.btn_login_add.setText(self.tr("Waiting..."))
         self.btn_login_add.setDisabled(True)
         self.inp_login_service.setDisabled(True)
-        self.__splash_dialog.run(self.tr("Login Service Started...\nSelect 'OnTheSpot' under devices in the Spotify Desktop App."))
+        self.__show_popup_dialog(self.tr("Login Service Started...\nSelect 'OnTheSpot' under devices in the Spotify Desktop App."))
         login_worker = threading.Thread(target=self.add_spotify_account_worker)
         login_worker.daemon = True
         login_worker.start()
@@ -602,12 +604,12 @@ class MainWindow(QMainWindow):
     def add_spotify_account_worker(self):
         session = spotify_new_session()
         if session == True:
-            self.__splash_dialog.run(self.tr("Account added, please restart the app."))
+            self.__show_popup_dialog(self.tr("Account added, please restart the app."))
             self.btn_login_add.setText(self.tr("Please Restart The App"))
             config.set_('parsing_acc_sn', len(account_pool))
             config.update()
         elif session == False:
-            self.__splash_dialog.run(self.tr("Account already exists."))
+            self.__show_popup_dialog(self.tr("Account already exists."))
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.setDisabled(False)
 
@@ -633,15 +635,15 @@ class MainWindow(QMainWindow):
 
         results = get_search_results(search_term, content_types)
         if results is None:
-            self.__splash_dialog.run(self.tr("You need to login to at least one account to use this feature."))
+            self.__show_popup_dialog(self.tr("You need to login to at least one account to use this feature."))
             self.inp_search_term.setText('')
             return
         elif results is True:
-            self.__splash_dialog.run(self.tr("Item is being parsed and will be added to the download queue shortly."))
+            self.__show_popup_dialog(self.tr("Item is being parsed and will be added to the download queue shortly."))
             self.inp_search_term.setText('')
             return
         elif results is False:
-            self.__splash_dialog.run(self.tr("Invalid item, please check your query or account settings"))
+            self.__show_popup_dialog(self.tr("Invalid item, please check your query or account settings"))
             self.inp_search_term.setText('')
             return
 
@@ -660,7 +662,7 @@ class MainWindow(QMainWindow):
                     'item_type': item_type,
                     'item_id': item_id
                 }
-                self.__splash_dialog.run(self.tr("{0} is being parsed and will be added to the download queue shortly.").format(f"{item_type.title()}: {item_name}"))
+                self.__show_popup_dialog(self.tr("{0} is being parsed and will be added to the download queue shortly.").format(f"{item_type.title()}: {item_name}"), download=True)
 
             btn.clicked.connect(lambda x,
                             item_name=result['item_name'],
