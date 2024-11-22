@@ -11,10 +11,10 @@ echo " => Fetch Dependencies"
 mkdir build
 cd build
 
-wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+curl -L -o appimagetool-x86_64.AppImage https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
 chmod +x appimagetool-x86_64.AppImage
 
-wget https://github.com/niess/python-appimage/releases/download/python3.12/python3.12.7-cp312-cp312-manylinux2014_x86_64.AppImage -O python.AppImage
+curl -L -o python.AppImage https://github.com/niess/python-appimage/releases/download/python3.12/python3.12.7-cp312-cp312-manylinux2014_x86_64.AppImage
 chmod +x python.AppImage
 
 ./python.AppImage --appimage-extract
@@ -31,8 +31,9 @@ cd build/OnTheSpot.AppDir
 ./AppRun -m pip install -r ../../requirements.txt
 ./AppRun -m pip install ../../dist/onthespot-*-py3-none-any.whl
 
-rm AppRun .DirIcon python.png python*.desktop
+rm AppRun .DirIcon python.png python*.desktop usr/share/applications/python*.desktop
 cp -t . ../../src/onthespot/resources/icons/onthespot.png ../../src/onthespot/resources/org.onthespot.OnTheSpot.desktop
+cp ../../src/onthespot/resources/org.onthespot.OnTheSpot.desktop usr/share/applications/
 
 echo '#! /bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"

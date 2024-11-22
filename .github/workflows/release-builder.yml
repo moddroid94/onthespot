@@ -11,9 +11,8 @@ on:
     types: [published]
 
 jobs:
-  # Windows Build
-  windows-build:
-    runs-on: windows-latest
+  windows-x86_64-build:
+    runs-on: [windows-latest, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -21,16 +20,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: Run Windows Build Script
         run: scripts\build_windows.bat
         shell: cmd
 
       - name: Upload Windows Executable
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: OnTheSpot.exe
+          name: OnTheSpot-x86_64.exe
           path: dist/OnTheSpot.exe
 
       - name: Upload to Release (Windows)
@@ -41,12 +40,43 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: dist/OnTheSpot.exe
-          asset_name: OnTheSpot.exe
+          asset_name: OnTheSpot-x86_64.exe
           asset_content_type: application/octet-stream
 
-  # Linux Build
-  linux-build:
-    runs-on: ubuntu-latest
+  windows-arm64-build:
+    runs-on: [windows-latest, x64]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Run Windows Build Script
+        run: scripts\build_windows.bat
+        shell: cmd
+
+      - name: Upload Windows Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: OnTheSpot-arm64.exe
+          path: dist/OnTheSpot.exe
+
+      - name: Upload to Release (Windows)
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/OnTheSpot.exe
+          asset_name: OnTheSpot-arm64.exe
+          asset_content_type: application/octet-stream
+
+  linux-x86_64-build:
+    runs-on: [ubuntu-latest, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -61,9 +91,9 @@ jobs:
         shell: bash
 
       - name: Upload Linux Executable
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: OnTheSpot.tar.gz
+          name: OnTheSpot-x86_64.tar.gz
           path: dist/OnTheSpot.tar.gz
 
       - name: Upload to Release (Linux)
@@ -74,12 +104,43 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: dist/OnTheSpot.tar.gz
-          asset_name: OnTheSpot.tar.gz
+          asset_name: OnTheSpot-x86_64.tar.gz
           asset_content_type: application/gzip
 
-  # macOS Build
-  macos-build:
-    runs-on: macos-latest
+  linux-arm64-build:
+    runs-on: [ubuntu-latest, ARM64]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf fuse libfuse2 wget
+
+      - name: Run Linux Build Script
+        run: scripts/build_linux.sh
+        shell: bash
+
+      - name: Upload Linux Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: OnTheSpot-arm64.tar.gz
+          path: dist/OnTheSpot.tar.gz
+
+      - name: Upload to Release (Linux)
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/OnTheSpot.tar.gz
+          asset_name: OnTheSpot-arm64.tar.gz
+          asset_content_type: application/gzip
+
+  macos-x86_64-build:
+    runs-on: [macos-12, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -89,9 +150,9 @@ jobs:
         shell: bash
 
       - name: Upload macOS DMG
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: OnTheSpot.dmg
+          name: OnTheSpot-x86_64.dmg
           path: dist/OnTheSpot.dmg
 
       - name: Upload to Release (macOS)
@@ -102,12 +163,38 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: dist/OnTheSpot.dmg
-          asset_name: OnTheSpot.dmg
+          asset_name: OnTheSpot-x86_64.dmg
           asset_content_type: application/x-apple-diskimage
 
-  # AppImage Build
-  appimage-build:
-    runs-on: ubuntu-latest
+  macos-arm64-build:
+    runs-on: [macos-latest, ARM64]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run macOS Build Script
+        run: scripts/build_mac.sh
+        shell: bash
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: OnTheSpot-arm64.dmg
+          path: dist/OnTheSpot.dmg
+
+      - name: Upload to Release (macOS)
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/OnTheSpot.dmg
+          asset_name: OnTheSpot-arm64.dmg
+          asset_content_type: application/x-apple-diskimage
+
+  appimage-x86_64-build:
+    runs-on: [ubuntu-latest, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -122,7 +209,7 @@ jobs:
         shell: bash
 
       - name: Upload AppImage Executable
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OnTheSpot-x86_64.AppImage
           path: dist/OnTheSpot-x86_64.AppImage

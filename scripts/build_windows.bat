@@ -35,7 +35,6 @@ powershell -Command "Expand-Archive -Path build\ffmpeg.zip -DestinationPath buil
 
 echo =^> Running PyInstaller to create .exe package...
 pyinstaller --onefile --noconsole --noconfirm ^
-    --hidden-import="onthespot.post_download" ^
     --hidden-import="zeroconf._utils.ipaddress" ^
     --hidden-import="zeroconf._handlers.answers" ^
     --add-data="src/onthespot/resources/translations/*.qm;onthespot/resources/translations" ^
