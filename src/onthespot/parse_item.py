@@ -19,7 +19,8 @@ def parse_url(url):
     account_service = account_pool[config.get('parsing_acc_sn')]['service']
 
     if account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
-        item_type, item_id = soundcloud_parse_url(url)
+        token = get_account_token()
+        item_type, item_id = soundcloud_parse_url(url, token)
         item_service = "soundcloud"
 
     elif account_service == 'spotify' and re.match(SPOTIFY_URL_REGEX, url):
@@ -181,7 +182,18 @@ def parsingworker():
 
                     if current_type in ["album", "playlist"]:
                         # Items are added to pending in function to avoid complexity
-                        soundcloud_get_set_items(token, item['item_url'])
+                        set_data = soundcloud_get_set_items(token, item['item_url'])
+                        for index, track in enumerate(set_data['tracks']):
+                            pending[track['id']] = {
+                                'item_url': track.get('permalink_url', ''),
+                                'item_service': 'soundcloud',
+                                'item_type': 'track',
+                                'item_id': track['id'],
+                                'parent_category': 'playlist' if not set_data['is_album'] else 'album',
+                                'playlist_name': set_data['title'],
+                                'playlist_by': set_data['user']['username'],
+                                'playlist_number': str(index + 1)
+                            }
 
                 elif current_service == "deezer":
 

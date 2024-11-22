@@ -31,17 +31,15 @@ class QueueWorker(QThread):
     def run(self):
         while True:
             if pending:
-                try:
-                    item_id = next(iter(pending))
-                    item = pending.pop(item_id)
-                    token = get_account_token()
-                    item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                    if item_id not in download_queue:
-                        self.add_item_to_download_list.emit(item, item_metadata)
-                    continue
-                except Exception as e:
-                    logger.error(f"Unknown Exception for {item}: {str(e)}")
-                    pending[item_id] = item
+
+                item_id = next(iter(pending))
+                item = pending.pop(item_id)
+                token = get_account_token()
+                item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
+                if item_id not in download_queue:
+                    self.add_item_to_download_list.emit(item, item_metadata)
+                continue
+
             else:
                 time.sleep(0.2)
 
