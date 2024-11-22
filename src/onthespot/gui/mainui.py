@@ -31,15 +31,16 @@ class QueueWorker(QThread):
     def run(self):
         while True:
             if pending:
-
-                item_id = next(iter(pending))
-                item = pending.pop(item_id)
-                token = get_account_token()
-                item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                if item_id not in download_queue:
+                try:
+                    local_id = next(iter(pending))
+                    item = pending.pop(local_id)
+                    token = get_account_token()
+                    item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
                     self.add_item_to_download_list.emit(item, item_metadata)
-                continue
-
+                    continue
+                except Exception as e:
+                    logger.error(f"Unknown Exception for {item}: {str(e)}")
+                    pending[local_id] = item
             else:
                 time.sleep(0.2)
 
@@ -374,7 +375,7 @@ class MainWindow(QMainWindow):
 
         status_label = QLabel(self.tbl_dl_progress)
         status_label.setText(self.tr("Waiting"))
-        actions = DownloadActionsButtons(item['item_id'], item_metadata, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
+        actions = DownloadActionsButtons(item['local_id'], item_metadata, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
 
         rows = self.tbl_dl_progress.rowCount()
         self.tbl_dl_progress.insertRow(rows)
@@ -389,7 +390,7 @@ class MainWindow(QMainWindow):
             item_label = QLabel(self.tbl_dl_progress)
             item_label.setText(title)
         # Add To List
-        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['item_id'])))
+        self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['local_id'])))
         self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
         self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
         self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(item_category))
@@ -401,7 +402,8 @@ class MainWindow(QMainWindow):
         self.update_table_visibility()
 
         with download_queue_lock:
-            download_queue[item['item_id']] = {
+            download_queue[item['local_id']] = {
+                'local_id': item['local_id'],
                 "item_service": item["item_service"],
                 "item_type": item["item_type"],
                 'item_id': item['item_id'],
@@ -472,21 +474,17 @@ class MainWindow(QMainWindow):
         with download_queue_lock:
             check_row = 0
             while check_row < self.tbl_dl_progress.rowCount():
-                item_id = self.tbl_dl_progress.item(check_row, 0).text()
-                try:
-                    item_id = int(item_id)
-                except ValueError:
-                    pass
-                logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
-                if item_id in download_queue:
-                    if download_queue[item_id]['item_status'] in (
+                local_id = self.tbl_dl_progress.item(check_row, 0).text()
+                logger.info(f'Removing Row : {check_row} and mediaid: {local_id}')
+                if local_id in download_queue:
+                    if download_queue[local_id]['item_status'] in (
                                 "Cancelled",
                                 "Downloaded",
                                 "Already Exists"
                             ):
-                        logger.info(f'Removing Row : {check_row} and mediaid: {item_id}')
+                        logger.info(f'Removing Row : {check_row} and mediaid: {local_id}')
                         self.tbl_dl_progress.removeRow(check_row)
-                        download_queue.pop(item_id)
+                        download_queue.pop(local_id)
                     else:
                         check_row = check_row + 1
                 else:
@@ -496,15 +494,15 @@ class MainWindow(QMainWindow):
         with download_queue_lock:
             row_count = self.tbl_dl_progress.rowCount()
             while row_count > 0:
-                for item_id in download_queue.keys():
-                    logger.info(f'Trying to cancel : {item_id}')
-                    if download_queue[item_id]['item_status'] == "Waiting":
-                        download_queue[item_id]['item_status'] = "Cancelled"
-                        download_queue[item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
-                        download_queue[item_id]['gui']['status_label'].setText(self.tr("Cancelled"))
-                        download_queue[item_id]['gui']['progress_bar'].setValue(0)
-                        download_queue[item_id]['gui']["btn"]['cancel'].hide()
-                        download_queue[item_id]['gui']["btn"]['retry'].show()
+                for local_id in download_queue.keys():
+                    logger.info(f'Trying to cancel : {local_id}')
+                    if download_queue[local_id]['item_status'] == "Waiting":
+                        download_queue[local_id]['item_status'] = "Cancelled"
+                        download_queue[local_id]['gui']['status_label'].setText(self.tr("Cancelled"))
+                        download_queue[local_id]['gui']['status_label'].setText(self.tr("Cancelled"))
+                        download_queue[local_id]['gui']['progress_bar'].setValue(0)
+                        download_queue[local_id]['gui']["btn"]['cancel'].hide()
+                        download_queue[local_id]['gui']["btn"]['retry'].show()
                     row_count -= 1
                 self.update_table_visibility()
 
@@ -512,13 +510,13 @@ class MainWindow(QMainWindow):
         with download_queue_lock:
             row_count = self.tbl_dl_progress.rowCount()
             while row_count > 0:
-                for item_id in download_queue.keys():
-                    logger.info(f'Trying to cancel : {item_id}')
-                    if download_queue[item_id]['item_status'] == "Failed":
-                        download_queue[item_id]['item_status'] = "Waiting"
-                        download_queue[item_id]['gui']['status_label'].setText(self.tr("Waiting"))
-                        download_queue[item_id]['gui']["btn"]['cancel'].show()
-                        download_queue[item_id]['gui']["btn"]['retry'].hide()
+                for local_id in download_queue.keys():
+                    logger.info(f'Trying to cancel : {local_id}')
+                    if download_queue[local_id]['item_status'] == "Failed":
+                        download_queue[local_id]['item_status'] = "Waiting"
+                        download_queue[local_id]['gui']['status_label'].setText(self.tr("Waiting"))
+                        download_queue[local_id]['gui']["btn"]['cancel'].show()
+                        download_queue[local_id]['gui']["btn"]['retry'].hide()
                     row_count -= 1
                 self.update_table_visibility()
 

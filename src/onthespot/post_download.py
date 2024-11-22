@@ -390,11 +390,11 @@ def add_to_m3u_file(item, item_metadata):
 
     # Check if the item_path is already in the M3U file
     with open(m3u_path, 'r') as m3u_file:
+        m3u_item_header = f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item['playlist_number']}. {item_metadata['artists']} - {item_metadata['title']}"
         m3u_contents = m3u_file.readlines()
-
-        if item['file_path'] not in [line.strip() for line in m3u_contents]:
+        if m3u_item_header not in [line.strip() for line in m3u_contents]:
             with open(m3u_path, 'a') as m3u_file:
-                m3u_file.write(f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item_metadata['artists']} - {item_metadata['title']}\n{item['file_path']}\n")
+                m3u_file.write(f"{m3u_item_header}\n{item['file_path']}\n")
         else:
             logger.info(f"{item['file_path']} already exists in the M3U file.")
 

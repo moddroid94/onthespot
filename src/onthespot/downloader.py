@@ -34,8 +34,8 @@ class DownloadWorker(QObject):
     def readd_item_to_download_queue(self, item):
         with download_queue_lock:
             try:
-                del download_queue[item['item_id']]
-                download_queue[item['item_id']] = item
+                del download_queue[item['local_id']]
+                download_queue[item['local_id']] = item
             except (KeyError):
                 # Item likely cleared from queue
                 return

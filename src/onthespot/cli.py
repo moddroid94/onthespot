@@ -28,13 +28,14 @@ class QueueWorker(threading.Thread):
     def run(self):
         while True:
             if pending:
-                item_id = next(iter(pending))
-                item = pending.pop(item_id)
+                local_id = next(iter(pending))
+                item = pending.pop(local_id)
                 token = get_account_token()
                 item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
 
                 with download_queue_lock:
-                    download_queue[item['item_id']] = {
+                    download_queue[local_id] = {
+                        'local_id': local_id,
                         "item_service": item["item_service"],
                         "item_type": item["item_type"],
                         'item_id': item['item_id'],
