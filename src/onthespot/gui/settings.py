@@ -53,7 +53,6 @@ def load_config(self):
     self.inp_download_root.setText(config.get("download_root"))
     self.inp_download_delay.setValue(config.get("download_delay"))
     self.inp_max_search_results.setValue(config.get("max_search_results"))
-    self.inp_max_retries.setValue(config.get("max_retries"))
     self.inp_chunk_size.setValue(config.get("chunk_size"))
     self.inp_media_format.setText(config.get("media_format"))
     self.inp_podcast_media_format.setText(config.get("podcast_media_format"))
@@ -63,7 +62,6 @@ def load_config(self):
     self.inp_playlist_path_formatter.setText(config.get("playlist_path_formatter"))
     self.inp_m3u_name_formatter.setText(config.get("m3u_name_formatter"))
     self.inp_album_cover_format.setText(config.get("album_cover_format"))
-    self.inp_max_recdl_delay.setValue(config.get("recoverable_fail_wait_delay"))
     self.inp_search_thumb_height.setValue(config.get("search_thumb_height"))
     self.inp_metadata_seperator.setText(config.get("metadata_seperator"))
 
@@ -148,9 +146,7 @@ def save_config(self):
     config.set_('album_cover_format', self.inp_album_cover_format.text())
     config.set_('download_delay', self.inp_download_delay.value())
     config.set_('chunk_size', self.inp_chunk_size.value())
-    config.set_('recoverable_fail_wait_delay', self.inp_max_recdl_delay.value())
     config.set_('search_thumb_height', self.inp_search_thumb_height.value())
-    config.set_('max_retries', self.inp_max_retries.value())
     config.set_('disable_bulk_dl_notices', self.inp_disable_bulk_popup.isChecked())
     config.set_('metadata_seperator', self.inp_metadata_seperator.text())
     if 0 < self.inp_max_search_results.value() <= 50:

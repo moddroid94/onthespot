@@ -54,17 +54,15 @@ class Config:
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name} - {artist}", # Playlist path format string
             "m3u_name_formatter": "M3U" + os.path.sep + "{playlist_name} by {playlist_owner}", # M3U name format string
             "m3u_format": "m3u8", # M3U file format
-            "max_retries": 3, # Number of times to retry before giving up on download
             "max_search_results": 10, # Number of search results to display of each type
             "media_format": "mp3", # Song track media format
             "podcast_media_format": "mp3", # Podcast track media format
-            "file_bitrate": "320k",
-            "file_hertz": "44100",
+            "file_bitrate": "320k", # Converted file bitrate
+            "file_hertz": "44100", # Converted file hertz
             "illegal_character_replacement": "-", # Character used to replace illegal characters or values in path
             "force_raw": False, # Skip media conversion and metadata writing
             "chunk_size": 50000, # Chunk size in bytes to download in
-            "recoverable_fail_wait_delay": 10, # No of seconds to wait before failure that can be retried
-            "disable_bulk_dl_notices": True, # Hide popups for bulk download buttons
+            "disable_bulk_dl_notices": True, # Hide download popups
             "save_album_cover": False, # Save album covers to a file
             "album_cover_format": "png", # Album cover format
             "inp_enable_lyrics": False, # Enable lyrics download

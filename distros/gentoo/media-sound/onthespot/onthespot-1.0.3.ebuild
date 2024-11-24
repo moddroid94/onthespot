@@ -32,7 +32,7 @@ RDEPEND="
 	dev-python/music-tag
 	dev-python/pillow
 	dev-python/pyperclip
-	dev-python/PyQt6[network,widgets]
+	dev-python/pyqt6[network,widgets]
 	dev-python/requests
 	dev-python/urllib3
 	media-libs/mutagen
