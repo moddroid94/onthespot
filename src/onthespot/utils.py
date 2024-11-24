@@ -494,29 +494,49 @@ def fix_mp3_metadata(filename):
 
 def add_to_m3u_file(item, item_metadata):
     logger.info(f"Adding {item['file_path']} to m3u")
+
     path = config.get("m3u_name_formatter")
+
     m3u_file = path.format(
-    playlist_name=sanitize_data(item['playlist_name']),
-    playlist_owner=sanitize_data(item['playlist_by']),
+        playlist_name=sanitize_data(item['playlist_name']),
+        playlist_owner=sanitize_data(item['playlist_by']),
     )
 
     m3u_file += "." + config.get("m3u_format")
-
     dl_root = config.get("download_root")
     m3u_path = os.path.join(dl_root, m3u_file)
 
     os.makedirs(os.path.dirname(m3u_path), exist_ok=True)
 
     if not os.path.exists(m3u_path):
-        with open(m3u_path, 'w') as m3u_file:
+        with open(m3u_path, 'w', encoding='utf-8') as m3u_file:
             m3u_file.write("#EXTM3U\n")
 
+    EXTINF = config.get('ext_path').format(
+        service=item.get('item_service', '').title(),
+        artist=item_metadata.get('artists', ''),
+        album=item_metadata.get('album_name', ''),
+        album_artist=item_metadata.get('album_artists', ''),
+        name=item_metadata.get('title', ''),
+        year=item_metadata.get('release_year', ''),
+        disc_number=item_metadata.get('disc_number', ''),
+        track_number=item_metadata.get('track_number', ''),
+        genre=item_metadata.get('genre', ''),
+        label=item_metadata.get('label', ''),
+        explicit=str(config.get('explicit_label')) if item_metadata.get('explicit') else '',
+        trackcount=item_metadata.get('total_tracks', ''),
+        disccount=item_metadata.get('total_discs', ''),
+        playlist_name=item.get('playlist_name', ''),
+        playlist_owner=item.get('playlist_by', ''),
+        playlist_number=item.get('playlist_number', ''),
+    ).replace(config.get('metadata_seperator'), config.get('ext_seperator'))
+
     # Check if the item_path is already in the M3U file
-    with open(m3u_path, 'r') as m3u_file:
-        m3u_item_header = f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {item['playlist_number']}. {item_metadata['artists']} - {item_metadata['title']}"
+    with open(m3u_path, 'r', encoding='utf-8') as m3u_file:
+        m3u_item_header = f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {EXTINF}"
         m3u_contents = m3u_file.readlines()
         if m3u_item_header not in [line.strip() for line in m3u_contents]:
-            with open(m3u_path, 'a') as m3u_file:
+            with open(m3u_path, 'a', encoding='utf-8') as m3u_file:
                 m3u_file.write(f"{m3u_item_header}\n{item['file_path']}\n")
         else:
             logger.info(f"{item['file_path']} already exists in the M3U file.")

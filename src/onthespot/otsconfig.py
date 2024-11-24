@@ -54,6 +54,8 @@ class Config:
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{name} - {artist}", # Playlist path format string
             "m3u_name_formatter": "M3U" + os.path.sep + "{playlist_name} by {playlist_owner}", # M3U name format string
             "m3u_format": "m3u8", # M3U file format
+            "ext_seperator": "; ", # M3U EXTINF metadata seperator
+            "ext_path": "{playlist_number}. {artist} - {name}", # M3U EXTINF path
             "max_search_results": 10, # Number of search results to display of each type
             "media_format": "mp3", # Song track media format
             "podcast_media_format": "mp3", # Podcast track media format
