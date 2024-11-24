@@ -111,7 +111,7 @@ class Config:
             "embed_url": False,
             "embed_key": True,
             "embed_bpm": True,
-            "embed_compilation": False,
+            "embed_compilation": True,
             "embed_lyrics": False,
             "embed_explicit": False,
             "embed_service_id": False,

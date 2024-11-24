@@ -43,5 +43,5 @@ src_install() {
 	distutils-r1_src_install
 
 	domenu "${S}"/src/onthespot/resources/org.onthespot.OnTheSpot.desktop
-	newicon -s 256 "${S}"/src/onthespot/resources/onthespot.png onthespot.png
+	newicon -s 256 "${S}"/src/onthespot/resources/icons/onthespot.png onthespot.png
 }
