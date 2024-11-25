@@ -24,7 +24,6 @@ def soundcloud_parse_url(url, token):
         return item_type, item_id
 
 def soundcloud_login_user(account):
-
     try:
         # Add support for logging in
         if account['uuid'] == 'public_soundcloud':
@@ -115,6 +114,22 @@ def soundcloud_login_user(account):
             }
         })
         return False
+
+def soundcloud_add_account():
+    cfg_copy = config.get('accounts').copy()
+    new_user = {
+        "uuid": 'public_soundcloud',
+        "service": "soundcloud",
+        "active": True,
+        "login": {
+            "client_id": "null",
+            "app_version": "null",
+            "app_locale": "null"
+        }
+    }
+    cfg_copy.append(new_user)
+    config.set_('accounts', cfg_copy)
+    config.update()
 
 def soundcloud_get_token(parsing_index):
     accounts = config.get("accounts")
@@ -227,9 +242,11 @@ def soundcloud_get_track_metadata(token, item_id):
             track_number = track_number + 1
             if track['id'] == track_data['id']:
                 break
+        album_type = 'album'
     except (KeyError, TypeError):
         total_tracks = '1'
         track_number = '1'
+        album_type = 'single'
     # Album Name
     try:
         album_name = track_data['publisher_metadata']['album_name']
@@ -269,6 +286,7 @@ def soundcloud_get_track_metadata(token, item_id):
     info['length'] = str(track_data.get("media", {}).get("transcodings", [{}])[0].get("duration", 0))
     info['artists'] = artists
     info['album_name'] = album_name
+    info['album_type'] = album_type
     info['album_artists'] = track_data.get('user', {}).get('username', '')
     info['explicit'] = publisher_metadata.get('explicit', False) if publisher_metadata else False
     info['copyright'] = copyright_data

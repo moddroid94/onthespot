@@ -3,16 +3,19 @@ import traceback
 import time
 import subprocess
 import threading
+import re
 import requests
 from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
+from yt_dlp import YoutubeDL
 from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
 from .otsconfig import config
 from .utils import sanitize_data, format_track_path, convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
+from .api.youtube import youtube_get_track_metadata
 from .accounts import get_account_token
 
 logger = get_logger("downloader")
@@ -38,7 +41,6 @@ class DownloadWorker(QObject):
             except (KeyError):
                 # Item likely cleared from queue
                 return
-
 
     def run(self):
         while self.is_running:
@@ -276,6 +278,27 @@ class DownloadWorker(QObject):
                                 if self.gui:
                                     self.progress.emit(item, self.tr("Failed"), 0)
                                 self.readd_item_to_download_queue(item)
+
+                        elif item_service == "youtube":
+                            def yt_dlp_progress_hook(self, item, d):
+                                if self.gui:
+                                    progress_str = re.search(r'(\d+\.\d+)%', d['_percent_str'])
+                                    self.progress.emit(item, self.tr("Downloading"), round(float(progress_str.group(1))) - 1)
+                            progress_hook = lambda d: yt_dlp_progress_hook(self, item, d)
+
+                            with YoutubeDL({
+                                    'quiet': True,
+                                    'extract_audio': True,
+                                    'format': 'bestaudio',
+                                    'outtmpl': temp_file_path,
+                                    'progress_hooks': [progress_hook]
+                                }) as video:
+
+                                video.download(f'https://www.youtube.com/watch?v={item['item_id']}')
+
+                                default_format = '.mp4'
+                                bitrate = "128k"
+
                     except (RuntimeError):
                         # Likely Ratelimit
                         logger.info("Download failed: {item}")

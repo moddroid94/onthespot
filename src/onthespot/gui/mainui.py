@@ -13,8 +13,9 @@ from ..otsconfig import config
 from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock
 from .thumb_listitem import LabelWithThumb
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session, MirrorSpotifyPlayback
-from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
+from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_add_account
 from ..api.deezer import deezer_get_track_metadata, deezer_add_account
+from ..api.youtube import youtube_get_track_metadata, youtube_add_account
 from ..accounts import get_account_token, FillAccountPool
 from ..search import get_search_results
 from ..downloader import DownloadWorker
@@ -282,7 +283,7 @@ class MainWindow(QMainWindow):
             btn.setIcon(trash_icon)
             #btn.setText(self.tr(" Remove "))
 
-            btn.clicked.connect(lambda x, index=rows: self.user_table_remove_click(index))
+            btn.clicked.connect(self.user_table_remove_click)
             btn.setMinimumHeight(30)
 
             service = QTableWidgetItem(str(account["service"]).title())
@@ -381,7 +382,7 @@ class MainWindow(QMainWindow):
 
         rows = self.tbl_dl_progress.rowCount()
         self.tbl_dl_progress.insertRow(rows)
-        if item_metadata['explicit']:  # Check if the item is explicit
+        if item_metadata.get('explicit', ''):  # Check if the item is explicit
             title = config.get('explicit_label', '') + ' ' + item_metadata['title']
         else:
             title = item_metadata['title']
@@ -522,21 +523,23 @@ class MainWindow(QMainWindow):
                     row_count -= 1
                 self.update_table_visibility()
 
+    def user_table_remove_click(self):
+        button = self.sender()
+        button_position = button.pos()
+        index = self.tbl_sessions.indexAt(button_position).row()
 
-    def user_table_remove_click(self, index):
+        del account_pool[index]
         accounts = config.get('accounts').copy()
         del accounts[index]
         config.set_('accounts', accounts)
         config.update()
-        del account_pool[index]
 
-        if config.get('parsing_acc_sn') == self.tbl_sessions.currentRow():
-            config.set_('parsing_acc_sn', len(account_pool) - 1)
-            try:
-                self.tbl_sessions.cellWidget(len(account_pool) - 1, 0).setChecked(True)
-            except:
-                logger.info('Account Pool Empty')
         self.tbl_sessions.removeRow(index)
+        if config.get('parsing_acc_sn') == index and len(account_pool) != 0:
+            config.set_('parsing_acc_sn', 0)
+            config.update()
+            self.tbl_sessions.cellWidget(0, 0).setChecked(True)
+
         self.__show_popup_dialog(self.tr("Account was removed successfully."))
 
     def update_config(self):
@@ -561,23 +564,26 @@ class MainWindow(QMainWindow):
 
         # Soundcloud
         elif self.inp_login_service.currentIndex() == 1:
-            self.lb_login_username.show()
-            self.lb_login_username.setText(self.tr("Client ID"))
-            self.inp_login_username.show()
-            self.lb_login_password.show()
-            self.lb_login_password.setText(self.tr("App Version"))
-            self.inp_login_password.show()
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.hide()
+            self.inp_login_password.hide()
+            #self.lb_login_username.show()
+            #self.lb_login_username.setText(self.tr("Client ID"))
+            #self.inp_login_username.show()
+            #self.lb_login_password.show()
+            #self.lb_login_password.setText(self.tr("App Version"))
+            #self.inp_login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
-            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.setText(self.tr("Add Public Account"))
             self.btn_login_add.clicked.connect(lambda:
-                (self.__show_popup_dialog(self.tr("Currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
-                self.inp_login_username.clear() and
-                self.inp_login_password.clear()
+                (self.__show_popup_dialog(self.tr("Public account added, please restart the app.\nLogging into personal accounts is currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
+                soundcloud_add_account()
                 )
 
         # Spotify
-        if self.inp_login_service.currentIndex() == 2:
+        elif self.inp_login_service.currentIndex() == 2:
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
@@ -590,6 +596,20 @@ class MainWindow(QMainWindow):
             self.btn_login_add.show()
             self.btn_login_add.setText(self.tr("Add Spotify Account"))
             self.btn_login_add.clicked.connect(self.add_spotify_account)
+
+        # Youtube
+        elif self.inp_login_service.currentIndex() == 3:
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.hide()
+            self.inp_login_password.hide()
+            self.btn_login_add.clicked.disconnect()
+            self.btn_login_add.show()
+            self.btn_login_add.setText(self.tr("Add Public Account"))
+            self.btn_login_add.clicked.connect(lambda:
+                (self.__show_popup_dialog(self.tr("Public account added, please restart the app.")) or True) and
+                youtube_add_account()
+                )
 
     def add_spotify_account(self):
         logger.info('Add spotify account clicked ')

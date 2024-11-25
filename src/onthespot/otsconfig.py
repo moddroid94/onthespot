@@ -64,7 +64,7 @@ class Config:
             "illegal_character_replacement": "-", # Character used to replace illegal characters or values in path
             "force_raw": False, # Skip media conversion and metadata writing
             "chunk_size": 50000, # Chunk size in bytes to download in
-            "disable_bulk_dl_notices": True, # Hide download popups
+            "disable_bulk_dl_notices": False, # Hide download popups
             "save_album_cover": False, # Save album covers to a file
             "album_cover_format": "png", # Album cover format
             "inp_enable_lyrics": False, # Enable lyrics download
@@ -140,6 +140,11 @@ class Config:
                         "app_version": "null",
                         "app_locale": "null"
                     }
+                },
+                {
+                    "uuid": "public_youtube",
+                    "service": "youtube",
+                    "active": True,
                 }
             ] # Saved account information
         }

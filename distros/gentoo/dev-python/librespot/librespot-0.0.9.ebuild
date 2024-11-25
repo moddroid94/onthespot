@@ -25,7 +25,10 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 DEPEND="
+        dev-python/defusedxml
         dev-python/pycryptodomex
+        dev-python/websocket-client
+        dev-python/zeroconf
 "
 
 distutils_enable_tests pytest

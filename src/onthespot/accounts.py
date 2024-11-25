@@ -5,6 +5,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from .api.spotify import spotify_login_user, spotify_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
 from .api.deezer import deezer_login_user, deezer_get_token
+from .api.youtube import youtube_login_user
 
 logger = get_logger("accounts")
 
@@ -40,23 +41,6 @@ class FillAccountPool(QThread):
                         self.progress.emit(self.tr('Login failed for \n{0}...!').format(account['login']['arl'][:30]), True)
                     continue
 
-            elif service == 'spotify':
-                if self.gui is True:
-                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['username']), True)
-                try:
-                    if spotify_login_user(account) is True:
-                        if self.gui is True:
-                            self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['username']), True)
-                        continue
-                    else:
-                        if self.gui is True:
-                            self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
-                        continue
-                except Exception as e:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
-                    continue
-
             elif service == 'soundcloud':
                 if self.gui is True:
                     self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['client_id']), True)
@@ -75,6 +59,27 @@ class FillAccountPool(QThread):
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['client_id']), True)
                     continue
 
+            elif service == 'spotify':
+                if self.gui is True:
+                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['username']), True)
+                try:
+                    if spotify_login_user(account) is True:
+                        if self.gui is True:
+                            self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['username']), True)
+                        continue
+                    else:
+                        if self.gui is True:
+                            self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
+                        continue
+                except Exception as e:
+                    if self.gui is True:
+                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
+                    continue
+
+            elif service == 'youtube':
+                youtube_login_user(account)
+                continue
+
         self.finished.emit()
 
 
@@ -82,6 +87,9 @@ class FillAccountPool(QThread):
 def get_account_token():
     parsing_index = config.get('parsing_acc_sn')
     service = account_pool[parsing_index]['service']
+
+    if service == 'youtube':
+        return
 
     if config.get("rotate_acc_sn") is True:
         for i in range(parsing_index + 1, parsing_index + len(account_pool) + 1):

@@ -93,6 +93,8 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 | [**Playlist Path**](#trackplaylist-path-format) | Customize the file naming pattern for playlists using variables like `{artist}`, `{album}`, etc. |
 | **Create M3U Files for Playlists** | If enabled create an M3U file for downloaded tracks in a playlist. |
 | [**M3U Path**](#trackplaylist-path-format) | Customize the download path of created M3U files using variables like `{artist}`, `{album}`, etc. |
+| [**EXTINF Seperator**](#trackplaylist-path-format) | M3U EXTINF metadata / list seperator. |
+| [**EXTINF Path**](#trackplaylist-path-format) | Customize the M3U EXTINF label using variables like `{artist}`, `{album}`, etc. |
 | **Save Album Cover** | Save album cover as an image with a default format of cover.png |
 | **Album Cover Format** | The image format to save album covers in (default: png) |
 | **Illegal Character Replacement** | Replace illegal characters in the filepath with the value specified (e.g., `/`, `\`, `<`, `>`, `*`, etc.). |
@@ -127,6 +129,8 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
    | ----------------- | --------------------------------------------------- |
    | `{service}`       | The music service used to download your file        |
    | `{artist}`        | Name of the artist(s).                              |
+   | `{album_artist}`  | Name of the album artist(s).                        |
+   | `{album_type}`    | Name of the artist type (single, album, etc).       |
    | `{album}`         | Name of the album.                                  |
    | `{name}`          | Name of the track.                                  |
    | `{year}`          | Release year of the track.                          |

@@ -99,6 +99,7 @@ def deezer_get_track_metadata(token, item_id):
     info['image_url'] = track_data.get('album', {}).get('cover_xl', '')
     info['album_artists'] = track_data.get('artist', {}).get('name', '')
     info['album_name'] = track_data.get('album', {}).get('title', '')
+    info['album_type'] = album_data.get('record_type', '')
     info['is_playable'] = track_data.get('readable', '')
 
     return info

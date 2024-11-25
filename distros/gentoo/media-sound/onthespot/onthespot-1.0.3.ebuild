@@ -37,6 +37,7 @@ RDEPEND="
 	dev-python/urllib3
 	media-libs/mutagen
 	media-video/ffmpeg[mp3,openssl,sdl]
+	net-misc/yt-dlp
 "
 
 src_install() {

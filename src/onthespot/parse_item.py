@@ -9,16 +9,22 @@ from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deeze
 
 logger = get_logger('parse_item')
 
+DEEZER_URL_REGEX = re.compile(r'https://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
 SOUNDCLOUD_URL_REGEX = re.compile(r"https://soundcloud.com/[-\w:/]+")
-SPOTIFY_URL_REGEX = re.compile(r"^(https?://)?open\.spotify\.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
-DEEZER_URL_REGEX = re.compile(r'https:\/\/www\.deezer\.com\/(?:[a-z]{2}\/)?(?P<type>album|playlist|track|artist)\/(?P<id>\d+)')
+SPOTIFY_URL_REGEX = re.compile(r"https://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
+YOUTUBE_URL_REGEX = re.compile(r"https://(www\.|music\.)?youtube\.com/watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)(&list=(?P<list_id>[a-zA-Z0-9_-]+))?")
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
-#YOUTUBE_URL_REGEX = re.compile(r"https://www\.youtube\.com/watch\?v=[-\w]")
 
 def parse_url(url):
     account_service = account_pool[config.get('parsing_acc_sn')]['service']
 
-    if account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
+    if account_service == 'deezer' and re.match(DEEZER_URL_REGEX, url):
+        match = re.search(DEEZER_URL_REGEX, url)
+        item_id = match.group("id")
+        item_type = match.group("type")
+        item_service = 'deezer'
+
+    elif account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
         token = get_account_token()
         item_type, item_id = soundcloud_parse_url(url, token)
         item_service = "soundcloud"
@@ -37,11 +43,15 @@ def parse_url(url):
         item_type = 'your_episodes'
         item_service = "spotify"
 
-    elif account_service == 'deezer' and re.match(DEEZER_URL_REGEX, url):
-        match = re.search(DEEZER_URL_REGEX, url)
-        item_id = match.group("id")
-        item_type = match.group("type")
-        item_service = 'deezer'
+    elif account_service == 'youtube' and re.match(YOUTUBE_URL_REGEX, url):
+        match = re.search(YOUTUBE_URL_REGEX, url)
+        if match:
+            item_service = 'youtube'
+            item_type = 'track'
+            item_id = match.group('video_id')
+            list_id = match.group('list_id') if match.group('list_id') else None
+            #if list_id:
+            #    item_type = 'playlist'
 
     else:
         logger.info(f'Invalid Url: {url}')
@@ -260,6 +270,19 @@ def parsingworker():
                         album_urls = deezer_get_artist_albums(current_id)
                         for index, album_url in enumerate(album_urls):
                             parse_url(album_url)
+                        continue
+
+                elif current_service == "youtube":
+
+                    if current_type == "track":
+                        local_id = format_item_id(item_id)
+                        pending[local_id] = {
+                            'local_id': local_id,
+                            'item_service': current_service,
+                            'item_type': current_type,
+                            'item_id': item_id,
+                            'parent_category': 'track'
+                            }
                         continue
         else:
             time.sleep(0.2)
