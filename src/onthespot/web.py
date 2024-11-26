@@ -109,7 +109,7 @@ def download_queue_page():
 
 @app.route('/')
 def index():
-    return redirect(url_for('download_queue'))
+    return redirect(url_for('download_queue_page'))
 
 @app.route('/search')
 def search():
