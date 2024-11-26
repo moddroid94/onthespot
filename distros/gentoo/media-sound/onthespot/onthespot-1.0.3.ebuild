@@ -28,6 +28,7 @@ BDEPEND="
 "
 
 RDEPEND="
+	dev-python/flask
 	dev-python/librespot
 	dev-python/music-tag
 	dev-python/pillow
