@@ -100,7 +100,7 @@ def clear_items():
     return jsonify(success=True)
 
 @app.route('/download_queue')
-def download_queue():
+def download_queue_page():
     config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
     with open(config_path, 'r') as config_file:
         config_data = json.load(config_file)
