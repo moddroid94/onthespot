@@ -2,7 +2,7 @@ import os
 import time
 import json
 import threading
-from flask import Flask, jsonify, render_template, request, send_file
+from flask import Flask, jsonify, render_template, request, send_file, redirect, url_for
 from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock
 from .otsconfig import config_dir, config
 from .accounts import FillAccountPool, get_account_token
@@ -27,7 +27,7 @@ class QueueWorker(threading.Thread):
             if pending:
                 local_id = next(iter(pending))
                 item = pending.pop(local_id)
-                token = get_account_token()  # Ensure this function is available
+                token = get_account_token()
                 item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
 
                 with download_queue_lock:
@@ -53,9 +53,8 @@ class QueueWorker(threading.Thread):
 @app.route('/items')
 def get_items():
     with download_queue_lock:
-        return jsonify(download_queue)  # Ensure thread safety when accessing download_queue
+        return jsonify(download_queue)
 
-# Serve icons from the resources/icons directory
 @app.route('/icons/<path:filename>')
 def serve_icons(filename):
     icon_path = os.path.join(config.app_root, 'resources', 'icons', filename)
@@ -88,7 +87,7 @@ def download_file(url):
 
 @app.route('/clear', methods=['POST'])
 def clear_items():
-    keys_to_delete = []  # Initialize an empty list to hold keys to delete
+    keys_to_delete = []
 
     for local_id, item in download_queue.items():
         if item["item_status"] == "Downloaded" or \
@@ -98,7 +97,7 @@ def clear_items():
             keys_to_delete.append(local_id)
     for key in keys_to_delete:
         del download_queue[key]
-    return jsonify(success=True)  # Return a success response
+    return jsonify(success=True)
 
 @app.route('/download_queue')
 def index():
@@ -106,22 +105,26 @@ def index():
     with open(config_path, 'r') as config_file:
         config_data = json.load(config_file)
         print(config_data)
-    return render_template('download_queue.html', config=config_data)  # Render the index.html file
+    return render_template('download_queue.html', config=config_data)
+
+@app.route('/')
+def index():
+    return redirect(url_for('download_queue'))
 
 @app.route('/search')
 def search():
     config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
     with open(config_path, 'r') as config_file:
         config_data = json.load(config_file)
-    return render_template('search.html', config=config_data)  # Render the index.html file
+    return render_template('search.html', config=config_data)
 
 @app.route('/about')
 def about():
-    return render_template('about.html')  # Render the index.html file
+    return render_template('about.html')
 
 @app.route('/search_results')
 def search_results():
-    query = request.args.get('q', '')  # Get the search query from the URL parameter
+    query = request.args.get('q', '')
 
     content_types = []
     if config.get('enable_search_tracks'):
@@ -140,7 +143,7 @@ def search_results():
         content_types.append('audiobook')
 
     results = get_search_results(query, content_types=content_types)
-    return jsonify(results)  # Return a success response
+    return jsonify(results)
 
 
 @app.route('/settings')
@@ -155,7 +158,7 @@ def update_settings():
     data = request.json
     for key, value in data.items():
         if isinstance(value, str) and value.isdigit():
-            value = int(value)  # Convert to int
+            value = int(value)
         config.set_(key, value)
         config.update()
     return jsonify(success=True)
