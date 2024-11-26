@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnTheSpot - Download Queue</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="header">
+        <ul>
+    <li><a href="https://github.com/justin025/onthespot/" target="_blank">OnTheSpot</a></li>
+    <li><a class="active" href="/search">Search</a></li>
+    <li><a href="/download_queue">Download Queue</a></li>
+    <li><a href="/settings">Settings</a></li>
+    <li><a href="/about">About</a></li>
+        </ul>
+    </div>
+
+    <br>
+
+    <form onsubmit="submitSearch(event)">
+        <input type="text" id="search-bar" name="q" placeholder="Search by name">
+        <button type="submit">Search</button>
+    </form>
+
+    <br>
+
+    <table border="1" id="results-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>By</th>
+                <th>Type</th>
+                <th>Service</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Results will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        function submitSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('search-bar').value;
+            fetch(`/search_results?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('results-table').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = '';
+
+
+                    data.forEach(item => {
+                        const itemImage = item.item_thumbnail_url ? `<img src="${item.item_thumbnail_url}" style="width: {{ config.search_thumb_height }}px; height: {{ config.search_thumb_height }}px; margin-right: 10px;">` : '';
+
+                        const serviceIcon = item.item_service ? `<img src="/icons/${item.item_service}.png" style="width: 20px; height: 20px; margin-right: 5px;">` : '';
+
+                        const downloadButton = `
+                            <button class="download-action-button" onclick="handleDownload('${item.item_url}')">
+                                <img src="icons/download.png" alt="Download">
+                            </button>
+                        `;
+
+                        const row = document.createElement('tr');
+
+                        const cell1 = document.createElement('td');
+                        cell1.style.display = "flex";
+                        cell1.style.alignItems = "center";
+                        cell1.style.paddingBottom = "14px";
+                        cell1.innerHTML = `${itemImage}${item.item_name}`;
+                        row.appendChild(cell1);
+
+                        const cell2 = document.createElement('td');
+                        cell2.textContent = item.item_by;
+                        row.appendChild(cell2);
+
+                        const cell3 = document.createElement('td');
+                        cell3.textContent = capitalizeFirstLetter(item.item_type);
+                        row.appendChild(cell3);
+
+                        const cell4 = document.createElement('td');
+                        cell4.innerHTML = `${serviceIcon}${capitalizeFirstLetter(item.item_service)}`;
+                        row.appendChild(cell4);
+
+                        const cell5 = document.createElement('td');
+                        cell5.innerHTML = downloadButton;
+                        row.appendChild(cell5);
+
+                        tableBody.appendChild(row);
+                    });
+
+                console.log("Search submitted:", query);
+            });
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function handleDownload(url) {
+            fetch(`/download/${encodeURIComponent(url)}`, {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Download successful');
+                } else {
+                    console.error('Download failed:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+</body>
+</html>

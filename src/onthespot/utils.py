@@ -139,7 +139,7 @@ def format_track_path(item, item_metadata):
     return item_path
 
 
-def convert_audio_format(filename, metadata, bitrate, default_format):
+def convert_audio_format(filename, metadata, default_format):
     if os.path.isfile(os.path.abspath(filename)):
         target_path = os.path.abspath(filename)
         file_name = os.path.basename(target_path)
@@ -164,7 +164,7 @@ def convert_audio_format(filename, metadata, bitrate, default_format):
         if filetype == default_format:
             command += ['-c:a', 'copy']
         else:
-            command += ['-ar', '44100', '-ac', '2', '-b:a', bitrate]
+            command += ['-ar', f'{config.get('file_hertz')}', '-ac', '2', '-b:a', f'{config.get('file_bitrate')}']
 
         # Add user defined parameters
         for param in config.get('ffmpeg_args'):

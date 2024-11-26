@@ -57,7 +57,8 @@ class DownloadWorker(QObject):
                             "Failed",
                             "Unavailable",
                             "Downloaded",
-                            "Already Exists"
+                            "Already Exists",
+                            "Deleted"
                         ):
                             time.sleep(0.2)
                             self.readd_item_to_download_queue(item)
@@ -308,9 +309,6 @@ class DownloadWorker(QObject):
                         self.readd_item_to_download_queue(item)
                         continue
 
-                    if not config.get('force_raw'):
-                        bitrate = config.get('file_bitrate')
-
                     # Lyrics
                     if item_service == "spotify":
                         item['item_status'] = 'Getting Lyrics'
@@ -332,12 +330,11 @@ class DownloadWorker(QObject):
 
                     # Convert file format and embed metadata
                     if not config.get('force_raw'):
-
                         item['item_status'] = 'Converting'
                         if self.gui:
                             self.progress.emit(item, self.tr("Converting"), 99)
 
-                        convert_audio_format(file_path, item_metadata, bitrate, default_format)
+                        convert_audio_format(file_path, item_metadata, default_format)
 
                         embed_metadata(item, item_metadata)
 

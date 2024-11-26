@@ -49,7 +49,7 @@ def load_config(self):
     self.inp_language.setCurrentIndex(config.get("language_index"))
     self.inp_explicit_label.setText(config.get("explicit_label"))
     self.inp_file_bitrate.setText(config.get("file_bitrate"))
-    self.inp_file_hertz.setText(config.get("file_hertz"))
+    self.inp_file_hertz.setValue(config.get("file_hertz"))
     self.inp_download_root.setText(config.get("download_root"))
     self.inp_download_delay.setValue(config.get("download_delay"))
     self.inp_max_search_results.setValue(config.get("max_search_results"))
@@ -81,7 +81,7 @@ def load_config(self):
     self.inp_enable_search_shows.setChecked(config.get("enable_search_shows"))
     self.inp_enable_search_audiobooks.setChecked(config.get("enable_search_audiobooks"))
 
-    self.inp_show_download_thumbnails.setChecked(config.get("show_search_thumbnails"))
+    self.inp_show_download_thumbnails.setChecked(config.get("show_download_thumbnails"))
     self.inp_show_search_thumbnails.setChecked(config.get("show_search_thumbnails"))
     self.inp_use_lrc_file.setChecked(config.get("use_lrc_file"))
     self.inp_rotate_acc_sn.setChecked(config.get("rotate_acc_sn"))
@@ -98,6 +98,7 @@ def load_config(self):
     self.inp_use_playlist_path.setChecked(config.get("use_playlist_path"))
     self.inp_create_playlists.setChecked(config.get("create_m3u_playlists"))
     self.inp_check_for_updates.setChecked(config.get("check_for_updates"))
+
     self.inp_embed_cover.setChecked(config.get("embed_cover"))
     self.inp_embed_branding.setChecked(config.get("embed_branding"))
     self.inp_embed_artist.setChecked(config.get("embed_artist"))
@@ -140,7 +141,7 @@ def save_config(self):
     config.set_('explicit_label', self.inp_explicit_label.text())
     config.set_('download_root', self.inp_download_root.text())
     config.set_('file_bitrate', self.inp_file_bitrate.text())
-    config.set_('file_hertz', self.inp_file_hertz.text())
+    config.set_('file_hertz', self.inp_file_hertz.value())
     config.set_('track_path_formatter', self.inp_track_formatter.text())
     config.set_('podcast_path_formatter', self.inp_podcast_path_formatter.text())
     config.set_('playlist_path_formatter', self.inp_playlist_path_formatter.text())
@@ -175,7 +176,7 @@ def save_config(self):
     config.set_('enable_search_shows', self.inp_enable_search_shows.isChecked())
     config.set_('enable_search_audiobooks', self.inp_enable_search_audiobooks.isChecked())
 
-    config.set_('show_download_thumbnails', self.inp_show_search_thumbnails.isChecked())
+    config.set_('show_download_thumbnails', self.inp_show_download_thumbnails.isChecked())
     config.set_('show_search_thumbnails', self.inp_show_search_thumbnails.isChecked())
     config.set_('use_lrc_file', self.inp_use_lrc_file.isChecked())
     config.set_('rotate_acc_sn', self.inp_rotate_acc_sn.isChecked())

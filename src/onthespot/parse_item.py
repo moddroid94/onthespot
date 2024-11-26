@@ -1,7 +1,7 @@
 import re
 import time
 from .otsconfig import config
-from .api.spotify import spotify_get_token, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
+from .api.spotify import spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .runtimedata import get_logger, parsing, download_queue, pending, account_pool
 from .accounts import get_account_token
@@ -52,7 +52,6 @@ def parse_url(url):
             list_id = match.group('list_id') if match.group('list_id') else None
             #if list_id:
             #    item_type = 'playlist'
-
     else:
         logger.info(f'Invalid Url: {url}')
         return False

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnTheSpot - Download Queue</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="header">
+        <ul>
+      <li><a href="https://github.com/justin025/onthespot/" target="_blank">OnTheSpot</a></li>
+      <li><a href="/search">Search</a></li>
+      <li><a class="active" href="/download_queue">Download Queue</a></li>
+      <li><a href="/settings">Settings</a></li>
+      <li><a href="/about">About</a></li>
+        </ul>
+    </div>
+
+    <br>
+
+    <button onclick="clearItems()">Clear Completed Items</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Parent Category</th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="download-queue-table">
+            <!-- Items will be added here dynamically -->
+        </tbody>
+    </table>
+
+    <script>
+        const config = {{ config | tojson | safe }};
+
+        function submitSearch(event) {
+            event.preventDefault();
+            const query = document.getElementById('search').value;
+            fetch(`/search_query?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Search submitted:", query);
+                });
+        }
+
+        function capitalizeFirstLetter(string) {
+            if (!string) return 'N/A';
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    console.log('Link copied to clipboard');
+                    // alert('Link copied to clipboard!');
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+        }
+
+        function fetchItems() {
+            fetch('/items')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tableBody = document.getElementById('download-queue-table');
+                    tableBody.innerHTML = '';
+
+                    for (const key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            const item = data[key];
+                            const row = document.createElement('tr');
+
+                            const itemImage = item.item_thumbnail ? `<img src="${item.item_thumbnail}" style="width: {{ config.search_thumb_height }}px; height: {{ config.search_thumb_height }}px; margin-right: 10px;">` : '';
+
+                            const serviceIcon = item.item_service ? `<img src="/icons/${item.item_service}.png" style="width: 20px; height: 20px; margin-right: 5px;">` : '';
+
+                            let copyButton = '';
+                            let cancelButton = '';
+                            let retryButton = '';
+                            let downloadButton = '';
+                            let deleteButton = '';
+
+                            if (config.download_copy_btn) {
+                                copyButton = createButton('icons/link.png', 'Copy Link', `copyToClipboard('${item.item_url}')`);
+                            }
+
+                            if (item.item_status === 'Waiting') {
+                                cancelButton = createButton('icons/stop.png', 'Stop Download', `handleCancel('${item.local_id}')`);
+                            }
+
+                            if (['Failed', 'Cancelled', 'Deleted'].includes(item.item_status)) {
+                                retryButton = createButton('icons/retry.png', 'Retry Download', `handleRetry('${item.local_id}')`);
+                            }
+
+                            if (['Downloaded', 'Already Exists'].includes(item.item_status)) {
+                                if (config.download_open_btn) {
+                                    downloadButton = createButton('icons/file.png', 'Open File', `window.location.href='/download/${item.local_id}'`);
+                                }
+                                if (config.download_delete_btn) {
+                                    deleteButton = createButton('icons/trash.png', 'Delete File', `handleDelete('${item.local_id}')`);
+                                }
+                            }
+
+                            const cell1 = document.createElement('td');
+                            cell1.style.display = "flex";
+                            cell1.style.alignItems = "center";
+                            cell1.style.paddingBottom = "14px";
+                            cell1.innerHTML = `${itemImage}${item.item_name}`;
+                            row.appendChild(cell1);
+
+                            const cell2 = document.createElement('td');
+                            cell2.textContent = capitalizeFirstLetter(item.parent_category) || 'N/A';
+                            row.appendChild(cell2);
+
+                            const cell3 = document.createElement('td');
+                            cell3.innerHTML = `${serviceIcon}${capitalizeFirstLetter(item.item_service) || 'N/A'}`;
+                            row.appendChild(cell3);
+
+                            const cell4 = document.createElement('td');
+                            cell4.textContent = item.item_status || 'N/A';
+                            row.appendChild(cell4);
+
+                            const cell5 = document.createElement('td');
+                            cell5.innerHTML = `${copyButton}${cancelButton}${retryButton}${downloadButton}${deleteButton}`;
+                            row.appendChild(cell5);
+
+                            tableBody.appendChild(row);
+                        }
+                    }
+                })
+                .catch(error => console.error('There has been a problem with your fetch operation:', error));
+        }
+
+        function createButton(iconSrc, altText, onClickHandler) {
+            return `
+                <button class="download-action-button" onclick="${onClickHandler}">
+                    <img src="${iconSrc}" alt="${altText}">
+                </button>
+            `;
+        }
+
+        function clearItems() {
+            fetch('/clear', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Clear completed successful');
+                    }
+            });
+        }
+
+        function handleDelete(local_id) {
+            fetch(`/delete/${local_id}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Delete successful');
+                } else {
+                    console.error('Delete failed:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function handleCancel(local_id) {
+            fetch(`/cancel/${local_id}`, {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Cancel successful');
+                } else {
+                    console.error('Cancel failed:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function handleRetry(local_id) {
+            fetch(`/retry/${local_id}`, {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Retry successful');
+                } else {
+                    console.error('Retry failed:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        window.onload = fetchItems;
+        setInterval(fetchItems, 2000);
+    </script>
+</body>
+</html>
