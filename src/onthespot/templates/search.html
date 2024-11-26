@@ -52,7 +52,6 @@
                     const tableBody = document.getElementById('results-table').getElementsByTagName('tbody')[0];
                     tableBody.innerHTML = '';
 
-
                     data.forEach(item => {
                         const itemImage = item.item_thumbnail_url ? `<img src="${item.item_thumbnail_url}" style="width: {{ config.search_thumb_height }}px; height: {{ config.search_thumb_height }}px; margin-right: 10px;">` : '';
 
@@ -91,8 +90,7 @@
 
                         tableBody.appendChild(row);
                     });
-
-                console.log("Search submitted:", query);
+                document.getElementById('search-bar').value = '';
             });
         }
 
