@@ -107,7 +107,18 @@ class DownloadWorker(QObject):
                             item['file_path'] = os.path.join(file_directory, entry)
 
                             if config.get('overwrite_existing_metadata'):
+
                                 logger.info('Overwriting Existing Metadata')
+
+                                # Lyrics
+                                if item_service == "spotify":
+                                    item['item_status'] = 'Getting Lyrics'
+                                    if self.gui:
+                                        self.progress.emit(item, self.tr("Getting Lyrics"), 99)
+                                    extra_metadata = globals()[f"{item_service}_get_lyrics"](token, item_id, item_type, item_metadata, file_path)
+                                    if isinstance(extra_metadata, dict):
+                                        item_metadata.update(extra_metadata)
+
                                 strip_metadata(item)
                                 embed_metadata(item, item_metadata)
 
