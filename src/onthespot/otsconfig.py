@@ -108,7 +108,7 @@ class Config:
             "embed_language": True,
             "embed_isrc": True,
             "embed_length": True,
-            "embed_url": False,
+            "embed_url": True,
             "embed_key": True,
             "embed_bpm": True,
             "embed_compilation": True,
