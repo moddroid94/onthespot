@@ -297,8 +297,8 @@ class DownloadWorker(QObject):
 
                                 video.download(f'https://www.youtube.com/watch?v={item['item_id']}')
 
-                                default_format = '.mp4'
-                                bitrate = "128k"
+                                default_format = '.m4a'
+                                bitrate = "256k"
 
                     except (RuntimeError):
                         # Likely Ratelimit

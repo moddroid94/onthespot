@@ -16,7 +16,7 @@ def youtube_login_user(account):
             "service": "youtube",
             "status": "active",
             "account_type": "public",
-            "bitrate": "128k",
+            "bitrate": "256k",
         })
         return True
 
