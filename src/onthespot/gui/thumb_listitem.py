@@ -27,7 +27,7 @@ class LabelWithThumb(QWidget):
 
         # Create QNetworkAccessManager
         self.manager = QNetworkAccessManager(self)
-        request = QNetworkRequest(QUrl(thumb_url))  # Create the network request
+        request = QNetworkRequest(QUrl(thumb_url))
 
         # Connect the finished signal to the slot
         self.manager.finished.connect(self.on_finished)
@@ -47,9 +47,9 @@ class LabelWithThumb(QWidget):
             pixmap = QPixmap()
             pixmap.loadFromData(image_data)
 
-            # Scale the pixmap to fit within the 60x60 size
             scaled_pixmap = pixmap.scaled(self.aspect_ratio, self.aspect_ratio, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             self.image_label.setPixmap(scaled_pixmap)  # Update the QLabel with the pixmap
 
-        # Clean up the reply object
+        # Mark request for deletion
+        self.manager.deleteLater()
         reply.deleteLater()
