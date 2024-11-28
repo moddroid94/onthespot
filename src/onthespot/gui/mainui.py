@@ -10,7 +10,7 @@ from ..utils import is_latest_release, open_item
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from ..otsconfig import config
-from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock
+from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock, pending_lock
 from .thumb_listitem import LabelWithThumb
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session, MirrorSpotifyPlayback
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_add_account
@@ -34,14 +34,16 @@ class QueueWorker(QThread):
             if pending:
                 try:
                     local_id = next(iter(pending))
-                    item = pending.pop(local_id)
+                    with pending_lock:
+                        item = pending.pop(local_id)
                     token = get_account_token()
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
                     self.add_item_to_download_list.emit(item, item_metadata)
                     continue
                 except Exception as e:
                     logger.error(f"Unknown Exception for {item}: {str(e)}")
-                    pending[local_id] = item
+                    with pending_lock:
+                        pending[local_id] = item
             else:
                 time.sleep(0.2)
 

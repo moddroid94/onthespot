@@ -3,7 +3,7 @@ import time
 from .otsconfig import config
 from .api.spotify import spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
-from .runtimedata import get_logger, parsing, download_queue, pending, account_pool
+from .runtimedata import get_logger, parsing, download_queue, pending, account_pool, parsing_lock, pending_lock
 from .accounts import get_account_token
 from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deezer_get_playlist_data, deezer_get_artist_albums
 from .utils import format_local_id
@@ -56,19 +56,20 @@ def parse_url(url):
     else:
         logger.info(f'Invalid Url: {url}')
         return False
-
-    parsing[item_id] = {
-        'item_url': url,
-        'item_service': item_service,
-        'item_type': item_type,
-        'item_id': item_id
-    }
+    with parsing_lock:
+        parsing[item_id] = {
+            'item_url': url,
+            'item_service': item_service,
+            'item_type': item_type,
+            'item_id': item_id
+        }
 
 def parsingworker():
     while True:
         if parsing:
             item_id = next(iter(parsing))
-            item = parsing.pop(item_id)
+            with parsing_lock:
+                item = parsing.pop(item_id)
 
             if item_id in pending or item_id in download_queue:
                 logger.info(f"Item Already Parsed: {item}")
@@ -84,13 +85,14 @@ def parsingworker():
                 if current_service == "spotify":
                     if current_type == "track":
                         local_id = format_local_id(item_id)
-                        pending[local_id] = {
-                            'local_id': local_id,
-                            'item_service': current_service,
-                            'item_type': current_type,
-                            'item_id': item_id,
-                            'parent_category': 'track'
-                            }
+                        with pending_lock:
+                            pending[local_id] = {
+                                'local_id': local_id,
+                                'item_service': current_service,
+                                'item_type': current_type,
+                                'item_id': item_id,
+                                'parent_category': 'track'
+                                }
                         continue
 
                     elif current_type == "album":
@@ -98,13 +100,14 @@ def parsingworker():
                         for index, track in enumerate(tracks):
                             item_id = track['id']
                             local_id = format_local_id(item_id)
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': 'spotify',
-                                'item_type': 'track',
-                                'item_id': item_id,
-                                'parent_category': 'album'
-                                }
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': 'spotify',
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': 'album'
+                                    }
                         continue
 
                     elif current_type == "playlist":
@@ -115,16 +118,17 @@ def parsingworker():
                                 item_id = item['track']['id']
                                 item_type = item['track']['type']
                                 local_id = format_local_id(item_id)
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': 'spotify',
-                                    'item_type': item_type,
-                                    'item_id': item_id,
-                                    'parent_category': 'playlist',
-                                    'playlist_name': playlist_name,
-                                    'playlist_by': playlist_by,
-                                    'playlist_number': str(index + 1)
-                                    }
+                                with pending_lock:
+                                    pending[local_id] = {
+                                        'local_id': local_id,
+                                        'item_service': 'spotify',
+                                        'item_type': item_type,
+                                        'item_id': item_id,
+                                        'parent_category': 'playlist',
+                                        'playlist_name': playlist_name,
+                                        'playlist_by': playlist_by,
+                                        'playlist_number': str(index + 1)
+                                        }
                             except TypeError:
                                 logger.error(f'TypeError for {item}')
                         continue
@@ -137,26 +141,28 @@ def parsingworker():
 
                     elif current_type == "episode":
                         local_id = format_local_id(item_id)
-                        pending[local_id] = {
-                            'local_id': local_id,
-                            'item_service': current_service,
-                            'item_type': current_type,
-                            'item_id': item_id,
-                            'parent_category': 'episode'
-                            }
+                        with pending_lock:
+                            pending[local_id] = {
+                                'local_id': local_id,
+                                'item_service': current_service,
+                                'item_type': current_type,
+                                'item_id': item_id,
+                                'parent_category': 'episode'
+                                }
                         continue
 
                     elif current_type in ['show', 'audiobook']:
                         episode_ids = spotify_get_show_episodes(token, current_id)
                         for index, episode_id in enumerate(episode_ids):
                             local_id = format_local_id(episode_id)
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': 'spotify',
-                                'item_type': 'episode',
-                                'item_id': episode_id,
-                                'parent_category': current_type
-                                }
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': 'spotify',
+                                    'item_type': 'episode',
+                                    'item_id': episode_id,
+                                    'parent_category': current_type
+                                    }
                         continue
 
                     elif current_type == "liked_songs":
@@ -164,16 +170,17 @@ def parsingworker():
                         for index, track in enumerate(tracks):
                             item_id = track['track']['id']
                             local_id = format_local_id(item_id)
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': 'spotify',
-                                'item_type': 'track',
-                                'item_id': item_id,
-                                'parent_category': 'playlist',
-                                'playlist_name': 'Liked Songs',
-                                'playlist_by': 'me',
-                                'playlist_number': str(index + 1)
-                                }
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': 'spotify',
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': 'playlist',
+                                    'playlist_name': 'Liked Songs',
+                                    'playlist_by': 'me',
+                                    'playlist_number': str(index + 1)
+                                    }
                         continue
 
                     elif current_type == "your_episodes":
@@ -181,29 +188,31 @@ def parsingworker():
                         for index, track in enumerate(tracks):
                             item_id = track['show']['id']
                             local_id = format_local_id(item_id)
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': 'spotify',
-                                'item_type': 'episode',
-                                'item_id': item_id,
-                                'parent_category': 'playlist',
-                                'playlist_name': 'Your Episodes',
-                                'playlist_by': 'me',
-                                'playlist_number': str(index + 1)
-                                }
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': 'spotify',
+                                    'item_type': 'episode',
+                                    'item_id': item_id,
+                                    'parent_category': 'playlist',
+                                    'playlist_name': 'Your Episodes',
+                                    'playlist_by': 'me',
+                                    'playlist_number': str(index + 1)
+                                    }
                         continue
 
                 elif current_service == "soundcloud":
 
                     if current_type == "track":
                         local_id = format_local_id(item_id)
-                        pending[local_id] = {
-                            'local_id': local_id,
-                            'item_service': current_service,
-                            'item_type': current_type,
-                            'item_id': item_id,
-                            'parent_category': 'track'
-                            }
+                        with pending_lock:
+                            pending[local_id] = {
+                                'local_id': local_id,
+                                'item_service': current_service,
+                                'item_type': current_type,
+                                'item_id': item_id,
+                                'parent_category': 'track'
+                                }
                         continue
 
                     if current_type in ["album", "playlist"]:
@@ -212,42 +221,45 @@ def parsingworker():
                         for index, track in enumerate(set_data['tracks']):
                             item_id = track['id']
                             local_id = format_local_id(item_id)
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_url': track.get('permalink_url', ''),
-                                'item_service': 'soundcloud',
-                                'item_type': 'track',
-                                'item_id': item_id,
-                                'parent_category': 'playlist' if not set_data['is_album'] else 'album',
-                                'playlist_name': set_data['title'],
-                                'playlist_by': set_data['user']['username'],
-                                'playlist_number': str(index + 1)
-                            }
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_url': track.get('permalink_url', ''),
+                                    'item_service': 'soundcloud',
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': 'playlist' if not set_data['is_album'] else 'album',
+                                    'playlist_name': set_data['title'],
+                                    'playlist_by': set_data['user']['username'],
+                                    'playlist_number': str(index + 1)
+                                }
 
                 elif current_service == "deezer":
 
                     if current_type == "track":
                         local_id = format_local_id(item_id)
-                        pending[local_id] = {
-                            'local_id': local_id,
-                            'item_service': current_service,
-                            'item_type': current_type,
-                            'item_id': item_id,
-                            'parent_category': 'track'
-                            }
+                        with pending_lock:
+                            pending[local_id] = {
+                                'local_id': local_id,
+                                'item_service': current_service,
+                                'item_type': current_type,
+                                'item_id': item_id,
+                                'parent_category': 'track'
+                                }
                         continue
                     elif current_type == "album":
                         tracks = deezer_get_album_items(current_id)
                         for index, track in enumerate(tracks):
                             item_id = track['id']
                             local_id = format_local_id(item_id)
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': 'deezer',
-                                'item_type': 'track',
-                                'item_id': item_id,
-                                'parent_category': 'album'
-                                }
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': 'deezer',
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': 'album'
+                                    }
                         continue
                     elif current_type == "playlist":
                         tracks = deezer_get_playlist_items(current_id)
@@ -255,16 +267,17 @@ def parsingworker():
                         for index, track in enumerate(tracks):
                             item_id = track['id']
                             local_id = format_local_id(item_id)
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': 'deezer',
-                                'item_type': 'track',
-                                'item_id': item_id,
-                                'parent_category': 'playlist',
-                                'playlist_name': playlist_name,
-                                'playlist_by': playlist_by,
-                                'playlist_number': str(index + 1)
-                                }
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': 'deezer',
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': 'playlist',
+                                    'playlist_name': playlist_name,
+                                    'playlist_by': playlist_by,
+                                    'playlist_number': str(index + 1)
+                                    }
                         continue
                     elif current_type == "artist":
                         album_urls = deezer_get_artist_albums(current_id)
@@ -276,13 +289,14 @@ def parsingworker():
 
                     if current_type == "track":
                         local_id = format_local_id(item_id)
-                        pending[local_id] = {
-                            'local_id': local_id,
-                            'item_service': current_service,
-                            'item_type': current_type,
-                            'item_id': item_id,
-                            'parent_category': 'track'
-                            }
+                        with pending_lock:
+                            pending[local_id] = {
+                                'local_id': local_id,
+                                'item_service': current_service,
+                                'item_type': current_type,
+                                'item_id': item_id,
+                                'parent_category': 'track'
+                                }
                         continue
         else:
             time.sleep(0.2)

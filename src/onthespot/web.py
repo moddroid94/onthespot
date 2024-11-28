@@ -3,7 +3,7 @@ import time
 import json
 import threading
 from flask import Flask, jsonify, render_template, request, send_file, redirect, url_for
-from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock
+from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock
 from .otsconfig import config_dir, config
 from .accounts import FillAccountPool, get_account_token
 from .parse_item import parsingworker, parse_url
@@ -26,7 +26,8 @@ class QueueWorker(threading.Thread):
         while True:
             if pending:
                 local_id = next(iter(pending))
-                item = pending.pop(local_id)
+                with pending_lock:
+                    item = pending.pop(local_id)
                 token = get_account_token()
                 item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
 

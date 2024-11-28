@@ -26,7 +26,9 @@ pending = {}
 download_queue = {}
 account_pool = []
 
-download_queue_lock = threading.Lock()  # Create a global lock
+parsing_lock = threading.Lock()
+pending_lock = threading.Lock()
+download_queue_lock = threading.Lock()
 
 loglevel = int(os.environ.get("LOG_LEVEL", 20))
 
