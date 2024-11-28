@@ -6,6 +6,7 @@ from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .runtimedata import get_logger, parsing, download_queue, pending, account_pool
 from .accounts import get_account_token
 from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deezer_get_playlist_data, deezer_get_artist_albums
+from .utils import format_local_id
 
 logger = get_logger('parse_item')
 
@@ -82,7 +83,7 @@ def parsingworker():
 
                 if current_service == "spotify":
                     if current_type == "track":
-                        local_id = format_item_id(item_id)
+                        local_id = format_local_id(item_id)
                         pending[local_id] = {
                             'local_id': local_id,
                             'item_service': current_service,
@@ -96,7 +97,7 @@ def parsingworker():
                         tracks = spotify_get_album_tracks(token, current_id)
                         for index, track in enumerate(tracks):
                             item_id = track['id']
-                            local_id = format_item_id(item_id)
+                            local_id = format_local_id(item_id)
                             pending[local_id] = {
                                 'local_id': local_id,
                                 'item_service': 'spotify',
@@ -113,7 +114,7 @@ def parsingworker():
                             try:
                                 item_id = item['track']['id']
                                 item_type = item['track']['type']
-                                local_id = format_item_id(item_id)
+                                local_id = format_local_id(item_id)
                                 pending[local_id] = {
                                     'local_id': local_id,
                                     'item_service': 'spotify',
@@ -135,7 +136,7 @@ def parsingworker():
                         continue
 
                     elif current_type == "episode":
-                        local_id = format_item_id(item_id)
+                        local_id = format_local_id(item_id)
                         pending[local_id] = {
                             'local_id': local_id,
                             'item_service': current_service,
@@ -148,7 +149,7 @@ def parsingworker():
                     elif current_type in ['show', 'audiobook']:
                         episode_ids = spotify_get_show_episodes(token, current_id)
                         for index, episode_id in enumerate(episode_ids):
-                            local_id = format_item_id(episode_id)
+                            local_id = format_local_id(episode_id)
                             pending[local_id] = {
                                 'local_id': local_id,
                                 'item_service': 'spotify',
@@ -162,7 +163,7 @@ def parsingworker():
                         tracks = spotify_get_liked_songs(token)
                         for index, track in enumerate(tracks):
                             item_id = track['track']['id']
-                            local_id = format_item_id(item_id)
+                            local_id = format_local_id(item_id)
                             pending[local_id] = {
                                 'local_id': local_id,
                                 'item_service': 'spotify',
@@ -179,7 +180,7 @@ def parsingworker():
                         tracks = spotify_get_your_episodes(token)
                         for index, track in enumerate(tracks):
                             item_id = track['show']['id']
-                            local_id = format_item_id(item_id)
+                            local_id = format_local_id(item_id)
                             pending[local_id] = {
                                 'local_id': local_id,
                                 'item_service': 'spotify',
@@ -195,7 +196,7 @@ def parsingworker():
                 elif current_service == "soundcloud":
 
                     if current_type == "track":
-                        local_id = format_item_id(item_id)
+                        local_id = format_local_id(item_id)
                         pending[local_id] = {
                             'local_id': local_id,
                             'item_service': current_service,
@@ -210,7 +211,7 @@ def parsingworker():
                         set_data = soundcloud_get_set_items(token, item['item_url'])
                         for index, track in enumerate(set_data['tracks']):
                             item_id = track['id']
-                            local_id = format_item_id(item_id)
+                            local_id = format_local_id(item_id)
                             pending[local_id] = {
                                 'local_id': local_id,
                                 'item_url': track.get('permalink_url', ''),
@@ -226,7 +227,7 @@ def parsingworker():
                 elif current_service == "deezer":
 
                     if current_type == "track":
-                        local_id = format_item_id(item_id)
+                        local_id = format_local_id(item_id)
                         pending[local_id] = {
                             'local_id': local_id,
                             'item_service': current_service,
@@ -239,7 +240,7 @@ def parsingworker():
                         tracks = deezer_get_album_items(current_id)
                         for index, track in enumerate(tracks):
                             item_id = track['id']
-                            local_id = format_item_id(item_id)
+                            local_id = format_local_id(item_id)
                             pending[local_id] = {
                                 'local_id': local_id,
                                 'item_service': 'deezer',
@@ -253,7 +254,7 @@ def parsingworker():
                         playlist_name, playlist_by = deezer_get_playlist_data(current_id)
                         for index, track in enumerate(tracks):
                             item_id = track['id']
-                            local_id = format_item_id(item_id)
+                            local_id = format_local_id(item_id)
                             pending[local_id] = {
                                 'local_id': local_id,
                                 'item_service': 'deezer',
@@ -274,7 +275,7 @@ def parsingworker():
                 elif current_service == "youtube":
 
                     if current_type == "track":
-                        local_id = format_item_id(item_id)
+                        local_id = format_local_id(item_id)
                         pending[local_id] = {
                             'local_id': local_id,
                             'item_service': current_service,
@@ -285,11 +286,3 @@ def parsingworker():
                         continue
         else:
             time.sleep(0.2)
-
-def format_item_id(item_id):
-    suffix = 0
-    local_id = f"{item_id}-{suffix}"
-    while local_id in download_queue or local_id in pending:
-        suffix += 1
-        local_id = f"{item_id}-{suffix}"
-    return local_id

@@ -14,9 +14,18 @@ from mutagen.id3 import ID3, ID3NoHeaderError, WOAS, USLT, TCMP, COMM
 from mutagen.oggvorbis import OggVorbis
 import music_tag
 from .otsconfig import config, config_dir
-from .runtimedata import get_logger
+from .runtimedata import get_logger, pending, download_queue
 
 logger = get_logger("utils")
+
+
+def format_local_id(item_id):
+    suffix = 0
+    local_id = f"{item_id}-{suffix}"
+    while local_id in download_queue or local_id in pending:
+        suffix += 1
+        local_id = f"{item_id}-{suffix}"
+    return local_id
 
 
 def is_latest_release():

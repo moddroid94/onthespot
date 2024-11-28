@@ -11,7 +11,7 @@ from librespot.zeroconf import ZeroconfServer
 from PyQt6.QtCore import QObject
 from ..otsconfig import config, cache_dir
 from ..runtimedata import get_logger, account_pool, pending, download_queue
-from ..utils import make_call, conv_list_format
+from ..utils import make_call, conv_list_format, format_local_id
 
 logger = get_logger("api.spotify")
 
@@ -79,15 +79,17 @@ class MirrorSpotifyPlayback(QObject):
                             parent_category = 'playlist'
                         elif data['context']['type'] in ('album', 'artist'):
                             parent_category = 'album'
-
+                        # Use item id to prevent duplicates
+                        #local_id = format_local_id(item_id)
                         pending[item_id] = {
-                        'item_service': 'spotify',
-                        'item_type': 'track',
-                        'item_id': item_id,
-                        'parent_category': parent_category,
-                        'playlist_name': playlist_name,
-                        'playlist_by': playlist_by,
-                        'playlist_number': '?'
+                            'local_id': item_id,
+                            'item_service': 'spotify',
+                            'item_type': 'track',
+                            'item_id': item_id,
+                            'parent_category': parent_category,
+                            'playlist_name': playlist_name,
+                            'playlist_by': playlist_by,
+                            'playlist_number': '?'
                         }
                         logger.info(f'Mirror Spotify Playback added track to download queue: https://open.spotify.com/track/{item_id}')
                         continue
