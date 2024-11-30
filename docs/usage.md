@@ -86,6 +86,7 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 | **Disable Bulk Download Notices** | Disables pop-up messages while downloading multiple songs or episodes. |
 | **Mirror Spotify Playback** | Download currently playing song on the selected spotify account |
 | **Windows 10 Explorer Thumbnails** | Embed thumbnails in a format that respects Windows 10 explorer and media player, this is an older format of ID3 and not widely supported. |
+| **Close To Tray** | Close application to tray on exit. |
 | **Check for Updates** | Automatically check for application updates. |
 | **Track/Episode Format** | Select the audio format for your downloaded music or podcasts (e.g. `mp3`, `flac`, `ogg`, `m4a`). |
 | [**Track/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |

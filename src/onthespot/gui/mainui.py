@@ -56,6 +56,11 @@ class MainWindow(QMainWindow):
             url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
             open_item(url)
 
+    def closeEvent(self, event):
+        if config.get('close_to_tray'):
+            event.ignore()
+            self.hide()
+
     def __init__(self, _dialog, start_url=''):
         super(MainWindow, self).__init__()
         self.path = os.path.dirname(os.path.realpath(__file__))
