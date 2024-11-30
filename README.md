@@ -43,7 +43,7 @@ OnTheSpot is an open-source user-friendly music downloader built with Qt and Pyt
 - [**Custom Download Paths**](https://www.microsoft.com/en-us/microsoft-365/business-insights-ideas/resources/11-ideas-for-how-to-organize-digital-files)<br>Set personalized paths for playlists and episodes for easy organization.
 - [**Free and Premium Support**](https://community.spotify.com/t5/Social-Random/What-is-the-difference-between-free-Spotify-and-Premium/td-p/5478479)<br>Compatible with both free and premium accounts.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > If you want to know more about the features, take a look at the application itself or check out our documentation.
 
 ## Getting Started
