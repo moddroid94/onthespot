@@ -182,20 +182,22 @@ class Config:
             os.makedirs(self.get("download_root"), exist_ok=True)
         # Set ffmpeg path
         self.app_root = os.path.dirname(os.path.realpath(__file__))
-        if os.path.isfile(os.path.join(self.app_root, 'bin', 'ffmpeg', 'ffmpeg' + self.ext_)):
-            # Try embedded binary at first
+        if which('ffmpeg'):
+            # Try system binaries first
+            print('Attempting to use system ffmpeg binary !')
+            self.set_('_ffmpeg_bin_path', os.path.abspath(which('ffmpeg')))
+        elif os.path.isfile(os.path.join(self.app_root, 'bin', 'ffmpeg', 'ffmpeg' + self.ext_)):
+            # Try embedded binary next
             print('FFMPEG found in package !')
             self.set_('_ffmpeg_bin_path',
                       os.path.abspath(os.path.join(self.app_root, 'bin', 'ffmpeg', 'ffmpeg' + self.ext_)))
         elif os.path.isfile(os.path.join(self.get('ffmpeg_bin_dir', '.'), 'ffmpeg' + self.ext_)):
-            # Now try user defined binary path
+            # Try user defined binary path neither are found
             print('FFMPEG found at config:ffmpeg_bin_dir !')
             self.set_('_ffmpeg_bin_path',
                       os.path.abspath(os.path.join(self.get('ffmpeg_bin_dir', '.'), 'ffmpeg' + self.ext_)))
         else:
-            # Try system binaries as fallback
-            print('Attempting to use system ffmpeg binary !')
-            self.set_('_ffmpeg_bin_path', os.path.abspath(which('ffmpeg')) if which('ffmpeg') else 'ffmpeg' + self.ext_)
+            print('Failed to find ffmpeg binary, please consider installing ffmpeg or defining its path.')
         print("Using ffmpeg binary at: ", self.get('_ffmpeg_bin_path'))
         self.set_('_log_file', os.path.join(cache_dir(), "onthespot", "logs", self.session_uuid, "onthespot.log"))
         self.set_('_cache_dir', os.path.join(cache_dir(), "onthespot"))
