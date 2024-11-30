@@ -1,12 +1,11 @@
 import os
 import json
-import platform
 import shutil
 from shutil import which
 import uuid
 
 def config_dir():
-    if platform.system() == "Windows":
+    if os.name == "nt":
         if 'APPDATA' in os.environ:
             return os.environ["APPDATA"]
         elif 'LOCALAPPDATA' in os.environ:
@@ -20,7 +19,7 @@ def config_dir():
             return os.path.join(os.path.expanduser("~"), ".config")
 
 def cache_dir():
-    if platform.system() == "Windows":
+    if os.name == "nt":
         if 'TEMP' in os.environ:
             return os.environ["TEMP"]
         else:
@@ -36,8 +35,7 @@ class Config:
         if cfg_path is None or not os.path.isfile(cfg_path):
             cfg_path = os.path.join(config_dir(), "onthespot", "otsconfig.json")
         self.__cfg_path = cfg_path
-        self.platform = platform.system()
-        self.ext_ = ".exe" if self.platform == "Windows" else ""
+        self.ext_ = ".exe" if os.name == "nt" else ""
         self.session_uuid = str(uuid.uuid4())
         self.__template_data = {
             "version": "", # Application version
@@ -182,9 +180,12 @@ class Config:
             os.makedirs(self.get("download_root"), exist_ok=True)
         # Set ffmpeg path
         self.app_root = os.path.dirname(os.path.realpath(__file__))
-        if which('ffmpeg'):
+        if os.name != 'nt' and os.path.exists('/usr/bin/ffmpeg'):
             # Try system binaries first
             print('Attempting to use system ffmpeg binary !')
+            self.set_('_ffmpeg_bin_path', '/usr/bin/ffmpeg')
+        elif which('ffmpeg'):
+            print('Attempting to use ffmpeg binary in path !')
             self.set_('_ffmpeg_bin_path', os.path.abspath(which('ffmpeg')))
         elif os.path.isfile(os.path.join(self.app_root, 'bin', 'ffmpeg', 'ffmpeg' + self.ext_)):
             # Try embedded binary next
