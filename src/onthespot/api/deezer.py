@@ -71,27 +71,38 @@ def deezer_get_track_metadata(token, item_id):
 
     track_data = make_call(f"{DEEZER_BASE}/track/{item_id}")
     album_data = make_call(f"{DEEZER_BASE}/album/{track_data.get('album', {}).get('id', '')}")
-    info = {}
+    album_tracks = make_call(f"{DEEZER_BASE}/album/{track_data.get('album', {}).get('id', '')}/tracks")
+    #album_page = make_call(f"https://www.deezer.com/album/{track_data.get('album', {}).get('id', '')}", text=True)
 
-    # Initialize an empty list to store contributor names
+    # Fetch track_number
+    for i, track in enumerate(album_data['tracks']['data']):
+        if track['id'] == int(item_id):
+            track_number = i + 1
+            break
+    if not track_number:
+        track_number = track_data.get('track_position', '')
+
     artists = []
-
-    # Append all contributor names to the list
     for artist in track_data.get('contributors', ''):
         artists.append(artist['name'])
+
+    info = {}
 
     info['title'] = track_data.get('title', '')
     info['isrc'] = track_data.get('isrc', '')
     info['item_url'] = track_data.get('link', '')
     info['length'] = str(track_data.get('duration', '')) + '000'
-    info['track_number'] = track_data.get('track_position', '')
+    # Deezer api does not return total_tracks only position so on a
+    # second disc the number will be, for instance, 1/24 instead of 13/24.
+    # I opted to iterate through the list instead as seen above.
+    #info['track_number'] = track_data.get('track_position', '')
+    info['track_number'] = track_number
     info['total_tracks'] = len(album_data.get("tracks", {}).get("data", ''))
-
-    # Since you can receive the disc the track is on but not
-    # the total number of discs I opted to comment this.
-    #info['disc_number'] = track_data.get('disk_number', '')
-    #info['total_discs'] = ''
-
+    # Deezer returns disc number but not total discs
+    # so it is scraped from the album_tracks, can
+    # alternatively scrape album page.
+    info['disc_number'] = track_data.get('disk_number', '')
+    info['total_discs'] = album_tracks.get('data', [])[-1].get('disk_number', '')
     info['release_year'] = track_data.get('release_date', '').split('-')[0]
     info['explicit'] = track_data.get('explicit_lyrics', '')
     info['bpm'] = track_data.get('bpm', '')

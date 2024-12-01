@@ -79,7 +79,7 @@ def translate(string):
         return string
 
 
-def make_call(url, params=None, headers=None, skip_cache=False):
+def make_call(url, params=None, headers=None, skip_cache=False, text=False):
     if not skip_cache:
         request_key = md5(f'{url}'.encode()).hexdigest()
         req_cache_file = os.path.join(config.get('_cache_dir'), 'reqcache', request_key+'.json')
@@ -88,6 +88,8 @@ def make_call(url, params=None, headers=None, skip_cache=False):
             logger.debug(f'URL "{url}" cache found ! HASH: {request_key}')
             try:
                 with open(req_cache_file, 'r', encoding='utf-8') as cf:
+                    if text:
+                        return cf.read()
                     json_data = json.load(cf)
                 return json_data
             except json.JSONDecodeError:
@@ -99,6 +101,8 @@ def make_call(url, params=None, headers=None, skip_cache=False):
         if not skip_cache:
             with open(req_cache_file, 'w', encoding='utf-8') as cf:
                 cf.write(response.text)
+        if text:
+            return response.text
         return json.loads(response.text)
     else:
         logger.info(f"Request status error {response.status_code}")

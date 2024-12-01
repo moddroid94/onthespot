@@ -182,7 +182,6 @@ def soundcloud_get_search_results(token, search_term, content_types):
     logger.info(search_results)
     return search_results
 
-
 def soundcloud_get_set_items(token, url):
     headers = {}
     headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
@@ -211,7 +210,7 @@ def soundcloud_get_track_metadata(token, item_id):
 
     track_data = make_call(f"https://api-v2.soundcloud.com/tracks/{item_id}", headers=headers, params=params)
     track_file = requests.get(track_data["media"]["transcodings"][0]["url"], headers=headers, params=params).json()
-    track_webpage = requests.get(f"{track_data['permalink_url']}/albums").text
+    track_webpage = make_call(f"{track_data['permalink_url']}/albums", text=True)
     # Parse album webpage
     start_index = track_webpage.find('<h2>Appears in albums</h2>')
     if start_index != -1:
