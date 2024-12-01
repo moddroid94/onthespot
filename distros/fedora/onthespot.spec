@@ -5,6 +5,7 @@ Summary:        A music downloader
 License:        GPL-2.0
 Source0:        onthespot-1.0.3-py3-none-any.whl
 Source1:        org.onthespot.OnTheSpot.desktop
+Source2:        onthespot.png
 BuildArch:      noarch
 
 BuildRequires: python3-devel
@@ -37,6 +38,7 @@ mkdir -p %{buildroot}/usr/bin
 # Install the desktop file
 mkdir -p %{buildroot}/usr/share/applications
 install -m 0644 %{SOURCE1} %{buildroot}/usr/share/applications/
+install -m 0644 %{SOURCE2} %{buildroot}/usr/share/icons/hicolor/256x256/apps/
 
 %files
 %{python3_sitelib}/onthespot*

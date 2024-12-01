@@ -15,6 +15,7 @@ echo " => Build OnTheSpot.rpm"
 mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 cp dist/onthespot-*-py3-none-any.whl ~/rpmbuild/SOURCES/
 cp src/onthespot/resources/org.onthespot.OnTheSpot.desktop ~/rpmbuild/SOURCES/
+cp src/onthespot/resources/icons/onthespot.png ~/rpmbuild/SOURCES/
 cp distros/fedora/onthespot.spec ~/rpmbuild/SPECS/
 rpmbuild -ba ~/rpmbuild/SPECS/onthespot.spec
 cp ~/rpmbuild/RPMS/noarch/onthespot-*.noarch.rpm dist/OnTheSpot.rpm
