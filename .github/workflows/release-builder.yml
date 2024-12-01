@@ -160,35 +160,3 @@ jobs:
           asset_path: dist/OnTheSpot-x86_64.AppImage
           asset_name: OnTheSpot-x86_64.AppImage
           asset_content_type: application/octet-stream
-
-  rpm-x86_64-build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install Dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y rpm python3-pip python3-dev python3-setuptools build-essential
-
-      - name: Run rpm Build Script
-        run: scripts/build_rpm.sh
-        shell: bash
-
-      - name: Upload AppImage Executable
-        uses: actions/upload-artifact@v4
-        with:
-          name: OnTheSpot.rpm
-          path: dist/OnTheSpot.rpm
-
-      - name: Upload to Release (AppImage)
-        if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: dist/OnTheSpot.rpm
-          asset_name: OnTheSpot-x86_64.rpm
-          asset_content_type: application/octet-stream
