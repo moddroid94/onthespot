@@ -2,23 +2,34 @@ Name:           onthespot
 Version:        1.0.3
 Release:        1%{?dist}
 Summary:        A music downloader
-License:        MIT
+License:        GPL-2.0
 Source0:        onthespot-1.0.3-py3-none-any.whl
 Source1:        org.onthespot.OnTheSpot.desktop
 BuildArch:      noarch
 
+BuildRequires: python3-devel
+BuildRequires: python3-pip
+
+Requires: python3-flask
+Requires: python3-mutagen
+Requires: python3-pillow
+Requires: python3-pyperclip
+Requires: python3-pyqt6
+Requires: python3-requests
+Requires: python3-urllib3
+Requires: yt-dlp
+
+Provides: python3.13dist(librespot) = 0.0.9
+Provides: python3.13dist(music-tag) = 0.4.3
+
 %description
 A music downloader.
 
-%prep
-# No preparation needed for a Wheel package
-
-%build
-# No build step needed for a Wheel package
-
 %install
 mkdir -p %{buildroot}/usr/lib/python3/site-packages
-pip3 install --root %{buildroot} --no-deps --ignore-installed %{SOURCE0}
+python3 -m pip install --root %{buildroot} --no-deps --ignore-installed %{SOURCE0}
+# Only here because I'm to lazy to write another spec and plan on dropping music-tag
+python3 -m pip install librespot music-tag
 
 # Ensure that the executables are installed
 mkdir -p %{buildroot}/usr/bin

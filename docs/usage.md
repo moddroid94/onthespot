@@ -108,6 +108,7 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 | **Raw Media Download** | Downloads an unmodified file from whatever service is selected. With this enabled file conversion and the embedding of any metadata is skipped. |
 | **Download Delay** | Time (in seconds) to wait before initiating the next download. Helps prevent Spotify's rate limits. |
 | **Download Chunk Size** | The chunk size in which to download files. |
+| **Maximum Download Workers** | Set the maximum number of download workers. Only change this setting if you know what you're doing. |
 | **Translate File Path** | Translate file paths into the application language. |
 | **Metadata Separator** | Set the separator for metadata fields with multiple values (default: `; `). |
 | **Overwrite Existing Collection** | If a file already exists re-embed metadata in your selected format. |
