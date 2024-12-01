@@ -88,12 +88,13 @@ class MainWindow(QMainWindow):
         fillaccountpool.start()
 
         queueworker = QueueWorker()
-        queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)  # Connect signal to update_table method
+        queueworker.add_item_to_download_list.connect(self.add_item_to_download_list)
         queueworker.start()
 
-        downloadworker = DownloadWorker(gui=True)
-        downloadworker.progress.connect(self.update_item_in_download_list)  # Connect the signal to the update method
-        downloadworker.start()  # Start the download worker thread
+        for i in range(config.get('maximum_download_workers')):
+            downloadworker = DownloadWorker(gui=True)
+            downloadworker.progress.connect(self.update_item_in_download_list)
+            downloadworker.start()
 
         self.mirrorplayback = MirrorSpotifyPlayback()
         if config.get('mirror_spotify_playback'):
@@ -414,6 +415,7 @@ class MainWindow(QMainWindow):
         with download_queue_lock:
             download_queue[item['local_id']] = {
                 'local_id': item['local_id'],
+                'available': True,
                 "item_service": item["item_service"],
                 "item_type": item["item_type"],
                 'item_id': item['item_id'],
@@ -449,7 +451,7 @@ class MainWindow(QMainWindow):
                     item['gui']['btn']['copy'].show()
                 item['gui']["btn"]['retry'].hide()
                 return
-            if progress == 0:
+            elif progress == 0:
                 item['gui']["btn"]['cancel'].hide()
                 if config.get("download_copy_btn"):
                     item['gui']['btn']['copy'].show()
@@ -460,12 +462,6 @@ class MainWindow(QMainWindow):
                 item['gui']['btn']['retry'].hide()
                 if config.get("download_copy_btn"):
                     item['gui']['btn']['copy'].show()
-                if config.get("download_play_btn"):
-                    item['gui']['btn']['play'].show()
-                if config.get("download_save_btn"):
-                    item['gui']['btn']['save'].show()
-                if config.get("download_queue_btn"):
-                    item['gui']['btn']['queue'].show()
                 if config.get("download_open_btn"):
                     item['gui']['btn']['open'].show()
                 if config.get("download_locate_btn"):

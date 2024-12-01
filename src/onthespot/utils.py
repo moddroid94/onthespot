@@ -148,7 +148,7 @@ def format_track_path(item, item_metadata):
     return item_path
 
 
-def convert_audio_format(filename, metadata, default_format):
+def convert_audio_format(filename, default_format):
     if os.path.isfile(os.path.abspath(filename)):
         target_path = os.path.abspath(filename)
         file_name = os.path.basename(target_path)

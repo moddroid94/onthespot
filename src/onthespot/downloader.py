@@ -36,8 +36,10 @@ class DownloadWorker(QObject):
     def readd_item_to_download_queue(self, item):
         with download_queue_lock:
             try:
-                del download_queue[item['local_id']]
-                download_queue[item['local_id']] = item
+                local_id = item['local_id']
+                del download_queue[local_id]
+                download_queue[local_id] = item
+                download_queue[local_id]['available'] = True
             except (KeyError):
                 # Item likely cleared from queue
                 return
@@ -47,7 +49,21 @@ class DownloadWorker(QObject):
             if download_queue:
                 try:
                     try:
-                        item = download_queue[next(iter(download_queue))]
+                        # Mark item as unavailable for other download workers
+                        iterator = iter(download_queue)
+                        while True:
+                            try:
+                                local_id = next(iterator)
+                                if download_queue[local_id]['available'] is False:
+                                    continue
+                                with download_queue_lock:
+                                    download_queue[local_id]['available'] = False
+                                item = download_queue[local_id]
+                                break
+                            except StopIteration:
+                                # Queue is empty
+                                break
+
                         item_service = item['item_service']
                         item_type = item['item_type']
                         item_id = item['item_id']
@@ -313,7 +329,7 @@ class DownloadWorker(QObject):
 
                     except (RuntimeError):
                         # Likely Ratelimit
-                        logger.info("Download failed: {item}")
+                        logger.info(f"Download failed: {item}")
                         item['item_status'] = 'Failed'
                         if self.gui:
                             self.progress.emit(item, self.tr("Failed"), 0)
@@ -345,7 +361,7 @@ class DownloadWorker(QObject):
                         if self.gui:
                             self.progress.emit(item, self.tr("Converting"), 99)
 
-                        convert_audio_format(file_path, item_metadata, default_format)
+                        convert_audio_format(file_path, default_format)
 
                         embed_metadata(item, item_metadata)
 

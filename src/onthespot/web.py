@@ -34,6 +34,7 @@ class QueueWorker(threading.Thread):
                 with download_queue_lock:
                     download_queue[local_id] = {
                         'local_id': local_id,
+                        'available': True,
                         "item_service": item["item_service"],
                         "item_type": item["item_type"],
                         'item_id': item['item_id'],
@@ -179,8 +180,9 @@ def main():
     queue_worker = QueueWorker()
     queue_worker.start()
 
-    download_worker = DownloadWorker()
-    download_worker.start()
+    for i in range(config.get('maximum_download_workers')):
+        downloadworker = DownloadWorker(gui=True)
+        downloadworker.start()
 
     fill_account_pool.wait()
 

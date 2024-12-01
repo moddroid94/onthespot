@@ -66,7 +66,7 @@ def load_config(self):
     self.inp_album_cover_format.setText(config.get("album_cover_format"))
     self.inp_search_thumb_height.setValue(config.get("search_thumb_height"))
     self.inp_metadata_seperator.setText(config.get("metadata_seperator"))
-
+    self.inp_maximum_download_workers.setValue(config.get("maximum_download_workers"))
 
     # Checkboxes
     self.inp_overwrite_existing_metadata.setChecked(config.get("overwrite_existing_metadata"))
@@ -162,7 +162,7 @@ def save_config(self):
     config.set_('media_format', self.inp_media_format.text())
     config.set_('podcast_media_format', self.inp_podcast_media_format.text())
     config.set_('illegal_character_replacement', self.inp_illegal_character_replacement.text())
-
+    config.set_('maximum_download_workers', self.inp_maximum_download_workers.value())
 
     # Checkboxes: config.set_('key', bool)
     config.set_('overwrite_existing_metadata', self.inp_overwrite_existing_metadata.isChecked())

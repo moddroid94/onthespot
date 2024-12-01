@@ -73,7 +73,9 @@ class DownloadActionsButtons(QWidget):
         file_path = download_queue[self.local_id]['file_path']
         file = os.path.abspath(file_path)
         os.remove(file)
+        download_queue[self.local_id]["item_status"] = 'Deleted'
         download_queue[self.local_id]["gui"]["status_label"].setText(self.tr("Deleted"))
         self.open_btn.hide()
         self.locate_btn.hide()
         self.delete_btn.hide()
+        self.retry_btn.show()
