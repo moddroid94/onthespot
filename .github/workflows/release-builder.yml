@@ -162,10 +162,15 @@ jobs:
           asset_content_type: application/octet-stream
 
   rpm-x86_64-build:
-    runs-on: fedora-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y rpm python3-pip python3-dev python3-setuptools build-essential
 
       - name: Run rpm Build Script
         run: scripts/build_rpm.sh

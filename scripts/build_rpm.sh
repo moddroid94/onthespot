@@ -1,10 +1,10 @@
 #!/bin/bash
 
-echo "========= OnTheSpot AppImage Build Script ==========="
+echo "========= OnTheSpot RPM Build Script ==========="
 
 
-echo " => Fetch Dependencies"
-sudo dnf install rpm-build python3-pip python3-devel python3-setuptools
+#echo " => Fetch Dependencies"
+#sudo dnf install rpm-build python3-pip python3-devel python3-setuptools
 
 
 echo " => Build OnTheSpot.whl"
