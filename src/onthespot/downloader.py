@@ -11,7 +11,7 @@ from librespot.metadata import TrackId, EpisodeId
 from yt_dlp import YoutubeDL
 from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
 from .otsconfig import config
-from .utils import sanitize_data, format_track_path, convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
+from .utils import format_track_path, convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile

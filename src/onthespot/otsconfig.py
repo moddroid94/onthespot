@@ -1,6 +1,5 @@
 import os
 import json
-import shutil
 from shutil import which
 import uuid
 

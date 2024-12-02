@@ -2,7 +2,6 @@ import os
 import pyperclip
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
-from ..otsconfig import config
 from ..runtimedata import download_queue, get_logger
 from ..utils import open_item
 

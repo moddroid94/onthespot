@@ -1,19 +1,17 @@
 import os
 import platform
-import time
 import subprocess
 from io import BytesIO
 import base64
 import json
 from hashlib import md5
 import requests
-from librespot.core import Session
 from PIL import Image
 from mutagen.flac import Picture
 from mutagen.id3 import ID3, ID3NoHeaderError, WOAS, USLT, TCMP, COMM
 from mutagen.oggvorbis import OggVorbis
 import music_tag
-from .otsconfig import config, config_dir
+from .otsconfig import config
 from .runtimedata import get_logger, pending, download_queue
 
 logger = get_logger("utils")
@@ -264,7 +262,10 @@ def embed_metadata(item, metadata):
                 command += ['-metadata', 'genre={}'.format(value)]
 
             elif key == 'performers' and config.get("embed_performers"):
-                command += ['-metadata', 'performer={}'.format(value)]
+                if filetype == '.mp3':
+                    command += ['-metadata', 'TPE1={}'.format(value)]
+                else:
+                    command += ['-metadata', 'performer={}'.format(value)]
 
             elif key == 'producers' and config.get("embed_producers"):
                 if filetype == '.mp3':
@@ -274,7 +275,7 @@ def embed_metadata(item, metadata):
 
             elif key == 'writers' and config.get("embed_writers"):
                 if filetype == '.mp3':
-                    command += ['-metadata', 'TOLY={}'.format(value)]
+                    command += ['-metadata', 'TEXT={}'.format(value)]
                 else:
                     command += ['-metadata', 'author={}'.format(value)]
 
@@ -338,18 +339,18 @@ def embed_metadata(item, metadata):
                 else:
                     command += ['-metadata', 'website={}'.format(value)]
 
-            elif key == 'explicit' and config.get("embed_explicit"):
-                if filetype == '.mp3':
-                    command += ['-metadata', 'ITUNESADVISORY={}'.format(value)]
-                else:
-                    command += ['-metadata', 'explicit={}'.format(value)]
-
             elif key == 'lyrics' and config.get("embed_lyrics"):
                 if filetype == '.mp3':
                     # Incorrectly embedded to TXXX:USLT, patch sent upstream
                     command += ['-metadata', 'USLT={}'.format(value)]
                 else:
                     command += ['-metadata', 'lyrics={}'.format(value)]
+
+            elif key == 'explicit' and config.get("embed_explicit"):
+                if filetype == '.mp3':
+                    command += ['-metadata', 'ITUNESADVISORY={}'.format(value)]
+                else:
+                    command += ['-metadata', 'explicit={}'.format(value)]
 
             elif key == 'time_signature' and config.get("embed_timesignature"):
                 command += ['-metadata', 'timesignature={}'.format(value)]
