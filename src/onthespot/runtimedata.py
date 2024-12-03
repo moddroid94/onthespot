@@ -30,6 +30,18 @@ parsing_lock = threading.Lock()
 pending_lock = threading.Lock()
 download_queue_lock = threading.Lock()
 
+init_tray = False
+
+
+def set_init_tray(value):
+    global init_tray
+    init_tray = value
+
+
+def get_init_tray():
+    return init_tray
+
+
 loglevel = int(os.environ.get("LOG_LEVEL", 20))
 
 

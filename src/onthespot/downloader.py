@@ -50,8 +50,9 @@ class DownloadWorker(QObject):
         while self.is_running:
             try:
                 try:
-                    with download_queue_lock:
-                        if download_queue:
+                    if download_queue:
+                        with download_queue_lock:
+
                             # Mark item as unavailable for other download workers
                             iterator = iter(download_queue)
                             while True:
@@ -61,9 +62,9 @@ class DownloadWorker(QObject):
                                 download_queue[local_id]['available'] = False
                                 item = download_queue[local_id]
                                 break
-                        else:
-                            time.sleep(0.2)
-                            continue
+                    else:
+                        time.sleep(0.2)
+                        continue
 
                     item_service = item['item_service']
                     item_type = item['item_type']
@@ -88,7 +89,7 @@ class DownloadWorker(QObject):
                 if self.gui:
                     self.progress.emit(item, self.tr("Downloading"), 1)
 
-                token = get_account_token()
+                token = get_account_token(item_service)
 
                 try:
                     item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
@@ -181,7 +182,18 @@ class DownloadWorker(QObject):
                 # item['gui']['progressbar'] and self.gui into a download_track function.
                 try:
                     if item_service == "spotify":
-                        account = account_pool[config.get('parsing_acc_sn')]['login']['session']
+                        # Check if selected account is the same item service and if not find one
+                        parsing_index = config.get('parsing_acc_sn')
+                        if account_pool[parsing_index]['service'] == item_service:
+                            account = account_pool[parsing_index]['login']['session']
+                        else:
+                            for i in range(len(account_pool)):
+                                index = (parsing_index + i + 1) % len(account_pool)
+                                account = account_pool[index]
+                                if account['service'] == item_service:
+                                    account = account_pool[index]['login']['session']
+                                    break
+
                         default_format = ".ogg"
                         temp_file_path += default_format
                         if item_type == "track":

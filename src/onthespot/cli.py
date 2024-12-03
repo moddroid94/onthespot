@@ -30,9 +30,8 @@ class QueueWorker(threading.Thread):
                 local_id = next(iter(pending))
                 with pending_lock:
                     item = pending.pop(local_id)
-                token = get_account_token()
+                token = get_account_token(item['item_service'])
                 item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-
                 with download_queue_lock:
                     download_queue[local_id] = {
                         'local_id': local_id,

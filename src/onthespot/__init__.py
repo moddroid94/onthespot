@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QStyle
 from PyQt6.QtGui import QIcon
 from .gui.mainui import MainWindow
 from .gui.minidialog import MiniDialog
-from .runtimedata import get_logger
+from .runtimedata import get_logger, set_init_tray
 from .otsconfig import config
 from .parse_item import parsingworker
 
@@ -87,6 +87,7 @@ def main():
     window = MainWindow(_dialog, start_url)
 
     if config.get('close_to_tray'):
+        set_init_tray(True)
         tray_app = TrayApp(window)
 
     app.setDesktopFileName('org.onthespot.OnTheSpot')

@@ -1,6 +1,17 @@
 import os
 from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QSpinBox, QComboBox, QWidget
 from ..otsconfig import config
+
+
+class NonScrollableSpinBox(QSpinBox):
+    def wheelEvent(self, event):
+        event.ignore()
+
+
+class NonScrollableComboBox(QComboBox):
+    def wheelEvent(self, event):
+        event.ignore()
 
 
 def load_config(self):
@@ -135,6 +146,50 @@ def load_config(self):
     self.inp_embed_speechiness.setChecked(config.get('embed_speechiness'))
     self.inp_embed_valence.setChecked(config.get('embed_valence'))
     self.inp_mirror_spotify_playback.setChecked(config.get('mirror_spotify_playback'))
+
+    # Disable scrolling to change values of QSpinBoxes and QComboBoxes
+    do_not_scroll = [
+        "inp_login_service",
+        "inp_language",
+        "inp_max_search_results",
+        "inp_search_thumb_height",
+        "inp_file_hertz",
+        "inp_download_delay",
+        "inp_chunk_size",
+        "inp_maximum_download_workers"
+        ]
+
+    for name in do_not_scroll:
+        widget = self.findChild(QWidget, name)
+        if isinstance(widget, QSpinBox):
+            # Create new NonScrollableSpinBox
+            new_widget = NonScrollableSpinBox()
+            new_widget.setRange(widget.minimum(), widget.maximum())
+            new_widget.setValue(widget.value())
+            new_widget.setGeometry(widget.geometry())
+            new_widget.setMinimumSize(widget.minimumSize())
+            new_widget.setMaximumSize(widget.maximumSize())
+        elif isinstance(widget, QComboBox):
+            # Create new NonScrollableComboBox
+            new_widget = NonScrollableComboBox()
+            new_widget.addItems([widget.itemText(i) for i in range(widget.count())])
+            new_widget.setCurrentIndex(widget.currentIndex())
+            new_widget.setGeometry(widget.geometry())
+            new_widget.setMinimumSize(widget.minimumSize())
+            new_widget.setMaximumSize(widget.maximumSize())
+            # Copy icons
+            for i in range(widget.count()):
+                icon = widget.itemIcon(i)
+                if not icon.isNull():
+                    new_widget.setItemIcon(i, icon)
+
+        # Replace the widget in the layout
+        widget.parent().layout().replaceWidget(widget, new_widget)
+        # Delete the original widget
+        widget.deleteLater()
+
+        # Store the newly created widget in the previous instance variable
+        setattr(self, name, new_widget)
 
 def save_config(self):
     # Missing Theme

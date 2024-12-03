@@ -64,21 +64,22 @@ class MirrorSpotifyPlayback(QObject):
                         parent_category = 'track'
                         playlist_name = ''
                         playlist_by = ''
-                        if data['context']['type'] == 'playlist':
-                            match = re.search(r'spotify:playlist:(\w+)', data['context']['uri'])
-                            if match:
-                                playlist_id = match.group(1)
-                            else:
-                                continue
-                            token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
-                            playlist_name, playlist_by = spotify_get_playlist_data(token, playlist_id)
-                            parent_category = 'playlist'
-                        elif data['context']['type'] == 'collection':
-                            playlist_name = 'Liked Songs'
-                            playlist_by = 'me'
-                            parent_category = 'playlist'
-                        elif data['context']['type'] in ('album', 'artist'):
-                            parent_category = 'album'
+                        if data['context'] is not None:
+                            if data['context'].get('type', '') == 'playlist':
+                                match = re.search(r'spotify:playlist:(\w+)', data['context']['uri'])
+                                if match:
+                                    playlist_id = match.group(1)
+                                else:
+                                    continue
+                                token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-email")
+                                playlist_name, playlist_by = spotify_get_playlist_data(token, playlist_id)
+                                parent_category = 'playlist'
+                            elif data['context'].get('type', '') == 'collection':
+                                playlist_name = 'Liked Songs'
+                                playlist_by = 'me'
+                                parent_category = 'playlist'
+                            elif data['context'].get('type', '') in ('album', 'artist'):
+                                parent_category = 'album'
                         # Use item id to prevent duplicates
                         #local_id = format_local_id(item_id)
                         with pending_lock:

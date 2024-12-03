@@ -17,34 +17,32 @@ YOUTUBE_URL_REGEX = re.compile(r"https://(www\.|music\.)?youtube\.com/watch\?v=(
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 
 def parse_url(url):
-    account_service = account_pool[config.get('parsing_acc_sn')]['service']
-
-    if account_service == 'deezer' and re.match(DEEZER_URL_REGEX, url):
+    if re.match(DEEZER_URL_REGEX, url):
         match = re.search(DEEZER_URL_REGEX, url)
         item_id = match.group("id")
         item_type = match.group("type")
         item_service = 'deezer'
 
-    elif account_service == 'soundcloud' and re.match(SOUNDCLOUD_URL_REGEX, url):
-        token = get_account_token()
+    elif re.match(SOUNDCLOUD_URL_REGEX, url):
+        token = get_account_token('soundcloud')
         item_type, item_id = soundcloud_parse_url(url, token)
         item_service = "soundcloud"
 
-    elif account_service == 'spotify' and re.match(SPOTIFY_URL_REGEX, url):
+    elif re.match(SPOTIFY_URL_REGEX, url):
         match = re.search(SPOTIFY_URL_REGEX, url)
         item_id = match.group("id")
         item_type = match.group("type")
         item_service = "spotify"
-    elif account_service == 'spotify' and url == 'https://open.spotify.com/collection/tracks':
+    elif url == 'https://open.spotify.com/collection/tracks':
         item_id = None
         item_type = 'liked_songs'
         item_service = "spotify"
-    elif account_service == 'spotify' and url == 'https://open.spotify.com/collection/your-episodes':
+    elif url == 'https://open.spotify.com/collection/your-episodes':
         item_id = None
         item_type = 'your_episodes'
         item_service = "spotify"
 
-    elif account_service == 'youtube' and re.match(YOUTUBE_URL_REGEX, url):
+    elif re.match(YOUTUBE_URL_REGEX, url):
         match = re.search(YOUTUBE_URL_REGEX, url)
         if match:
             item_service = 'youtube'
@@ -80,7 +78,7 @@ def parsingworker():
                 current_service = item['item_service']
                 current_type = item['item_type']
                 current_id = item['item_id']
-                token = get_account_token()
+                token = get_account_token(current_service)
 
                 if current_service == "spotify":
                     if current_type == "track":

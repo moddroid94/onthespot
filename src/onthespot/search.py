@@ -35,6 +35,6 @@ def get_search_results(search_term, content_types=None):
 
         logger.info(f"Search clicked with value term {search_term}")
         if search_term != "":
-            token = get_account_token()
             account_type = config.get('accounts')[config.get('parsing_acc_sn')]['service']
+            token = get_account_token(account_type)
             return globals()[f"{account_type}_get_search_results"](token, search_term, content_types)

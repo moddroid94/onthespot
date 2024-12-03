@@ -10,7 +10,7 @@ from ..utils import is_latest_release, open_item
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from ..otsconfig import config
-from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock, pending_lock
+from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock, pending_lock, get_init_tray
 from .thumb_listitem import LabelWithThumb
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session, MirrorSpotifyPlayback
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_add_account
@@ -36,7 +36,7 @@ class QueueWorker(QThread):
                     local_id = next(iter(pending))
                     with pending_lock:
                         item = pending.pop(local_id)
-                    token = get_account_token()
+                    token = get_account_token(item['item_service'])
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
                     self.add_item_to_download_list.emit(item, item_metadata)
                     continue
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
             open_item(url)
 
     def closeEvent(self, event):
-        if config.get('close_to_tray'):
+        if config.get('close_to_tray') and get_init_tray():
             event.ignore()
             self.hide()
 
@@ -373,8 +373,8 @@ class MainWindow(QMainWindow):
         playlist_by = ''
         if item['parent_category'] == 'playlist':
             item_category = f'Playlist: {item["playlist_name"]}'
-            playlist_name = item['playlist_name']
-            playlist_by = item['playlist_by']
+            playlist_name = item.get('playlist_name', '')
+            playlist_by = item.get('playlist_by', '')
         elif item['parent_category'] in ('album', 'show', 'audiobook'):
             item_category = f'{item["parent_category"].title()}: {item_metadata["album_name"]}'
         else:
@@ -485,6 +485,7 @@ class MainWindow(QMainWindow):
                 if local_id in download_queue:
                     if download_queue[local_id]['item_status'] in (
                                 "Cancelled",
+                                "Deleted",
                                 "Downloaded",
                                 "Already Exists"
                             ):

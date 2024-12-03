@@ -84,19 +84,18 @@ class FillAccountPool(QThread):
 
 
 
-def get_account_token():
+def get_account_token(item_service):
+    if item_service == 'youtube':
+        return
     parsing_index = config.get('parsing_acc_sn')
     service = account_pool[parsing_index]['service']
-
-    if service == 'youtube':
-        return
-
-    if config.get("rotate_acc_sn") is True:
+    if item_service == service and not config.get("rotate_acc_sn"):
+        return globals()[f"{item_service}_get_token"](parsing_index)
+    else:
         for i in range(parsing_index + 1, parsing_index + len(account_pool) + 1):
             index = i % len(account_pool)
-            if account_pool[index]['service'] == service:
-                config.set_('parsing_acc_sn', index)
-                config.update
-                return globals()[f"{service}_get_token"](index)
-    else:
-        return globals()[f"{service}_get_token"](parsing_index)
+            if account_pool[index]['service'] == item_service:
+                if config.get("rotate_acc_sn"):
+                    config.set_('parsing_acc_sn', index)
+                    config.update
+                return globals()[f"{item_service}_get_token"](index)
