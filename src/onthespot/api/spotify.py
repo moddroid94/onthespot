@@ -131,11 +131,11 @@ def spotify_new_session():
                     with open(session_json_path, 'r') as file:
                         zeroconf_login = json.load(file)
                 except FileNotFoundError:
-                    print(f"Error: The file {session_json_path} was not found.")
+                    logger.error(f"Error: The file {session_json_path} was not found.")
                 except json.JSONDecodeError:
-                    print("Error: Failed to decode JSON from the file.")
+                    logger.error("Error: Failed to decode JSON from the file.")
                 except Exception as e:
-                    print(f"An error occurred: {e}")
+                    logger.error(f"An error occurred: {e}")
                 cfg_copy = config.get('accounts').copy()
                 new_user = {
                     "uuid": uuid_uniq,
@@ -158,20 +158,19 @@ def spotify_new_session():
 def spotify_login_user(account):
     try:
         # I'd prefer to use 'Session.Builder().stored(credentials).create but
-        # it seems to be broken, loading from credentials file instead
+        # I can't get it to work, loading from credentials file instead.
         uuid = account['uuid']
         username = account['login']['username']
 
         session_dir = os.path.join(cache_dir(), "onthespot", "sessions")
         os.makedirs(session_dir, exist_ok=True)
         session_json_path = os.path.join(session_dir, f"ots_login_{uuid}.json")
-        print(session_json_path)
         try:
             with open(session_json_path, 'w') as file:
                 json.dump(account['login'], file)
-            print(f"Login information for '{username[:4]}*******' written to {session_json_path}")
+            logger.info(f"Login information for '{username[:4]}*******' written to {session_json_path}")
         except IOError as e:
-            print(f"Error writing to file {session_json_path}: {e}")
+            logger.error(f"Error writing to file {session_json_path}: {e}")
 
 
         config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()

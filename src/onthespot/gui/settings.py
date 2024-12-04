@@ -18,43 +18,26 @@ def load_config(self):
     # Hide Popups
     self.group_search_items.hide()
     self.group_download_items.hide()
-    # Icons
-    en_US_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'en_US.png'))
-    self.inp_language.insertItem(0, en_US_icon, "English")
-    de_DE_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'de_DE.png'))
-    self.inp_language.insertItem(1, de_DE_icon, "Deutsch")
-    pt_PT_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pt_PT.png'))
-    self.inp_language.insertItem(2, pt_PT_icon, "Português")
 
-    pirate_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'pirate_flag.png'))
-    self.inp_language.insertItem(999, pirate_icon, "Contribute")
+    # Icons
+    self.inp_language.insertItem(0, self.get_icon('en_US'), "English")
+    self.inp_language.insertItem(1, self.get_icon('de_DE'), "Deutsch")
+    self.inp_language.insertItem(2, self.get_icon('pt_PT'), "Português")
+    self.inp_language.insertItem(999, self.get_icon('pirate_flag'), "Contribute")
     self.inp_language.currentIndexChanged.connect(self.contribute)
 
-    deezer_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'deezer.png'))
-    self.inp_login_service.insertItem(0, deezer_icon, "")
-
-    soundcloud_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'soundcloud.png'))
-    self.inp_login_service.insertItem(1, soundcloud_icon, "")
-
-    spotify_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'spotify.png'))
-    self.inp_login_service.insertItem(2, spotify_icon, "")
-
-    youtube_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'youtube.png'))
-    self.inp_login_service.insertItem(3, youtube_icon, "")
-
+    self.inp_login_service.insertItem(0, self.get_icon('deezer'), "")
+    self.inp_login_service.insertItem(1, self.get_icon('soundcloud'), "")
+    self.inp_login_service.insertItem(2, self.get_icon('spotify'), "")
+    self.inp_login_service.insertItem(3, self.get_icon('youtube'), "")
     self.inp_login_service.setCurrentIndex(2)
 
-    save_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'save.png'))
-    self.btn_save_config.setIcon(save_icon)
-    folder_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'folder.png'))
-    self.btn_download_root_browse.setIcon(folder_icon)
-    self.btn_download_tmp_browse.setIcon(folder_icon)
-    search_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'search.png'))
-    self.btn_search.setIcon(search_icon)
-    collapse_down_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_down.png'))
-    collapse_up_icon = QIcon(os.path.join(config.app_root, 'resources', 'icons', 'collapse_up.png'))
-    self.btn_search_filter_toggle.setIcon(collapse_down_icon)
-    self.btn_download_filter_toggle.setIcon(collapse_up_icon)
+    self.btn_save_config.setIcon(self.get_icon('save'))
+    self.btn_download_root_browse.setIcon(self.get_icon('folder'))
+    self.btn_download_tmp_browse.setIcon(self.get_icon('folder'))
+    self.btn_search.setIcon(self.get_icon('search'))
+    self.btn_search_filter_toggle.setIcon(self.get_icon('collapse_down'))
+    self.btn_download_filter_toggle.setIcon(self.get_icon('collapse_up'))
 
     # Text
     self.inp_language.setCurrentIndex(config.get("language_index"))
@@ -77,6 +60,7 @@ def load_config(self):
     self.inp_album_cover_format.setText(config.get("album_cover_format"))
     self.inp_search_thumb_height.setValue(config.get("search_thumb_height"))
     self.inp_metadata_seperator.setText(config.get("metadata_seperator"))
+    self.inp_maximum_queue_workers.setValue(config.get("maximum_queue_workers"))
     self.inp_maximum_download_workers.setValue(config.get("maximum_download_workers"))
 
     # Checkboxes
@@ -156,6 +140,7 @@ def load_config(self):
         "inp_file_hertz",
         "inp_download_delay",
         "inp_chunk_size",
+        "inp_maximum_queue_workers",
         "inp_maximum_download_workers"
         ]
 
@@ -210,13 +195,11 @@ def save_config(self):
     config.set_('search_thumb_height', self.inp_search_thumb_height.value())
     config.set_('disable_bulk_dl_notices', self.inp_disable_bulk_popup.isChecked())
     config.set_('metadata_seperator', self.inp_metadata_seperator.text())
-    if 0 < self.inp_max_search_results.value() <= 50:
-        config.set_('max_search_results', self.inp_max_search_results.value())
-    else:
-            config.set_('max_search_results', 5)
+    config.set_('max_search_results', self.inp_max_search_results.value())
     config.set_('media_format', self.inp_media_format.text())
     config.set_('podcast_media_format', self.inp_podcast_media_format.text())
     config.set_('illegal_character_replacement', self.inp_illegal_character_replacement.text())
+    config.set_('maximum_queue_workers', self.inp_maximum_queue_workers.value())
     config.set_('maximum_download_workers', self.inp_maximum_download_workers.value())
 
     # Checkboxes: config.set_('key', bool)

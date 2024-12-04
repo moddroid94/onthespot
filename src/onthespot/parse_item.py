@@ -16,6 +16,7 @@ SPOTIFY_URL_REGEX = re.compile(r"https://open.spotify.com/(intl-([a-zA-Z]+)/|)(?
 YOUTUBE_URL_REGEX = re.compile(r"https://(www\.|music\.)?youtube\.com/watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)(&list=(?P<list_id>[a-zA-Z0-9_-]+))?")
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 
+
 def parse_url(url):
     if re.match(DEEZER_URL_REGEX, url):
         match = re.search(DEEZER_URL_REGEX, url)

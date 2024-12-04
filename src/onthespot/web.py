@@ -105,7 +105,6 @@ def download_queue_page():
     config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
     with open(config_path, 'r') as config_file:
         config_data = json.load(config_file)
-        print(config_data)
     return render_template('download_queue.html', config=config_data)
 
 @app.route('/')
@@ -167,8 +166,8 @@ def update_settings():
 def main():
     fill_account_pool = FillAccountPool()
 
-    fill_account_pool.finished.connect(lambda: print("Finished filling account pool."))
-    fill_account_pool.progress.connect(lambda message, status: print(f"{message} {'Success' if status else 'Failed'}"))
+    fill_account_pool.finished.connect(lambda: logger.info("Finished filling account pool."))
+    fill_account_pool.progress.connect(lambda message, status: logger.info(f"{message} {'Success' if status else 'Failed'}"))
 
     fill_account_pool.start()
 
@@ -176,8 +175,9 @@ def main():
     thread.daemon = True
     thread.start()
 
-    queue_worker = QueueWorker()
-    queue_worker.start()
+    for i in range(config.get('maximum_queue_workers')):
+        queue_worker = QueueWorker()
+        queue_worker.start()
 
     for i in range(config.get('maximum_download_workers')):
         downloadworker = DownloadWorker(gui=True)

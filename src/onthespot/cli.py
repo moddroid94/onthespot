@@ -51,6 +51,7 @@ class QueueWorker(threading.Thread):
             else:
                 time.sleep(0.2)
 
+
 def main():
     print('\033[32mLogging In...\033[0m\n', end='', flush=True)
 
@@ -65,8 +66,9 @@ def main():
     thread.daemon = True
     thread.start()
 
-    queue_worker = QueueWorker()
-    queue_worker.start()
+    for i in range(config.get('maximum_queue_workers')):
+        queue_worker = QueueWorker()
+        queue_worker.start()
 
     for i in range(config.get('maximum_download_workers')):
         downloadworker = DownloadWorker(gui=True)

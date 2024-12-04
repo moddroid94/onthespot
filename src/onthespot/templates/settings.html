@@ -186,6 +186,9 @@
         <label for="chunk_size">Chunk Size:</label>
         <input type="number" id="chunk_size" value="{{ config.chunk_size }}" placeholder="Enter chunk size"><br><br>
 
+        <label for="maximum_queue_workers">Maximum Queue Workers:</label>
+        <input type="text" id="maximum_queue_workers" value="{{ config.maximum_queue_workers }}" placeholder="Enter maximum download workers"><br><br>
+
         <label for="maximum_download_workers">Maximum Download Workers:</label>
         <input type="text" id="maximum_download_workers" value="{{ config.maximum_download_workers }}" placeholder="Enter maximum download workers"><br><br>
 
@@ -357,6 +360,7 @@
             const forceRaw = document.getElementById('force_raw').checked;
             const downloadDelay = document.getElementById('download_delay').value;
             const translateFilePath = document.getElementById('translate_file_path').value;
+            const maximumQueueWorkers = document.getElementById('maximum_queue_workers').value;
             const maximumDownloadWorkers = document.getElementById('maximum_download_workers').value;
 
             const metadataSeparator = document.getElementById('metadata_seperator').value;
@@ -441,6 +445,7 @@
                 force_raw: forceRaw,
                 download_delay: downloadDelay,
                 translate_file_path: translateFilePath,
+                maximum_queue_workers: maximumQueueWorkers,
                 maximum_download_workers: maximumDownloadWorkers,
                 metadata_separator: metadataSeparator,
                 overwrite_existing_metadata: overwriteExistingMetadata,
