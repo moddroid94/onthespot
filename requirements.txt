@@ -3,7 +3,6 @@ librespot
 music-tag
 mutagen
 Pillow
-pyperclip
 PyQt6
 PyQt6_sip
 Requests

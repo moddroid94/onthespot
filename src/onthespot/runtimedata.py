@@ -21,10 +21,11 @@ stdout_handler = logging.StreamHandler(sys.stdout)
 log_handler.setFormatter(log_formatter)
 stdout_handler.setFormatter(log_formatter)
 
+account_pool = []
+temp_download_path = []
 parsing = {}
 pending = {}
 download_queue = {}
-account_pool = []
 
 parsing_lock = threading.Lock()
 pending_lock = threading.Lock()

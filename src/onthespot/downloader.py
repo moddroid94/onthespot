@@ -9,7 +9,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from yt_dlp import YoutubeDL
-from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool
+from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool, temp_download_path
 from .otsconfig import config
 from .utils import format_track_path, convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
 from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
@@ -106,6 +106,8 @@ class DownloadWorker(QObject):
                     continue
 
                 dl_root = config.get("download_root")
+                if temp_download_path:
+                    dl_root = temp_download_path[0]
                 file_path = os.path.join(dl_root, item_path)
                 directory, file_name = os.path.split(file_path)
                 temp_file_path = os.path.join(directory, '~' + file_name)

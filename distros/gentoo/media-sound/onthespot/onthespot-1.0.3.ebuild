@@ -32,7 +32,6 @@ RDEPEND="
 	dev-python/librespot
 	dev-python/music-tag
 	dev-python/pillow
-	dev-python/pyperclip
 	dev-python/pyqt6[network,widgets]
 	dev-python/requests
 	dev-python/urllib3

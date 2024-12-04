@@ -22,14 +22,17 @@ class TrayApp:
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.activated.connect(self.tray_icon_clicked)
 
+
     def tray_icon_clicked(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.show_window()
+
 
     def show_window(self):
         self.main_window.show()
         self.main_window.raise_()
         self.main_window.activateWindow()
+
 
     def quit_application(self):
         QApplication.quit()
@@ -95,6 +98,7 @@ def main():
 
     logger.info('Good bye ..')
     os._exit(0)
+
 
 if __name__ == '__main__':
     main()

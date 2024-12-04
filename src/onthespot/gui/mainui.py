@@ -5,12 +5,12 @@ from urllib3.exceptions import MaxRetryError, NewConnectionError
 from PyQt6 import uic, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton
+from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton, QHBoxLayout, QWidget
 from ..utils import is_latest_release, open_item
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from ..otsconfig import config
-from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock, pending_lock, get_init_tray
+from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock, pending_lock, get_init_tray, temp_download_path
 from .thumb_listitem import LabelWithThumb
 from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session, MirrorSpotifyPlayback
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_add_account
@@ -91,7 +91,6 @@ class MainWindow(QMainWindow):
         self.inp_version.setText(config.get("version"))
         self.inp_session_uuid.setText(config.session_uuid)
         logger.info(f"Initialising main window, logging session : {config.session_uuid}")
-
 
         # Fill the value from configs
         logger.info("Loading configurations..")
@@ -191,6 +190,7 @@ class MainWindow(QMainWindow):
         self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
         self.btn_download_root_browse.clicked.connect(self.__select_dir)
         self.btn_download_tmp_browse.clicked.connect(self.__select_tmp_dir)
+        self.inp_tmp_dl_root.textChanged.connect(self.update_tmp_dir)
         self.inp_search_term.returnPressed.connect(self.fill_search_table)
         self.btn_progress_clear_complete.clicked.connect(self.remove_completed_from_download_list)
 
@@ -267,8 +267,15 @@ class MainWindow(QMainWindow):
     def __select_tmp_dir(self):
         dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
         if dir_path.strip() != '':
-            self.inp_tmp_dl_root.setText(QDir.toNativeSeparators(dir_path))
+            temp_path = QDir.toNativeSeparators(dir_path)
+            self.inp_tmp_dl_root.setText(temp_path)
+            temp_download_path.append(temp_path)
 
+    def update_tmp_dir(self):
+        temp_download_path.clear()
+        new_path = self.inp_tmp_dl_root.text()
+        if new_path:
+            temp_download_path.append(new_path)
 
     def __show_popup_dialog(self, txt, btn_hide=False, download=False):
         if download and config.get('disable_bulk_dl_notices'):
@@ -703,7 +710,7 @@ class MainWindow(QMainWindow):
             self.inp_search_term.setText('')
             return
 
-        def download_btn_clicked(item_name, item_url, item_service, item_type, item_id, ):
+        def download_btn_clicked(item_name, item_url, item_service, item_type, item_id):
             parsing[item_id] = {
                 'item_url': item_url,
                 'item_service': item_service,
@@ -712,19 +719,34 @@ class MainWindow(QMainWindow):
             }
             self.__show_popup_dialog(self.tr("{0} is being parsed and will be added to the download queue shortly.").format(f"{item_type.title()}: {item_name}"), download=True)
 
+        def copy_btn_clicked(item_url):
+            QApplication.clipboard().setText(item_url)
+            self.__show_popup_dialog(self.tr("The URL has been copied to the clipboard."), download=True)
+
         for result in results:
-            btn = QPushButton(self.tbl_search_results)
-            #btn.setText(btn_text.strip())
-            btn.setIcon(self.get_icon('download'))
-            btn.setMinimumHeight(30)
-            btn.clicked.connect(lambda x,
-                            item_name=result['item_name'],
-                            item_url=result['item_url'],
-                            item_type=result['item_type'],
-                            item_id=result['item_id'],
-                            item_service=result['item_service']:
-                            download_btn_clicked(item_name, item_url, item_service, item_type, item_id)
-                            )
+            download_btn = QPushButton(self.tbl_search_results)
+            download_btn.setIcon(self.get_icon('download'))
+            download_btn.setMinimumHeight(30)
+            download_btn.clicked.connect(lambda x,
+                                    item_name=result['item_name'],
+                                    item_url=result['item_url'],
+                                    item_type=result['item_type'],
+                                    item_id=result['item_id'],
+                                    item_service=result['item_service']:
+                                    download_btn_clicked(item_name, item_url, item_service, item_type, item_id)
+                                    )
+
+            copy_btn = QPushButton(self.tbl_search_results)
+            copy_btn.setIcon(self.get_icon('link'))
+            copy_btn.setMinimumHeight(30)
+            copy_btn.clicked.connect(lambda x, item_url=result['item_url']: copy_btn_clicked(item_url))
+
+            btn_layout = QHBoxLayout()
+            btn_layout.addWidget(copy_btn)
+            btn_layout.addWidget(download_btn)
+
+            btn_widget = QWidget()
+            btn_widget.setLayout(btn_layout)
 
             service = QTableWidgetItem(result['item_service'].title())
             service.setIcon(self.get_icon(result["item_service"]))
@@ -743,9 +765,10 @@ class MainWindow(QMainWindow):
             self.tbl_search_results.setItem(rows, 1, QTableWidgetItem(str(result['item_by'])))
             self.tbl_search_results.setItem(rows, 2, QTableWidgetItem(result['item_type'].title()))
             self.tbl_search_results.setItem(rows, 3, service)
-            self.tbl_search_results.setCellWidget(rows, 4, btn)
+            self.tbl_search_results.setCellWidget(rows, 4, btn_widget)
             self.tbl_search_results.horizontalHeader().resizeSection(0, 450)
-        self.inp_search_term.setText('')
+
+            self.inp_search_term.setText('')
 
 
     def update_table_visibility(self):

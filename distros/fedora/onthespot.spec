@@ -14,7 +14,6 @@ BuildRequires: python3-pip
 Requires: python3-flask
 Requires: python3-mutagen
 Requires: python3-pillow
-Requires: python3-pyperclip
 Requires: python3-pyqt6
 Requires: python3-requests
 Requires: python3-urllib3

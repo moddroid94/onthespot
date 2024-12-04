@@ -1,7 +1,6 @@
 import os
-import pyperclip
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QHBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QHBoxLayout, QWidget
 from ..runtimedata import download_queue, get_logger
 from ..utils import open_item
 
@@ -43,7 +42,7 @@ class DownloadActionsButtons(QWidget):
 
 
     def copy_link(self):
-        pyperclip.copy(self.item_metadata['item_url'])
+        QApplication.clipboard().setText(self.item_metadata['item_url'])
 
 
     def cancel_item(self):

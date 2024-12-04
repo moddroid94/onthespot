@@ -656,9 +656,9 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-1557</y>
+             <y>-285</y>
              <width>627</width>
-             <height>3234</height>
+             <height>3225</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1282,7 +1282,7 @@
                         <enum>Qt::RightToLeft</enum>
                        </property>
                        <property name="text">
-                        <string>Disable Download Popups</string>
+                        <string>Disable Search Popups</string>
                        </property>
                       </widget>
                      </item>
