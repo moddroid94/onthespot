@@ -17,7 +17,7 @@ class DownloadActionsButtons(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(pbar)
-        if copy_btn != None:
+        if copy_btn is not None:
             self.copy_btn = copy_btn
             copy_btn.clicked.connect(self.copy_link)
             layout.addWidget(copy_btn)
@@ -27,22 +27,24 @@ class DownloadActionsButtons(QWidget):
         self.retry_btn = retry_btn
         retry_btn.clicked.connect(self.retry_item)
         layout.addWidget(retry_btn)
-        if open_btn != None:
+        if open_btn is not None:
             self.open_btn = open_btn
             open_btn.clicked.connect(self.open_file)
             layout.addWidget(open_btn)
-        if locate_btn != None:
+        if locate_btn is not None:
             self.locate_btn = locate_btn
             locate_btn.clicked.connect(self.locate_file)
             layout.addWidget(locate_btn)
-        if delete_btn != None:
+        if delete_btn is not None:
             self.delete_btn = delete_btn
             delete_btn.clicked.connect(self.delete_file)
             layout.addWidget(delete_btn)
         self.setLayout(layout)
 
+
     def copy_link(self):
         pyperclip.copy(self.item_metadata['item_url'])
+
 
     def cancel_item(self):
         download_queue[self.local_id]['item_status'] = "Cancelled"
@@ -51,6 +53,7 @@ class DownloadActionsButtons(QWidget):
         self.cancel_btn.hide()
         self.retry_btn.show()
 
+
     def retry_item(self):
         download_queue[self.local_id]['item_status'] = "Waiting"
         download_queue[self.local_id]['gui']['status_label'].setText(self.tr("Waiting"))
@@ -58,15 +61,18 @@ class DownloadActionsButtons(QWidget):
         self.retry_btn.hide()
         self.cancel_btn.show()
 
+
     def open_file(self):
         file_path = download_queue[self.local_id]['file_path']
         file = os.path.abspath(file_path)
         open_item(file)
 
+
     def locate_file(self):
         file_path = download_queue[self.local_id]['file_path']
         file_dir = os.path.dirname(file_path)
         open_item(file_dir)
+
 
     def delete_file(self):
         file_path = download_queue[self.local_id]['file_path']

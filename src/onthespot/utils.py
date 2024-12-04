@@ -507,6 +507,7 @@ def fix_mp3_metadata(filename):
         del id3['TXXX:TCMP']
     id3.save()
 
+
 def add_to_m3u_file(item, item_metadata):
     logger.info(f"Adding {item['file_path']} to m3u")
 
@@ -556,6 +557,7 @@ def add_to_m3u_file(item, item_metadata):
                 m3u_file.write(f"{m3u_item_header}\n{item['file_path']}\n")
         else:
             logger.info(f"{item['file_path']} already exists in the M3U file.")
+
 
 def strip_metadata(item):
     if os.path.isfile(os.path.abspath(item['file_path'])):

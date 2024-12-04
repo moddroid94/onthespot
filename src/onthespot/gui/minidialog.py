@@ -9,6 +9,7 @@ from ..utils import open_item
 
 logger = get_logger('gui.minidialog')
 
+
 class MiniDialog(QDialog):
     def __init__(self, parent=None):
         super(MiniDialog, self).__init__(parent)
@@ -31,6 +32,7 @@ class MiniDialog(QDialog):
 
         self.lb_main.mousePressEvent = self.on_label_click
 
+
     def on_label_click(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             match = re.search(r"href='(https?://[^']+)'", self.lb_main.text())
@@ -40,6 +42,7 @@ class MiniDialog(QDialog):
                     logger.info(f"Update URL Clicked, {match.group(1)}")
                     open_item(match.group(1))
             except Exception:
+                # No url in label
                 pass
 
     def run(self, content, btn_hidden=False):

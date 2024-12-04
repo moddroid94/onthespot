@@ -17,6 +17,7 @@ class FillAccountPool(QThread):
         self.gui = gui
         super().__init__()
 
+
     def run(self):
         accounts = config.get('accounts')
         for account in accounts:

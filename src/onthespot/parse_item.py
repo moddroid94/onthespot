@@ -63,6 +63,7 @@ def parse_url(url):
             'item_id': item_id
         }
 
+
 def parsingworker():
     while True:
         if parsing:

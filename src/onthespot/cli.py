@@ -87,7 +87,6 @@ class CLI(Cmd):
     intro = '\033[32mWelcome to OnTheSpot. Type help or ? to list commands.\033[0m'
     prompt = '(OTS) '
 
-
     def do_help(self, arg):
         print("\033[32mAvailable commands:\033[0m")
         print("  help                - Show this help message")
@@ -141,7 +140,6 @@ class CLI(Cmd):
             deezer_add_account(parts[2])
 
         elif len(parts) == 2 and parts[0] == "select_account":
-
             try:
                 account_number = int(parts[1])
                 config.set_('parsing_acc_sn', account_number)
@@ -151,7 +149,6 @@ class CLI(Cmd):
                 print("\033[32mInvalid account number. Please enter a valid integer.\033[0m")
 
         elif len(parts) == 2 and parts[0] == "delete_account":
-
             try:
                 account_number = int(parts[1])
                 accounts = config.get('accounts').copy()
@@ -162,7 +159,6 @@ class CLI(Cmd):
                 print(f"\033[32mDeleted account number: {account_number}\033[0m")
             except ValueError:
                 print("\033[32mInvalid account number. Please enter a valid integer.\033[0m")
-
         else:
             print("\033[32mConfiguration options:\033[0m")
             print("  list_accounts")
@@ -300,12 +296,10 @@ class CLI(Cmd):
         stdscr.refresh()
 
 
-
     def do_exit(self, arg):
         """Exit the CLI application."""
         print("Exiting the CLI application.")
         os._exit(0)
-
 
 
 if __name__ == '__main__':

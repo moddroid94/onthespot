@@ -15,7 +15,7 @@ class NonScrollableComboBox(QComboBox):
 
 
 def load_config(self):
-    # Hide Popups
+    # Hide Popup Settings
     self.group_search_items.hide()
     self.group_download_items.hide()
 
@@ -32,6 +32,7 @@ def load_config(self):
     self.inp_login_service.insertItem(3, self.get_icon('youtube'), "")
     self.inp_login_service.setCurrentIndex(2)
 
+    #self.btn_reset_config.setIcon(self.get_icon('trash'))
     self.btn_save_config.setIcon(self.get_icon('save'))
     self.btn_download_root_browse.setIcon(self.get_icon('folder'))
     self.btn_download_tmp_browse.setIcon(self.get_icon('folder'))
@@ -175,6 +176,7 @@ def load_config(self):
 
         # Store the newly created widget in the previous instance variable
         setattr(self, name, new_widget)
+
 
 def save_config(self):
     # Missing Theme

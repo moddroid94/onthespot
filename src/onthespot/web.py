@@ -51,19 +51,23 @@ class QueueWorker(threading.Thread):
             else:
                 time.sleep(0.2)
 
+
 @app.route('/items')
 def get_items():
     with download_queue_lock:
         return jsonify(download_queue)
+
 
 @app.route('/icons/<path:filename>')
 def serve_icons(filename):
     icon_path = os.path.join(config.app_root, 'resources', 'icons', filename)
     return send_file(icon_path)
 
+
 @app.route('/download/<path:local_id>')
 def download_media(local_id):
     return send_file(download_queue[local_id]['file_path'], as_attachment=True)
+
 
 @app.route('/delete/<path:local_id>', methods=['DELETE'])
 def delete_media(local_id):
@@ -71,20 +75,24 @@ def delete_media(local_id):
     download_queue[local_id]['item_status'] = 'Deleted'
     return jsonify(success=True)
 
+
 @app.route('/cancel/<path:local_id>', methods=['POST'])
 def cancel_item(local_id):
     download_queue[local_id]['item_status'] = 'Cancelled'
     return jsonify(success=True)
+
 
 @app.route('/retry/<path:local_id>', methods=['POST'])
 def retry_item(local_id):
     download_queue[local_id]['item_status'] = 'Waiting'
     return jsonify(success=True)
 
+
 @app.route('/download/<path:url>', methods=['POST'])
 def download_file(url):
     parse_url(url)
     return jsonify(success=True)
+
 
 @app.route('/clear', methods=['POST'])
 def clear_items():
@@ -100,6 +108,7 @@ def clear_items():
         del download_queue[key]
     return jsonify(success=True)
 
+
 @app.route('/download_queue')
 def download_queue_page():
     config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
@@ -107,9 +116,11 @@ def download_queue_page():
         config_data = json.load(config_file)
     return render_template('download_queue.html', config=config_data)
 
+
 @app.route('/')
 def index():
     return redirect(url_for('download_queue_page'))
+
 
 @app.route('/search')
 def search():
@@ -118,9 +129,11 @@ def search():
         config_data = json.load(config_file)
     return render_template('search.html', config=config_data)
 
+
 @app.route('/about')
 def about():
     return render_template('about.html')
+
 
 @app.route('/search_results')
 def search_results():
@@ -153,6 +166,7 @@ def settings():
         config_data = json.load(config_file)
     return render_template('settings.html', config=config_data, account_pool=account_pool)  # Render the settings.html file
 
+
 @app.route('/update_settings', methods=['POST'])
 def update_settings():
     data = request.json
@@ -162,6 +176,7 @@ def update_settings():
         config.set_(key, value)
         config.update()
     return jsonify(success=True)
+
 
 def main():
     fill_account_pool = FillAccountPool()
@@ -190,6 +205,7 @@ def main():
         mirrorplayback.start()
 
     app.run(debug=True)
+
 
 if __name__ == '__main__':
     main()

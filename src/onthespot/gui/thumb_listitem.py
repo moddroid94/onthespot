@@ -39,6 +39,7 @@ class LabelWithThumb(QWidget):
 
         self.setLayout(layout)
 
+
     def on_finished(self, reply: QNetworkReply):
         # This method is called when the network request is completed
         if reply.error() == QNetworkReply.NetworkError.NoError:  # Correct error checking

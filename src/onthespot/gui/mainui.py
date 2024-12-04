@@ -66,18 +66,17 @@ class QueueWorker(QObject):
 
 
 class MainWindow(QMainWindow):
+    def closeEvent(self, event):
+        if config.get('close_to_tray') and get_init_tray():
+            event.ignore()
+            self.hide()
+
 
     # Remove Later
     def contribute(self):
         if self.inp_language.currentIndex() == self.inp_language.count() - 1:
             url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
             open_item(url)
-
-
-    def closeEvent(self, event):
-        if config.get('close_to_tray') and get_init_tray():
-            event.ignore()
-            self.hide()
 
 
     def __init__(self, _dialog, start_url=''):
@@ -122,9 +121,6 @@ class MainWindow(QMainWindow):
 
         # Bind button click
         self.bind_button_inputs()
-
-        self.__users = []
-        self.last_search = None
 
         # Set application theme
         self.toggle_theme_button.clicked.connect(self.toggle_theme)
@@ -219,8 +215,6 @@ class MainWindow(QMainWindow):
 
 
     def set_table_props(self):
-        window_width = self.width()
-        logger.info(f"Setting table item properties {window_width}")
         # Sessions table
         #self.tbl_sessions.setSortingEnabled(True)
         self.tbl_sessions.horizontalHeader().setSectionsMovable(True)
@@ -305,7 +299,6 @@ class MainWindow(QMainWindow):
 
 
     def fill_account_table(self):
-
         # Clear the table
         while self.tbl_sessions.rowCount() > 0:
             self.tbl_sessions.removeRow(0)
@@ -418,7 +411,7 @@ class MainWindow(QMainWindow):
 
         rows = self.tbl_dl_progress.rowCount()
         self.tbl_dl_progress.insertRow(rows)
-        if item_metadata.get('explicit', ''):  # Check if the item is explicit
+        if item_metadata.get('explicit', ''):
             title = config.get('explicit_label', '') + ' ' + item_metadata['title']
         else:
             title = item_metadata['title']
@@ -521,34 +514,12 @@ class MainWindow(QMainWindow):
                                 "Already Exists"
                             ):
                         logger.info(f'Removing Row: {check_row} and mediaid: {local_id}')
-
-                        # Clear the widget in the last column before removing the row
-                        widget = self.tbl_dl_progress.cellWidget(check_row, 0)
-                        if widget:
-                            widget.deleteLater()  # Schedule the widget for deletion
-                        widget = self.tbl_dl_progress.cellWidget(check_row, 1)
-                        if widget:
-                            widget.deleteLater()  # Schedule the widget for deletion
-                        widget = self.tbl_dl_progress.cellWidget(check_row, 2)
-                        if widget:
-                            widget.deleteLater()  # Schedule the widget for deletion
-                        widget = self.tbl_dl_progress.cellWidget(check_row, 3)
-                        if widget:
-                            widget.deleteLater()  # Schedule the widget for deletion
-                        widget = self.tbl_dl_progress.cellWidget(check_row, 4)
-                        if widget:
-                            widget.deleteLater()  # Schedule the widget for deletion
-                        widget = self.tbl_dl_progress.cellWidget(check_row, 5)
-                        if widget:
-                            widget.deleteLater()  # Schedule the widget for deletion
-
-                        # Remove the row from the table
                         self.tbl_dl_progress.removeRow(check_row)
                         download_queue.pop(local_id)
                     else:
-                        check_row += 1  # Move to the next row
+                        check_row += 1
                 else:
-                    check_row += 1  # Move to the next row
+                    check_row += 1
 
 
     def cancel_all_downloads(self):
@@ -732,31 +703,29 @@ class MainWindow(QMainWindow):
             self.inp_search_term.setText('')
             return
 
+        def download_btn_clicked(item_name, item_url, item_service, item_type, item_id, ):
+            parsing[item_id] = {
+                'item_url': item_url,
+                'item_service': item_service,
+                'item_type': item_type,
+                'item_id': item_id
+            }
+            self.__show_popup_dialog(self.tr("{0} is being parsed and will be added to the download queue shortly.").format(f"{item_type.title()}: {item_name}"), download=True)
+
         for result in results:
             btn = QPushButton(self.tbl_search_results)
             #btn.setText(btn_text.strip())
             btn.setIcon(self.get_icon('download'))
-
-            item_url = result['item_url']
-
-            def download_btn_clicked(item_name, item_url, item_service, item_type, item_id, ):
-                parsing[item_id] = {
-                    'item_url': item_url,
-                    'item_service': item_service,
-                    'item_type': item_type,
-                    'item_id': item_id
-                }
-                self.__show_popup_dialog(self.tr("{0} is being parsed and will be added to the download queue shortly.").format(f"{item_type.title()}: {item_name}"), download=True)
-
+            btn.setMinimumHeight(30)
             btn.clicked.connect(lambda x,
                             item_name=result['item_name'],
                             item_url=result['item_url'],
                             item_type=result['item_type'],
                             item_id=result['item_id'],
                             item_service=result['item_service']:
-                            download_btn_clicked(item_name, item_url, item_service, item_type, item_id))
+                            download_btn_clicked(item_name, item_url, item_service, item_type, item_id)
+                            )
 
-            btn.setMinimumHeight(30)
             service = QTableWidgetItem(result['item_service'].title())
             service.setIcon(self.get_icon(result["item_service"]))
 

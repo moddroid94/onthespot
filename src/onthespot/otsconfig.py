@@ -17,6 +17,7 @@ def config_dir():
         else:
             return os.path.join(os.path.expanduser("~"), ".config")
 
+
 def cache_dir():
     if os.name == "nt":
         if 'TEMP' in os.environ:
@@ -223,6 +224,7 @@ class Config:
                 os.path.dirname(self.get("_log_file")), exist_ok=True
                 )
 
+
     def get(self, key, default=None):
         if key in self.__config:
             return self.__config[key]
@@ -231,12 +233,14 @@ class Config:
         else:
             return default
 
+
     def set_(self, key, value):
         if type(value) in [list, dict]:
             self.__config[key] = value.copy()
         else:
             self.__config[key] = value
         return value
+
 
     def update(self):
         os.makedirs(os.path.dirname(self.__cfg_path), exist_ok=True)
@@ -245,6 +249,7 @@ class Config:
                 self.set_(key, self.__template_data[key])
         with open(self.__cfg_path, "w") as cf:
             cf.write(json.dumps(self.__config, indent=4))
+
 
     def rollback(self):
         with open(self.__cfg_path, "w") as cf:

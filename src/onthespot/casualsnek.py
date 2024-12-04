@@ -12,7 +12,6 @@ def start_snake_game(win):
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
 
-
     while True:
         snake = [(4, 10), (4, 9), (4, 8)]
         food = (random.randint(3, win.getmaxyx()[0] - 2), random.randint(1, win.getmaxyx()[1] - 3))
@@ -65,6 +64,7 @@ def start_snake_game(win):
             elif key == ord('q'):
                 return
 
+
 def draw_borders(win):
     height, width = win.getmaxyx()
     if width < 2 or height < 2:
@@ -79,6 +79,7 @@ def draw_borders(win):
     if height > 1 and width > 2:
         win.addstr(height - 1, 0, '┗' + '━' * (width - 3) + '┛', curses.color_pair(1))
 
+
 def update_header(win, score):
     win.addstr(1, 2, f'Score: {score}', curses.A_BOLD)
     if not download_queue:
@@ -88,6 +89,7 @@ def update_header(win, score):
         item_label = f"{current_item['item_name']} by {current_item['item_by']}: {current_item['item_status']}"
 
     win.addstr(1, 15, item_label, curses.A_BOLD)
+
 
 def display_game_over(win, score):
     win.clear()
