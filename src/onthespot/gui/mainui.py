@@ -551,7 +551,7 @@ class MainWindow(QMainWindow):
             row_count = self.tbl_dl_progress.rowCount()
             while row_count > 0:
                 for local_id in download_queue.keys():
-                    logger.info(f'Trying to cancel : {local_id}')
+                    logger.info(f'Retrying : {local_id}')
                     if download_queue[local_id]['item_status'] == "Failed":
                         download_queue[local_id]['item_status'] = "Waiting"
                         download_queue[local_id]['gui']['status_label'].setText(self.tr("Waiting"))

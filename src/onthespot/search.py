@@ -30,8 +30,10 @@ def get_search_results(search_term, content_types=None):
             with open(search_term, 'r', encoding='utf-8') as sf:
                 links = sf.readlines()
                 for link in links:
-                    logger.info(f'Reading link "{link}" from file at "{search_term}"')
-                    parse_url(link)
+                    link = link.strip()
+                    if link.startswith("https://"):
+                        logger.debug(f'Parsing link from {search_term}: {link}')
+                        parse_url(link)
             return True
 
         logger.info(f"Search clicked with value term {search_term}")

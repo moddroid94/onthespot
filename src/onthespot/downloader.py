@@ -342,9 +342,9 @@ class DownloadWorker(QObject):
                             default_format = '.m4a'
                             bitrate = "256k"
 
-                except (RuntimeError):
+                except RuntimeError as e:
                     # Likely Ratelimit
-                    logger.info(f"Download failed: {item}")
+                    logger.info(f"Error {str(e)}, Download failed: {item}")
                     item['item_status'] = 'Failed'
                     if self.gui:
                         self.progress.emit(item, self.tr("Failed"), 0)
