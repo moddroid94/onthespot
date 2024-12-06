@@ -94,11 +94,9 @@ class DownloadWorker(QObject):
                 try:
                     item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
                     item_path = format_track_path(item, item_metadata)
-
-                except (Exception, KeyError):
+                except (Exception, KeyError) as e:
+                    logger.error(f"Failed to fetch metadata for '{item_id}', Error: {str(e)}\nTraceback: {traceback.format_exc()}")
                     item['item_status'] = "Failed"
-                    logger.error(
-                        f"Metadata fetching failed for track by id '{item_id}', {traceback.format_exc()}")
                     self.tr("Failed")
                     if self.gui:
                         self.progress.emit(item, self.tr("Failed"), 0)
@@ -285,8 +283,9 @@ class DownloadWorker(QObject):
 
                         try:
                             url = track_data['data'][0]['media'][0]['sources'][0]['url']
-                        except KeyError:
+                        except KeyError as e:
                             # Fallback to lowest quality
+                            logger.error(f'Unable to select Deezer quality, falling back to 128kbps. Error: {str(e)}\nTraceback: {traceback.format_exc()}')
                             song_quality = 1
                             song_format = 'MP3_128'
                             bitrate = "128k"
@@ -344,7 +343,7 @@ class DownloadWorker(QObject):
 
                 except RuntimeError as e:
                     # Likely Ratelimit
-                    logger.info(f"Error {str(e)}, Download failed: {item}")
+                    logger.info(f"Download failed: {item}, Error: {str(e)}\nTraceback: {traceback.format_exc()}")
                     item['item_status'] = 'Failed'
                     if self.gui:
                         self.progress.emit(item, self.tr("Failed"), 0)
@@ -406,7 +405,7 @@ class DownloadWorker(QObject):
                 self.readd_item_to_download_queue(item)
                 continue
             except Exception as e:
-                logger.error(f"Unknown Exception: {str(e)}")
+                logger.error(f"Unknown Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
                 item['item_status'] = "Failed"
                 if self.gui:
                     self.progress.emit(item, self.tr("Failed"), 0)

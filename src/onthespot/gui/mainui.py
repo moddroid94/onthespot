@@ -1,6 +1,7 @@
 import os
 import time
 import threading
+import traceback
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 from PyQt6 import uic, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
@@ -52,7 +53,7 @@ class QueueWorker(QObject):
                         time.sleep(0.1)
                     continue
                 except Exception as e:
-                    logger.error(f"Unknown Exception for {item}: {str(e)}")
+                    logger.error(f"Unknown Exception for {item}: {str(e)}\nTraceback: {traceback.format_exc()}")
                     with pending_lock:
                         pending[local_id] = item
             else:

@@ -4,6 +4,7 @@ import time
 import uuid
 import json
 import threading
+import traceback
 import requests
 from librespot.audio.decoders import AudioQuality
 from librespot.core import Session
@@ -11,7 +12,7 @@ from librespot.zeroconf import ZeroconfServer
 from PyQt6.QtCore import QObject
 from ..otsconfig import config, cache_dir
 from ..runtimedata import get_logger, account_pool, pending, download_queue, pending_lock
-from ..utils import make_call, conv_list_format, format_local_id
+from ..utils import make_call, conv_list_format
 
 logger = get_logger("api.spotify")
 
@@ -126,16 +127,16 @@ def spotify_new_session():
                 return False
             else:
                 # I wish there was a way to get credentials without saving to
-                # a file and parsing it as so
+                # a file and parsing it but not currently sure how.
                 try:
                     with open(session_json_path, 'r') as file:
                         zeroconf_login = json.load(file)
-                except FileNotFoundError:
-                    logger.error(f"Error: The file {session_json_path} was not found.")
-                except json.JSONDecodeError:
-                    logger.error("Error: Failed to decode JSON from the file.")
+                except FileNotFoundError as e:
+                    logger.error(f"Error: {str(e)} The file {session_json_path} was not found.\nTraceback: {traceback.format_exc()}")
+                except json.JSONDecodeError as e:
+                    logger.error(f"Error: {str(e)} Failed to decode JSON from the file.\nTraceback: {traceback.format_exc()}")
                 except Exception as e:
-                    logger.error(f"An error occurred: {e}")
+                    logger.error(f"Unknown Error: {str(e)}\nTraceback: {traceback.format_exc()}")
                 cfg_copy = config.get('accounts').copy()
                 new_user = {
                     "uuid": uuid_uniq,
@@ -170,8 +171,7 @@ def spotify_login_user(account):
                 json.dump(account['login'], file)
             logger.info(f"Login information for '{username[:4]}*******' written to {session_json_path}")
         except IOError as e:
-            logger.error(f"Error writing to file {session_json_path}: {e}")
-
+            logger.error(f"Error writing to file {session_json_path}: {str(e)}\nTraceback: {traceback.format_exc()}")
 
         config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
         # For some reason initialising session as None prevents premature application exit
@@ -197,7 +197,7 @@ def spotify_login_user(account):
         })
         return True
     except Exception as e:
-        logger.error(f"Unknown Exception: {str(e)}")
+        logger.error(f"Unknown Exception: {str(e)}\nTraceback: {traceback.format_exc()}")
         account_pool.append({
             "uuid": uuid,
             "username": username,
@@ -329,13 +329,13 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
                             minutes, seconds = divmod(int(line['startMs']) / 1000, 60)
                             lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["text"]["sentence"]["text"]}')
                         except KeyError as e:
-                            logger.debug("Invalid line, likely title, skipping..")
+                            logger.debug(f"Invalid line: {str(e)} likely title, skipping..")
 
                 else:
                     logger.info("Unsynced episode lyrics, please open a bug report.")
 
-        except (KeyError, IndexError):
-            logger.error(f'KeyError/Index Error. Failed to get lyrics for track id: {item_id}, ')
+        except (KeyError, IndexError) as e:
+            logger.error(f'KeyError/Index Error. Failed to get lyrics for {item_id}: {str(e)}\nTraceback: {traceback.format_exc()}')
 
         merged_lyrics = '\n'.join(lyrics)
 

@@ -1,7 +1,6 @@
+from PyQt6.QtCore import QThread, pyqtSignal
 from .runtimedata import get_logger, account_pool
 from .otsconfig import config
-
-from PyQt6.QtCore import QThread, pyqtSignal
 from .api.spotify import spotify_login_user, spotify_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
 from .api.deezer import deezer_login_user, deezer_get_token
