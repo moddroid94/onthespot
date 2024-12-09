@@ -579,9 +579,7 @@ def strip_metadata(item):
         if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
             command += ['-loglevel', 'error', '-hide_banner', '-nostats']
 
-        command += ['-c:a', 'copy']
-
-        command += ['-map_metadata', '-1']
+        command += ['-map', '0:a', '-map_metadata', '-1', '-c:a', 'copy']
 
         # Add output parameter at last
         command += [item['file_path']]
