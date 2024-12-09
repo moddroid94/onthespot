@@ -513,7 +513,7 @@ class MainWindow(QMainWindow):
             check_row = 0
             while check_row < self.tbl_dl_progress.rowCount():
                 local_id = self.tbl_dl_progress.item(check_row, 0).text()
-                logger.info(f'Removing Row: {check_row} and mediaid: {local_id}')
+                logger.debug(f'Removing Row: {check_row} and mediaid: {local_id}')
                 if local_id in download_queue:
                     if download_queue[local_id]['item_status'] in (
                                 "Cancelled",
@@ -521,7 +521,7 @@ class MainWindow(QMainWindow):
                                 "Downloaded",
                                 "Already Exists"
                             ):
-                        logger.info(f'Removing Row: {check_row} and mediaid: {local_id}')
+                        logger.debug(f'Removing Row: {check_row} and mediaid: {local_id}')
                         self.tbl_dl_progress.removeRow(check_row)
                         download_queue.pop(local_id)
                     else:
@@ -535,7 +535,7 @@ class MainWindow(QMainWindow):
             row_count = self.tbl_dl_progress.rowCount()
             while row_count > 0:
                 for local_id in download_queue.keys():
-                    logger.info(f'Trying to cancel : {local_id}')
+                    logger.debug(f'Trying to cancel : {local_id}')
                     if download_queue[local_id]['item_status'] == "Waiting":
                         download_queue[local_id]['item_status'] = "Cancelled"
                         download_queue[local_id]['gui']['status_label'].setText(self.tr("Cancelled"))
@@ -552,7 +552,7 @@ class MainWindow(QMainWindow):
             row_count = self.tbl_dl_progress.rowCount()
             while row_count > 0:
                 for local_id in download_queue.keys():
-                    logger.info(f'Retrying : {local_id}')
+                    logger.debug(f'Retrying : {local_id}')
                     if download_queue[local_id]['item_status'] == "Failed":
                         download_queue[local_id]['item_status'] = "Waiting"
                         download_queue[local_id]['gui']['status_label'].setText(self.tr("Waiting"))

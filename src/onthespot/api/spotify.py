@@ -262,11 +262,9 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
         lyrics = []
         try:
             if item_type == "track":
-                url = f'https://spclient.wg.spotify.com/color-lyrics/v2/track/{item_id}'
+                url = f'https://spclient.wg.spotify.com/color-lyrics/v2/track/{item_id}?format=json&market=from_token'
             elif item_type == "episode":
-                url = f"https://spclient.wg.spotify.com/transcript-read-along/v2/episode/{item_id}"
-
-            params = 'format=json&market=from_token'
+                url = f"https://spclient.wg.spotify.com/transcript-read-along/v2/episode/{item_id}?format=json&market=from_token"
 
             headers = {
             'app-platform': 'WebPlayer',
@@ -274,7 +272,7 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
             }
 
-            resp = make_call(url, headers=headers, params=params)
+            resp = make_call(url, headers=headers)
             if resp == None:
                 logger.info(f"Failed to find lyrics for {item_type}: {item_id}")
                 return None
@@ -361,16 +359,12 @@ def spotify_get_playlist_items(token, playlist_id):
     items = []
     offset = 0
     limit = 100
-    url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode'
 
     while True:
+        url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode&offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
-        params = {
-            'limit': limit,
-            'offset': offset
-            }
 
-        resp = make_call(url, headers=headers, params=params, skip_cache=True)
+        resp = make_call(url, headers=headers, skip_cache=True)
 
         offset += limit
         items.extend(resp['items'])
@@ -387,16 +381,11 @@ def spotify_get_liked_songs(token):
     limit = 50
     token = account_pool[config.get('parsing_acc_sn')]['login']['session'].tokens().get("user-library-read")
 
-    url = f'https://api.spotify.com/v1/me/tracks'
-
     while True:
+        url = f'https://api.spotify.com/v1/me/tracks?offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
-        params = {
-            'limit': limit,
-            'offset': offset
-            }
 
-        resp = make_call(url, headers=headers, params=params, skip_cache=True)
+        resp = make_call(url, headers=headers, skip_cache=True)
 
         offset += limit
         items.extend(resp['items'])
@@ -412,16 +401,12 @@ def spotify_get_your_episodes(token):
     offset = 0
     limit = 50
     token = account_pool[config.get('parsing_acc_sn')]['login']['session'].tokens().get("user-library-read")
-    url = f'https://api.spotify.com/v1/me/shows'
 
     while True:
+        url = f'https://api.spotify.com/v1/me/episodes?offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
-        params = {
-            'limit': limit,
-            'offset': offset
-            }
 
-        resp = make_call(url, headers=headers, params=params, skip_cache=True)
+        resp = make_call(url, headers=headers, skip_cache=True)
 
         offset += limit
         items.extend(resp['items'])
@@ -452,19 +437,13 @@ def spotify_get_album_tracks(token, album_id):
     songs = []
     offset = 0
     limit = 50
-    include_groups = 'album,compilation'
 
     while True:
+        url=f'https://api.spotify.com/v1/albums/{album_id}/tracks?offset={offset}&limit={limit}'
         headers = {"Authorization": f"Bearer {token}"}
-        params = {
-            'limit': limit,
-            'include_groups': include_groups,
-            'offset': offset
-            }
         resp = make_call(
-            f'https://api.spotify.com/v1/albums/{album_id}/tracks',
-            headers=headers,
-            params=params
+            url=url,
+            headers=headers
             )
 
         offset += limit
@@ -625,12 +604,12 @@ def spotify_get_track_metadata(token, item_id):
     return info
 
 
-def spotify_get_episode_metadata(token, episode_id_str):
-    logger.info(f"Get episode info for episode by id '{episode_id_str}'")
+def spotify_get_episode_metadata(token, episode_id):
+    logger.info(f"Get episode info for episode by id '{episode_id}'")
 
     headers = {"Authorization": f"Bearer {token}"}
 
-    episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id_str}", headers=headers)
+    episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id}", headers=headers)
     info = {}
 
     languages = episode_data.get('languages', '')
@@ -660,15 +639,12 @@ def spotify_get_show_episodes(token, show_id):
     limit = 50
 
     while True:
+        url = f'https://api.spotify.com/v1/shows/{show_id}/episodes?offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
-        params = {
-            'limit': limit,
-            'offset': offset
-            }
+
         resp = make_call(
-            f'https://api.spotify.com/v1/shows/{show_id}/episodes',
-            headers=headers,
-            params=params
+            url=url,
+            headers=headers
             )
 
         offset += limit

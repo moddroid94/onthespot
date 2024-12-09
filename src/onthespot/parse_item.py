@@ -187,19 +187,20 @@ def parsingworker():
                     elif current_type == "your_episodes":
                         tracks = spotify_get_your_episodes(token)
                         for index, track in enumerate(tracks):
-                            item_id = track['show']['id']
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': 'spotify',
-                                    'item_type': 'episode',
-                                    'item_id': item_id,
-                                    'parent_category': 'playlist',
-                                    'playlist_name': 'Your Episodes',
-                                    'playlist_by': 'me',
-                                    'playlist_number': str(index + 1)
-                                    }
+                            item_id = track['episode']['id']
+                            if item_id:
+                                local_id = format_local_id(item_id)
+                                with pending_lock:
+                                    pending[local_id] = {
+                                        'local_id': local_id,
+                                        'item_service': 'spotify',
+                                        'item_type': 'episode',
+                                        'item_id': item_id,
+                                        'parent_category': 'playlist',
+                                        'playlist_name': 'Your Episodes',
+                                        'playlist_by': 'me',
+                                        'playlist_number': str(index + 1)
+                                        }
                         continue
 
                 elif current_service == "soundcloud":
