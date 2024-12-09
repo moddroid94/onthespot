@@ -152,8 +152,9 @@ def parsingworker():
                         continue
 
                     elif current_type in ['show', 'audiobook']:
-                        episode_ids = spotify_get_show_episodes(token, current_id)
-                        for index, episode_id in enumerate(episode_ids):
+                        episodes = spotify_get_show_episodes(token, current_id)
+                        for index, episode in enumerate(episodes):
+                            episode_id = episode['id']
                             local_id = format_local_id(episode_id)
                             with pending_lock:
                                 pending[local_id] = {

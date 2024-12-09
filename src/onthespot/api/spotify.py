@@ -312,15 +312,15 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
                     digit=""
                 lyrics.append(f'[length:{digit}{round((l_ms/1000)/60)}:{round((l_ms/1000)%60)}]\n')
 
+            default_length = len(lyrics)
+
             if item_type == "track":
                 if resp["lyrics"]["syncType"] == "LINE_SYNCED":
                     for line in resp["lyrics"]["lines"]:
                         minutes, seconds = divmod(int(line['startTimeMs']) / 1000, 60)
                         lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["words"]}')
-                else:
-                    # It's un synced lyrics, if not forcing synced lyrics return it
-                    if not config.get("only_synced_lyrics"):
-                        lyrics = [line['words'][0]['string'] for line in resp['lines']]
+                elif resp["lyrics"]["syncType"] == "UNSYNCED" and not config.get("only_synced_lyrics"):
+                    lyrics = [line['words'] for line in resp['lyrics']['lines']]
 
             elif item_type == "episode":
                 if resp["timeSyncedStatus"] == "SYLLABLE_SYNCED":
@@ -330,7 +330,6 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
                             lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["text"]["sentence"]["text"]}')
                         except KeyError as e:
                             logger.debug(f"Invalid line: {str(e)} likely title, skipping..")
-
                 else:
                     logger.info("Unsynced episode lyrics, please open a bug report.")
 
@@ -340,8 +339,8 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
         merged_lyrics = '\n'.join(lyrics)
 
         if lyrics:
-            logger.info(lyrics)
-            if len(lyrics) <= 2:
+            logger.debug(lyrics)
+            if len(lyrics) <= default_length:
                 return False
             if config.get('use_lrc_file'):
                 with open(filepath + '.lrc', 'w', encoding='utf-8') as f:
@@ -654,19 +653,27 @@ def spotify_get_episode_metadata(token, episode_id_str):
     return info
 
 
-def spotify_get_show_episodes(token, show_id_str):
-    logger.info(f"Get episodes for show by id '{show_id_str}'")
+def spotify_get_show_episodes(token, show_id):
+    logger.info(f"Get episodes for show by id '{show_id}'")
     episodes = []
     offset = 0
     limit = 50
+
     while True:
         headers = {'Authorization': f'Bearer {token}'}
-        params = {'limit': limit, 'offset': offset}
-        resp = make_call(f'https://api.spotify.com/v1/shows/{show_id_str}/episodes', headers=headers, params=params)
-        offset += limit
-        for episode in resp["items"]:
-            episodes.append(episode["id"])
+        params = {
+            'limit': limit,
+            'offset': offset
+            }
+        resp = make_call(
+            f'https://api.spotify.com/v1/shows/{show_id}/episodes',
+            headers=headers,
+            params=params
+            )
 
-        if len(resp['items']) < limit:
+        offset += limit
+        episodes.extend(resp['items'])
+
+        if resp['total'] <= offset:
             break
     return episodes
