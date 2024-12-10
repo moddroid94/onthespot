@@ -613,8 +613,8 @@ def spotify_get_episode_metadata(token, episode_id):
             break
 
     copyrights = []
-    for i in range(len(episode_data.get('show', {}).get('copyrights', {}))):
-        text = episode_data.get('show', {}).get('copyrights', {}).get(i, {}).get('text', '')
+    for copyright in episode_data.get('show', {}).get('copyrights', []):
+        text = copyright.get('text', '')
         copyrights.append(text)
 
     info = {}
