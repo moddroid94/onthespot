@@ -441,10 +441,7 @@ def spotify_get_album_tracks(token, album_id):
     while True:
         url=f'https://api.spotify.com/v1/albums/{album_id}/tracks?offset={offset}&limit={limit}'
         headers = {"Authorization": f"Bearer {token}"}
-        resp = make_call(
-            url=url,
-            headers=headers
-            )
+        resp = make_call(url, headers=headers)
 
         offset += limit
         songs.extend(resp['items'])
@@ -558,9 +555,7 @@ def spotify_get_track_metadata(token, item_id):
     info['track_number'] = track_data.get('tracks', [{}])[0].get('track_number', '')
     info['total_tracks'] = track_data.get('tracks', [{}])[0].get('album', {}).get('total_tracks', '')
     info['disc_number'] = track_data.get('tracks', [{}])[0].get('disc_number', '')
-
     info['total_discs'] = sorted([trk.get('disc_number', 0) for trk in album_data.get('tracks', {}).get('items', [])])[-1] if 'tracks' in album_data else 1
-
     info['genre'] = conv_list_format(artist_data.get('genres', []))
     info['performers'] = conv_list_format([item for item in credits.get('performers', []) if isinstance(item, str)])
     info['producers'] = conv_list_format([item for item in credits.get('producers', []) if isinstance(item, str)])
@@ -589,6 +584,7 @@ def spotify_get_track_metadata(token, item_id):
         10: "A♯/B♭",
         11: "B"
     }
+
     if track_audio_data is not None:
         info['bpm'] = str(track_audio_data.get('tempo', ''))
         info['key'] = str(key_mapping.get(track_audio_data.get('key', ''), ''))
@@ -606,28 +602,39 @@ def spotify_get_track_metadata(token, item_id):
 
 def spotify_get_episode_metadata(token, episode_id):
     logger.info(f"Get episode info for episode by id '{episode_id}'")
-
     headers = {"Authorization": f"Bearer {token}"}
-
     episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id}", headers=headers)
+    show_data = spotify_get_show_episodes(token, episode_data.get('show', {}).get('id', ''))
+
+    track_number = ''
+    for index, episode in enumerate(show_data):
+        if episode['id'] == episode_id:
+            track_number = index + 1
+            break
+
+    copyrights = []
+    for i in range(len(episode_data.get('show', {}).get('copyrights', {}))):
+        text = episode_data.get('show', {}).get('copyrights', {}).get(i, {}).get('text', '')
+        copyrights.append(text)
+
     info = {}
-
-    languages = episode_data.get('languages', '')
-
     info['album_name'] = episode_data.get("show", {}).get("name", "")
     info['title'] = episode_data.get('name', "")
     info['image_url'] = episode_data.get('images', [{}])[0].get('url', "")
     info['release_year'] = episode_data.get('release_date', "")
-    info['total_tracks'] = episode_data.get('show', {}).get('total_episodes', 0)
+    info['track_number'] = track_number
+    # Not accurate
+    #info['total_tracks'] = episode_data.get('show', {}).get('total_episodes', 0)
+    info['total_tracks'] = len([episode for episode in show_data if episode is not None])
     info['artists'] = conv_list_format([episode_data.get('show', {}).get('publisher', "")])
     info['album_artists'] = conv_list_format([episode_data.get('show', {}).get('publisher', "")])
-    info['language'] = conv_list_format(languages)
-    info['description'] = str(episode_data.get('description', "") if episode_data.get('description', "") != "" else "")
-    info['copyright'] = conv_list_format(episode_data.get('show', {}).get('copyrights', ''))
+    info['language'] = conv_list_format(episode_data.get('languages', []))
+    info['description'] = str(episode_data.get('description', ""))
+    info['copyright'] = conv_list_format(copyrights)
     info['length'] = str(episode_data.get('duration_ms', ''))
     info['explicit'] = episode_data.get('explicit', '')
     info['is_playable'] = episode_data.get('is_playable', '')
-    info['item_url'] = episode_data.get('show', {}).get('external_urls', {}).get('spotify', '')
+    info['item_url'] = episode_data.get('external_urls', {}).get('spotify', '')
 
     return info
 
@@ -641,11 +648,7 @@ def spotify_get_show_episodes(token, show_id):
     while True:
         url = f'https://api.spotify.com/v1/shows/{show_id}/episodes?offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
-
-        resp = make_call(
-            url=url,
-            headers=headers
-            )
+        resp = make_call(url, headers=headers)
 
         offset += limit
         episodes.extend(resp['items'])
