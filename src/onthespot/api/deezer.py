@@ -87,7 +87,6 @@ def deezer_get_track_metadata(token, item_id):
         artists.append(artist['name'])
 
     info = {}
-
     info['title'] = track_data.get('title', '')
     info['isrc'] = track_data.get('isrc', '')
     info['item_url'] = track_data.get('link', '')
