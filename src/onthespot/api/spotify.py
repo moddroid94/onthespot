@@ -638,6 +638,7 @@ def spotify_get_episode_metadata(token, episode_id):
     info['explicit'] = episode_data.get('explicit', '')
     info['is_playable'] = episode_data.get('is_playable', '')
     info['item_url'] = episode_data.get('external_urls', {}).get('spotify', '')
+    info['item_id'] = episode_data.get('id', '')
 
     return info
 

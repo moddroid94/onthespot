@@ -291,5 +291,6 @@ def soundcloud_get_track_metadata(token, item_id):
     info['explicit'] = publisher_metadata.get('explicit', False) if publisher_metadata else False
     info['copyright'] = copyright_data
     info['is_playable'] = track_data.get('streamable', '')
+    info['item_id'] = track_data.get('id', '')
 
     return info

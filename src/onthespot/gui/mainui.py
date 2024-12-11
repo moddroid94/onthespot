@@ -17,6 +17,7 @@ from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify
 from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_add_account
 from ..api.deezer import deezer_get_track_metadata, deezer_add_account
 from ..api.youtube import youtube_get_track_metadata, youtube_add_account
+from ..api.bandcamp import bandcamp_get_track_metadata, bandcamp_add_account
 from ..accounts import get_account_token, FillAccountPool
 from ..search import get_search_results
 from ..downloader import DownloadWorker
@@ -587,8 +588,22 @@ class MainWindow(QMainWindow):
 
 
     def set_login_fields(self):
-        # Deezer
+        # Bandcamp
         if self.inp_login_service.currentIndex() == 0:
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.hide()
+            self.inp_login_password.hide()
+            self.btn_login_add.clicked.disconnect()
+            self.btn_login_add.show()
+            self.btn_login_add.setText(self.tr("Add Public Account"))
+            self.btn_login_add.clicked.connect(lambda:
+                (self.__show_popup_dialog(self.tr("Public account added, please restart the app.\nLogging into personal accounts is currently unsupported, if you have any premium purchases please consider lending it to the dev team.")) or True) and
+                bandcamp_add_account()
+                )
+
+        # Deezer
+        elif self.inp_login_service.currentIndex() == 1:
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.show()
@@ -604,7 +619,7 @@ class MainWindow(QMainWindow):
                 )
 
         # Soundcloud
-        elif self.inp_login_service.currentIndex() == 1:
+        elif self.inp_login_service.currentIndex() == 2:
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
@@ -624,7 +639,7 @@ class MainWindow(QMainWindow):
                 )
 
         # Spotify
-        elif self.inp_login_service.currentIndex() == 2:
+        elif self.inp_login_service.currentIndex() == 3:
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
@@ -639,7 +654,7 @@ class MainWindow(QMainWindow):
             self.btn_login_add.clicked.connect(self.add_spotify_account)
 
         # Youtube
-        elif self.inp_login_service.currentIndex() == 3:
+        elif self.inp_login_service.currentIndex() == 4:
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()

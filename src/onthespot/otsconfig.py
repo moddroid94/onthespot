@@ -146,6 +146,11 @@ class Config:
                     "uuid": "public_youtube",
                     "service": "youtube",
                     "active": True,
+                },
+                {
+                    "uuid": "public_bandcamp",
+                    "service": "bandcamp",
+                    "active": True,
                 }
             ] # Saved account information
         }

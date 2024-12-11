@@ -1,16 +1,16 @@
 import re
 import time
-from .otsconfig import config
-from .api.spotify import spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
-from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
-from .runtimedata import get_logger, parsing, download_queue, pending, account_pool, parsing_lock, pending_lock
+from .runtimedata import get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
 from .accounts import get_account_token
+from .api.bandcamp import bandcamp_get_album_data, bandcamp_get_artist_albums
 from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deezer_get_playlist_data, deezer_get_artist_albums
+from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
+from .api.spotify import spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
 from .utils import format_local_id
 
 logger = get_logger('parse_item')
-
-DEEZER_URL_REGEX = re.compile(r'https://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
+BANDCAMP_URL_REGEX = re.compile(r'https://[a-z0-9-]+\.bandcamp\.com(?:/(?P<type>track|album|music)/[a-z0-9-]+)?')
+DEEZER_URL_REGEX = re.compile(r'https://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<item_name>\d+)')
 SOUNDCLOUD_URL_REGEX = re.compile(r"https://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
 YOUTUBE_URL_REGEX = re.compile(r"https://(www\.|music\.)?youtube\.com/watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)(&list=(?P<list_id>[a-zA-Z0-9_-]+))?")
@@ -18,7 +18,16 @@ YOUTUBE_URL_REGEX = re.compile(r"https://(www\.|music\.)?youtube\.com/watch\?v=(
 
 
 def parse_url(url):
-    if re.match(DEEZER_URL_REGEX, url):
+    if re.match(BANDCAMP_URL_REGEX, url):
+        match = re.search(BANDCAMP_URL_REGEX, url)
+        item_id = url
+        item_service = 'bandcamp'
+        if not match.group("type") or match.group("type") == 'music':
+            item_type = 'artist'
+        else:
+            item_type = match.group("type")
+
+    elif re.match(DEEZER_URL_REGEX, url):
         match = re.search(DEEZER_URL_REGEX, url)
         item_id = match.group("id")
         item_type = match.group("type")
@@ -80,6 +89,7 @@ def parsingworker():
                 current_service = item['item_service']
                 current_type = item['item_type']
                 current_id = item['item_id']
+                current_url = item['item_url']
                 token = get_account_token(current_service)
 
                 if current_service == "spotify":
@@ -285,7 +295,7 @@ def parsingworker():
                         continue
                     elif current_type == "artist":
                         album_urls = deezer_get_artist_albums(current_id)
-                        for index, album_url in enumerate(album_urls):
+                        for album_url in enumerate(album_urls):
                             parse_url(album_url)
                         continue
 
@@ -301,6 +311,41 @@ def parsingworker():
                                 'item_id': item_id,
                                 'parent_category': 'track'
                                 }
+                        continue
+
+                elif current_service == "bandcamp":
+
+                    if current_type == "track":
+                        local_id = format_local_id(current_url)
+                        with pending_lock:
+                            pending[local_id] = {
+                                'local_id': local_id,
+                                'item_service': current_service,
+                                'item_type': current_type,
+                                'item_id': current_url,
+                                'parent_category': 'track'
+                                }
+                        continue
+
+                    if current_type == "album":
+                        album_data = bandcamp_get_album_data(current_id)
+                        for track in album_data.get('track', {}).get('itemListElement', []):
+                            item_id = track['item'].get('@id')
+                            local_id = format_local_id(item_id)
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': current_service,
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': 'album'
+                                    }
+                        continue
+
+                    if current_type == "artist":
+                        album_urls = bandcamp_get_artist_albums(current_id)
+                        for album_url in album_urls:
+                            parse_url(album_url)
                         continue
         else:
             time.sleep(0.2)

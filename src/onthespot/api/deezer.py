@@ -21,15 +21,19 @@ class ScriptExtractor(html.parser.HTMLParser):
         self.scripts = []
         self.curtag = None
 
+
     def handle_starttag(self, tag, attrs):
         self.curtag = tag.lower()
+
 
     def handle_data(self, data):
         if self.curtag == "script":
             self.scripts.append(data)
 
+
     def handle_endtag(self, tag):
         self.curtag = None
+
 
 def deezer_add_account(arl):
     cfg_copy = config.get('accounts').copy()
@@ -45,13 +49,16 @@ def deezer_add_account(arl):
     config.set_('accounts', cfg_copy)
     config.update()
 
+
 def deezer_get_album_items(album_id):
     album_data = make_call(f"{DEEZER_BASE}/album/{album_id}")
     return album_data.get("tracks", {}).get("data", '')
 
+
 def deezer_get_playlist_items(playlist_id):
     album_data = make_call(f"{DEEZER_BASE}/playlist/{playlist_id}")
     return album_data.get("tracks", {}).get("data", '')
+
 
 def deezer_get_playlist_data(playlist_id):
     playlist_data = make_call(f"{DEEZER_BASE}/playlist/{playlist_id}")
@@ -65,6 +72,7 @@ def deezer_get_artist_albums(artist_id):
     for album in album_data.get("data", ''):
         url_list.append(album.get("link", ''))
     return url_list
+
 
 def deezer_get_track_metadata(token, item_id):
     logger.info(f"Get track info for: '{item_id}'")
@@ -111,8 +119,10 @@ def deezer_get_track_metadata(token, item_id):
     info['album_name'] = track_data.get('album', {}).get('title', '')
     info['album_type'] = album_data.get('record_type', '')
     info['is_playable'] = track_data.get('readable', '')
+    info['item_id'] = track_data.get('id', '')
 
     return info
+
 
 def get_song_info_from_deezer_website(id):
     url = f"https://www.deezer.com/us/track/{id}"
@@ -134,6 +144,7 @@ def get_song_info_from_deezer_website(id):
             songs.append(DZR_APP_STATE['DATA'])
     return songs[0]
 
+
 def md5hex(data):
     """ return hex string of md5 of the given string """
     # type(data): bytes
@@ -142,10 +153,12 @@ def md5hex(data):
     h.update(data)
     return b2a_hex(h.digest())
 
+
 def hexaescrypt(data, key):
     """ returns hex string of aes encrypted data """
     c = AES.new(key.encode(), AES.MODE_ECB)
     return b2a_hex(c.encrypt(data))
+
 
 def calcbfkey(songid):
     """ Calculate the Blowfish decrypt key for a given songid """
@@ -161,6 +174,7 @@ def blowfishDecrypt(data, key):
     iv = a2b_hex("0001020304050607")
     c = Blowfish.new(key.encode(), Blowfish.MODE_CBC, iv)
     return c.decrypt(data)
+
 
 def decryptfile(data_chunks, key, fo):
     """
@@ -185,6 +199,7 @@ def decryptfile(data_chunks, key, fo):
         fo.write(data)
         i += 1
 
+
 def genurlkey(songid, md5origin, mediaver=4, fmt=1):
     """ Calculate the deezer download url given the songid, origin and media+format """
     data_concat = b'\xa4'.join(_ for _ in [md5origin.encode(),
@@ -195,6 +210,7 @@ def genurlkey(songid, md5origin, mediaver=4, fmt=1):
     if len(data) % 16 != 0:
         data += b'\0' * (16 - len(data) % 16)
     return hexaescrypt(data, "jo6aey6haid2Teih")
+
 
 def deezer_login_user(account):
     try:
@@ -265,6 +281,7 @@ def deezer_login_user(account):
 
 def deezer_get_token(parsing_index):
     return account_pool[config.get('parsing_acc_sn')]['login']['session']
+
 
 def deezer_get_search_results(token, search_term, content_types):
     params = {}

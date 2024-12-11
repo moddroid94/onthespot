@@ -5,6 +5,7 @@ from io import BytesIO
 import base64
 import json
 from hashlib import md5
+import ssl
 import requests
 from PIL import Image
 from mutagen.flac import Picture
@@ -15,6 +16,54 @@ from .otsconfig import config
 from .runtimedata import get_logger, pending, download_queue
 
 logger = get_logger("utils")
+
+class SSLAdapter(requests.adapters.HTTPAdapter):
+    def __init__(self, ssl_context, *args, **kwargs):
+        self.ssl_context = ssl_context
+        super().__init__(*args, **kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        context = self.ssl_context
+        return super().init_poolmanager(*args, ssl_context=context, **kwargs)
+
+
+def make_call(url, params=None, headers=None, skip_cache=False, text=False, use_ssl=False):
+    if not skip_cache:
+        request_key = md5(f'{url}'.encode()).hexdigest()
+        req_cache_file = os.path.join(config.get('_cache_dir'), 'reqcache', request_key + '.json')
+        os.makedirs(os.path.dirname(req_cache_file), exist_ok=True)
+        if os.path.isfile(req_cache_file):
+            logger.debug(f'URL "{url}" cache found! HASH: {request_key}')
+            try:
+                with open(req_cache_file, 'r', encoding='utf-8') as cf:
+                    if text:
+                        return cf.read()
+                    json_data = json.load(cf)
+                return json_data
+            except json.JSONDecodeError:
+                logger.error(f'URL "{url}" cache has invalid data, retrying request!')
+                pass
+        logger.debug(f'URL "{url}" has cache miss! HASH: {request_key}; Fetching data')
+
+    session = requests.Session()
+
+    if use_ssl:
+        ctx = ssl.create_default_context()
+        ctx.verify_mode = ssl.CERT_REQUIRED
+        session.mount('https://', SSLAdapter(ssl_context=ctx))
+
+    response = session.get(url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        if not skip_cache:
+            with open(req_cache_file, 'w', encoding='utf-8') as cf:
+                cf.write(response.text)
+        if text:
+            return response.text
+        return json.loads(response.text)
+    else:
+        logger.info(f"Request status error {response.status_code}")
+        return None
 
 
 def format_local_id(item_id):
@@ -75,35 +124,6 @@ def translate(string):
         return response.json()["sentences"][0]["trans"]
     except (requests.exceptions.RequestException, KeyError, IndexError):
         return string
-
-
-def make_call(url, params=None, headers=None, skip_cache=False, text=False):
-    if not skip_cache:
-        request_key = md5(f'{url}'.encode()).hexdigest()
-        req_cache_file = os.path.join(config.get('_cache_dir'), 'reqcache', request_key+'.json')
-        os.makedirs(os.path.dirname(req_cache_file), exist_ok=True)
-        if os.path.isfile(req_cache_file):
-            logger.debug(f'URL "{url}" cache found ! HASH: {request_key}')
-            try:
-                with open(req_cache_file, 'r', encoding='utf-8') as cf:
-                    if text:
-                        return cf.read()
-                    json_data = json.load(cf)
-                return json_data
-            except json.JSONDecodeError:
-                logger.error(f'URL "{url}" cache has invalid data, retring request !')
-                pass
-        logger.debug(f'URL "{url}" has cache miss ! HASH: {request_key}; Fetching data')
-    response = requests.get(url, headers=headers, params=params)
-    if response.status_code == 200:
-        if not skip_cache:
-            with open(req_cache_file, 'w', encoding='utf-8') as cf:
-                cf.write(response.text)
-        if text:
-            return response.text
-        return json.loads(response.text)
-    else:
-        logger.info(f"Request status error {response.status_code}")
 
 
 def conv_list_format(items):
@@ -256,7 +276,7 @@ def embed_metadata(item, metadata):
                     command += ['-metadata', 'disc={}/{}'.format(value, metadata['total_discs'])]
 
             elif key in ['track_number', 'tracknumber'] and config.get("embed_tracknumber"):
-                command += ['-metadata', 'track={}/{}'.format(value, metadata['total_tracks'])]
+                command += ['-metadata', 'track={}/{}'.format(value, metadata.get('total_tracks', ''))]
 
             elif key == 'genre' and config.get("embed_genre"):
                 command += ['-metadata', 'genre={}'.format(value)]

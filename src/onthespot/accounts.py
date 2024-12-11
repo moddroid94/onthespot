@@ -5,8 +5,10 @@ from .api.spotify import spotify_login_user, spotify_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
 from .api.deezer import deezer_login_user, deezer_get_token
 from .api.youtube import youtube_login_user
+from .api.bandcamp import bandcamp_login_user
 
 logger = get_logger("accounts")
+
 
 class FillAccountPool(QThread):
     finished = pyqtSignal()
@@ -24,7 +26,11 @@ class FillAccountPool(QThread):
             if not account['active']:
                 continue
 
-            if service == 'deezer':
+            if service == 'bandcamp':
+                bandcamp_login_user(account)
+                continue
+
+            elif service == 'deezer':
                 if self.gui is True:
                     self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['arl'][:30]), True)
                 try:
@@ -85,7 +91,7 @@ class FillAccountPool(QThread):
 
 
 def get_account_token(item_service):
-    if item_service == 'youtube':
+    if item_service in ('bandcamp', 'youtube'):
         return
     parsing_index = config.get('parsing_acc_sn')
     service = account_pool[parsing_index]['service']

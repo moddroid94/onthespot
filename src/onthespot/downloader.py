@@ -12,10 +12,11 @@ from yt_dlp import YoutubeDL
 from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool, temp_download_path
 from .otsconfig import config
 from .utils import format_track_path, convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
-from .api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
-from .api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
+from .api.spotify import spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
+from .api.soundcloud import soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
 from .api.youtube import youtube_get_track_metadata
+from .api.bandcamp import bandcamp_get_track_metadata
 from .accounts import get_account_token
 
 logger = get_logger("downloader")
@@ -340,6 +341,26 @@ class DownloadWorker(QObject):
 
                             default_format = '.m4a'
                             bitrate = "256k"
+
+                    elif item_service == "bandcamp":
+                        response = requests.get(item_metadata['file_url'], stream=True)
+                        total_size = int(response.headers.get('Content-Length', 0))
+                        downloaded = 0
+                        data_chunks = b''
+
+                        with open(temp_file_path, 'wb') as file:
+                            for data in response.iter_content(chunk_size=config.get("chunk_size", 1024)):
+                                if data:
+                                    downloaded += len(data)
+                                    data_chunks += data
+                                    file.write(data)
+
+                                    if total_size > 0 and downloaded != total_size:
+                                        if self.gui:
+                                            self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
+
+                        default_format = '.mp3'
+                        bitrate = "128k"
 
                 except RuntimeError as e:
                     # Likely Ratelimit

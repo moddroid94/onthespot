@@ -9,6 +9,7 @@ from .otsconfig import config_dir, config
 from .accounts import FillAccountPool, get_account_token
 from .parse_item import parsingworker, parse_url
 from .search import get_search_results
+from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, deezer_add_account
 from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata

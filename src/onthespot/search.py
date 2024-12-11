@@ -7,6 +7,7 @@ from .api.spotify import spotify_get_search_results
 from .api.soundcloud import soundcloud_get_search_results
 from .api.deezer import deezer_get_search_results
 from .api.youtube import youtube_get_search_results
+from .api.bandcamp import bandcamp_get_search_results
 
 logger = get_logger("search")
 

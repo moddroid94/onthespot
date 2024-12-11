@@ -105,5 +105,6 @@ def youtube_get_track_metadata(token, item_id):
     info['release_year'] = info_dict.get('upload_date', '')[:4]
     info['length'] = length
     info['is_playable'] = True if info_dict.get('availability') == 'public' else False
+    info['item_id'] = item_id
 
     return info
