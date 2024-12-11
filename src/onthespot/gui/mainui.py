@@ -575,11 +575,14 @@ class MainWindow(QMainWindow):
         config.update()
 
         self.tbl_sessions.removeRow(index)
-        if config.get('parsing_acc_sn') == index and len(account_pool) != 0:
+        if config.get('parsing_acc_sn') == index or config.get('parsing_acc_sn') >= len(account_pool):
             config.set_('parsing_acc_sn', 0)
             config.update()
-            self.tbl_sessions.cellWidget(0, 0).setChecked(True)
-
+            try:
+                self.tbl_sessions.cellWidget(0, 0).setChecked(True)
+            except AttributeError:
+                # Account Table is empty
+                pass
         self.__show_popup_dialog(self.tr("Account was removed successfully."))
 
 
@@ -596,7 +599,7 @@ class MainWindow(QMainWindow):
             self.inp_login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
-            self.btn_login_add.setText(self.tr("Add Public Account"))
+            self.btn_login_add.setText(self.tr("Add Bandcamp Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.\nLogging into personal accounts is currently unsupported, if you have any premium purchases please consider lending it to the dev team.")) or True) and
                 bandcamp_add_account()
@@ -607,6 +610,7 @@ class MainWindow(QMainWindow):
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.show()
+            self.inp_login_password.setPlaceholderText("Enter your deezer arl")
             self.lb_login_password.setText(self.tr("ARL"))
             self.inp_login_password.show()
             self.btn_login_add.clicked.disconnect()
@@ -632,7 +636,7 @@ class MainWindow(QMainWindow):
             #self.inp_login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
-            self.btn_login_add.setText(self.tr("Add Public Account"))
+            self.btn_login_add.setText(self.tr("Add Soundcloud Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.\nLogging into personal accounts is currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
                 soundcloud_add_account()
@@ -661,7 +665,7 @@ class MainWindow(QMainWindow):
             self.inp_login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
-            self.btn_login_add.setText(self.tr("Add Public Account"))
+            self.btn_login_add.setText(self.tr("Add Youtube Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.")) or True) and
                 youtube_add_account()

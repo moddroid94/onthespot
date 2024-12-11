@@ -133,6 +133,11 @@ class Config:
             "theme": "dark", # Light\Dark
             "accounts": [
                 {
+                    "uuid": "public_bandcamp",
+                    "service": "bandcamp",
+                    "active": True,
+                },
+                {
                     "uuid": "public_soundcloud",
                     "service": "soundcloud",
                     "active": True,
@@ -147,11 +152,6 @@ class Config:
                     "service": "youtube",
                     "active": True,
                 },
-                {
-                    "uuid": "public_bandcamp",
-                    "service": "bandcamp",
-                    "active": True,
-                }
             ] # Saved account information
         }
         if os.path.isfile(self.__cfg_path):

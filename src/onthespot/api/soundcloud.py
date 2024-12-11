@@ -63,23 +63,12 @@ def soundcloud_login_user(account):
             assert client_id_match is not None
             client_id = client_id_match.group(1)
 
-            accounts = config.get('accounts')
-            # Remove public from list
-            accounts = [account for account in accounts if account["uuid"] != "public_soundcloud"]
-
-            new_user = {
-                "uuid": "public_soundcloud",
-                "service": "soundcloud",
-                "active": True,
-                "login": {
-                    "client_id": client_id,
-                    "app_version": app_version,
-                    "app_locale": "en",
-                }
-            }
-            accounts.insert(0, new_user)
-
-            config.set_('accounts', accounts)
+            cfg_copy = config.get('accounts').copy()
+            for account in cfg_copy:
+                if account["uuid"] == "public_soundcloud":
+                    account['login']['client_id'] = client_id
+                    account['login']['app_version'] = app_version
+            config.set_('accounts', cfg_copy)
             config.update()
 
             account_pool.append({
