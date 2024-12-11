@@ -83,7 +83,7 @@ class Config:
             "enable_search_shows": True, # Enable listed category in search
             "enable_search_audiobooks": True, # Enable listed category in search
             "show_search_thumbnails": True, # Show thumbnails in search view
-            "show_download_thumbnails": True, # Show thumbnails in download view
+            "show_download_thumbnails": False, # Show thumbnails in download view
             "explicit_label": "🅴", # Explicit label in app and download path
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
             "metadata_seperator": "; ", # Seperator used for metadata fields that have multiple values

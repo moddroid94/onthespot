@@ -139,7 +139,7 @@ def bandcamp_get_track_metadata(token, url):
     info['file_url'] = track_data.get('tralbum', {}).get('trackinfo', [{}])[0].get('file', {}).get('mp3-128', '')
     info['item_id'] = track_data.get('tralbum', {}).get('current', {}).get('id', '')
     lyrics = track_data.get('tralbum', {}).get('current', {}).get('lyrics', '')
-    info['lyrics'] = lyrics if lyrics else ''
+    info['lyrics'] = lyrics if lyrics and not config.get('only_synced_lyrics') else ''
     info['genre'] = conv_list_format(album_data.get('keywords', []))
     info['image_url'] = thumbnail_url
     info['is_playable'] = True

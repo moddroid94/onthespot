@@ -420,9 +420,11 @@ def set_music_thumbnail(filename, metadata):
 
         temp_name = os.path.join(os.path.dirname(target_path), "~" + file_stem + filetype)
 
-        # Fetch thumbnail
         image_path = os.path.join(os.path.dirname(filename), 'cover')
         image_path += "." + config.get("album_cover_format")
+
+        # Fetch thumbnail
+        #if not os.path.isfile(image_path) or (parent_category == 'playlist' and config.get('use_playlist_path')):
         logger.info(f"Fetching item thumbnail")
         img = Image.open(BytesIO(requests.get(metadata['image_url']).content))
         buf = BytesIO()
