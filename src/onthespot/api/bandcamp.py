@@ -78,23 +78,25 @@ def bandcamp_get_search_results(token, search_term, content_types):
     return search_results
 
 
-def bandcamp_get_album_data(url):
+def bandcamp_get_album_track_ids(token, url):
+    logger.info(f"Getting tracks from album: {url}")
     album_webpage = make_call(url, text=True, use_ssl=True)
 
     matches = re.findall(r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>', album_webpage, re.DOTALL)
-    if matches:
-        for match in matches:
-            json_data_str = match
-            json_data_str = re.sub(r',\s*}', '}', json_data_str)  # Remove trailing commas
-            album_data = json.loads(json_data_str)
+    for match in matches:
+        json_data_str = match
+        json_data_str = re.sub(r',\s*}', '}', json_data_str)  # Remove trailing commas
+        album_data = json.loads(json_data_str)
 
-            return album_data
+        item_ids = []
+        for track in album_data.get('track', {}).get('itemListElement', []):
+            item_ids.append(track['item'].get('@id'))
+        return item_ids
 
 
 def bandcamp_get_track_metadata(token, url):
     track_webpage = make_call(url, text=True, use_ssl=True)
     track_data = {}
-
     matches = re.findall(r'data-(\w+)="(.*?)"', track_webpage)
     for match in matches:
         attribute_name, attribute_value = match
@@ -107,7 +109,12 @@ def bandcamp_get_track_metadata(token, url):
         except json.JSONDecodeError:
             track_data[attribute_name] = decoded_value
 
-    album_data = bandcamp_get_album_data(track_data['embed']['album_embed_data']['linkback'])
+    album_webpage = make_call(url, text=True, use_ssl=True)
+    matches = re.findall(r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>', album_webpage, re.DOTALL)
+    for match in matches:
+        json_data_str = match
+        json_data_str = re.sub(r',\s*}', '}', json_data_str)  # Remove trailing commas
+        album_data = json.loads(json_data_str)
 
     # Year
     year = ''
@@ -145,14 +152,15 @@ def bandcamp_get_track_metadata(token, url):
     info['is_playable'] = True
     return info
 
-def bandcamp_get_artist_albums(url):
+def bandcamp_get_artist_album_ids(token, url):
+    logger.info(f"Getting album ids for artist: '{url}'")
     root_url = re.match(r'^(https?://[^/]+)', url).group(1)
     artist_webpage = make_call(url, text=True, use_ssl=True)
 
-    album_list = []
+    album_urls = []
     matches = re.findall(r'<a\s+href=["\'](\/album[^"\']*)["\']', artist_webpage)
     for href in matches:
         full_url = f"{root_url}{href}"
-        album_list.append(full_url)
+        album_urls.append(full_url)
 
-    return album_list
+    return album_urls

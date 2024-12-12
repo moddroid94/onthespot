@@ -50,28 +50,37 @@ def deezer_add_account(arl):
     config.update()
 
 
-def deezer_get_album_items(album_id):
+def deezer_get_album_track_ids(token, album_id):
+    logger.info(f"Getting tracks from album: {album_id}")
     album_data = make_call(f"{DEEZER_BASE}/album/{album_id}")
-    return album_data.get("tracks", {}).get("data", '')
+    item_ids = []
+    for track in album_data.get("tracks", {}).get("data", ''):
+        item_ids.append(track['id'])
+    return item_ids
 
 
-def deezer_get_playlist_items(playlist_id):
+def deezer_get_artist_album_ids(token, artist_id):
+    logger.info(f"Getting album ids for artist: '{artist_id}'")
+    album_data = make_call(f"{DEEZER_BASE}/artist/{artist_id}/albums")
+    item_ids = []
+    for album in album_data.get("data", ''):
+        item_ids.append(album.get("id", ''))
+    return item_ids
+
+
+def deezer_get_playlist_track_ids(token, playlist_id):
+    logger.info(f"Getting items in playlist: '{playlist_id}'")
     album_data = make_call(f"{DEEZER_BASE}/playlist/{playlist_id}")
-    return album_data.get("tracks", {}).get("data", '')
+    item_ids = []
+    for track in album_data.get("tracks", {}).get("data", ''):
+        item_ids.append(track['id'])
+    return item_ids
 
 
-def deezer_get_playlist_data(playlist_id):
+def deezer_get_playlist_data(token, playlist_id):
+    logger.info(f"Get playlist data for playlist: '{playlist_id}'")
     playlist_data = make_call(f"{DEEZER_BASE}/playlist/{playlist_id}")
     return playlist_data.get("title", ''), playlist_data.get("creator", {}).get("name", '')
-
-
-def deezer_get_artist_albums(artist_id):
-    album_data = make_call(f"{DEEZER_BASE}/artist/{artist_id}/albums")
-
-    url_list = []
-    for album in album_data.get("data", ''):
-        url_list.append(album.get("link", ''))
-    return url_list
 
 
 def deezer_get_track_metadata(token, item_id):
@@ -278,6 +287,7 @@ def deezer_login_user(account):
             }
         })
         return False
+
 
 def deezer_get_token(parsing_index):
     return account_pool[config.get('parsing_acc_sn')]['login']['session']

@@ -243,15 +243,19 @@ def spotify_get_token(parsing_index):
     return token
 
 
-def spotify_get_artist_albums(token, artist_id):
-    logger.info(f"Get albums for artist by id '{artist_id}'")
+def spotify_get_artist_album_ids(token, artist_id):
+    logger.info(f"Getting album ids for artist: '{artist_id}'")
     headers = {"Authorization": f"Bearer {token}"}
-    resp = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', headers=headers) #%2Cappears_on%2Ccompilation
-    return [resp['items'][i]['external_urls']['spotify'] for i in range(len(resp['items']))]
+    artist_data = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', headers=headers) #%2Cappears_on%2Ccompilation
+
+    item_ids = []
+    for album in artist_data['items']:
+        item_ids.append(album['id'])
+    return item_ids
 
 
 def spotify_get_playlist_data(token, playlist_id):
-    logger.info(f"Get playlist dump for '{playlist_id}'")
+    logger.info(f"Get playlist data for playlist: {playlist_id}")
     headers = {"Authorization": f"Bearer {token}"}
     resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers, skip_cache=True)
     return resp['name'], resp['owner']['display_name']
@@ -432,9 +436,9 @@ def get_album_name(token, album_id):
             resp['total_tracks']
 
 
-def spotify_get_album_tracks(token, album_id):
-    logger.info(f"Get tracks from album by id '{album_id}'")
-    songs = []
+def spotify_get_album_track_ids(token, album_id):
+    logger.info(f"Getting tracks from album: {album_id}")
+    tracks = []
     offset = 0
     limit = 50
 
@@ -444,11 +448,15 @@ def spotify_get_album_tracks(token, album_id):
         resp = make_call(url, headers=headers)
 
         offset += limit
-        songs.extend(resp['items'])
+        tracks.extend(resp['items'])
 
         if resp['total'] <= offset:
             break
-    return songs
+
+    item_ids = []
+    for track in tracks:
+        item_ids.append(track['id'])
+    return item_ids
 
 
 def spotify_get_search_results(token, search_term, content_types):
@@ -603,14 +611,14 @@ def spotify_get_episode_metadata(token, episode_id):
     logger.info(f"Get episode info for episode by id '{episode_id}'")
     headers = {"Authorization": f"Bearer {token}"}
     episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id}", headers=headers)
-    show_data = spotify_get_show_episodes(token, episode_data.get('show', {}).get('id', ''))
+    show_episode_ids = spotify_get_show_episode_ids(token, episode_data.get('show', {}).get('id', ''))
     # I believe audiobook ids start with a 7 but to verify you can use https://api.spotify.com/v1/audiobooks/{id}
     # the endpoint could possibly be used to mark audiobooks in genre but it doesn't really provide any additional
     # metadata compared to show_data beyond abridged and unabridged.
 
     track_number = ''
-    for index, episode in enumerate(show_data):
-        if episode['id'] == episode_id:
+    for index, episode in enumerate(show_episode_ids):
+        if episode == episode_id:
             track_number = index + 1
             break
 
@@ -627,7 +635,7 @@ def spotify_get_episode_metadata(token, episode_id):
     info['track_number'] = track_number
     # Not accurate
     #info['total_tracks'] = episode_data.get('show', {}).get('total_episodes', 0)
-    info['total_tracks'] = len([episode for episode in show_data if episode])
+    info['total_tracks'] = len(show_episode_ids)
     info['artists'] = conv_list_format([episode_data.get('show', {}).get('publisher', '')])
     info['album_artists'] = conv_list_format([episode_data.get('show', {}).get('publisher', '')])
     info['language'] = conv_list_format(episode_data.get('languages', []))
@@ -643,8 +651,8 @@ def spotify_get_episode_metadata(token, episode_id):
     return info
 
 
-def spotify_get_show_episodes(token, show_id):
-    logger.info(f"Get episodes for show by id '{show_id}'")
+def spotify_get_show_episode_ids(token, show_id):
+    logger.info(f"Getting show episodes: {show_id}'")
     episodes = []
     offset = 0
     limit = 50
@@ -659,4 +667,8 @@ def spotify_get_show_episodes(token, show_id):
 
         if resp['total'] <= offset:
             break
-    return episodes
+
+    item_ids = []
+    for episode in episodes:
+        item_ids.append(episode['id'])
+    return item_ids

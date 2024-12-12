@@ -17,10 +17,10 @@ BASE_URL = "https://api.tidal.com/v1"
 
 
 def tidal_add_account_pt1():
-    data = {
-    "client_id": CLIENT_ID,
-    "scope": "r_usr+w_usr+w_sub",
-    }
+    data = {}
+
+    data["client_id"] = CLIENT_ID
+    data["scope"] = "r_usr+w_usr+w_sub"
     response = requests.post(f"{AUTH_URL}/device_authorization", data=data)
 
     if response.status_code != 200:
@@ -38,12 +38,11 @@ def tidal_add_account_pt2(device_code):
     #device_code, verification_url = tidal_add_account_pt1
     logger.info(f"Visit the following url to login: {device_code}")
     while True:
-        data = {
-            "client_id": CLIENT_ID,
-            "device_code": device_code,
-            "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-            "scope": "r_usr+w_usr+w_sub",
-        }
+        data = {}
+        data["client_id"] = CLIENT_ID
+        data["device_code"] = device_code
+        data["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code"
+        data["scope"] = "r_usr+w_usr+w_sub"
         response = requests.post(f"{AUTH_URL}/token", data=data, auth=AUTH)
 
         if response.status_code != 200:
@@ -137,14 +136,13 @@ def tidal_get_token(parsing_index):
 
 
 def tidal_get_search_results(token, search_term, content_types):
-    params = {
-        "query": search_term,
-        "limit": config.get('max_search_results'),
-        "countryCode": token['country_code'],
-    }
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}"
-    }
+    params = {}
+    params["query"] = search_term
+    params["limit"] = config.get('max_search_results')
+    params["countryCode"] = token['country_code']
+
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
 
     search_results = []
 
@@ -205,12 +203,11 @@ def tidal_get_search_results(token, search_term, content_types):
 
 
 def tidal_get_track_metadata(token, item_id):
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}",
-    }
-    params={
-        "countryCode": token['country_code']
-    }
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
+
+    params = {}
+    params["countryCode"] = token['country_code']
 
     track_data = make_call(f"{BASE_URL}/tracks/{item_id}", headers=headers, params=params)
     if not track_data:
@@ -258,13 +255,13 @@ def tidal_get_track_metadata(token, item_id):
 
 def tidal_get_lyrics(token, item_id, item_type, metadata, filepath):
     if config.get('inp_enable_lyrics'):
+        headers = {}
+        headers["Authorization"] = f"Bearer {token['access_token']}"
+
+        params = {}
+        params["countryCode"] = token['country_code']
+
         lyrics = []
-        headers = {
-            "Authorization": f"Bearer {token['access_token']}",
-        }
-        params={
-            "countryCode": token['country_code']
-        }
 
         resp = make_call(f'https://listen.tidal.com/v1/tracks/{item_id}/lyrics/', headers=headers, params=params)
         if not resp:
@@ -328,14 +325,13 @@ def tidal_get_lyrics(token, item_id, item_type, metadata, filepath):
 
 
 def tidal_get_file_url(token, item_id):
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}",
-    }
-    params = {
-        "audioquality": "LOSSLESS",  # LOW, HIGH, LOSSLESS, MQA
-        "playbackmode": "STREAM",
-        "assetpresentation": "FULL",
-    }
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
+
+    params = {}
+    params["audioquality"] = "LOSSLESS"  # LOW, HIGH, LOSSLESS, MQA
+    params["playbackmode"] = "STREAM"
+    params["assetpresentation"] = "FULL"
 
     playback_info = make_call(f"{BASE_URL}/tracks/{item_id}/playbackinfopostpaywall", params=params, headers=headers)
 
@@ -344,69 +340,66 @@ def tidal_get_file_url(token, item_id):
     return flac_url
 
 
-def tidal_get_artist_albums(token, item_id):
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}",
-    }
-    params = {
-        "countryCode": token['country_code'],
-        "limit": '10000'
-    }
+def tidal_get_artist_album_ids(token, artist_id):
+    logger.info(f"Getting album ids for artist: {artist_id}")
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
 
-    artist_albums = make_call(f"{BASE_URL}/artists/{item_id}/albums", params=params, headers=headers)
+    params = {}
+    params["countryCode"] = token['country_code']
+    params["limit"] = '10000'
+
+    artist_albums = make_call(f"{BASE_URL}/artists/{artist_id}/albums", params=params, headers=headers)
 
     item_ids = []
     for entry in artist_albums['items']:
         item_ids.append(entry['id'])
-
     return item_ids
 
 
-def tidal_get_album_items(token, item_id):
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}",
-    }
-    params = {
-        "countryCode": token['country_code'],
-        "limit": '10000'
-    }
+def tidal_get_album_track_ids(token, album_id):
+    logger.info(f"Getting tracks from album: {album_id}")
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
 
-    album_track_data = make_call(f"{BASE_URL}/albums/{item_id}/tracks", params=params, headers=headers)
+    params = {}
+    params["countryCode"] = token['country_code']
+    params["limit"] = '10000'
+
+    album_track_data = make_call(f"{BASE_URL}/albums/{album_id}/tracks", params=params, headers=headers)
 
     item_ids = []
-    for entry in album_track_data['items']:
-        item_ids.append(entry['id'])
-
+    for track in album_track_data['items']:
+        item_ids.append(track['id'])
     return item_ids
 
 
-def tidal_get_playlist_items(token, item_id):
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}",
-    }
-    params = {
-        "countryCode": token['country_code'],
-        "limit": '10000'
-    }
+def tidal_get_playlist_track_ids(token, playlist_id):
+    logger.info(f"Getting items in playlist: {playlist_id}")
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
 
-    playlist_track_data = make_call(f"{BASE_URL}/playlists/{item_id}/tracks", params=params, headers=headers)
+    params = {}
+    params["countryCode"] = token['country_code']
+    params["limit"] = '10000'
+
+    playlist_track_data = make_call(f"{BASE_URL}/playlists/{playlist_id}/tracks", params=params, headers=headers)
 
     item_ids = []
-    for entry in playlist_track_data['items']:
-        item_ids.append(entry['id'])
-
+    for track in playlist_track_data['items']:
+        item_ids.append(track['id'])
     return item_ids
 
-def tidal_get_playlist_data(token, item_id):
-    headers = {
-        "Authorization": f"Bearer {token['access_token']}",
-    }
-    params = {
-        "countryCode": token['country_code'],
-    }
+def tidal_get_playlist_data(token, playlist_id):
+    logger.info(f"Get playlist data for playlist: {playlist_id}")
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
 
-    playlist_data = make_call(f"{BASE_URL}/playlists/{item_id}", params=params, headers=headers)
-    print(playlist_data)
+    params = {}
+    params["countryCode"] = token['country_code']
+    params["limit"] = '10000'
+
+    playlist_data = make_call(f"{BASE_URL}/playlists/{playlist_id}", params=params, headers=headers)
     playlist_name = playlist_data.get('title', '')
     playlist_by = playlist_data.get('creator', {}).get('name', 'Tidal')
     return playlist_name, playlist_by

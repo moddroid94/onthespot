@@ -2,11 +2,11 @@ import re
 import time
 from .runtimedata import get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
 from .accounts import get_account_token
-from .api.bandcamp import bandcamp_get_album_data, bandcamp_get_artist_albums
-from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deezer_get_playlist_data, deezer_get_artist_albums
+from .api.bandcamp import bandcamp_get_album_track_ids, bandcamp_get_artist_album_ids
+from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_track_ids, deezer_get_playlist_data
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
-from .api.spotify import spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
-from .api.tidal import tidal_get_album_items, tidal_get_artist_albums, tidal_get_playlist_items, tidal_get_playlist_data
+from .api.spotify import spotify_get_album_track_ids, spotify_get_artist_album_ids, spotify_get_playlist_items, spotify_get_playlist_data, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_show_episode_ids
+from .api.tidal import tidal_get_album_track_ids, tidal_get_artist_album_ids, tidal_get_playlist_track_ids, tidal_get_playlist_data
 from .utils import format_local_id
 
 logger = get_logger('parse_item')
@@ -88,331 +88,164 @@ def parsingworker():
             item_id = next(iter(parsing))
             with parsing_lock:
                 item = parsing.pop(item_id)
+            logger.info(f"Parsing: {item}")
 
-            if item_id in pending or item_id in download_queue:
-                logger.info(f"Item Already Parsed: {item}")
-                continue
-            else:
-                logger.info(f"Parsing: {item}")
+            current_service = item['item_service']
+            current_type = item['item_type']
+            current_id = item['item_id']
+            current_url = item['item_url']
+            token = get_account_token(current_service)
 
-                current_service = item['item_service']
-                current_type = item['item_type']
-                current_id = item['item_id']
-                current_url = item['item_url']
-                token = get_account_token(current_service)
-
-                # In the future append ids to a list in the api file so that each
-                # service is standardized and can be parsed in a cleaner format.
-
-                if current_service == "spotify":
-                    if current_type == "track":
+            if current_service == "soundcloud":
+                if current_type in ("album", "playlist"):
+                    set_data = soundcloud_get_set_items(token, current_url)
+                    for index, track in enumerate(set_data['tracks']):
+                        item_id = track['id']
                         local_id = format_local_id(item_id)
                         with pending_lock:
                             pending[local_id] = {
                                 'local_id': local_id,
-                                'item_service': current_service,
-                                'item_type': current_type,
+                                'item_service': 'soundcloud',
+                                'item_type': 'track',
                                 'item_id': item_id,
-                                'parent_category': 'track'
-                                }
-                        continue
+                                'parent_category': 'playlist' if not set_data['is_album'] else 'album',
+                                'playlist_name': set_data['title'],
+                                'playlist_by': set_data['user']['username'],
+                                'playlist_number': str(index + 1)
+                            }
+                    continue
 
-                    elif current_type == "album":
-                        tracks = spotify_get_album_tracks(token, current_id)
-                        for index, track in enumerate(tracks):
-                            item_id = track['id']
+            if current_service == "spotify":
+                if current_type == "playlist":
+                    items = spotify_get_playlist_items(token, current_id)
+                    playlist_name, playlist_by = spotify_get_playlist_data(token, current_id)
+                    for index, item in enumerate(items):
+                        try:
+                            item_id = item['track']['id']
+                            item_type = item['track']['type']
                             local_id = format_local_id(item_id)
                             with pending_lock:
                                 pending[local_id] = {
                                     'local_id': local_id,
                                     'item_service': 'spotify',
-                                    'item_type': 'track',
+                                    'item_type': item_type,
                                     'item_id': item_id,
-                                    'parent_category': 'album'
+                                    'parent_category': 'playlist',
+                                    'playlist_name': playlist_name,
+                                    'playlist_by': playlist_by,
+                                    'playlist_number': str(index + 1)
                                     }
-                        continue
-
-                    elif current_type == "playlist":
-                        items = spotify_get_playlist_items(token, current_id)
-                        playlist_name, playlist_by = spotify_get_playlist_data(token, current_id)
-                        for index, item in enumerate(items):
-                            try:
-                                item_id = item['track']['id']
-                                item_type = item['track']['type']
-                                local_id = format_local_id(item_id)
-                                with pending_lock:
-                                    pending[local_id] = {
-                                        'local_id': local_id,
-                                        'item_service': 'spotify',
-                                        'item_type': item_type,
-                                        'item_id': item_id,
-                                        'parent_category': 'playlist',
-                                        'playlist_name': playlist_name,
-                                        'playlist_by': playlist_by,
-                                        'playlist_number': str(index + 1)
-                                        }
-                            except TypeError:
-                                logger.error(f'TypeError for {item}')
-                        continue
-
-                    elif current_type == "artist":
-                        album_urls = spotify_get_artist_albums(token, current_id)
-                        for index, album_url in enumerate(album_urls):
-                            parse_url(album_url)
-                        continue
-
-                    elif current_type == "episode":
+                        except TypeError:
+                            logger.error(f'TypeError for {item}')
+                    continue
+                elif current_type == "liked_songs":
+                    tracks = spotify_get_liked_songs(token)
+                    for index, track in enumerate(tracks):
+                        item_id = track['track']['id']
                         local_id = format_local_id(item_id)
                         with pending_lock:
                             pending[local_id] = {
                                 'local_id': local_id,
-                                'item_service': current_service,
-                                'item_type': current_type,
+                                'item_service': 'spotify',
+                                'item_type': 'track',
                                 'item_id': item_id,
-                                'parent_category': 'episode'
+                                'parent_category': 'playlist',
+                                'playlist_name': 'Liked Songs',
+                                'playlist_by': 'me',
+                                'playlist_number': str(index + 1)
                                 }
-                        continue
-
-                    elif current_type in ['show', 'audiobook']:
-                        episodes = spotify_get_show_episodes(token, current_id)
-                        for index, episode in enumerate(episodes):
-                            if episode is None:
-                                continue
-                            episode_id = episode['id']
-                            local_id = format_local_id(episode_id)
+                    continue
+                elif current_type == "your_episodes":
+                    tracks = spotify_get_your_episodes(token)
+                    for index, track in enumerate(tracks):
+                        item_id = track['episode']['id']
+                        if item_id:
+                            local_id = format_local_id(item_id)
                             with pending_lock:
                                 pending[local_id] = {
                                     'local_id': local_id,
                                     'item_service': 'spotify',
                                     'item_type': 'episode',
-                                    'item_id': episode_id,
-                                    'parent_category': current_type
-                                    }
-                        continue
-
-                    elif current_type == "liked_songs":
-                        tracks = spotify_get_liked_songs(token)
-                        for index, track in enumerate(tracks):
-                            item_id = track['track']['id']
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': 'spotify',
-                                    'item_type': 'track',
                                     'item_id': item_id,
                                     'parent_category': 'playlist',
-                                    'playlist_name': 'Liked Songs',
+                                    'playlist_name': 'Your Episodes',
                                     'playlist_by': 'me',
                                     'playlist_number': str(index + 1)
                                     }
-                        continue
+                    continue
 
-                    elif current_type == "your_episodes":
-                        tracks = spotify_get_your_episodes(token)
-                        for index, track in enumerate(tracks):
-                            item_id = track['episode']['id']
-                            if item_id:
-                                local_id = format_local_id(item_id)
-                                with pending_lock:
-                                    pending[local_id] = {
-                                        'local_id': local_id,
-                                        'item_service': 'spotify',
-                                        'item_type': 'episode',
-                                        'item_id': item_id,
-                                        'parent_category': 'playlist',
-                                        'playlist_name': 'Your Episodes',
-                                        'playlist_by': 'me',
-                                        'playlist_number': str(index + 1)
-                                        }
-                        continue
+            if current_type == "track":
+                local_id = format_local_id(item_id)
+                with pending_lock:
+                    pending[local_id] = {
+                        'local_id': local_id,
+                        'item_service': current_service,
+                        'item_type': current_type,
+                        'item_id': item_id,
+                        'parent_category': current_type
+                        }
+                continue
 
-                elif current_service == "soundcloud":
+            elif current_type in ("album", "playlist"):
+                item_ids = globals()[f"{current_service}_get_{current_type}_track_ids"](token, current_id)
 
-                    if current_type == "track":
-                        local_id = format_local_id(item_id)
-                        with pending_lock:
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': current_service,
-                                'item_type': current_type,
-                                'item_id': item_id,
-                                'parent_category': 'track'
-                                }
-                        continue
+                playlist_name = ''
+                playlist_by = ''
+                if current_type == "playlist":
+                    playlist_name, playlist_by = globals()[f"{current_service}_get_playlist_data"](token, current_id)
 
-                    if current_type in ["album", "playlist"]:
-                        # Items are added to pending in function to avoid complexity
-                        set_data = soundcloud_get_set_items(token, item['item_url'])
-                        for index, track in enumerate(set_data['tracks']):
-                            item_id = track['id']
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_url': track.get('permalink_url', ''),
-                                    'item_service': 'soundcloud',
-                                    'item_type': 'track',
-                                    'item_id': item_id,
-                                    'parent_category': 'playlist' if not set_data['is_album'] else 'album',
-                                    'playlist_name': set_data['title'],
-                                    'playlist_by': set_data['user']['username'],
-                                    'playlist_number': str(index + 1)
-                                }
+                for index, item_id in enumerate(item_ids):
+                    local_id = format_local_id(item_id)
+                    with pending_lock:
+                        pending[local_id] = {
+                            'local_id': local_id,
+                            'item_service': current_service,
+                            'item_type': 'track',
+                            'item_id': item_id,
+                            'parent_category': current_type,
+                            'playlist_name': playlist_name,
+                            'playlist_by': playlist_by,
+                            'playlist_number': str(index + 1)
+                            }
+                continue
 
-                elif current_service == "deezer":
+            elif current_type == "artist":
+                item_ids = globals()[f"{current_service}_get_artist_album_ids"](token, current_id)
+                for item_id in item_ids:
+                    local_id = format_local_id(item_id)
+                    with parsing_lock:
+                        parsing[item_id] = {
+                            'item_url': '',
+                            'item_service': current_service,
+                            'item_type': 'album',
+                            'item_id': item_id
+                        }
 
-                    if current_type == "track":
-                        local_id = format_local_id(item_id)
-                        with pending_lock:
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': current_service,
-                                'item_type': current_type,
-                                'item_id': item_id,
-                                'parent_category': 'track'
-                                }
-                        continue
-                    elif current_type == "album":
-                        tracks = deezer_get_album_items(current_id)
-                        for index, track in enumerate(tracks):
-                            item_id = track['id']
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': 'deezer',
-                                    'item_type': 'track',
-                                    'item_id': item_id,
-                                    'parent_category': 'album'
-                                    }
-                        continue
-                    elif current_type == "playlist":
-                        tracks = deezer_get_playlist_items(current_id)
-                        playlist_name, playlist_by = deezer_get_playlist_data(current_id)
-                        for index, track in enumerate(tracks):
-                            item_id = track['id']
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': 'deezer',
-                                    'item_type': 'track',
-                                    'item_id': item_id,
-                                    'parent_category': 'playlist',
-                                    'playlist_name': playlist_name,
-                                    'playlist_by': playlist_by,
-                                    'playlist_number': str(index + 1)
-                                    }
-                        continue
-                    elif current_type == "artist":
-                        album_urls = deezer_get_artist_albums(current_id)
-                        for album_url in enumerate(album_urls):
-                            parse_url(album_url)
-                        continue
+            elif current_type == "episode":
+                local_id = format_local_id(item_id)
+                with pending_lock:
+                    pending[local_id] = {
+                        'local_id': local_id,
+                        'item_service': current_service,
+                        'item_type': current_type,
+                        'item_id': item_id,
+                        'parent_category': current_service
+                        }
+                continue
 
-                elif current_service == "youtube":
+            elif current_type in ['show', 'audiobook']:
+                item_ids = spotify_get_show_episode_ids(token, current_id)
+                for item_id in item_ids:
+                    local_id = format_local_id(item_id)
+                    with pending_lock:
+                        pending[local_id] = {
+                            'local_id': local_id,
+                            'item_service': current_service,
+                            'item_type': 'episode',
+                            'item_id': item_id,
+                            'parent_category': current_type
+                            }
+                continue
 
-                    if current_type == "track":
-                        local_id = format_local_id(item_id)
-                        with pending_lock:
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': current_service,
-                                'item_type': current_type,
-                                'item_id': item_id,
-                                'parent_category': 'track'
-                                }
-                        continue
-
-                elif current_service == "bandcamp":
-
-                    if current_type == "track":
-                        local_id = format_local_id(current_url)
-                        with pending_lock:
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': current_service,
-                                'item_type': current_type,
-                                'item_id': current_url,
-                                'parent_category': 'track'
-                                }
-                        continue
-
-                    if current_type == "album":
-                        album_data = bandcamp_get_album_data(current_id)
-                        for track in album_data.get('track', {}).get('itemListElement', []):
-                            item_id = track['item'].get('@id')
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': current_service,
-                                    'item_type': 'track',
-                                    'item_id': item_id,
-                                    'parent_category': 'album'
-                                    }
-                        continue
-
-                    if current_type == "artist":
-                        album_urls = bandcamp_get_artist_albums(current_id)
-                        for album_url in album_urls:
-                            parse_url(album_url)
-                        continue
-
-                elif current_service == "tidal":
-
-                    if current_type == "track":
-                        local_id = format_local_id(current_id)
-                        with pending_lock:
-                            pending[local_id] = {
-                                'local_id': local_id,
-                                'item_service': current_service,
-                                'item_type': current_type,
-                                'item_id': current_id,
-                                'parent_category': 'track'
-                                }
-                        continue
-                    if current_type == "album":
-                        item_ids = tidal_get_album_items(token, current_id)
-                        for item_id in item_ids:
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': current_service,
-                                    'item_type': 'track',
-                                    'item_id': item_id,
-                                    'parent_category': current_type
-                                    }
-                        continue
-                    if current_type == "artist":
-                        item_ids = tidal_get_artist_albums(token, current_id)
-                        for item_id in item_ids:
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                parsing[item_id] = {
-                                    'item_url': '',
-                                    'item_service': current_service,
-                                    'item_type': 'album',
-                                    'item_id': item_id
-                                }
-                        continue
-                    elif current_type == "playlist":
-                        playlist_name, playlist_by = tidal_get_playlist_data(token, current_id)
-                        item_ids = tidal_get_playlist_items(token, current_id)
-                        for index, item_id in enumerate(item_ids):
-                            local_id = format_local_id(item_id)
-                            with pending_lock:
-                                pending[local_id] = {
-                                    'local_id': local_id,
-                                    'item_service': 'tidal',
-                                    'item_type': 'track',
-                                    'item_id': item_id,
-                                    'parent_category': 'playlist',
-                                    'playlist_name': playlist_name,
-                                    'playlist_by': playlist_by,
-                                    'playlist_number': str(index + 1)
-                                    }
         else:
             time.sleep(0.2)

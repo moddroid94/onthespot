@@ -176,6 +176,7 @@ def soundcloud_get_search_results(token, search_term, content_types):
 
 
 def soundcloud_get_set_items(token, url):
+    logger.info(f"Getting set items for {url}")
     headers = {}
     headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
 
