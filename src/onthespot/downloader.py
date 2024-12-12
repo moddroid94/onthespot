@@ -17,6 +17,7 @@ from .api.soundcloud import soundcloud_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
 from .api.youtube import youtube_get_track_metadata
 from .api.bandcamp import bandcamp_get_track_metadata
+from .api.tidal import tidal_get_track_metadata, tidal_get_lyrics, tidal_get_file_url
 from .accounts import get_account_token
 
 logger = get_logger("downloader")
@@ -130,7 +131,7 @@ class DownloadWorker(QObject):
                             logger.info('Overwriting Existing Metadata')
 
                             # Lyrics
-                            if item_service == "spotify":
+                            if item_service in ("spotify", "tidal"):
                                 item['item_status'] = 'Getting Lyrics'
                                 if self.gui:
                                     self.progress.emit(item, self.tr("Getting Lyrics"), 99)
@@ -359,8 +360,26 @@ class DownloadWorker(QObject):
                                         if self.gui:
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
 
-                        default_format = '.mp3'
-                        bitrate = "128k"
+                    elif item_service == "tidal":
+                        file_url = tidal_get_file_url(token, item_id)
+                        response = requests.get(file_url, stream=True)
+                        total_size = int(response.headers.get('Content-Length', 0))
+                        downloaded = 0
+                        data_chunks = b''
+
+                        with open(temp_file_path, 'wb') as file:
+                            for data in response.iter_content(chunk_size=config.get("chunk_size", 1024)):
+                                if data:
+                                    downloaded += len(data)
+                                    data_chunks += data
+                                    file.write(data)
+
+                                    if total_size > 0 and downloaded != total_size:
+                                        if self.gui:
+                                            self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
+
+                        default_format = '.flac'
+                        bitrate = "1411k"
 
                 except RuntimeError as e:
                     # Likely Ratelimit
@@ -372,7 +391,7 @@ class DownloadWorker(QObject):
                     continue
 
                 # Lyrics
-                if item_service == "spotify":
+                if item_service in ("spotify", "tidal"):
                     item['item_status'] = 'Getting Lyrics'
                     if self.gui:
                         self.progress.emit(item, self.tr("Getting Lyrics"), 99)

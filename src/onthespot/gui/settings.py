@@ -30,7 +30,8 @@ def load_config(self):
     self.inp_login_service.insertItem(1, self.get_icon('deezer'), "")
     self.inp_login_service.insertItem(2, self.get_icon('soundcloud'), "")
     self.inp_login_service.insertItem(3, self.get_icon('spotify'), "")
-    self.inp_login_service.insertItem(4, self.get_icon('youtube'), "")
+    self.inp_login_service.insertItem(4, self.get_icon('tidal'), "")
+    self.inp_login_service.insertItem(5, self.get_icon('youtube'), "")
     self.inp_login_service.setCurrentIndex(3)
 
     #self.btn_reset_config.setIcon(self.get_icon('trash'))

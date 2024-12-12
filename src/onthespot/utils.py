@@ -62,7 +62,7 @@ def make_call(url, params=None, headers=None, skip_cache=False, text=False, use_
             return response.text
         return json.loads(response.text)
     else:
-        logger.info(f"Request status error {response.status_code}")
+        logger.info(f"Request status error {response.status_code}: {url}")
         return None
 
 

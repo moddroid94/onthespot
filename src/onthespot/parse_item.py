@@ -6,13 +6,15 @@ from .api.bandcamp import bandcamp_get_album_data, bandcamp_get_artist_albums
 from .api.deezer import deezer_get_album_items, deezer_get_playlist_items, deezer_get_playlist_data, deezer_get_artist_albums
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .api.spotify import spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_album_tracks, spotify_get_playlist_data, spotify_get_playlist_items, spotify_get_artist_albums, spotify_get_show_episodes
+from .api.tidal import tidal_get_album_items, tidal_get_artist_albums, tidal_get_playlist_items, tidal_get_playlist_data
 from .utils import format_local_id
 
 logger = get_logger('parse_item')
 BANDCAMP_URL_REGEX = re.compile(r'https://[a-z0-9-]+\.bandcamp\.com(?:/(?P<type>track|album|music)/[a-z0-9-]+)?')
-DEEZER_URL_REGEX = re.compile(r'https://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<item_name>\d+)')
+DEEZER_URL_REGEX = re.compile(r'https://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
 SOUNDCLOUD_URL_REGEX = re.compile(r"https://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
+TIDAL_URL_REGEX = re.compile( r"https://listen.tidal.com/(?P<type>album|track|artist|playlist)/(?P<id>[a-z0-9-\-]+)" )
 YOUTUBE_URL_REGEX = re.compile(r"https://(www\.|music\.)?youtube\.com/watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)(&list=(?P<list_id>[a-zA-Z0-9_-]+))?")
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 
@@ -51,6 +53,13 @@ def parse_url(url):
         item_id = None
         item_type = 'your_episodes'
         item_service = "spotify"
+
+    elif re.match(TIDAL_URL_REGEX, url):
+        match = re.search(TIDAL_URL_REGEX, url)
+        if match:
+            item_service = 'tidal'
+            item_type = match.group('type')
+            item_id = match.group('id')
 
     elif re.match(YOUTUBE_URL_REGEX, url):
         match = re.search(YOUTUBE_URL_REGEX, url)
@@ -91,6 +100,9 @@ def parsingworker():
                 current_id = item['item_id']
                 current_url = item['item_url']
                 token = get_account_token(current_service)
+
+                # In the future append ids to a list in the api file so that each
+                # service is standardized and can be parsed in a cleaner format.
 
                 if current_service == "spotify":
                     if current_type == "track":
@@ -347,5 +359,60 @@ def parsingworker():
                         for album_url in album_urls:
                             parse_url(album_url)
                         continue
+
+                elif current_service == "tidal":
+
+                    if current_type == "track":
+                        local_id = format_local_id(current_id)
+                        with pending_lock:
+                            pending[local_id] = {
+                                'local_id': local_id,
+                                'item_service': current_service,
+                                'item_type': current_type,
+                                'item_id': current_id,
+                                'parent_category': 'track'
+                                }
+                        continue
+                    if current_type == "album":
+                        item_ids = tidal_get_album_items(token, current_id)
+                        for item_id in item_ids:
+                            local_id = format_local_id(item_id)
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': current_service,
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': current_type
+                                    }
+                        continue
+                    if current_type == "artist":
+                        item_ids = tidal_get_artist_albums(token, current_id)
+                        for item_id in item_ids:
+                            local_id = format_local_id(item_id)
+                            with pending_lock:
+                                parsing[item_id] = {
+                                    'item_url': '',
+                                    'item_service': current_service,
+                                    'item_type': 'album',
+                                    'item_id': item_id
+                                }
+                        continue
+                    elif current_type == "playlist":
+                        playlist_name, playlist_by = tidal_get_playlist_data(token, current_id)
+                        item_ids = tidal_get_playlist_items(token, current_id)
+                        for index, item_id in enumerate(item_ids):
+                            local_id = format_local_id(item_id)
+                            with pending_lock:
+                                pending[local_id] = {
+                                    'local_id': local_id,
+                                    'item_service': 'tidal',
+                                    'item_type': 'track',
+                                    'item_id': item_id,
+                                    'parent_category': 'playlist',
+                                    'playlist_name': playlist_name,
+                                    'playlist_by': playlist_by,
+                                    'playlist_number': str(index + 1)
+                                    }
         else:
             time.sleep(0.2)

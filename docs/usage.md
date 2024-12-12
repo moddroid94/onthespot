@@ -88,6 +88,8 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 | **Windows 10 Explorer Thumbnails** | Embed thumbnails in a format that respects Windows 10 explorer and media player, this is an older format of ID3 and not widely supported. |
 | **Close To Tray** | Close application to tray on exit. |
 | **Check for Updates** | Automatically check for application updates. |
+| **File Bitrate** | Set the bitrate of a converted file, default value is 320k. This setting is ignored if a lossless file format is selected. |
+| **File Hertz** | Set the hertz of a converted file, default value is 44100 |
 | **Track/Episode Format** | Select the audio format for your downloaded music or podcasts (e.g. `mp3`, `flac`, `ogg`, `m4a`). |
 | [**Track/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
 | **Use Custom Playlist Path** | Enable the use of a custom path format for playlists. |
@@ -102,8 +104,6 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 | **Download Lyrics\*** | Enable downloading of lyrics for each track/episode. *This feature requires a premium account.* |
 | **Download Synced Lyrics Only\*** | Only download synced lyrics for tracks. *This feature requires a premium account.*|
 | **Save LRC File\*** | Save lyrics in an `.lrc` file alongside the track. *This feature requires a premium account.* |
-| **File Bitrate** | Set the bitrate of a converted file, default value is 320k |
-| **File Hertz** | Set the hertz of a converted file, default value is 44100 |
 | **Rotate Active Account** | Automatically rotate between added accounts for downloading to minimize the chance of hitting rate limits. |
 | **Raw Media Download** | Downloads an unmodified file from whatever service is selected. With this enabled file conversion and the embedding of any metadata is skipped. |
 | **Download Delay** | Time (in seconds) to wait before initiating the next download. Helps prevent Spotify's rate limits. |

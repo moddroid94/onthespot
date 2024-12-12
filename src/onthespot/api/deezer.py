@@ -295,6 +295,19 @@ def deezer_get_search_results(token, search_term, content_types):
 
     search_results = []
 
+    if 'track' in content_types:
+        track_search = requests.get(track_url, params=params).json()
+        for track in track_search['data']:
+            search_results.append({
+                'item_id': track['id'],
+                'item_name': track['title'],
+                'item_by': track['artist']['name'],
+                'item_type': "track",
+                'item_service': "deezer",
+                'item_url': track['link'],
+                'item_thumbnail_url': track["album"]["cover"]
+            })
+
     if 'album' in content_types:
         album_search = requests.get(album_url, params=params).json()
         for album in album_search['data']:
@@ -307,7 +320,6 @@ def deezer_get_search_results(token, search_term, content_types):
                 'item_url': album['link'],
                 'item_thumbnail_url': album["cover"]
             })
-
 
     if 'artist' in content_types:
         artist_search = requests.get(artist_url, params=params).json()
@@ -333,19 +345,6 @@ def deezer_get_search_results(token, search_term, content_types):
                 'item_service': "deezer",
                 'item_url': playlist['link'],
                 'item_thumbnail_url': playlist["picture"]
-            })
-
-    if 'track' in content_types:
-        track_search = requests.get(track_url, params=params).json()
-        for track in track_search['data']:
-            search_results.append({
-                'item_id': track['id'],
-                'item_name': track['title'],
-                'item_by': track['artist']['name'],
-                'item_type': "track",
-                'item_service': "deezer",
-                'item_url': track['link'],
-                'item_thumbnail_url': track["album"]["cover"]
             })
 
     logger.info(search_results)

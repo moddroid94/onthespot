@@ -18,6 +18,7 @@ from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata
 from ..api.deezer import deezer_get_track_metadata, deezer_add_account
 from ..api.youtube import youtube_get_track_metadata, youtube_add_account
 from ..api.bandcamp import bandcamp_get_track_metadata, bandcamp_add_account
+from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_track_metadata
 from ..accounts import get_account_token, FillAccountPool
 from ..search import get_search_results
 from ..downloader import DownloadWorker
@@ -47,11 +48,12 @@ class QueueWorker(QObject):
                         item = pending.pop(local_id)
                     token = get_account_token(item['item_service'])
                     item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                    self.add_item_to_download_list.emit(item, item_metadata)
-                    # Padding for 'GLib-ERROR : Creating pipes for GWakeup: Too many open files Trace/breakpoint trap'
-                    # when mass downloading cached responses with download queue thumbnails enabled.
-                    if config.get('show_download_thumbnails'):
-                        time.sleep(0.1)
+                    if item_metadata:
+                        self.add_item_to_download_list.emit(item, item_metadata)
+                        # Padding for 'GLib-ERROR : Creating pipes for GWakeup: Too many open files Trace/breakpoint trap'
+                        # when mass downloading cached responses with download queue thumbnails enabled.
+                        if config.get('show_download_thumbnails'):
+                            time.sleep(0.1)
                     continue
                 except Exception as e:
                     logger.error(f"Unknown Exception for {item}: {str(e)}\nTraceback: {traceback.format_exc()}")
@@ -657,8 +659,19 @@ class MainWindow(QMainWindow):
             self.btn_login_add.setText(self.tr("Add Spotify Account"))
             self.btn_login_add.clicked.connect(self.add_spotify_account)
 
-        # Youtube
+        # Tidal
         elif self.inp_login_service.currentIndex() == 4:
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.hide()
+            self.inp_login_password.hide()
+            self.btn_login_add.clicked.disconnect()
+            self.btn_login_add.show()
+            self.btn_login_add.setText(self.tr("Add Tidal Account"))
+            self.btn_login_add.clicked.connect(self.add_tidal_account)
+
+        # Youtube
+        elif self.inp_login_service.currentIndex() == 5:
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
@@ -682,6 +695,28 @@ class MainWindow(QMainWindow):
         login_worker.daemon = True
         login_worker.start()
 
+    def add_tidal_account(self):
+        logger.info('Add spotify account clicked ')
+        self.btn_login_add.setText(self.tr("Waiting..."))
+        self.btn_login_add.setDisabled(True)
+        self.inp_login_service.setDisabled(True)
+        device_code, verification_url = tidal_add_account_pt1()
+        self.__show_popup_dialog(self.tr(f"Login Service Started head to <a style='color: #6495ed;' href='https://{verification_url}'>https://{verification_url}</a> to continue."))
+        login_worker = threading.Thread(target=self.add_tidal_account_worker, args=(device_code,))
+        login_worker.daemon = True
+        login_worker.start()
+
+    def add_tidal_account_worker(self, device_code):
+        session = tidal_add_account_pt2(device_code)
+        if session == True:
+            self.__show_popup_dialog(self.tr("Account added, please restart the app."))
+            self.btn_login_add.setText(self.tr("Please Restart The App"))
+            config.set_('parsing_acc_sn', len(account_pool))
+            config.update()
+        elif session == False:
+            self.__show_popup_dialog(self.tr("Account already exists."))
+            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.setDisabled(False)
 
     def add_spotify_account_worker(self):
         session = spotify_new_session()

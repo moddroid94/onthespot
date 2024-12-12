@@ -6,6 +6,7 @@ from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
 from .api.deezer import deezer_login_user, deezer_get_token
 from .api.youtube import youtube_login_user
 from .api.bandcamp import bandcamp_login_user
+from .api.tidal import tidal_login_user, tidal_get_token
 
 logger = get_logger("accounts")
 
@@ -56,10 +57,6 @@ class FillAccountPool(QThread):
                     if self.gui is True:
                         self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['client_id']), True)
                     continue
-                elif valid_login:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['client_id']), True)
-                    continue
                 else:
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['client_id']), True)
@@ -82,12 +79,25 @@ class FillAccountPool(QThread):
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
                     continue
 
+            elif service == 'tidal':
+                if self.gui is True:
+                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['username']), True)
+
+                valid_login = tidal_login_user(account)
+                if valid_login:
+                    if self.gui is True:
+                        self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['username']), True)
+                    continue
+                else:
+                    if self.gui is True:
+                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
+                    continue
+
             elif service == 'youtube':
                 youtube_login_user(account)
                 continue
 
         self.finished.emit()
-
 
 
 def get_account_token(item_service):

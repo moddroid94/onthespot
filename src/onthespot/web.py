@@ -12,6 +12,7 @@ from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, deezer_add_account
 from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
+from .api.tidal import tidal_get_track_metadata
 from .api.youtube import youtube_get_track_metadata
 from .downloader import DownloadWorker
 
@@ -31,24 +32,25 @@ class QueueWorker(threading.Thread):
                     item = pending.pop(local_id)
                 token = get_account_token(item['item_service'])
                 item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                with download_queue_lock:
-                    download_queue[local_id] = {
-                        'local_id': local_id,
-                        'available': True,
-                        "item_service": item["item_service"],
-                        "item_type": item["item_type"],
-                        'item_id': item['item_id'],
-                        'item_status': 'Waiting',
-                        "file_path": None,
-                        "item_name": item_metadata["title"],
-                        "item_by": item_metadata["artists"],
-                        'parent_category': item['parent_category'],
-                        'playlist_name': item.get('playlist_name', ''),
-                        'playlist_by': item.get('playlist_by', ''),
-                        'playlist_number': item.get('playlist_number', ''),
-                        'item_thumbnail': item_metadata["image_url"],
-                        'item_url': item_metadata["item_url"]
-                    }
+                if item_metadata:
+                    with download_queue_lock:
+                        download_queue[local_id] = {
+                            'local_id': local_id,
+                            'available': True,
+                            "item_service": item["item_service"],
+                            "item_type": item["item_type"],
+                            'item_id': item['item_id'],
+                            'item_status': 'Waiting',
+                            "file_path": None,
+                            "item_name": item_metadata["title"],
+                            "item_by": item_metadata["artists"],
+                            'parent_category': item['parent_category'],
+                            'playlist_name': item.get('playlist_name', ''),
+                            'playlist_by': item.get('playlist_by', ''),
+                            'playlist_number': item.get('playlist_number', ''),
+                            'item_thumbnail': item_metadata["image_url"],
+                            'item_url': item_metadata["item_url"]
+                        }
             else:
                 time.sleep(0.2)
 
