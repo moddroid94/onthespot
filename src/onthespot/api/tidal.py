@@ -285,7 +285,7 @@ def tidal_get_lyrics(token, item_id, item_type, metadata, filepath):
             elif key in ['writers'] and config.get("embed_writers"):
                 lyrics.append(f'[au:{value}]')
 
-        lyrics.append(f'[by:{resp.get("lyricsProvider", '').title()}]')
+        lyrics.append(f'[by:{resp.get("lyricsProvider", "").title()}]')
 
         if config.get("embed_length"):
             l_ms = int(metadata['length'])

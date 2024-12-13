@@ -195,7 +195,7 @@ def convert_audio_format(filename, default_format):
         if filetype == default_format:
             command += ['-c:a', 'copy']
         else:
-            command += ['-ar', f'{config.get('file_hertz')}', '-ac', '2', '-b:a', f'{config.get('file_bitrate')}']
+            command += ['-ar', f'{config.get("file_hertz")}', '-ac', '2', '-b:a', f'{config.get("file_bitrate")}']
 
         # Add user defined parameters
         for param in config.get('ffmpeg_args'):
@@ -246,7 +246,7 @@ def embed_metadata(item, metadata):
                 command += ['-metadata', 'comment={}'.format(branding)]
 
         if config.get("embed_service_id"):
-            command += ['-metadata', f'{item['item_service']}id={item['item_id']}']
+            command += ['-metadata', f'{item["item_service"]}id={item["item_id"]}']
 
         for key in metadata.keys():
             value = metadata[key]

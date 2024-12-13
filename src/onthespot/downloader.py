@@ -230,6 +230,8 @@ class DownloadWorker(QObject):
                         del stream_internal, stream.input_stream
 
                     elif item_service == "soundcloud":
+                        bitrate = "128k"
+                        default_format = ".mp3"
                         temp_file_path += default_format
                         # Don't know how to emit progress from ffmpeg
                         command = [config.get('_ffmpeg_bin_path'), "-loglevel", "error", "-i", f"{item_metadata['file_url']}", "-c", "copy", temp_file_path]
@@ -237,8 +239,6 @@ class DownloadWorker(QObject):
                             subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
                         else:
                             subprocess.check_call(command, shell=False)
-                        bitrate = "128k"
-                        default_format = ".mp3"
 
                     elif item_service == 'deezer':
                         song = get_song_info_from_deezer_website(item['item_id'])
@@ -338,7 +338,7 @@ class DownloadWorker(QObject):
                                 'progress_hooks': [progress_hook]
                             }) as video:
 
-                            video.download(f'https://www.youtube.com/watch?v={item['item_id']}')
+                            video.download(f'https://www.youtube.com/watch?v={item["item_id"]}')
                             default_format = '.m4a'
                             bitrate = "256k"
 

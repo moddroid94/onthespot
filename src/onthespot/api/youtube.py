@@ -42,7 +42,7 @@ def youtube_get_search_results(token, search_term, content_types):
     search_results = []
 
     with YoutubeDL(ydl_opts) as ytdl:
-        result = ytdl.extract_info(f"ytsearch{config.get("max_search_results")}:{search_term}", download=False)
+        result = ytdl.extract_info(f'ytsearch{config.get("max_search_results")}:{search_term}', download=False)
         for result in result['entries']:
             search_results.append({
                 'item_id': result['id'],
@@ -51,7 +51,7 @@ def youtube_get_search_results(token, search_term, content_types):
                 'item_type': "track",
                 'item_service': "youtube",
                 'item_url': result['url'],
-                'item_thumbnail_url': f'https://i.ytimg.com/vi/{result['id']}/hqdefault.jpg'
+                'item_thumbnail_url': f'https://i.ytimg.com/vi/{result["id"]}/hqdefault.jpg'
             })
 
     logger.info(search_results)
@@ -104,7 +104,7 @@ def youtube_get_track_metadata(token, item_id):
     info['item_url'] = info_dict.get('webpage_url', '')
     info['release_year'] = info_dict.get('upload_date', '')[:4]
     info['length'] = length
-    info['is_playable'] = True if info_dict.get('availability') == 'public' else False
+    info['is_playable'] = True if info_dict.get('availability', '') == 'public' else False
     info['item_id'] = item_id
 
     return info
