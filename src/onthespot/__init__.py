@@ -47,7 +47,7 @@ def main():
         config.set_("file_hertz", int(config.get("file_hertz")))
 
     # Set Application Version
-    version = "v1.0.3"
+    version = "v1.0.4"
     logger.info(f'OnTheSpot Version: {version}')
     config.set_("version", version)
 
