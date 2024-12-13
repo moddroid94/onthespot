@@ -57,6 +57,12 @@
 
                         const serviceIcon = item.item_service ? `<img src="/icons/${item.item_service}.png" style="width: 20px; height: 20px; margin-right: 5px;">` : '';
 
+                        const copyButton = `
+                            <button class="download-action-button" onclick="copyToClipboard('${item.item_url}')">
+                                <img src="icons/link.png" alt="Copy">
+                            </button>
+                        `;
+
                         const downloadButton = `
                             <button class="download-action-button" onclick="handleDownload('${item.item_url}')">
                                 <img src="icons/download.png" alt="Download">
@@ -85,7 +91,7 @@
                         row.appendChild(cell4);
 
                         const cell5 = document.createElement('td');
-                        cell5.innerHTML = downloadButton;
+                        cell5.innerHTML = `${copyButton}${downloadButton}`;
                         row.appendChild(cell5);
 
                         tableBody.appendChild(row);
@@ -96,6 +102,17 @@
 
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    console.log('Link copied to clipboard');
+                    // alert('Link copied to clipboard!');
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
         }
 
         function handleDownload(url) {

@@ -14,7 +14,7 @@ BANDCAMP_URL_REGEX = re.compile(r'https://[a-z0-9-]+\.bandcamp\.com(?:/(?P<type>
 DEEZER_URL_REGEX = re.compile(r'https://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
 SOUNDCLOUD_URL_REGEX = re.compile(r"https://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
-TIDAL_URL_REGEX = re.compile( r"https://listen.tidal.com/(?P<type>album|track|artist|playlist)/(?P<id>[a-z0-9-\-]+)" )
+TIDAL_URL_REGEX = re.compile( r"https://(www\.|listen\.)?.tidal.com/(?P<type>album|track|artist|playlist)/(?P<id>[a-z0-9-\-]+)" )
 YOUTUBE_URL_REGEX = re.compile(r"https://(www\.|music\.)?youtube\.com/watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)(&list=(?P<list_id>[a-zA-Z0-9_-]+))?")
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 
