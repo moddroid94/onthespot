@@ -1,7 +1,8 @@
 import curses
 import random
-from .runtimedata import download_queue
 from .otsconfig import config
+from .runtimedata import download_queue
+
 
 def start_snake_game(win):
     curses.curs_set(0)

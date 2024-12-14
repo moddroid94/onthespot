@@ -1,12 +1,12 @@
-import os
-import platform
-import subprocess
-from io import BytesIO
 import base64
 import json
-from hashlib import md5
-import ssl
+import os
+import platform
 import requests
+import ssl
+import subprocess
+from hashlib import md5
+from io import BytesIO
 from PIL import Image
 from mutagen.flac import Picture
 from mutagen.id3 import ID3, ID3NoHeaderError, WOAS, USLT, TCMP, COMM
@@ -16,6 +16,7 @@ from .otsconfig import config
 from .runtimedata import get_logger, pending, download_queue
 
 logger = get_logger("utils")
+
 
 class SSLAdapter(requests.adapters.HTTPAdapter):
     def __init__(self, ssl_context, *args, **kwargs):
@@ -435,78 +436,79 @@ def set_music_thumbnail(filename, metadata):
         with open(image_path, 'wb') as cover:
             cover.write(buf.read())
 
-        # I have no idea why music tag manages to display covers
-        # in file explorer but raw mutagen and ffmpeg do not.
-        if config.get('embed_cover') and config.get('windows_10_explorer_thumbnails'):
-            with open(image_path, 'rb') as image_file:
-                image_data = image_file.read()
-            tags = music_tag.load_file(filename)
-            tags['artwork'] = image_data
-            tags.save()
+        if not config.get('force_raw'):
+            # I have no idea why music tag manages to display covers
+            # in file explorer but raw mutagen and ffmpeg do not.
+            if config.get('embed_cover') and config.get('windows_10_explorer_thumbnails'):
+                with open(image_path, 'rb') as image_file:
+                    image_data = image_file.read()
+                tags = music_tag.load_file(filename)
+                tags['artwork'] = image_data
+                tags.save()
 
-        elif config.get('embed_cover') and filetype not in ('.wav', '.ogg'):
-            if os.path.isfile(temp_name):
+            elif config.get('embed_cover') and filetype not in ('.wav', '.ogg'):
+                if os.path.isfile(temp_name):
+                    os.remove(temp_name)
+
+                os.rename(filename, temp_name)
+
+                command = [config.get('_ffmpeg_bin_path'), '-i', temp_name]
+
+                # Set log level based on environment variable
+                if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
+                    command += ['-loglevel', 'error', '-hide_banner', '-nostats']
+
+                # Windows equivilant of argument list too long
+                #if filetype == '.ogg':
+                #    #with open(image_path, "rb") as image_file:
+                #    #    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+                #    #
+                #    # Argument list too long, downscale the image instead
+                #
+                #    with Image.open(image_path) as img:
+                #        new_size = (250, 250) # 250 seems to be the max
+                #        img = img.resize(new_size, Image.Resampling.LANCZOS)
+                #        with BytesIO() as output:
+                #            img.save(output, format=config.get("album_cover_format"))
+                #            output.seek(0)
+                #            base64_image = base64.b64encode(output.read()).decode('utf-8')
+                #
+                #    # METADATA_BLOCK_PICTURE is a better supported format but I don't know how to write it
+                #    command += [
+                #        "-c", "copy", "-metadata", f"coverart={base64_image}", "-metadata", f"coverartmime=image/{config.get('album_cover_format')}"
+                #        ]
+                #else:
+                command += [
+                    '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic',
+                    '-metadata:s:v', 'title=Cover', '-metadata:s:v', 'comment=Cover (front), -id3v2_version 1'
+                    ]
+
+                command += [filename]
+                logger.debug(
+                    f'Setting thumbnail with ffmpeg. Built commandline {command}'
+                    )
+                if os.name == 'nt':
+                    subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
+                else:
+                    subprocess.check_call(command, shell=False)
+
+            elif config.get('embed_cover') and filetype == '.ogg':
+                with open(image_path, 'rb') as image_file:
+                    image_data = image_file.read()
+                tags = OggVorbis(filename)
+                picture = Picture()
+                picture.data = image_data
+                picture.type = 3
+                picture.desc = "Cover"
+                picture.mime = f"image/{config.get('album_cover_format')}"
+                picture_data = picture.write()
+                encoded_data = base64.b64encode(picture_data)
+                vcomment_value = encoded_data.decode("ascii")
+                tags["metadata_block_picture"] = [vcomment_value]
+                tags.save()
+
+            if os.path.exists(temp_name):
                 os.remove(temp_name)
-
-            os.rename(filename, temp_name)
-
-            command = [config.get('_ffmpeg_bin_path'), '-i', temp_name]
-
-            # Set log level based on environment variable
-            if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
-                command += ['-loglevel', 'error', '-hide_banner', '-nostats']
-
-            # Windows equivilant of argument list too long
-            #if filetype == '.ogg':
-            #    #with open(image_path, "rb") as image_file:
-            #    #    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
-            #    #
-            #    # Argument list too long, downscale the image instead
-            #
-            #    with Image.open(image_path) as img:
-            #        new_size = (250, 250) # 250 seems to be the max
-            #        img = img.resize(new_size, Image.Resampling.LANCZOS)
-            #        with BytesIO() as output:
-            #            img.save(output, format=config.get("album_cover_format"))
-            #            output.seek(0)
-            #            base64_image = base64.b64encode(output.read()).decode('utf-8')
-            #
-            #    # METADATA_BLOCK_PICTURE is a better supported format but I don't know how to write it
-            #    command += [
-            #        "-c", "copy", "-metadata", f"coverart={base64_image}", "-metadata", f"coverartmime=image/{config.get('album_cover_format')}"
-            #        ]
-            #else:
-            command += [
-                '-i', image_path, '-map', '0:a', '-map', '1:v', '-c', 'copy', '-disposition:v:0', 'attached_pic',
-                '-metadata:s:v', 'title=Cover', '-metadata:s:v', 'comment=Cover (front), -id3v2_version 1'
-                ]
-
-            command += [filename]
-            logger.debug(
-                f'Setting thumbnail with ffmpeg. Built commandline {command}'
-                )
-            if os.name == 'nt':
-                subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
-            else:
-                subprocess.check_call(command, shell=False)
-
-        elif config.get('embed_cover') and filetype == '.ogg':
-            with open(image_path, 'rb') as image_file:
-                image_data = image_file.read()
-            tags = OggVorbis(filename)
-            picture = Picture()
-            picture.data = image_data
-            picture.type = 3
-            picture.desc = "Cover"
-            picture.mime = f"image/{config.get('album_cover_format')}"
-            picture_data = picture.write()
-            encoded_data = base64.b64encode(picture_data)
-            vcomment_value = encoded_data.decode("ascii")
-            tags["metadata_block_picture"] = [vcomment_value]
-            tags.save()
-
-        if os.path.exists(temp_name):
-            os.remove(temp_name)
 
         if not config.get('save_album_cover'):
             os.remove(image_path)

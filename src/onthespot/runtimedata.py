@@ -1,10 +1,10 @@
-import sys
-import os
-import tracemalloc
-from functools import wraps
 import linecache
 import logging
+import os
+import sys
 import threading
+import tracemalloc
+from functools import wraps
 from logging.handlers import RotatingFileHandler
 from .otsconfig import config
 

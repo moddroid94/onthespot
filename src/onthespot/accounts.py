@@ -1,12 +1,12 @@
 from PyQt6.QtCore import QThread, pyqtSignal
-from .runtimedata import get_logger, account_pool
-from .otsconfig import config
-from .api.spotify import spotify_login_user, spotify_get_token
-from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
-from .api.deezer import deezer_login_user, deezer_get_token
-from .api.youtube import youtube_login_user
 from .api.bandcamp import bandcamp_login_user
+from .api.deezer import deezer_login_user, deezer_get_token
+from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
+from .api.spotify import spotify_login_user, spotify_get_token
 from .api.tidal import tidal_login_user, tidal_get_token
+from .api.youtube import youtube_login_user
+from .otsconfig import config
+from .runtimedata import get_logger, account_pool
 
 logger = get_logger("accounts")
 

@@ -1,7 +1,7 @@
-import os
 import json
-from shutil import which
+import os
 import uuid
+from shutil import which
 
 def config_dir():
     if os.name == "nt":

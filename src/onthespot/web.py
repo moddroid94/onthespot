@@ -1,13 +1,9 @@
-import os
-import time
 import json
+import os
 import threading
-from flask import Flask, jsonify, render_template, request, send_file, redirect, url_for
-from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock
-from .otsconfig import config_dir, config
+import time
+from flask import Flask, jsonify, render_template, redirect, request, send_file, url_for
 from .accounts import FillAccountPool, get_account_token
-from .parse_item import parsingworker, parse_url
-from .search import get_search_results
 from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, deezer_add_account
 from .api.soundcloud import soundcloud_get_track_metadata
@@ -15,6 +11,10 @@ from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get
 from .api.tidal import tidal_get_track_metadata
 from .api.youtube import youtube_get_track_metadata
 from .downloader import DownloadWorker
+from .otsconfig import config_dir, config
+from .parse_item import parsingworker, parse_url
+from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock
+from .search import get_search_results
 
 logger = get_logger("web")
 app = Flask(__name__)

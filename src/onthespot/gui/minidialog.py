@@ -1,10 +1,10 @@
 import os
 import re
 from PyQt6 import uic
-from PyQt6.QtWidgets import QDialog
 from PyQt6.QtCore import Qt
-from ..runtimedata import get_logger
+from PyQt6.QtWidgets import QDialog
 from ..otsconfig import config
+from ..runtimedata import get_logger
 from ..utils import open_item
 
 logger = get_logger('gui.minidialog')

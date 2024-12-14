@@ -1,10 +1,10 @@
-import re
-import html
+from html import unescape
 import json
+import re
 import requests
-from ..utils import conv_list_format, make_call
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool
+from ..utils import conv_list_format, make_call
 
 logger = get_logger("api.bandcamp")
 
@@ -102,7 +102,7 @@ def bandcamp_get_track_metadata(token, url):
         attribute_name, attribute_value = match
 
         # Decode HTML entities (like &quot; to " and &amp; to &)
-        decoded_value = html.unescape(attribute_value)
+        decoded_value = unescape(attribute_value)
         try:
             decoded_value_json = json.loads(decoded_value)
             track_data[attribute_name] = decoded_value_json

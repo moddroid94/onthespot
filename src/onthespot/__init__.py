@@ -2,13 +2,13 @@ import os
 import sys
 import threading
 from PyQt6.QtCore import QTranslator
-from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QStyle
 from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QStyle
 from .gui.mainui import MainWindow
 from .gui.minidialog import MiniDialog
-from .runtimedata import get_logger, set_init_tray
 from .otsconfig import config
 from .parse_item import parsingworker
+from .runtimedata import get_logger, set_init_tray
 
 class TrayApp:
     def __init__(self, main_window):

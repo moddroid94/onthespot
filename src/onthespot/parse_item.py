@@ -1,12 +1,12 @@
 import re
 import time
-from .runtimedata import get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
 from .accounts import get_account_token
 from .api.bandcamp import bandcamp_get_album_track_ids, bandcamp_get_artist_album_ids
 from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_track_ids, deezer_get_playlist_data
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .api.spotify import spotify_get_album_track_ids, spotify_get_artist_album_ids, spotify_get_playlist_items, spotify_get_playlist_data, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_show_episode_ids
 from .api.tidal import tidal_get_album_track_ids, tidal_get_artist_album_ids, tidal_get_playlist_track_ids, tidal_get_playlist_data
+from .runtimedata import get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
 from .utils import format_local_id
 
 logger = get_logger('parse_item')

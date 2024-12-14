@@ -1,24 +1,24 @@
-import os
-import traceback
-import time
-import subprocess
-import threading
 import re
 import requests
+import subprocess
+import threading
+import time
+import traceback
+import os
 from PyQt6.QtCore import QObject, pyqtSignal
 from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from yt_dlp import YoutubeDL
-from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool, temp_download_path
-from .otsconfig import config
-from .utils import format_track_path, convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
-from .api.spotify import spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
-from .api.soundcloud import soundcloud_get_track_metadata
-from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
-from .api.youtube import youtube_get_track_metadata
-from .api.bandcamp import bandcamp_get_track_metadata
-from .api.tidal import tidal_get_track_metadata, tidal_get_lyrics, tidal_get_file_url
 from .accounts import get_account_token
+from .api.bandcamp import bandcamp_get_track_metadata
+from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
+from .api.soundcloud import soundcloud_get_track_metadata
+from .api.spotify import spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
+from .api.tidal import tidal_get_track_metadata, tidal_get_lyrics, tidal_get_file_url
+from .api.youtube import youtube_get_track_metadata
+from .otsconfig import config
+from .runtimedata import get_logger, download_queue, download_queue_lock, account_pool, temp_download_path
+from .utils import format_track_path, convert_audio_format, embed_metadata, set_music_thumbnail, fix_mp3_metadata, add_to_m3u_file, strip_metadata
 
 logger = get_logger("downloader")
 
@@ -139,18 +139,21 @@ class DownloadWorker(QObject):
                                 if isinstance(extra_metadata, dict):
                                     item_metadata.update(extra_metadata)
 
-                            strip_metadata(item)
-                            embed_metadata(item, item_metadata)
+                            if not config.get('force_raw'):
+                                strip_metadata(item)
+                                embed_metadata(item, item_metadata)
 
-                            # Thumbnail
-                            if config.get('save_album_cover') or config.get('embed_cover'):
-                                item['item_status'] = 'Setting Thumbnail'
-                                if self.gui:
-                                    self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
-                                set_music_thumbnail(item['file_path'], item_metadata)
+                                # Thumbnail
+                                if config.get('save_album_cover') or config.get('embed_cover'):
+                                    item['item_status'] = 'Setting Thumbnail'
+                                    if self.gui:
+                                        self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
+                                    set_music_thumbnail(item['file_path'], item_metadata)
 
-                            if os.path.splitext(item['file_path'])[1] == '.mp3':
-                                fix_mp3_metadata(item['file_path'])
+                                if os.path.splitext(item['file_path'])[1] == '.mp3':
+                                    fix_mp3_metadata(item['file_path'])
+                            else:
+                                set_music_thumbnail(file_path, item_metadata)
 
                         # M3U
                         if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
@@ -428,6 +431,8 @@ class DownloadWorker(QObject):
 
                     if os.path.splitext(file_path)[1] == '.mp3':
                         fix_mp3_metadata(file_path)
+                else:
+                    set_music_thumbnail(file_path, item_metadata)
 
                 # M3U
                 if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':

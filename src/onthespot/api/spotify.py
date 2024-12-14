@@ -1,11 +1,11 @@
+import json
 import os
 import re
-import time
-import uuid
-import json
-import threading
-import traceback
 import requests
+import threading
+import time
+import traceback
+import uuid
 from librespot.audio.decoders import AudioQuality
 from librespot.core import Session
 from librespot.zeroconf import ZeroconfServer

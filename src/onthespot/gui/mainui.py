@@ -1,27 +1,27 @@
 import os
-import time
 import threading
+import time
 import traceback
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 from PyQt6 import uic, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton, QHBoxLayout, QWidget
-from ..utils import is_latest_release, open_item
+from ..accounts import get_account_token, FillAccountPool
+from ..api.bandcamp import bandcamp_add_account, bandcamp_get_track_metadata
+from ..api.deezer import deezer_add_account, deezer_get_track_metadata
+from ..api.soundcloud import soundcloud_add_account, soundcloud_get_token, soundcloud_get_track_metadata
+from ..api.spotify import MirrorSpotifyPlayback, spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
+from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_track_metadata
+from ..api.youtube import youtube_add_account, youtube_get_track_metadata
+from ..downloader import DownloadWorker
+from ..otsconfig import config
+from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, pending, get_logger, temp_download_path
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
-from ..otsconfig import config
-from ..runtimedata import get_logger, parsing, pending, download_queue, account_pool, download_queue_lock, pending_lock, get_init_tray, temp_download_path
 from .thumb_listitem import LabelWithThumb
-from ..api.spotify import spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session, MirrorSpotifyPlayback
-from ..api.soundcloud import soundcloud_get_token, soundcloud_get_track_metadata, soundcloud_add_account
-from ..api.deezer import deezer_get_track_metadata, deezer_add_account
-from ..api.youtube import youtube_get_track_metadata, youtube_add_account
-from ..api.bandcamp import bandcamp_get_track_metadata, bandcamp_add_account
-from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_track_metadata
-from ..accounts import get_account_token, FillAccountPool
+from ..utils import is_latest_release, open_item
 from ..search import get_search_results
-from ..downloader import DownloadWorker
 
 logger = get_logger('gui.main_ui')
 

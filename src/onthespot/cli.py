@@ -1,22 +1,22 @@
-import logging
-import threading
-from cmd import Cmd
-import os
-import time
 import curses
-from .runtimedata import account_pool, pending, download_queue, download_queue_lock, pending_lock
-from .otsconfig import config_dir, config
+import logging
+import os
+import threading
+import time
+from cmd import Cmd
 from .accounts import FillAccountPool, get_account_token
-from .parse_item import parsingworker, parse_url
-from .search import get_search_results
 from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, deezer_add_account
 from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
 from .api.tidal import tidal_get_track_metadata
 from .api.youtube import youtube_get_track_metadata
-from .downloader import DownloadWorker
 from .casualsnek import start_snake_game
+from .downloader import DownloadWorker
+from .otsconfig import config_dir, config
+from .parse_item import parsingworker, parse_url
+from .runtimedata import account_pool, pending, download_queue, download_queue_lock, pending_lock
+from .search import get_search_results
 
 logging.disable(logging.CRITICAL)
 
