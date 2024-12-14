@@ -108,13 +108,16 @@ def bandcamp_get_track_metadata(token, url):
             track_data[attribute_name] = decoded_value_json
         except json.JSONDecodeError:
             track_data[attribute_name] = decoded_value
-
-    album_webpage = make_call(url, text=True, use_ssl=True)
+    try:
+        album_webpage = make_call(track_data['embed']['album_embed_data']['linkback'], text=True, use_ssl=True)
+    except Exception:
+        pass
     matches = re.findall(r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>', album_webpage, re.DOTALL)
     for match in matches:
         json_data_str = match
         json_data_str = re.sub(r',\s*}', '}', json_data_str)  # Remove trailing commas
         album_data = json.loads(json_data_str)
+        print(album_data)
 
     # Year
     year = ''

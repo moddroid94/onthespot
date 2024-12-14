@@ -16,7 +16,7 @@ from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_
 from ..api.youtube import youtube_add_account, youtube_get_track_metadata
 from ..downloader import DownloadWorker
 from ..otsconfig import config
-from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, pending, get_logger, temp_download_path
+from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, pending, pending_lock, get_logger, temp_download_path
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from .thumb_listitem import LabelWithThumb
