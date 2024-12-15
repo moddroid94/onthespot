@@ -13,7 +13,7 @@ CLIENT_SECRET = base64.b64decode("VkpLaERGcUpQcXZzUFZOQlY2dWtYVEptd2x2YnR0UDd3bE
 AUTH = (CLIENT_ID, CLIENT_SECRET)
 AUTH_URL = "https://auth.tidal.com/v1/oauth2"
 BASE_URL = "https://api.tidal.com/v1"
-#BASEV2_URL = "https://openapi.tidal.com/v2"
+BASEV2_URL = "https://openapi.tidal.com/v2"
 
 
 def tidal_add_account_pt1():
@@ -347,12 +347,13 @@ def tidal_get_artist_album_ids(token, artist_id):
 
     params = {}
     params["countryCode"] = token['country_code']
+    params["includes"] = "albums,singles"
     params["limit"] = '10000'
 
-    artist_albums = make_call(f"{BASE_URL}/artists/{artist_id}/albums", params=params, headers=headers)
+    artist_albums = make_call(f"{BASEV2_URL}/artists/{artist_id}/relationships/albums", params=params, headers=headers)
 
     item_ids = []
-    for entry in artist_albums['items']:
+    for entry in artist_albums['data']:
         item_ids.append(entry['id'])
     return item_ids
 
