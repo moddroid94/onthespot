@@ -373,6 +373,9 @@ def embed_metadata(item, metadata):
                 else:
                     command += ['-metadata', 'explicit={}'.format(value)]
 
+            elif key == 'upc' and config.get("embed_upc"):
+                command += ['-metadata', 'upc={}'.format(value)]
+
             elif key == 'time_signature' and config.get("embed_timesignature"):
                 command += ['-metadata', 'timesignature={}'.format(value)]
 

@@ -68,6 +68,7 @@ def load_config(self):
 
     # Checkboxes
     self.inp_overwrite_existing_metadata.setChecked(config.get("overwrite_existing_metadata"))
+    self.inp_embed_upc.setChecked(config.get("embed_upc"))
     self.inp_embed_service_id.setChecked(config.get("embed_service_id"))
     self.inp_windows_explorer_thumbnails.setChecked(config.get("windows_10_explorer_thumbnails"))
     self.inp_close_to_tray.setChecked(config.get("close_to_tray"))
@@ -208,6 +209,7 @@ def save_config(self):
 
     # Checkboxes: config.set_('key', bool)
     config.set_('overwrite_existing_metadata', self.inp_overwrite_existing_metadata.isChecked())
+    config.set_('embed_upc', self.inp_embed_upc.isChecked())
     config.set_('embed_service_id', self.inp_embed_service_id.isChecked())
     config.set_('windows_10_explorer_thumbnails', self.inp_windows_explorer_thumbnails.isChecked())
     config.set_('close_to_tray', self.inp_close_to_tray.isChecked())

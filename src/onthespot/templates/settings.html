@@ -278,6 +278,9 @@
         <label for="embed_compilation">Embed Compilation</label>
         <input type="checkbox" id="embed_compilation" {% if config.embed_compilation %}checked{% endif %}><br><br>
 
+        <label for="embed_upc">Embed UPC</label>
+        <input type="checkbox" id="embed_upc" {% if config.embed_upc %}checked{% endif %}><br><br>
+
         <label for="embed_service_id">Embed Service ID:</label>
         <input type="checkbox" id="embed_service_id" {% if config.embed_service_id %}checked{% endif %}><br><br>
 
@@ -390,6 +393,7 @@
             const embedLyrics = document.getElementById('embed_lyrics').checked;
             const embedExplicit = document.getElementById('embed_explicit').checked;
             const embedCompilation = document.getElementById('embed_compilation').checked;
+            const embedUpc = document.getElementById('embed_service_id').checked;
             const embedServiceId = document.getElementById('embed_service_id').checked;
             const embedTimeSignature = document.getElementById('embed_timesignature').checked;
             const embedAcousticness = document.getElementById('embed_acousticness').checked;
@@ -474,6 +478,7 @@
                 embed_lyrics: embedLyrics,
                 embed_explicit: embedExplicit,
                 embed_compilation: embedCompilation,
+                embed_upc: embedUpc,
                 embed_service_id: embedServiceId,
                 embed_timesignature: embedTimeSignature,
                 embed_acousticness: embedAcousticness,

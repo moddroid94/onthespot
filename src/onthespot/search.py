@@ -21,7 +21,7 @@ def get_search_results(search_term, content_types=None):
         logger.warning(f"Returning empty data as query is empty !")
         return False
 
-    if search_term.startswith('https://'):
+    if search_term.startswith('https://') or search_term.startswith('http://'):
         logger.info(f"Search clicked with value with url {search_term}")
         result = parse_url(search_term)
         if result is False:

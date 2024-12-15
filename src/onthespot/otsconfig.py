@@ -115,6 +115,7 @@ class Config:
             "embed_compilation": True,
             "embed_lyrics": False,
             "embed_explicit": False,
+            "embed_upc": False,
             "embed_service_id": False,
             "embed_timesignature": False,
             "embed_acousticness": False,

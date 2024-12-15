@@ -212,8 +212,9 @@ def tidal_get_track_metadata(token, item_id):
     track_data = make_call(f"{BASE_URL}/tracks/{item_id}", headers=headers, params=params)
     if not track_data:
         return
-    album_data = make_call(f"{BASE_URL}/albums/{track_data['album']['id']}", headers=headers, params=params)
-    album_track_data = make_call(f"{BASE_URL}/albums/{track_data['album']['id']}/tracks", headers=headers, params=params)
+
+    params["include"] = "items"
+    album_data = make_call(f"{BASEV2_URL}/albums/{track_data['album']['id']}", headers=headers, params=params)
 
     # Artists
     artists = []
@@ -221,8 +222,9 @@ def tidal_get_track_metadata(token, item_id):
         artists.append(artist.get('name', ''))
 
     # Track Number
-    for i, track in enumerate(album_track_data['items']):
-        if track['id'] == int(item_id):
+    track_number = None
+    for i, track in enumerate(album_data.get('included', [])):
+        if track.get('id', '') == str(item_id):
             track_number = i + 1
             break
     if not track_number:
@@ -244,10 +246,12 @@ def tidal_get_track_metadata(token, item_id):
     info['album_artists'] = track_data.get('artist', '').get('name', '')
     info['artists'] = conv_list_format(artists)
     info['album_name'] = track_data.get('album', '').get('title', '')
-    info['total_tracks'] = album_data.get('numberOfTracks', '')
-    info['total_discs'] = album_data.get('numberOfVolumes', '')
-    info['release_year'] = album_data.get('releaseDate', '').split("-")[0]
-    info['image_url'] = f'https://resources.tidal.com/images/{(track_data.get("album", "").get("cover", "") or "").replace("-", "/")}/1280x1280.jpg'
+    info['total_tracks'] = album_data.get('data', {}).get('attributes', {}).get('numberOfItems', '')
+    info['total_discs'] = album_data.get('data', {}).get('attributes', {}).get('numberOfVolumes', '')
+    info['release_year'] = album_data.get('data', {}).get('attributes', {}).get('releaseDate', '').split("-")[0]
+    info['upc'] = album_data.get('data', {}).get('attributes', {}).get('barcodeId', '')
+    info['image_url'] = album_data.get('data', {}).get('attributes', {}).get('imageLinks', {})[0].get('href', '')
+    info['album_type'] = album_data.get('data', {}).get('attributes', {}).get('type', '').lower()
     info['is_playable'] = track_data.get('streamReady', '')
 
     return info
