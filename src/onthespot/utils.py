@@ -196,7 +196,12 @@ def convert_audio_format(filename, default_format):
         if filetype == default_format:
             command += ['-c:a', 'copy']
         else:
-            command += ['-ar', f'{config.get("file_hertz")}', '-ac', '2', '-b:a', f'{config.get("file_bitrate")}']
+            command += [
+                #'-f', filetype.split('.')[1],
+                '-ac', '2',
+                '-ar', f'{config.get("file_hertz")}',
+                '-b:a', f'{config.get("file_bitrate")}'
+                ]
 
         # Add user defined parameters
         for param in config.get('ffmpeg_args'):

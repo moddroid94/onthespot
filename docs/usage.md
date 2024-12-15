@@ -88,7 +88,7 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 | **Windows 10 Explorer Thumbnails** | Embed thumbnails in a format that respects Windows 10 explorer and media player, this is an older format of ID3 and not widely supported. |
 | **Close To Tray** | Close application to tray on exit. |
 | **Check for Updates** | Automatically check for application updates. |
-| **File Bitrate** | Set the bitrate of a converted file, default value is 320k. This setting is ignored if a lossless file format is selected. |
+| **File Bitrate** | Set the bitrate of a converted file, default value is 320k. This setting is not respected by flac, wav, and m4a files. |
 | **File Hertz** | Set the hertz of a converted file, default value is 44100 |
 | **Track/Episode Format** | Select the audio format for your downloaded music or podcasts (e.g. `mp3`, `flac`, `ogg`, `m4a`). |
 | [**Track/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |

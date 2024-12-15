@@ -240,7 +240,7 @@ def tidal_get_track_metadata(token, item_id):
     info['copyright'] = track_data.get('copyright', '')
     bpm = track_data.get('bpm', '')
     info['bpm'] = bpm if bpm else ''
-    info['item_url'] = track_data.get('url', '')
+    info['item_url'] = track_data.get('url', '').replace('http://www.', 'https://')
     info['isrc'] = track_data.get('isrc', '')
     info['explicit'] = track_data.get('explicit', '')
     info['album_artists'] = track_data.get('artist', '').get('name', '')
