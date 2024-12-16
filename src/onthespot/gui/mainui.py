@@ -611,7 +611,6 @@ class MainWindow(QMainWindow):
 
         # Bandcamp
         elif self.inp_login_service.currentIndex() == 1:
-            self.inp_login_password.textChanged.disconnect()
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
@@ -628,7 +627,6 @@ class MainWindow(QMainWindow):
 
         # Deezer
         elif self.inp_login_service.currentIndex() == 2:
-            self.inp_login_password.textChanged.disconnect()
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
@@ -648,7 +646,6 @@ class MainWindow(QMainWindow):
 
         # Soundcloud
         elif self.inp_login_service.currentIndex() == 3:
-            self.inp_login_password.textChanged.disconnect()
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
@@ -678,7 +675,6 @@ class MainWindow(QMainWindow):
             self.inp_login_password.hide()
             try:
                 self.btn_login_add.clicked.disconnect()
-                self.inp_login_password.textChanged.disconnect()
             except TypeError:
                 # Default value does not have disconnect
                 pass
@@ -689,7 +685,6 @@ class MainWindow(QMainWindow):
 
         # Tidal
         elif self.inp_login_service.currentIndex() == 5:
-            self.inp_login_password.textChanged.disconnect()
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
@@ -703,7 +698,6 @@ class MainWindow(QMainWindow):
 
         # Youtube
         elif self.inp_login_service.currentIndex() == 6:
-            self.inp_login_password.textChanged.disconnect()
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
