@@ -10,6 +10,7 @@ from librespot.audio.decoders import AudioQuality, VorbisOnlyAudioQuality
 from librespot.metadata import TrackId, EpisodeId
 from yt_dlp import YoutubeDL
 from .accounts import get_account_token
+from .api.apple_music import apple_music_get_track_metadata, apple_music_get_decryption_key, apple_music_get_lyrics, apple_music_get_webplayback_info
 from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
 from .api.soundcloud import soundcloud_get_track_metadata
@@ -46,6 +47,15 @@ class DownloadWorker(QObject):
             except (KeyError):
                 # Item likely cleared from queue
                 return
+
+
+    def yt_dlp_progress_hook(self, item, d):
+        if self.gui:
+            progress = item['gui']['progress_bar'].value()
+            progress_str = re.search(r'(\d+\.\d+)%', d['_percent_str'])
+            updated_progress_value = round(float(progress_str.group(1))) - 1
+            if updated_progress_value >= progress:
+                self.progress.emit(item, self.tr("Downloading"), updated_progress_value)
 
 
     def run(self):
@@ -153,6 +163,8 @@ class DownloadWorker(QObject):
                                 if os.path.splitext(item['file_path'])[1] == '.mp3':
                                     fix_mp3_metadata(item['file_path'])
                             else:
+                                if self.gui:
+                                    self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
                                 set_music_thumbnail(file_path, item_metadata)
 
                         # M3U
@@ -190,13 +202,13 @@ class DownloadWorker(QObject):
                         # Check if selected account is the same item service and if not find one
                         parsing_index = config.get('parsing_acc_sn')
                         if account_pool[parsing_index]['service'] == item_service:
-                            account = account_pool[parsing_index]['login']['session']
+                            session = account_pool[parsing_index]['login']['session']
                         else:
                             for i in range(len(account_pool)):
                                 index = (parsing_index + i + 1) % len(account_pool)
                                 account = account_pool[index]
                                 if account['service'] == item_service:
-                                    account = account_pool[index]['login']['session']
+                                    session = account_pool[index]['login']['session']
                                     break
 
                         default_format = ".ogg"
@@ -208,19 +220,16 @@ class DownloadWorker(QObject):
 
                         quality = AudioQuality.HIGH
                         bitrate = "160k"
-                        if account.get_user_attribute("type") == "premium" and item_type == 'track':
+                        if session.get_user_attribute("type") == "premium" and item_type == 'track':
                             quality = AudioQuality.VERY_HIGH
                             bitrate = "320k"
 
-                        stream = account.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
-
+                        stream = session.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
                         total_size = stream.input_stream.size
                         downloaded = 0
-                        _CHUNK_SIZE = config.get("chunk_size")
-
                         with open(temp_file_path, 'wb') as file:
                             while downloaded < total_size:
-                                data = stream.input_stream.stream().read(_CHUNK_SIZE)
+                                data = stream.input_stream.stream().read(config.get("chunk_size"))
                                 downloaded += len(data)
                                 if len(data) != 0:
                                     file.write(data)
@@ -235,13 +244,18 @@ class DownloadWorker(QObject):
                     elif item_service == "soundcloud":
                         bitrate = "128k"
                         default_format = ".mp3"
-                        temp_file_path += default_format
-                        # Don't know how to emit progress from ffmpeg
-                        command = [config.get('_ffmpeg_bin_path'), "-loglevel", "error", "-i", f"{item_metadata['file_url']}", "-c", "copy", temp_file_path]
-                        if os.name == 'nt':
-                            subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
-                        else:
-                            subprocess.check_call(command, shell=False)
+                        progress_hook = lambda d: self.yt_dlp_progress_hook(item, d)
+                        ydl_opts = {
+                            "quiet": True,
+                            "no_warnings": True,
+                            "fixup": "never",
+                            "noprogress": True,
+                            "extract_audio": True,
+                            "outtmpl": temp_file_path,
+                            "progress_hooks": [progress_hook],
+                        }
+                        with YoutubeDL(ydl_opts) as ydl:
+                            ydl.download([item_metadata['file_url']])
 
                     elif item_service == 'deezer':
                         song = get_song_info_from_deezer_website(item['item_id'])
@@ -327,30 +341,28 @@ class DownloadWorker(QObject):
                             self.readd_item_to_download_queue(item)
 
                     elif item_service == "youtube":
-                        def yt_dlp_progress_hook(self, item, d):
-                            if self.gui:
-                                progress_str = re.search(r'(\d+\.\d+)%', d['_percent_str'])
-                                self.progress.emit(item, self.tr("Downloading"), round(float(progress_str.group(1))) - 1)
-                        progress_hook = lambda d: yt_dlp_progress_hook(self, item, d)
-
-                        with YoutubeDL({
-                                'quiet': True,
-                                'extract_audio': True,
-                                'format': 'bestaudio',
-                                'outtmpl': temp_file_path,
-                                'progress_hooks': [progress_hook]
-                            }) as video:
-
+                        default_format = '.m4a'
+                        bitrate = "256k"
+                        progress_hook = lambda d: self.yt_dlp_progress_hook(item, d)
+                        ydl_opts = {
+                            'quiet': True,
+                            "no_warnings": True,
+                            "noprogress": True,
+                            'extract_audio': True,
+                            'format': 'bestaudio',
+                            'outtmpl': temp_file_path,
+                            'progress_hooks': [progress_hook]
+                            }
+                        with YoutubeDL(ydl_opts) as video:
                             video.download(f'https://www.youtube.com/watch?v={item["item_id"]}')
-                            default_format = '.m4a'
-                            bitrate = "256k"
 
                     elif item_service == "bandcamp":
+                        default_format = '.mp3'
+                        bitrate = "128k"
                         response = requests.get(item_metadata['file_url'], stream=True)
                         total_size = int(response.headers.get('Content-Length', 0))
                         downloaded = 0
                         data_chunks = b''
-
                         with open(temp_file_path, 'wb') as file:
                             for data in response.iter_content(chunk_size=config.get("chunk_size", 1024)):
                                 if data:
@@ -361,16 +373,15 @@ class DownloadWorker(QObject):
                                     if total_size > 0 and downloaded != total_size:
                                         if self.gui:
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
-                        default_format = '.mp3'
-                        bitrate = "128k"
 
                     elif item_service == "tidal":
+                        default_format = '.flac'
+                        bitrate = "1411k"
                         file_url = tidal_get_file_url(token, item_id)
                         response = requests.get(file_url, stream=True)
                         total_size = int(response.headers.get('Content-Length', 0))
                         downloaded = 0
                         data_chunks = b''
-
                         with open(temp_file_path, 'wb') as file:
                             for data in response.iter_content(chunk_size=config.get("chunk_size", 1024)):
                                 if data:
@@ -381,8 +392,56 @@ class DownloadWorker(QObject):
                                     if total_size > 0 and downloaded != total_size:
                                         if self.gui:
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
-                        default_format = '.flac'
-                        bitrate = "1411k"
+
+                    elif item_service == "apple_music":
+                        default_format = '.m4a'
+                        bitrate = "256k"
+                        webplayback_info = apple_music_get_webplayback_info(token, item_id)
+
+                        stream_url = None
+                        for asset in webplayback_info["assets"]:
+                            if asset["flavor"] == "28:ctrp256":
+                                stream_url = asset["URL"]
+
+                        if not stream_url:
+                            logger.error(f'Apple music playback info invalid: {webplayback_info}')
+                            continue
+
+                        decryption_key = apple_music_get_decryption_key(token, stream_url, item_id)
+
+                        progress_hook = lambda d: self.yt_dlp_progress_hook(item, d)
+                        ydl_opts = {
+                            "quiet": True,
+                            "no_warnings": True,
+                            "outtmpl": temp_file_path,
+                            "allow_unplayable_formats": True,
+                            "fixup": "never",
+                            "allowed_extractors": ["generic"],
+                            "noprogress": True,
+                            "progress_hooks": [progress_hook],
+                        }
+                        with YoutubeDL(ydl_opts) as video:
+                            video.download(stream_url)
+
+                        if self.gui:
+                            self.progress.emit(item, self.tr("Decrypting"), 99)
+
+                        decrypted_temp_file_path = temp_file_path + '.m4a'
+                        subprocess.run(
+                        [
+                            config.get('_ffmpeg_bin_path'),
+                            "-loglevel", "error",
+                            "-y",
+                            "-decryption_key", decryption_key,
+                            "-i", temp_file_path,
+                            "-c", "copy",
+                            "-movflags",
+                            "+faststart",
+                            decrypted_temp_file_path
+                        ],
+                        check=True
+                        )
+                        os.rename(decrypted_temp_file_path, temp_file_path)
 
                 except RuntimeError as e:
                     # Likely Ratelimit
@@ -394,7 +453,7 @@ class DownloadWorker(QObject):
                     continue
 
                 # Lyrics
-                if item_service in ("spotify", "tidal"):
+                if item_service in ("apple_music", "spotify", "tidal"):
                     item['item_status'] = 'Getting Lyrics'
                     if self.gui:
                         self.progress.emit(item, self.tr("Getting Lyrics"), 99)
@@ -432,6 +491,8 @@ class DownloadWorker(QObject):
                     if os.path.splitext(file_path)[1] == '.mp3':
                         fix_mp3_metadata(file_path)
                 else:
+                    if self.gui:
+                        self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
                     set_music_thumbnail(file_path, item_metadata)
 
                 # M3U

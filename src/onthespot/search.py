@@ -1,5 +1,6 @@
 import os
 from .accounts import get_account_token
+from .api.apple_music import apple_music_get_search_results
 from .api.bandcamp import bandcamp_get_search_results
 from .api.deezer import deezer_get_search_results
 from .api.soundcloud import soundcloud_get_search_results
@@ -40,6 +41,6 @@ def get_search_results(search_term, content_types=None):
 
         logger.info(f"Search clicked with value term {search_term}")
         if search_term != "":
-            account_type = config.get('accounts')[config.get('parsing_acc_sn')]['service']
+            account_type = account_pool[config.get('parsing_acc_sn')]['service']
             token = get_account_token(account_type)
             return globals()[f"{account_type}_get_search_results"](token, search_term, content_types)

@@ -5,6 +5,7 @@ from ..runtimedata import get_logger, account_pool
 from ..utils import make_call, conv_list_format
 
 logger = get_logger("api.soundcloud")
+BASE_URL = 'https://api-v2.soundcloud.com'
 
 
 def soundcloud_parse_url(url, token):
@@ -16,7 +17,7 @@ def soundcloud_parse_url(url, token):
         params["app_version"] = token['app_version']
         params["app_locale"] = token['app_locale']
 
-        resp = make_call(f"https://api-v2.soundcloud.com/resolve?url={url}", headers=headers, params=params)
+        resp = make_call(f"{BASE_URL}/resolve?url={url}", headers=headers, params=params)
 
         item_id = str(resp["id"])
         item_type = resp["kind"]
@@ -140,8 +141,8 @@ def soundcloud_get_search_results(token, search_term, content_types):
     params["app_locale"] = token['app_locale']
     params["q"] = search_term
 
-    track_url = f"https://api-v2.soundcloud.com/search/tracks"
-    playlist_url = f"https://api-v2.soundcloud.com/search/playlists"
+    track_url = f"{BASE_URL}/search/tracks"
+    playlist_url = f"{BASE_URL}/search/playlists"
 
     search_results = []
 
@@ -186,7 +187,7 @@ def soundcloud_get_set_items(token, url):
     params["app_locale"] = token['app_locale']
 
     try:
-        set_data = make_call(f"https://api-v2.soundcloud.com/resolve?url={url}", headers=headers, params=params, skip_cache=True)
+        set_data = make_call(f"{BASE_URL}/resolve?url={url}", headers=headers, params=params, skip_cache=True)
         return set_data
     except (TypeError, KeyError):
         logger.info(f"Failed to parse tracks for set: {url}")
@@ -201,7 +202,7 @@ def soundcloud_get_track_metadata(token, item_id):
     params["app_version"] = token['app_version']
     params["app_locale"] = token['app_locale']
 
-    track_data = make_call(f"https://api-v2.soundcloud.com/tracks/{item_id}", headers=headers, params=params)
+    track_data = make_call(f"{BASE_URL}/tracks/{item_id}", headers=headers, params=params)
     track_file = requests.get(track_data["media"]["transcodings"][0]["url"], headers=headers, params=params).json()
     track_webpage = make_call(f"{track_data['permalink_url']}/albums", text=True)
     # Parse album webpage
@@ -209,7 +210,7 @@ def soundcloud_get_track_metadata(token, item_id):
     if start_index != -1:
         album_href = re.search(r'href="([^"]*)"', track_webpage[start_index:])
         if album_href:
-            album_data = make_call(f"https://api-v2.soundcloud.com/resolve?url=https://soundcloud.com{album_href.group(1)}", headers=headers, params=params)
+            album_data = make_call(f"{BASE_URL}/resolve?url=https://soundcloud.com{album_href.group(1)}", headers=headers, params=params)
 
     # Many soundcloud songs are missing publisher metadata, parse if exists.
 

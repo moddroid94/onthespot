@@ -1,4 +1,5 @@
 from PyQt6.QtCore import QThread, pyqtSignal
+from .api.apple_music import apple_music_login_user, apple_music_get_token
 from .api.bandcamp import bandcamp_login_user
 from .api.deezer import deezer_login_user, deezer_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
@@ -27,7 +28,22 @@ class FillAccountPool(QThread):
             if not account['active']:
                 continue
 
-            if service == 'bandcamp':
+
+            if service == 'apple_music':
+                if self.gui is True:
+                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['pltvcid']), True)
+
+                valid_login = apple_music_login_user(account)
+                if valid_login:
+                    if self.gui is True:
+                        self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['pltvcid']), True)
+                    continue
+                else:
+                    if self.gui is True:
+                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['pltvcid']), True)
+                    continue
+
+            elif service == 'bandcamp':
                 bandcamp_login_user(account)
                 continue
 

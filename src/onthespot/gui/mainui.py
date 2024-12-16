@@ -8,6 +8,7 @@ from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton, QHBoxLayout, QWidget
 from ..accounts import get_account_token, FillAccountPool
+from ..api.apple_music import apple_music_add_account, apple_music_get_track_metadata
 from ..api.bandcamp import bandcamp_add_account, bandcamp_get_track_metadata
 from ..api.deezer import deezer_add_account, deezer_get_track_metadata
 from ..api.soundcloud import soundcloud_add_account, soundcloud_get_token, soundcloud_get_track_metadata
@@ -331,7 +332,7 @@ class MainWindow(QMainWindow):
             btn.clicked.connect(self.user_table_remove_click)
             btn.setMinimumHeight(30)
 
-            service = QTableWidgetItem(str(account["service"]).title())
+            service = QTableWidgetItem(str(account["service"]).replace('_', ' ').title())
             service.setIcon(self.get_icon(account["service"]))
 
             self.tbl_sessions.insertRow(rows)
@@ -413,7 +414,7 @@ class MainWindow(QMainWindow):
             item_category = f'{item["parent_category"].title()}: {item_metadata["title"]}'
 
         item_service = item["item_service"]
-        service_label = QTableWidgetItem(str(item_service).title())
+        service_label = QTableWidgetItem(str(item_service).replace('_', ' ').title())
         service_label.setIcon(self.get_icon(item_service))
 
         status_label = QLabel(self.tbl_dl_progress)
@@ -593,14 +594,32 @@ class MainWindow(QMainWindow):
 
 
     def set_login_fields(self):
-        # Bandcamp
+        # Apple Music
         if self.inp_login_service.currentIndex() == 0:
+            self.inp_login_password.setDisabled(True)
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.show()
+            self.inp_login_password.setPlaceholderText("Enter the path to your cookie file")
+            self.lb_login_password.setText(self.tr("Cookie File"))
+            self.inp_login_password.show()
+            self.btn_login_add.clicked.disconnect()
+            self.btn_login_add.show()
+            self.btn_login_add.setText('')
+            self.btn_login_add.setIcon(self.get_icon('folder'))
+            self.btn_login_add.clicked.connect(self.add_apple_music_account_worker)
+
+        # Bandcamp
+        elif self.inp_login_service.currentIndex() == 1:
+            self.inp_login_password.textChanged.disconnect()
+            self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
             self.inp_login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
             self.btn_login_add.setText(self.tr("Add Bandcamp Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.\nLogging into personal accounts is currently unsupported, if you have any premium purchases please consider lending it to the dev team.")) or True) and
@@ -608,7 +627,9 @@ class MainWindow(QMainWindow):
                 )
 
         # Deezer
-        elif self.inp_login_service.currentIndex() == 1:
+        elif self.inp_login_service.currentIndex() == 2:
+            self.inp_login_password.textChanged.disconnect()
+            self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.show()
@@ -617,6 +638,7 @@ class MainWindow(QMainWindow):
             self.inp_login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
@@ -625,7 +647,9 @@ class MainWindow(QMainWindow):
                 )
 
         # Soundcloud
-        elif self.inp_login_service.currentIndex() == 2:
+        elif self.inp_login_service.currentIndex() == 3:
+            self.inp_login_password.textChanged.disconnect()
+            self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
@@ -638,6 +662,7 @@ class MainWindow(QMainWindow):
             #self.inp_login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
             self.btn_login_add.setText(self.tr("Add Soundcloud Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.\nLogging into personal accounts is currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
@@ -645,44 +670,78 @@ class MainWindow(QMainWindow):
                 )
 
         # Spotify
-        elif self.inp_login_service.currentIndex() == 3:
+        elif self.inp_login_service.currentIndex() == 4:
+            self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
             self.inp_login_password.hide()
             try:
                 self.btn_login_add.clicked.disconnect()
+                self.inp_login_password.textChanged.disconnect()
             except TypeError:
                 # Default value does not have disconnect
                 pass
             self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
             self.btn_login_add.setText(self.tr("Add Spotify Account"))
             self.btn_login_add.clicked.connect(self.add_spotify_account)
 
         # Tidal
-        elif self.inp_login_service.currentIndex() == 4:
+        elif self.inp_login_service.currentIndex() == 5:
+            self.inp_login_password.textChanged.disconnect()
+            self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
             self.inp_login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
             self.btn_login_add.setText(self.tr("Add Tidal Account"))
             self.btn_login_add.clicked.connect(self.add_tidal_account)
 
         # Youtube
-        elif self.inp_login_service.currentIndex() == 5:
+        elif self.inp_login_service.currentIndex() == 6:
+            self.inp_login_password.textChanged.disconnect()
+            self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.hide()
             self.inp_login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
             self.btn_login_add.setText(self.tr("Add Youtube Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.")) or True) and
                 youtube_add_account()
                 )
+
+
+
+
+    def add_apple_music_account_worker(self):
+        session = None
+        self.lb_login_password.setDisabled(True)
+        self.btn_login_add.setDisabled(True)
+
+        file_path, _ = QFileDialog.getOpenFileName(self, 'Select a file:', os.path.expanduser("~"), "Text Files (*.txt);;All Files (*);;")
+        if file_path:
+            try:
+                self.inp_login_password.setText(os.path.normpath(file_path.strip()))
+                session = apple_music_add_account(os.path.normpath(file_path.strip()))
+            except (TypeError, AttributeError):
+                pass
+
+        if session:
+            config.set_('parsing_acc_sn', len(account_pool))
+            config.update()
+            self.__show_popup_dialog(self.tr("Account added, please restart the app."))
+            self.btn_login_add.setDisabled(False)
+        else:
+            self.__show_popup_dialog(self.tr("Please enter a valid cookie path."))
+            self.btn_login_add.setDisabled(False)
 
 
     def add_spotify_account(self):
@@ -695,6 +754,19 @@ class MainWindow(QMainWindow):
         login_worker.daemon = True
         login_worker.start()
 
+
+    def add_spotify_account_worker(self):
+        if spotify_new_session():
+            self.__show_popup_dialog(self.tr("Account added, please restart the app."))
+            self.btn_login_add.setText(self.tr("Please Restart The App"))
+            config.set_('parsing_acc_sn', len(account_pool))
+            config.update()
+        else:
+            self.__show_popup_dialog(self.tr("Account already exists."))
+            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.setDisabled(False)
+
+
     def add_tidal_account(self):
         logger.info('Add spotify account clicked ')
         self.btn_login_add.setText(self.tr("Waiting..."))
@@ -706,26 +778,14 @@ class MainWindow(QMainWindow):
         login_worker.daemon = True
         login_worker.start()
 
-    def add_tidal_account_worker(self, device_code):
-        session = tidal_add_account_pt2(device_code)
-        if session == True:
-            self.__show_popup_dialog(self.tr("Account added, please restart the app."))
-            self.btn_login_add.setText(self.tr("Please Restart The App"))
-            config.set_('parsing_acc_sn', len(account_pool))
-            config.update()
-        elif session == False:
-            self.__show_popup_dialog(self.tr("Account already exists."))
-            self.btn_login_add.setText(self.tr("Add Account"))
-            self.btn_login_add.setDisabled(False)
 
-    def add_spotify_account_worker(self):
-        session = spotify_new_session()
-        if session == True:
+    def add_tidal_account_worker(self, device_code):
+        if tidal_add_account_pt2(device_code):
             self.__show_popup_dialog(self.tr("Account added, please restart the app."))
             self.btn_login_add.setText(self.tr("Please Restart The App"))
             config.set_('parsing_acc_sn', len(account_pool))
             config.update()
-        elif session == False:
+        else:
             self.__show_popup_dialog(self.tr("Account already exists."))
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.setDisabled(False)
@@ -803,7 +863,7 @@ class MainWindow(QMainWindow):
             btn_widget = QWidget()
             btn_widget.setLayout(btn_layout)
 
-            service = QTableWidgetItem(result['item_service'].title())
+            service = QTableWidgetItem(result['item_service'].replace('_', ' ').title())
             service.setIcon(self.get_icon(result["item_service"]))
 
             rows = self.tbl_search_results.rowCount()

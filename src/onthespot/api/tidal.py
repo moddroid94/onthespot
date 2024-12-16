@@ -1,4 +1,4 @@
-import base64
+from base64 import b64decode
 import json
 import requests
 import time
@@ -7,9 +7,9 @@ from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool
 from ..utils import make_call, conv_list_format
 
-logger = get_logger("api.deezer")
-CLIENT_ID = base64.b64decode("elU0WEhWVmtjMnREUG80dA==").decode("iso-8859-1")
-CLIENT_SECRET = base64.b64decode("VkpLaERGcUpQcXZzUFZOQlY2dWtYVEptd2x2YnR0UDd3bE1scmM3MnNlND0=").decode("iso-8859-1")
+logger = get_logger("api.tidal")
+CLIENT_ID = b64decode("elU0WEhWVmtjMnREUG80dA==").decode("iso-8859-1")
+CLIENT_SECRET = b64decode("VkpLaERGcUpQcXZzUFZOQlY2dWtYVEptd2x2YnR0UDd3bE1scmM3MnNlND0=").decode("iso-8859-1")
 AUTH = (CLIENT_ID, CLIENT_SECRET)
 AUTH_URL = "https://auth.tidal.com/v1/oauth2"
 BASE_URL = "https://api.tidal.com/v1"
@@ -339,7 +339,7 @@ def tidal_get_file_url(token, item_id):
 
     playback_info = make_call(f"{BASE_URL}/tracks/{item_id}/playbackinfopostpaywall", params=params, headers=headers)
 
-    manifest = json.loads(base64.b64decode(playback_info["manifest"]).decode("utf-8"))
+    manifest = json.loads(b64decode(playback_info["manifest"]).decode("utf-8"))
     flac_url = manifest["urls"][0]
     return flac_url
 

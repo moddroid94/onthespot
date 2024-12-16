@@ -1,6 +1,7 @@
 import re
 import time
 from .accounts import get_account_token
+from .api.apple_music import apple_music_get_album_track_ids, apple_music_get_artist_album_ids, apple_music_get_playlist_track_ids, apple_music_get_playlist_data
 from .api.bandcamp import bandcamp_get_album_track_ids, bandcamp_get_artist_album_ids
 from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_track_ids, deezer_get_playlist_data
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
@@ -10,6 +11,7 @@ from .runtimedata import get_logger, parsing, download_queue, pending, parsing_l
 from .utils import format_local_id
 
 logger = get_logger('parse_item')
+APPLE_MUSIC_URL_REGEX = re.compile(r'https?://music\.apple\.com/([a-z]{2})/(?P<type>album|playlist|artist)/(?P<title>[-a-z0-9]+)/(?P<id>[\w.]+)(?:\?i=(?P<track_id>\d+))?')
 BANDCAMP_URL_REGEX = re.compile(r'https?://[a-z0-9-]+\.bandcamp\.com(?:/(?P<type>track|album|music)/[a-z0-9-]+)?')
 DEEZER_URL_REGEX = re.compile(r'https?://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
 SOUNDCLOUD_URL_REGEX = re.compile(r"https?://soundcloud.com/[-\w:/]+")
@@ -20,7 +22,16 @@ YOUTUBE_URL_REGEX = re.compile(r"https?://(www\.|music\.)?youtube\.com/watch\?v=
 
 
 def parse_url(url):
-    if re.match(BANDCAMP_URL_REGEX, url):
+    if re.match(APPLE_MUSIC_URL_REGEX, url):
+        match = re.search(APPLE_MUSIC_URL_REGEX, url)
+        item_id = match.group("id")
+        item_type = match.group("type")
+        item_service = 'apple_music'
+        if match.group("track_id"):
+            item_id = match.group("track_id")
+            item_type = 'track'
+
+    elif re.match(BANDCAMP_URL_REGEX, url):
         match = re.search(BANDCAMP_URL_REGEX, url)
         item_id = url
         item_service = 'bandcamp'

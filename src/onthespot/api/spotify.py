@@ -15,7 +15,7 @@ from ..runtimedata import get_logger, account_pool, pending, download_queue, pen
 from ..utils import make_call, conv_list_format
 
 logger = get_logger("api.spotify")
-
+BASE_URL = "https://api.spotify.com/v1"
 
 class MirrorSpotifyPlayback(QObject):
     def __init__(self):
@@ -55,7 +55,7 @@ class MirrorSpotifyPlayback(QObject):
             except Exception:
                 spotify_re_init_session(account_pool[parsing_index])
                 token = account_pool[parsing_index]['login']['session'].tokens().get("user-read-currently-playing")
-            url = "https://api.spotify.com/v1/me/player/currently-playing"
+            url = f"{BASE_URL}/me/player/currently-playing"
             resp = requests.get(url, headers={"Authorization": f"Bearer {token}"})
             if resp.status_code == 200:
                 data = resp.json()
@@ -246,7 +246,7 @@ def spotify_get_token(parsing_index):
 def spotify_get_artist_album_ids(token, artist_id):
     logger.info(f"Getting album ids for artist: '{artist_id}'")
     headers = {"Authorization": f"Bearer {token}"}
-    artist_data = make_call(f'https://api.spotify.com/v1/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', headers=headers) #%2Cappears_on%2Ccompilation
+    artist_data = make_call(f'{BASE_URL}/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', headers=headers) #%2Cappears_on%2Ccompilation
 
     item_ids = []
     for album in artist_data['items']:
@@ -257,7 +257,7 @@ def spotify_get_artist_album_ids(token, artist_id):
 def spotify_get_playlist_data(token, playlist_id):
     logger.info(f"Get playlist data for playlist: {playlist_id}")
     headers = {"Authorization": f"Bearer {token}"}
-    resp = make_call(f'https://api.spotify.com/v1/playlists/{playlist_id}', headers=headers, skip_cache=True)
+    resp = make_call(f'{BASE_URL}/playlists/{playlist_id}', headers=headers, skip_cache=True)
     return resp['name'], resp['owner']['display_name']
 
 
@@ -365,7 +365,7 @@ def spotify_get_playlist_items(token, playlist_id):
     limit = 100
 
     while True:
-        url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode&offset={offset}&limit={limit}'
+        url = f'{BASE_URL}/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode&offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
 
         resp = make_call(url, headers=headers, skip_cache=True)
@@ -386,7 +386,7 @@ def spotify_get_liked_songs(token):
     token = account_pool[config.get('parsing_acc_sn')]['login']['session'].tokens().get("user-library-read")
 
     while True:
-        url = f'https://api.spotify.com/v1/me/tracks?offset={offset}&limit={limit}'
+        url = f'{BASE_URL}/me/tracks?offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
 
         resp = make_call(url, headers=headers, skip_cache=True)
@@ -407,7 +407,7 @@ def spotify_get_your_episodes(token):
     token = account_pool[config.get('parsing_acc_sn')]['login']['session'].tokens().get("user-library-read")
 
     while True:
-        url = f'https://api.spotify.com/v1/me/episodes?offset={offset}&limit={limit}'
+        url = f'{BASE_URL}/me/episodes?offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
 
         resp = make_call(url, headers=headers, skip_cache=True)
@@ -423,7 +423,7 @@ def get_album_name(token, album_id):
     logger.info(f"Get album info from album by id ''{album_id}'")
     headers = {"Authorization": f"Bearer {token}"}
     resp = make_call(
-        f'https://api.spotify.com/v1/albums/{album_id}',
+        f'{BASE_URL}/albums/{album_id}',
         headers=headers
         )
     if m := re.search(r'(\d{4})', resp['release_date']):
@@ -443,7 +443,7 @@ def spotify_get_album_track_ids(token, album_id):
     limit = 50
 
     while True:
-        url=f'https://api.spotify.com/v1/albums/{album_id}/tracks?offset={offset}&limit={limit}'
+        url=f'{BASE_URL}/albums/{album_id}/tracks?offset={offset}&limit={limit}'
         headers = {"Authorization": f"Bearer {token}"}
         resp = make_call(url, headers=headers)
 
@@ -466,7 +466,7 @@ def spotify_get_search_results(token, search_term, content_types):
     if content_types is None:
         content_types = ["track", "album", "playlist", "artist", "show", "episode", "audiobook"]
     data = requests.get(
-        "https://api.spotify.com/v1/search",
+        f"{BASE_URL}/search",
         {
             "limit": config.get("max_search_results"),
             "offset": "0",
@@ -527,9 +527,9 @@ def spotify_get_search_results(token, search_term, content_types):
 
 def spotify_get_track_metadata(token, item_id):
     headers = {"Authorization": f"Bearer {token}"}
-    track_data = make_call(f'https://api.spotify.com/v1/tracks?ids={item_id}&market=from_token', headers=headers)
+    track_data = make_call(f'{BASE_URL}/tracks?ids={item_id}&market=from_token', headers=headers)
     credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{item_id}/credits', headers=headers)
-    track_audio_data = make_call(f'https://api.spotify.com/v1/audio-features/{item_id}', headers=headers)
+    track_audio_data = make_call(f'{BASE_URL}/audio-features/{item_id}', headers=headers)
     album_data = make_call(track_data['tracks'][0]['album']['href'], headers=headers)
     artist_data = make_call(track_data['tracks'][0]['artists'][0]['href'], headers=headers)
 
@@ -610,7 +610,7 @@ def spotify_get_track_metadata(token, item_id):
 def spotify_get_episode_metadata(token, episode_id):
     logger.info(f"Get episode info for episode by id '{episode_id}'")
     headers = {"Authorization": f"Bearer {token}"}
-    episode_data = make_call(f"https://api.spotify.com/v1/episodes/{episode_id}", headers=headers)
+    episode_data = make_call(f"{BASE_URL}/episodes/{episode_id}", headers=headers)
     show_episode_ids = spotify_get_show_episode_ids(token, episode_data.get('show', {}).get('id', ''))
     # I believe audiobook ids start with a 7 but to verify you can use https://api.spotify.com/v1/audiobooks/{id}
     # the endpoint could possibly be used to mark audiobooks in genre but it doesn't really provide any additional
@@ -658,7 +658,7 @@ def spotify_get_show_episode_ids(token, show_id):
     limit = 50
 
     while True:
-        url = f'https://api.spotify.com/v1/shows/{show_id}/episodes?offset={offset}&limit={limit}'
+        url = f'{BASE_URL}/shows/{show_id}/episodes?offset={offset}&limit={limit}'
         headers = {'Authorization': f'Bearer {token}'}
         resp = make_call(url, headers=headers)
 

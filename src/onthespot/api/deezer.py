@@ -11,8 +11,8 @@ from ..runtimedata import get_logger, account_pool
 from ..utils import conv_list_format, make_call
 
 logger = get_logger("api.deezer")
+BASE_URL = "https://api.deezer.com/"
 
-DEEZER_BASE = "https://api.deezer.com/"
 
 class ScriptExtractor(html.parser.HTMLParser):
     """ extract <script> tag contents from a html page """
@@ -52,7 +52,7 @@ def deezer_add_account(arl):
 
 def deezer_get_album_track_ids(token, album_id):
     logger.info(f"Getting tracks from album: {album_id}")
-    album_data = make_call(f"{DEEZER_BASE}/album/{album_id}")
+    album_data = make_call(f"{BASE_URL}/album/{album_id}")
     item_ids = []
     for track in album_data.get("tracks", {}).get("data", ''):
         item_ids.append(track['id'])
@@ -61,7 +61,7 @@ def deezer_get_album_track_ids(token, album_id):
 
 def deezer_get_artist_album_ids(token, artist_id):
     logger.info(f"Getting album ids for artist: '{artist_id}'")
-    album_data = make_call(f"{DEEZER_BASE}/artist/{artist_id}/albums")
+    album_data = make_call(f"{BASE_URL}/artist/{artist_id}/albums")
     item_ids = []
     for album in album_data.get("data", ''):
         item_ids.append(album.get("id", ''))
@@ -70,7 +70,7 @@ def deezer_get_artist_album_ids(token, artist_id):
 
 def deezer_get_playlist_track_ids(token, playlist_id):
     logger.info(f"Getting items in playlist: '{playlist_id}'")
-    album_data = make_call(f"{DEEZER_BASE}/playlist/{playlist_id}")
+    album_data = make_call(f"{BASE_URL}/playlist/{playlist_id}")
     item_ids = []
     for track in album_data.get("tracks", {}).get("data", ''):
         item_ids.append(track['id'])
@@ -79,16 +79,16 @@ def deezer_get_playlist_track_ids(token, playlist_id):
 
 def deezer_get_playlist_data(token, playlist_id):
     logger.info(f"Get playlist data for playlist: '{playlist_id}'")
-    playlist_data = make_call(f"{DEEZER_BASE}/playlist/{playlist_id}")
+    playlist_data = make_call(f"{BASE_URL}/playlist/{playlist_id}")
     return playlist_data.get("title", ''), playlist_data.get("creator", {}).get("name", '')
 
 
 def deezer_get_track_metadata(token, item_id):
     logger.info(f"Get track info for: '{item_id}'")
 
-    track_data = make_call(f"{DEEZER_BASE}/track/{item_id}")
-    album_data = make_call(f"{DEEZER_BASE}/album/{track_data.get('album', {}).get('id', '')}")
-    album_tracks = make_call(f"{DEEZER_BASE}/album/{track_data.get('album', {}).get('id', '')}/tracks")
+    track_data = make_call(f"{BASE_URL}/track/{item_id}")
+    album_data = make_call(f"{BASE_URL}/album/{track_data.get('album', {}).get('id', '')}")
+    album_tracks = make_call(f"{BASE_URL}/album/{track_data.get('album', {}).get('id', '')}/tracks")
     #album_page = make_call(f"https://www.deezer.com/album/{track_data.get('album', {}).get('id', '')}", text=True)
 
     # Fetch track_number
@@ -290,7 +290,7 @@ def deezer_login_user(account):
 
 
 def deezer_get_token(parsing_index):
-    return account_pool[config.get('parsing_acc_sn')]['login']['session']
+    return account_pool[parsing_index]['login']['session']
 
 
 def deezer_get_search_results(token, search_term, content_types):
@@ -298,10 +298,10 @@ def deezer_get_search_results(token, search_term, content_types):
     params["q"] = search_term
     params["limit"] = config.get("max_search_results")
 
-    album_url = f"{DEEZER_BASE}/search/album"
-    artist_url = f"{DEEZER_BASE}/search/artist"
-    playlist_url = f"{DEEZER_BASE}/search/playlist"
-    track_url = f"{DEEZER_BASE}/search/track"
+    album_url = f"{BASE_URL}/search/album"
+    artist_url = f"{BASE_URL}/search/artist"
+    playlist_url = f"{BASE_URL}/search/playlist"
+    track_url = f"{BASE_URL}/search/track"
 
     search_results = []
 

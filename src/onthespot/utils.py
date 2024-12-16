@@ -28,7 +28,7 @@ class SSLAdapter(requests.adapters.HTTPAdapter):
         return super().init_poolmanager(*args, ssl_context=context, **kwargs)
 
 
-def make_call(url, params=None, headers=None, skip_cache=False, text=False, use_ssl=False):
+def make_call(url, params=None, headers=None, session=None, skip_cache=False, text=False, use_ssl=False):
     if not skip_cache:
         request_key = md5(f'{url}'.encode()).hexdigest()
         req_cache_file = os.path.join(config.get('_cache_dir'), 'reqcache', request_key + '.json')
@@ -46,7 +46,8 @@ def make_call(url, params=None, headers=None, skip_cache=False, text=False, use_
                 pass
         logger.debug(f'URL "{url}" has cache miss! HASH: {request_key}; Fetching data')
 
-    session = requests.Session()
+    if session is None:
+        session = requests.Session()
 
     if use_ssl:
         ctx = ssl.create_default_context()
