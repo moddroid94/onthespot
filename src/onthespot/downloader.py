@@ -427,8 +427,7 @@ class DownloadWorker(QObject):
                             self.progress.emit(item, self.tr("Decrypting"), 99)
 
                         decrypted_temp_file_path = temp_file_path + '.m4a'
-                        subprocess.run(
-                        [
+                        command = [
                             config.get('_ffmpeg_bin_path'),
                             "-loglevel", "error",
                             "-y",
@@ -438,9 +437,12 @@ class DownloadWorker(QObject):
                             "-movflags",
                             "+faststart",
                             decrypted_temp_file_path
-                        ],
-                        check=True
-                        )
+                        ]
+                        if os.name == 'nt':
+                            subprocess.check_call(command, shell=False, creationflags=subprocess.CREATE_NO_WINDOW)
+                        else:
+                            subprocess.check_call(command, shell=False)
+
                         if os.path.exists(temp_file_path):
                             os.remove(temp_file_path)
                         os.rename(decrypted_temp_file_path, temp_file_path)
