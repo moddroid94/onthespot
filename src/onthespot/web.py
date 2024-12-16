@@ -1,9 +1,12 @@
-import json
 import os
+# Required for librespot-python
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+import json
 import threading
 import time
 from flask import Flask, jsonify, render_template, redirect, request, send_file, url_for
 from .accounts import FillAccountPool, get_account_token
+from .api.apple_music import apple_music_get_track_metadata
 from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, deezer_add_account
 from .api.soundcloud import soundcloud_get_track_metadata

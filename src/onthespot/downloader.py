@@ -426,7 +426,7 @@ class DownloadWorker(QObject):
                         if self.gui:
                             self.progress.emit(item, self.tr("Decrypting"), 99)
 
-                        decrypted_temp_file_path = temp_file_path + '.m4a'
+                        decrypted_temp_file_path = temp_file_path + '1.m4a'
                         subprocess.run(
                         [
                             config.get('_ffmpeg_bin_path'),

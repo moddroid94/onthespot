@@ -14,16 +14,16 @@ HOMEPAGE="
         https://pypi.org/project/pywidevine/
 "
 SRC_URI="
-        https://github.com/devine-dl/pywidevine/archive/refs/tags/v${PV}.tar.gz
+        https://github.com/beardypig/pymp4/archive/refs/tags/v${PV}.tar.gz
                 -> ${P}.tar.gz
-"
-
-DEPEND="
-	dev-python/pymp4
 "
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS="amd64"
+
+DEPEND="
+        =dev-python/construct-2.8.8
+"
 
 distutils_enable_tests pytest

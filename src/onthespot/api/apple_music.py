@@ -336,7 +336,6 @@ def apple_music_get_decryption_key(session, stream_url, item_id):
     # Extract the PSSH (Protection System Specific Header) from the m3u8 object
     m3u8_obj = m3u8.load(stream_url)
     pssh = m3u8_obj.keys[0].uri if m3u8_obj.keys else None
-    print(pssh)
 
     try:
         widevine_pssh_data = WidevinePsshData()

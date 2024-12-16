@@ -1,4 +1,6 @@
 import os
+# Required for librespot-python
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
 import sys
 import threading
 from PyQt6.QtCore import QTranslator
@@ -9,6 +11,7 @@ from .gui.minidialog import MiniDialog
 from .otsconfig import config
 from .parse_item import parsingworker
 from .runtimedata import get_logger, set_init_tray
+
 
 class TrayApp:
     def __init__(self, main_window):
