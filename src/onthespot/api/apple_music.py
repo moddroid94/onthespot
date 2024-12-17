@@ -197,8 +197,8 @@ def apple_music_get_track_metadata(session, item_id):
 
     # Artists
     artists = []
-    for artist in track_data.get('data', [])[0].get('attributes', {}).get('artistName', '').split('&'):
-        artists.append(artist)
+    for artist in track_data.get('data', [])[0].get('attributes', {}).get('artistName', '').replace("&", ",").split(","):
+        artists.append(artist.strip())
 
     # Track Number
     track_number = None
@@ -247,7 +247,7 @@ def apple_music_get_track_metadata(session, item_id):
         album_type = 'compilation'
     info['album_type'] = album_type
 
-    info['album_artists'] = album_data.get('data', [])[0].get('attributes', {}).get('artistName', '')
+    info['album_artists'] = artists[0]
 
     info['track_number'] = track_number
     info['total_discs'] = total_discs
@@ -302,9 +302,16 @@ def apple_music_get_lyrics(session, item_id, item_type, metadata, filepath):
             if lyric:
                 if time_synced:
                     if ':' in begin_time:
-                        minutes, seconds = begin_time.split(':')
-                        seconds, milliseconds = seconds.split('.')
-                    else:
+                        time_parts = begin_time.split(':')
+                        if len(time_parts) == 3:  # Format: HH:MM:SS.mmm
+                            hours, minutes, seconds = time_parts
+                            seconds, milliseconds = seconds.split('.')
+                            minutes = int(minutes) + (int(hours) * 60)
+                        elif len(time_parts) == 2:  # Format: MM:SS.mmm
+                            minutes, seconds = time_parts
+                            seconds, milliseconds = seconds.split('.')
+                            hours = '0'
+                    else: # Format: SS.mmm
                         seconds, milliseconds = begin_time.split('.')
                         minutes = '0'
                     formatted_time = f"{int(minutes):02}:{int(seconds):02}.{int(milliseconds)}"
