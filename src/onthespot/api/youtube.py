@@ -103,7 +103,10 @@ def youtube_get_track_metadata(_, item_id):
     info['image_url'] = f'https://i.ytimg.com/vi/{item_id}/hqdefault.jpg'
     info['language'] = info_dict.get('language', '')
     info['item_url'] = info_dict.get('webpage_url', '')
-    info['release_year'] = info_dict.get('release_date', '')[:4] #20150504
+    # Windows takes issue with the following line, not sure why
+    #info['release_year'] = info_dict.get('release_date', '')[:4] #20150504
+    release_year = info_dict.get('release_year', '')
+    info['release_year'] = str(release_year if release_year else info_dict.get('upload_date', '')[:4])
     info['length'] = length
     info['is_playable'] = True if info_dict.get('availability', '') == 'public' and not info_dict.get('is_live', '') else False
     info['item_id'] = item_id
