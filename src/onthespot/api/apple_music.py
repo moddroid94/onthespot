@@ -314,7 +314,7 @@ def apple_music_get_lyrics(session, item_id, item_type, metadata, filepath):
                     else: # Format: SS.mmm
                         seconds, milliseconds = begin_time.split('.')
                         minutes = '0'
-                    formatted_time = f"{int(minutes):02}:{int(seconds):02}.{int(milliseconds)}"
+                    formatted_time = f"{int(minutes):02}:{int(seconds):02}.{int(milliseconds.replace('s', ''))}"
                     lyric = f'[{formatted_time}] {lyric}'
 
                 lyrics_list.append(lyric)
