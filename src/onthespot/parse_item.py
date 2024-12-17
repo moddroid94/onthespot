@@ -1,12 +1,12 @@
 import re
 import time
 from .accounts import get_account_token
-from .api.apple_music import apple_music_get_album_track_ids, apple_music_get_artist_album_ids, apple_music_get_playlist_track_ids, apple_music_get_playlist_data
+from .api.apple_music import apple_music_get_album_track_ids, apple_music_get_artist_album_ids, apple_music_get_playlist_data
 from .api.bandcamp import bandcamp_get_album_track_ids, bandcamp_get_artist_album_ids
-from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_track_ids, deezer_get_playlist_data
+from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_data
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .api.spotify import spotify_get_album_track_ids, spotify_get_artist_album_ids, spotify_get_playlist_items, spotify_get_playlist_data, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_show_episode_ids
-from .api.tidal import tidal_get_album_track_ids, tidal_get_artist_album_ids, tidal_get_playlist_track_ids, tidal_get_playlist_data
+from .api.tidal import tidal_get_album_track_ids, tidal_get_artist_album_ids, tidal_get_playlist_data, tidal_get_mix_data
 from .runtimedata import get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
 from .utils import format_local_id
 
@@ -16,7 +16,7 @@ BANDCAMP_URL_REGEX = re.compile(r'https?://[a-z0-9-]+\.bandcamp\.com(?:/(?P<type
 DEEZER_URL_REGEX = re.compile(r'https?://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
 SOUNDCLOUD_URL_REGEX = re.compile(r"https?://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https?://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
-TIDAL_URL_REGEX = re.compile(r"https?://(www\.|listen\.)?tidal.com/(browse/)?(?P<type>album|track|artist|playlist)/(?P<id>\d+)")
+TIDAL_URL_REGEX = re.compile(r"https?://(www\.|listen\.)?tidal.com/(browse/)?(?P<type>album|track|artist|playlist|mix)/(?P<id>[-a-z0-9]+)")
 YOUTUBE_URL_REGEX = re.compile(r"https?://(www\.|music\.)?youtube\.com/watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)(&list=(?P<list_id>[a-zA-Z0-9_-]+))?")
 #QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 
@@ -197,22 +197,24 @@ def parsingworker():
                         }
                 continue
 
-            elif current_type in ("album", "playlist"):
-                item_ids = globals()[f"{current_service}_get_{current_type}_track_ids"](token, current_id)
+            elif current_type in ["album", "playlist", "mix"]:
+                if current_type == "album":
+                    playlist_name = ''
+                    playlist_by = ''
+                    track_ids = globals()[f"{current_service}_get_{current_type}_track_ids"](token, current_id)
+                else:
+                    playlist_name, playlist_by, track_ids = globals()[f"{current_service}_get_{current_type}_data"](token, current_id)
+                if current_type == 'mix':
+                    current_type = 'playlist'
 
-                playlist_name = ''
-                playlist_by = ''
-                if current_type == "playlist":
-                    playlist_name, playlist_by = globals()[f"{current_service}_get_playlist_data"](token, current_id)
-
-                for index, item_id in enumerate(item_ids):
-                    local_id = format_local_id(item_id)
+                for index, track_id in enumerate(track_ids):
+                    local_id = format_local_id(track_id)
                     with pending_lock:
                         pending[local_id] = {
                             'local_id': local_id,
                             'item_service': current_service,
                             'item_type': 'track',
-                            'item_id': item_id,
+                            'item_id': track_id,
                             'parent_category': current_type,
                             'playlist_name': playlist_name,
                             'playlist_by': playlist_by,

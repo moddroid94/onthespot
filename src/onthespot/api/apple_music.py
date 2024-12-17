@@ -398,16 +398,14 @@ def apple_music_get_artist_album_ids(session, artist_id):
     return item_ids
 
 
-def apple_music_get_playlist_track_ids(session, playlist_id):
-    logger.info(f"Getting items in playlist: '{playlist_id}'")
-    playlist_data = make_call(f"{BASE_URL}/catalog/{session.cookies.get("itua")}/playlists/{playlist_id}", session=session)
-    item_ids = []
-    for track in playlist_data.get('data', [])[0].get('relationships', {}).get('tracks', {}).get('data', []):
-        item_ids.append(track['id'])
-    return item_ids
-
-
 def apple_music_get_playlist_data(session, playlist_id):
-    logger.info(f"Get playlist data for playlist: '{playlist_id}'")
-    playlist_data = make_call(f"{BASE_URL}/catalog/{session.cookies.get("itua")}/playlists/{playlist_id}", session=session)
-    return playlist_data.get('data', [])[0].get('attributes', {}).get('name', ''), playlist_data.get('data', [])[0].get('attributes', {}).get('curatorName', '')
+    logger.info(f"Get playlist data for playlist: {playlist_id}")
+    playlist_data = make_call(f"{BASE_URL}/catalog/{session.cookies.get("itua")}/playlists/{playlist_id}", session=session, skip_cache=True)
+
+    playlist_name = playlist_data.get('data', [])[0].get('attributes', {}).get('name', '')
+    playlist_by =  playlist_data.get('data', [])[0].get('attributes', {}).get('curatorName', '')
+
+    track_ids = []
+    for track in playlist_data.get('data', [])[0].get('relationships', {}).get('tracks', {}).get('data', []):
+        track_ids.append(track['id'])
+    return playlist_name, playlist_by, track_ids

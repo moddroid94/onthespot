@@ -379,22 +379,6 @@ def tidal_get_album_track_ids(token, album_id):
     return item_ids
 
 
-def tidal_get_playlist_track_ids(token, playlist_id):
-    logger.info(f"Getting items in playlist: {playlist_id}")
-    headers = {}
-    headers["Authorization"] = f"Bearer {token['access_token']}"
-
-    params = {}
-    params["countryCode"] = token['country_code']
-    params["limit"] = '10000'
-
-    playlist_track_data = make_call(f"{BASE_URL}/playlists/{playlist_id}/tracks", params=params, headers=headers)
-
-    item_ids = []
-    for track in playlist_track_data['items']:
-        item_ids.append(track['id'])
-    return item_ids
-
 def tidal_get_playlist_data(token, playlist_id):
     logger.info(f"Get playlist data for playlist: {playlist_id}")
     headers = {}
@@ -404,7 +388,35 @@ def tidal_get_playlist_data(token, playlist_id):
     params["countryCode"] = token['country_code']
     params["limit"] = '10000'
 
-    playlist_data = make_call(f"{BASE_URL}/playlists/{playlist_id}", params=params, headers=headers)
+    playlist_data = make_call(f"{BASE_URL}/playlists/{playlist_id}", params=params, headers=headers, skip_cache=True)
+    playlist_track_data = make_call(f"{BASE_URL}/playlists/{playlist_id}/tracks", params=params, headers=headers, skip_cache=True)
+
     playlist_name = playlist_data.get('title', '')
     playlist_by = playlist_data.get('creator', {}).get('name', 'Tidal')
-    return playlist_name, playlist_by
+
+    track_ids = []
+    for track in playlist_track_data['items']:
+        track_ids.append(track.get('id', ''))
+    return playlist_name, playlist_by, track_ids
+
+
+def tidal_get_mix_data(token, mix_id):
+    logger.info(f"Get mix data for mix: {mix_id}")
+    headers = {}
+    headers["Authorization"] = f"Bearer {token['access_token']}"
+    print(mix_id)
+    params = {}
+    params["mixId"] = mix_id
+    params["countryCode"] = token['country_code']
+    params["locale"] = 'en_US'
+    params["deviceType"] = 'BROWSER'
+
+    mix_data = make_call(f"https://api.tidal.com/v1/pages/mix", params=params, headers=headers)#, skip_cache=True)
+    print(mix_data)
+    playlist_name = mix_data['title']
+    playlist_by = 'Tidal'
+
+    track_ids = []
+    for track in mix_data['rows'][1]['modules'][0]['pagedList']['items']:
+        track_ids.append(track['id'])
+    return playlist_name, playlist_by, track_ids
