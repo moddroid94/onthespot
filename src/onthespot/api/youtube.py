@@ -33,33 +33,33 @@ def youtube_add_account():
     config.update()
 
 
-def youtube_get_search_results(token, search_term, content_types):
+def youtube_get_search_results(_, search_term, content_types):
     ydl_opts = {
         'quiet': True,
         'extract_flat': True,
     }
 
     search_results = []
+    if 'track' in content_types:
+        with YoutubeDL(ydl_opts) as ytdl:
+            result = ytdl.extract_info(f'ytsearch{config.get("max_search_results")}:{search_term}', download=False)
+            for result in result['entries']:
+                search_results.append({
+                    'item_id': result['id'],
+                    'item_name': result['title'],
+                    'item_by': result['channel'],
+                    'item_type': "track",
+                    'item_service': "youtube",
+                    'item_url': result['url'],
+                    'item_thumbnail_url': f'https://i.ytimg.com/vi/{result["id"]}/hqdefault.jpg'
+                })
 
-    with YoutubeDL(ydl_opts) as ytdl:
-        result = ytdl.extract_info(f'ytsearch{config.get("max_search_results")}:{search_term}', download=False)
-        for result in result['entries']:
-            search_results.append({
-                'item_id': result['id'],
-                'item_name': result['title'],
-                'item_by': result['channel'],
-                'item_type': "track",
-                'item_service': "youtube",
-                'item_url': result['url'],
-                'item_thumbnail_url': f'https://i.ytimg.com/vi/{result["id"]}/hqdefault.jpg'
-            })
-
-    logger.info(search_results)
+    logger.debug(search_results)
     return search_results
 
 
-def youtube_get_track_metadata(token, item_id):
-    url = f'https://www.youtube.com/watch?v={item_id}'
+def youtube_get_track_metadata(_, item_id):
+    url = f'https://music.youtube.com/watch?v={item_id}'
     request_key = md5(f'{url}'.encode()).hexdigest()
     cache_dir = os.path.join(config.get('_cache_dir'), 'reqcache')
     os.makedirs(cache_dir, exist_ok=True)
@@ -92,7 +92,8 @@ def youtube_get_track_metadata(token, item_id):
 
     info = {}
     info['title'] = info_dict.get('title', '')
-    info['album_name'] = info_dict.get('title', '')
+    album = info_dict.get('album', '')
+    info['album_name'] = album if album else info_dict.get('title', '')
     info['artists'] = info_dict.get('channel', '')
     info['album_artists'] = info_dict.get('channel', '')
     info['description'] = info_dict.get('description', '')
@@ -102,9 +103,45 @@ def youtube_get_track_metadata(token, item_id):
     info['image_url'] = f'https://i.ytimg.com/vi/{item_id}/hqdefault.jpg'
     info['language'] = info_dict.get('language', '')
     info['item_url'] = info_dict.get('webpage_url', '')
-    info['release_year'] = info_dict.get('upload_date', '')[:4]
+    info['release_year'] = info_dict.get('release_date', '')[:4] #20150504
     info['length'] = length
-    info['is_playable'] = True if info_dict.get('availability', '') == 'public' else False
+    info['is_playable'] = True if info_dict.get('availability', '') == 'public' and not info_dict.get('is_live', '') else False
     info['item_id'] = item_id
 
     return info
+
+
+def youtube_get_playlist_data(_, playlist_id):
+    url = f'https://music.youtube.com/playlist?list={playlist_id}'
+    ydl_opts = {
+        'quiet': True,
+        'extract_flat': True,
+    }
+
+    with YoutubeDL(ydl_opts) as ytdl:
+        playlist_data = ytdl.extract_info(url, download=False)
+
+    playlist_name = playlist_data.get('title', '')
+    playlist_by = playlist_data.get('channel', '') # If null the item is an album
+
+    track_ids = []
+    for entry in playlist_data['entries']:
+        track_ids.append(entry.get('id', ''))
+    return playlist_name, playlist_by, track_ids
+
+
+def youtube_get_channel_track_ids(_, channel_id):
+    url = f'https://music.youtube.com/channel/{channel_id}'
+
+    ydl_opts = {
+        'quiet': True,
+        'extract_flat': True,
+    }
+
+    with YoutubeDL(ydl_opts) as ytdl:
+        channel_data = ytdl.extract_info(url, download=False)
+
+    track_ids = []
+    for entry in channel_data['entries']:
+        track_ids.append(entry.get('id', ''))
+    return track_ids

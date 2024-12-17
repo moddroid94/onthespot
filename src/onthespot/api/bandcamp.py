@@ -34,7 +34,7 @@ def bandcamp_add_account():
     config.update()
 
 
-def bandcamp_get_search_results(token, search_term, content_types):
+def bandcamp_get_search_results(_, search_term, content_types):
     search_results = []
     urls = []
     if 'track' in content_types:
@@ -78,7 +78,7 @@ def bandcamp_get_search_results(token, search_term, content_types):
     return search_results
 
 
-def bandcamp_get_album_track_ids(token, url):
+def bandcamp_get_album_track_ids(_, url):
     logger.info(f"Getting tracks from album: {url}")
     album_webpage = make_call(url, text=True, use_ssl=True)
 
@@ -94,7 +94,7 @@ def bandcamp_get_album_track_ids(token, url):
         return item_ids
 
 
-def bandcamp_get_track_metadata(token, url):
+def bandcamp_get_track_metadata(_, url):
     track_webpage = make_call(url, text=True, use_ssl=True)
     track_data = {}
     matches = re.findall(r'data-(\w+)="(.*?)"', track_webpage)
@@ -155,7 +155,7 @@ def bandcamp_get_track_metadata(token, url):
     info['is_playable'] = True
     return info
 
-def bandcamp_get_artist_album_ids(token, url):
+def bandcamp_get_artist_album_ids(_, url):
     logger.info(f"Getting album ids for artist: '{url}'")
     root_url = re.match(r'^(https?://[^/]+)', url).group(1)
     artist_webpage = make_call(url, text=True, use_ssl=True)

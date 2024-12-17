@@ -50,7 +50,7 @@ def deezer_add_account(arl):
     config.update()
 
 
-def deezer_get_album_track_ids(token, album_id):
+def deezer_get_album_track_ids(_, album_id):
     logger.info(f"Getting tracks from album: {album_id}")
     album_data = make_call(f"{BASE_URL}/album/{album_id}")
     item_ids = []
@@ -59,7 +59,7 @@ def deezer_get_album_track_ids(token, album_id):
     return item_ids
 
 
-def deezer_get_artist_album_ids(token, artist_id):
+def deezer_get_artist_album_ids(_, artist_id):
     logger.info(f"Getting album ids for artist: '{artist_id}'")
     album_data = make_call(f"{BASE_URL}/artist/{artist_id}/albums")
     item_ids = []
@@ -68,7 +68,7 @@ def deezer_get_artist_album_ids(token, artist_id):
     return item_ids
 
 
-def deezer_get_playlist_data(token, playlist_id):
+def deezer_get_playlist_data(_, playlist_id):
     logger.info(f"Get playlist data for playlist: '{playlist_id}'")
     playlist_data = make_call(f"{BASE_URL}/playlist/{playlist_id}")
 
@@ -81,7 +81,7 @@ def deezer_get_playlist_data(token, playlist_id):
     return playlist_name, playlist_by, track_ids
 
 
-def deezer_get_track_metadata(token, item_id):
+def deezer_get_track_metadata(_, item_id):
     logger.info(f"Get track info for: '{item_id}'")
 
     track_data = make_call(f"{BASE_URL}/track/{item_id}")
@@ -131,8 +131,8 @@ def deezer_get_track_metadata(token, item_id):
     return info
 
 
-def get_song_info_from_deezer_website(id):
-    url = f"https://www.deezer.com/us/track/{id}"
+def get_song_info_from_deezer_website(track_id):
+    url = f"https://www.deezer.com/us/track/{track_id}"
     session = account_pool[config.get('parsing_acc_sn')]['login']['session']
     resp = session.get(url)
     if resp.status_code == 404:
@@ -291,7 +291,7 @@ def deezer_get_token(parsing_index):
     return account_pool[parsing_index]['login']['session']
 
 
-def deezer_get_search_results(token, search_term, content_types):
+def deezer_get_search_results(_, search_term, content_types):
     params = {}
     params["q"] = search_term
     params["limit"] = config.get("max_search_results")

@@ -105,6 +105,11 @@ class DownloadWorker(QObject):
 
                 try:
                     item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)
+
+                    # album number shim from enumerated items, i hate youtube
+                    if item_service == 'youtube' and item.get('parent_category', '') == 'album':
+                        item_metadata.update({'track_number': item['playlist_number']})
+
                     item_path = format_track_path(item, item_metadata)
                 except (Exception, KeyError) as e:
                     logger.error(f"Failed to fetch metadata for '{item_id}', Error: {str(e)}\nTraceback: {traceback.format_exc()}")
@@ -341,7 +346,7 @@ class DownloadWorker(QObject):
                             self.readd_item_to_download_queue(item)
 
                     elif item_service == "youtube":
-                        default_format = '.m4a'
+                        default_format = '.opus'
                         bitrate = "256k"
                         progress_hook = lambda d: self.yt_dlp_progress_hook(item, d)
                         ydl_opts = {
