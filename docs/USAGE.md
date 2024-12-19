@@ -113,7 +113,4 @@ If a file path is provided the app will parse each line in the file for urls beg
 ## 6. Saving Your Configuration
 
 - **Apply Changes**
-  - After adjusting any settings, click the 'Save Settings' button to apply your changes.
-
-> [!IMPORTANT]
-> Some configuration changes may require restarting the app to take effect.
+  - After adjusting any settings, click the 'Save Settings' button to apply your changes. Some configuration changes may require restarting the app to take effect.
