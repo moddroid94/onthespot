@@ -33,7 +33,7 @@ For more further documentation, please see the following:
 2. [**Basic Usage Instructions**](docs/USAGE.md)
 
 
-# Screenshots
+## Screenshots
 ![Search](assets/images/search.png)
 ![Download Queue](assets/images/download_queue.png)
 ![Settings](assets/images/settings.png)
