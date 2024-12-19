@@ -12,6 +12,8 @@ from .otsconfig import config
 from .parse_item import parsingworker
 from .runtimedata import get_logger, set_init_tray
 
+logger = get_logger('gui')
+
 
 class TrayApp:
     def __init__(self, main_window):
@@ -42,7 +44,6 @@ class TrayApp:
 
 
 def main():
-    logger = get_logger('__init__')
     logger.info('Starting application in \n3\n2\n1')
 
     # Migration (>v1.0.3)

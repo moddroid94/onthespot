@@ -332,6 +332,9 @@ class MainWindow(QMainWindow):
             btn.clicked.connect(self.user_table_remove_click)
             btn.setMinimumHeight(30)
 
+            status = QTableWidgetItem(str(account["status"]).title())
+            status.setIcon(self.get_icon(account["status"]))
+
             service = QTableWidgetItem(str(account["service"]).replace('_', ' ').title())
             service.setIcon(self.get_icon(account["service"]))
 
@@ -341,7 +344,7 @@ class MainWindow(QMainWindow):
             self.tbl_sessions.setItem(rows, 2, QTableWidgetItem(service))
             self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(str(account["account_type"]).title()))
             self.tbl_sessions.setItem(rows, 4, QTableWidgetItem(account["bitrate"]))
-            self.tbl_sessions.setItem(rows, 5, QTableWidgetItem(str(account["status"]).title()))
+            self.tbl_sessions.setItem(rows, 5, QTableWidgetItem(status))
             self.tbl_sessions.setCellWidget(rows, 6, btn)
         logger.info("Accounts table was populated !")
 
@@ -711,8 +714,6 @@ class MainWindow(QMainWindow):
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.")) or True) and
                 youtube_add_account()
                 )
-
-
 
 
     def add_apple_music_account_worker(self):

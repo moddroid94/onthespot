@@ -74,6 +74,8 @@ def tidal_add_account_pt2(device_code):
 
 def tidal_login_user(account):
     try:
+        # Ping to verify connectivity
+        requests.get('https://tidal.com')
         if time.time() >= account['login']['token_expiry']:
             data = {
                 "client_id": CLIENT_ID,

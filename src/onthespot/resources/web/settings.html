@@ -6,6 +6,7 @@
     <title>OnTheSpot - Settings</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script src="{{ url_for('static', filename='js/utils.js') }}" defer></script>
 </head>
 <body>
     <div class="header">
@@ -30,6 +31,7 @@
                 <th>Account Type</th>
                 <th>Max Bitrate</th>
                 <th>Status</th>
+                <!--<th>Actions</th>-->
             </tr>
         </thead>
         <tbody>
@@ -37,10 +39,15 @@
             <tr>
                 <td>{{ loop.index - 1 }}</td>
                 <td>{{ account.username[:20] }}{% if account.username|length > 20 %}...{% endif %}</td>
-                <td>{{ account.service|capitalize }}</td>
+                <td><img src="/icons/{{ account.service }}.png" style="width: 20px; height: 20px; margin-right: 5px;">{{ account.service.replace('_', ' ').title() }}</td>
                 <td>{{ account.account_type|capitalize }}</td>
                 <td>{{ account.bitrate }}</td>
                 <td>{{ account.status|capitalize }}</td>
+                <!--<td>
+                    <button class="download-action-button" onclick="${onClickHandler}">
+                        <img src="icons/trash.png" alt="${altText}">
+                    </button>
+                </td>-->
             </tr>
             {% endfor %}
         </tbody>

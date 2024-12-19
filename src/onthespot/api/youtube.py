@@ -1,6 +1,7 @@
+from hashlib import md5
 import json
 import os
-from hashlib import md5
+import requests
 from yt_dlp import YoutubeDL
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool
@@ -9,16 +10,31 @@ logger = get_logger("api.youtube")
 
 
 def youtube_login_user(account):
-    if account['uuid'] == 'public_youtube':
+    try:
+        # Ping to verify connectivity
+        requests.get('https://youtube.com')
+        if account['uuid'] == 'public_youtube':
+            account_pool.append({
+                "uuid": "public_youtube",
+                "username": 'yt-dlp',
+                "service": "youtube",
+                "status": "active",
+                "account_type": "public",
+                "bitrate": "256k",
+            })
+            return True
+    except Exception as e:
+        logger.error(f"Unknown Exception: {str(e)}")
         account_pool.append({
-            "uuid": "public_youtube",
+            "uuid": account['uuid'],
             "username": 'yt-dlp',
             "service": "youtube",
-            "status": "active",
-            "account_type": "public",
-            "bitrate": "256k",
+            "status": "error",
+            "account_type": "N/A",
+            "bitrate": "N/A",
         })
-        return True
+        return False
+
 
 
 def youtube_add_account():
@@ -102,7 +118,7 @@ def youtube_get_track_metadata(_, item_id):
     #info['image_url'] = f'https://i.ytimg.com/vi/{item_id}/maxresdefault.jpg'
     info['image_url'] = f'https://i.ytimg.com/vi/{item_id}/hqdefault.jpg'
     info['language'] = info_dict.get('language', '')
-    info['item_url'] = info_dict.get('webpage_url', '')
+    info['item_url'] = url
     # Windows takes issue with the following line, not sure why
     #info['release_year'] = info_dict.get('release_date', '')[:4] #20150504
     release_year = info_dict.get('release_year', '')

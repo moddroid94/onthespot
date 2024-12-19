@@ -1,78 +1,34 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/01_Logo/Cover_White.png">
-  <source media="(prefers-color-scheme: light)" srcset="../assets/01_Logo/Cover_Black.png">
-  <img src="../assets/01_Logo/Cover_White.png" alt="Logo of OnTheSpot" width="350">
-</picture>
+# Usage Guide
 
-<br>
+## 1. Logging into your accounts
+OnTheSpot supports various accounts and instructions for each are listed below, for further assistance please reach out for support on the community discord [here](https://discord.gg/GCQwRBFPk9).
 
-# Getting Started
+- **Apple Music**: Enter the path to your Apple Music cookie in netscape format, the cookie can be deleted after the app has successfully logged in. To export your cookie you can use one of the following extensions, though I cannot verify that either are secure please use them at your own risk.
+   - Firefox Extension: [Export Cookies](https://addons.mozilla.org/en-CA/firefox/addon/export-cookies-txt/)
 
-When launching the application for the first time you will receive a warning that no Spotify accounts are added.
+   - Chrome Extension: [Get cookies.txt Clean](https://chromewebstore.google.com/detail/get-cookiestxt-clean/ahmnmhfbokciafffnknlekllgcnafnie)
 
-1. **Dismiss the Warning**
-   - Click the close button on the warning dialog.
+- **Deezer**: Paste your ARL into the bar provided and click add account. To get your ARL log into the deezer website, open inspect element, navigate to application/storage, and open the deezer website's cookies. Your arl should be listed under one of the values provided.
 
-2. **Add Your Spotify Account(s)**
-   - Navigate to the **Configuration** tab.
-   - Scroll to the bottom and add your Spotify account(s).
+- **Spotify**: Ensure that both OnTheSpot and the Spotify Desktop App are not restricted by a firewall or vpn so that they can communicate. Click add account and then head over to devices in the Spotify app. Under devices you should see 'OnTheSpot', select it. Once complete the app will prompt you to restart.
 
-> [!TIP]
-> Adding multiple accounts allows you to download multiple songs simultaneously, speeding up the download process.
-
-[WIP: Youtube Video Explaining the Usage]
+- **Tidal**: The app will provide you a link, open the link and login in your browser.
 
 ## 2. Searching and Downloading Music
+The search bar is able to parse queries, urls, and text files.
 
-### Search by Query
+If a query is provided, say 'Daft Punk' for instance, the app will provide results to the query seperated into categories: Tracks, Albums, Artists, Playlists, and depending on the music service Episodes, Podcasts, and Audiobooks.
 
-1. **Navigate to the Search Tab**
-   - Click on the **Search** tab within the application.
+If a url is provided the app will parse the url and immediately begin downloading.
 
-2. **Enter Your Search Terms**
-   - Type the name of a song, artist, album, or playlist into the search bar.
-
-3. **Execute the Search**
-   - Click the **Search** button to retrieve results.
-
-4. **Download Music**
-   - **Single Download**: Click the **Download** button next to the desired item.
-   - **Bulk Download**: Use the buttons below the results table to download multiple items at once.
-
-> [!NOTE]
-> Downloading large media types like albums or playlists may take longer. The application might appear unresponsive during this process. Please be patient.
-
-> [!TIP]
-> You can also specify the path to a text file containing the links you want to download.
-
-### Download by URL
-
-1. **Enter the URL**
-   - Paste the Spotify URL of a song, album, artist, or playlist into the search field.
-
-2. **Start the Download**
-   - Click the **Download** button to begin downloading.
-
-3. **Bulk URL Downloads**
-   - You can also provide a path to a text file containing multiple URLs. OnTheSpot will queue all listed URLs for downloading.
-
-> [!IMPORTANT]
-> Ensure each URL in the text file is on a separate line to avoid errors during the download process.
-
-> [!NOTE]
-> Similar to bulk downloads via query, downloading media types other than 'Tracks' may take longer and cause the app to appear frozen temporarily.
+If a file path is provided the app will parse each line in the file for urls beginning in either http:// or https:// and begin downloading the items listed.
 
 ## 4. Configuration
 
-Customize **OnTheSpot** to fit your preferences by adjusting the settings in the Configuration tab.
-
 ### General Configuration Options
 
-> [!CAUTION]
-> Changing some settings may affect the organization and quality of your downloaded music. Proceed with adjustments only if you are familiar with the options.
-
    <details open>
-   <summary><b>Open Advanced Options</b></summary>
+   <summary><b>Open Configuration Table</b></summary>
 
 | **Option** | **Description** |
 | ------ | ------ |
@@ -108,8 +64,8 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 | **Raw Media Download** | Downloads an unmodified file from whatever service is selected. With this enabled file conversion and the embedding of any metadata is skipped. |
 | **Download Delay** | Time (in seconds) to wait before initiating the next download. Helps prevent Spotify's rate limits. |
 | **Download Chunk Size** | The chunk size in which to download files. |
-| **Maximum Queue Workers** | Set the maximum number of queue workers. Setting a higher number will queue songs faster, only change this setting if you know what you're doing. |
-| **Maximum Download Workers** | Set the maximum number of download workers. Only change this setting if you know what you're doing. |
+| **Maximum Queue Workers** | Set the maximum number of queue workers. Setting a higher number will queue songs faster, only change this setting if you know what you're doing. Changes to this setting require you to restart the app take effect. |
+| **Maximum Download Workers** | Set the maximum number of download workers. Only change this setting if you know what you're doing. Changes to this setting require you to restart the app to take effect. |
 | **Translate File Path** | Translate file paths into the application language. |
 | **Metadata Separator** | Set the separator for metadata fields with multiple values (default: `; `). |
 | **Overwrite Existing Collection** | If a file already exists re-embed metadata in your selected format. |
@@ -134,7 +90,6 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
    | `{artist}`        | Name of the artist(s).                              |
    | `{album_artist}`  | Name of the album artist(s).                        |
    | `{album_type}`    | Name of the artist type (single, album, etc).       |
-   | `{album}`         | Name of the album.                                  |
    | `{name}`          | Name of the track.                                  |
    | `{year}`          | Release year of the track.                          |
    | `{track_number}`  | Track number on the album.                          |
@@ -158,7 +113,7 @@ Customize **OnTheSpot** to fit your preferences by adjusting the settings in the
 ## 6. Saving Your Configuration
 
 - **Apply Changes**
-  - After adjusting any settings, click the **Save Settings** button on the right to apply your changes.
+  - After adjusting any settings, click the 'Save Settings' button to apply your changes.
 
 > [!IMPORTANT]
-> Some configuration changes may require restarting **OnTheSpot** to take effect. Make sure to restart the application if prompted.
+> Some configuration changes may require restarting the app to take effect.

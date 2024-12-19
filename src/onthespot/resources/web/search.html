@@ -6,6 +6,7 @@
     <title>OnTheSpot - Download Queue</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script src="{{ url_for('static', filename='utils.js') }}" defer></script>
 </head>
 <body>
     <div class="header">
@@ -87,7 +88,7 @@
                         row.appendChild(cell3);
 
                         const cell4 = document.createElement('td');
-                        cell4.innerHTML = `${serviceIcon}${capitalizeFirstLetter(item.item_service)}`;
+                        cell4.innerHTML = `${serviceIcon}${formatServiceName(item.item_service)}`;
                         row.appendChild(cell4);
 
                         const cell5 = document.createElement('td');
@@ -98,21 +99,6 @@
                     });
                 document.getElementById('search-bar').value = '';
             });
-        }
-
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    console.log('Link copied to clipboard');
-                    // alert('Link copied to clipboard!');
-                })
-                .catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
         }
 
         function handleDownload(url) {

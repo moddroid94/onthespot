@@ -6,6 +6,7 @@
     <title>OnTheSpot - Download Queue</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script src="{{ url_for('static', filename='utils.js') }}" defer></script>
 </head>
 <body>
     <div class="header">
@@ -46,22 +47,6 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("Search submitted:", query);
-                });
-        }
-
-        function capitalizeFirstLetter(string) {
-            if (!string) return 'N/A';
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    console.log('Link copied to clipboard');
-                    // alert('Link copied to clipboard!');
-                })
-                .catch(err => {
-                    console.error('Failed to copy: ', err);
                 });
         }
 
@@ -125,7 +110,7 @@
                             row.appendChild(cell2);
 
                             const cell3 = document.createElement('td');
-                            cell3.innerHTML = `${serviceIcon}${capitalizeFirstLetter(item.item_service) || 'N/A'}`;
+                            cell3.innerHTML = `${serviceIcon}${formatServiceName(item.item_service) || 'N/A'}`;
                             row.appendChild(cell3);
 
                             const cell4 = document.createElement('td');

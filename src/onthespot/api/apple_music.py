@@ -72,7 +72,7 @@ def apple_music_login_user(account):
                 "Sec-Fetch-Dest": "empty",
                 "Sec-Fetch-Mode": "cors",
                 "Sec-Fetch-Site": "same-site",
-                "origin": "https://beta.music.apple.com",
+                "origin": "https://music.apple.com",
             }
         )
 

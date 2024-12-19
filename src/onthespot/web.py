@@ -20,7 +20,8 @@ from .runtimedata import get_logger, account_pool, pending, download_queue, down
 from .search import get_search_results
 
 logger = get_logger("web")
-app = Flask(__name__)
+web_resources = os.path.join(config.app_root, 'resources', 'web')
+app = Flask('OnTheSpot', template_folder=web_resources, static_folder=web_resources)
 
 
 class QueueWorker(threading.Thread):

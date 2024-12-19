@@ -28,7 +28,6 @@ class FillAccountPool(QThread):
             if not account['active']:
                 continue
 
-
             if service == 'apple_music':
                 if self.gui is True:
                     self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['pltvcid']), True)

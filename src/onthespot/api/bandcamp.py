@@ -10,16 +10,30 @@ logger = get_logger("api.bandcamp")
 
 
 def bandcamp_login_user(account):
-    if account['uuid'] == 'public_bandcamp':
+    try:
+        # Ping to verify connectivity
+        requests.get('https://bandcamp.com')
+        if account['uuid'] == 'public_bandcamp':
+            account_pool.append({
+                "uuid": "public_bandcamp",
+                "username": 'bandcamp',
+                "service": 'bandcamp',
+                "status": "active",
+                "account_type": "public",
+                "bitrate": "128k",
+            })
+        return True
+    except Exception as e:
         account_pool.append({
-            "uuid": "public_bandcamp",
+            "uuid": account['uuid'],
             "username": 'bandcamp',
             "service": 'bandcamp',
-            "status": "active",
-            "account_type": "public",
-            "bitrate": "128k",
+            "status": "error",
+            "account_type": "N/A",
+            "bitrate": "N/A",
         })
-        return True
+        return False
+
 
 
 def bandcamp_add_account():
