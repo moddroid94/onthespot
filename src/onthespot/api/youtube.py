@@ -106,6 +106,19 @@ def youtube_get_track_metadata(_, item_id):
     else:
         length = ''
 
+    # Get thumbnail url
+    thumbnail_url = None
+    for thumbnail in info_dict.get('thumbnails', []):
+        current_url = thumbnail.get('url', '')
+        # Square thumbnails are stored on googleusercontent.com as
+        # opposed to ytimg.com. Select the last (highest quality)
+        # square thumbnail.
+        if 'googleusercontent.com' in current_url:
+            thumbnail_url = current_url
+
+    if not thumbnail_url and info_dict.get('thumbnails', []):
+        thumbnail_url = info_dict.get('thumbnails', [])[-1].get('url', '')
+
     info = {}
     info['title'] = info_dict.get('title', '')
     album = info_dict.get('album', '')
@@ -116,7 +129,8 @@ def youtube_get_track_metadata(_, item_id):
     # Commented thumbnails are periodically missing
     #info['image_url'] = info_dict.get('thumbnail', '')
     #info['image_url'] = f'https://i.ytimg.com/vi/{item_id}/maxresdefault.jpg'
-    info['image_url'] = f'https://i.ytimg.com/vi/{item_id}/hqdefault.jpg'
+    #info['image_url'] = f'https://i.ytimg.com/vi/{item_id}/hqdefault.jpg'
+    info['image_url'] = thumbnail_url
     info['language'] = info_dict.get('language', '')
     info['item_url'] = url
     # Windows takes issue with the following line, not sure why

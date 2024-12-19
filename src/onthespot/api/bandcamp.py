@@ -24,6 +24,7 @@ def bandcamp_login_user(account):
             })
         return True
     except Exception as e:
+        logger.error(f"Unknown Exception: {str(e)}")
         account_pool.append({
             "uuid": account['uuid'],
             "username": 'bandcamp',

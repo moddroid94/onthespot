@@ -1,5 +1,6 @@
 import html.parser
 import json
+import random
 import re
 import requests
 import uuid
@@ -220,9 +221,41 @@ def genurlkey(songid, md5origin, mediaver=4, fmt=1):
 
 
 def deezer_login_user(account):
+    uuid = account['uuid']
+    arl = account['login']['arl']
+    if uuid == 'public_deezer':
+        try:
+            # I have no idea why rentry 403s every scraping trick I've tried
+            ia_url = f"http://archive.org/wayback/available?url=https://rentry.co/firehawk52"
+            response = requests.get(ia_url)
+            if response.status_code != 200:
+                logger.error(f'Unable to fetch public deezer account from Internet Archive, status code: {response.raise_for_status()}')
+                raise Exception
+            data = response.json()
+
+            # Sometimes returns with info missing
+            try:
+                url = data['archived_snapshots']['closest']['url']
+            except Exception:
+                url = 'http://web.archive.org/web/20241206020314/https://rentry.co/firehawk52'
+
+            html_content = requests.get(url).text
+
+            table_match = re.search(r'<table class="ntable">(.*?)</table>', html_content, re.DOTALL)
+            if table_match:
+                table_content = table_match.group(1)
+                rows = re.findall(r'<tr>(.*?)</tr>', table_content, re.DOTALL)
+
+                public_arls = []
+                for row in rows[1:]:
+                    public_arl = re.search(r'<code>(.*?)</code>', row)
+                    public_arls.append(public_arl.group(1))
+                arl = random.choice(public_arls)
+        except Exception as e:
+            logger.error('Failed to fetch firehawk52 shared deezer accounts.')
+            return False
+
     try:
-        uuid = account['uuid']
-        arl = account['login']['arl']
         headers = {
             'Origin': 'https://www.deezer.com',
             'Accept-Encoding': 'utf-8',
@@ -232,10 +265,6 @@ def deezer_login_user(account):
         session.headers.update(headers)
         session.cookies.update({'arl': arl, 'comeback': '1'})
 
-        api_token = None
-
-        # Prepare to call the API
-        method = 'deezer.getUserData'
         params = {
             'api_version': "1.0",
             'api_token': 'null',
@@ -249,18 +278,24 @@ def deezer_login_user(account):
             headers=headers
         ).json()
 
+        account_type = 'free'
         bitrate = '128k'
         if user_data["results"]["USER"]["OPTIONS"]["web_lossless"]:
+            account_type = 'premium'
             bitrate = '1411k'
         elif user_data["results"]["USER"]["OPTIONS"]["web_hq"]:
+            account_type = 'premium'
             bitrate = '320k'
+
+        if uuid == 'public_deezer':
+            account_type = 'public'
 
         account_pool.append({
             "uuid": uuid,
             "username": arl,
             "service": "deezer",
             "status": "active",
-            "account_type": "premium" if user_data["results"]["USER"]["OPTIONS"]["web_lossless"] else "free",
+            "account_type": account_type,
             "bitrate": bitrate,
             "login": {
                 "arl": arl,

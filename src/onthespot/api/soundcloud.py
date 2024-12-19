@@ -89,7 +89,8 @@ def soundcloud_login_user(account):
 
             logger.info(f"Refreshed SoundCloud tokens as {client_id[:8]}******** {app_version[:8]}********")
             return True
-    except:
+    except Exception as e:
+        logger.error(f"Unknown Exception: {str(e)}")
         account_pool.append({
             "uuid": "public_soundcloud",
             "username": "N/A",

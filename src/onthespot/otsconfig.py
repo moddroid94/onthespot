@@ -139,6 +139,14 @@ class Config:
                     "active": True,
                 },
                 {
+                    "uuid": "public_deezer",
+                    "service": "deezer",
+                    "active": True,
+                    "login": {
+                        "arl": "public_deezer",
+                    }
+                },
+                {
                     "uuid": "public_soundcloud",
                     "service": "soundcloud",
                     "active": True,

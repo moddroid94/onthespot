@@ -656,7 +656,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>0</y>
+             <y>-1543</y>
              <width>627</width>
              <height>3255</height>
             </rect>
@@ -2201,7 +2201,7 @@
                      <item>
                       <widget class="QLabel" name="lb_chunk_size_3">
                        <property name="text">
-                        <string>Download Delay</string>
+                        <string>Download Delay (s)</string>
                        </property>
                       </widget>
                      </item>
@@ -2249,7 +2249,7 @@
                      <item>
                       <widget class="QLabel" name="lb_chunk_size">
                        <property name="text">
-                        <string> Download Chunk Size</string>
+                        <string> Download Chunk Size (b)</string>
                        </property>
                       </widget>
                      </item>

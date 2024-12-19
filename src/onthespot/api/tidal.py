@@ -87,7 +87,8 @@ def tidal_login_user(account):
             response = requests.post(f"{AUTH_URL}/token", data=data, auth=AUTH)
 
             if response.status_code != 200:
-                logger.info(f"Token refresh pending: {response.json()}")
+                logger.info(f"Error user's ip address is likely blocked, status code: {response.status_code}")
+                raise Exception
 
             auth_data = response.json()
 
@@ -114,7 +115,7 @@ def tidal_login_user(account):
         })
         return True
     except Exception as e:
-        logger.error(f"Unknown Exception: {str(e)}")
+        logger.error(f"Tidal Login Error: {str(e)}")
         account_pool.append({
             "uuid": account['uuid'],
             "username": account['login']['username'],
