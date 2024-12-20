@@ -31,7 +31,6 @@ pyinstaller --onefile \
     --hidden-import="zeroconf._handlers.answers" \
     --add-data="src/onthespot/gui/qtui/*.ui:onthespot/gui/qtui" \
     --add-data="src/onthespot/resources/icons/*.png:onthespot/resources/icons" \
-    --add-data="src/onthespot/resources/themes/*.qss:onthespot/resources/themes" \
     --add-data="src/onthespot/resources/translations/*.qm:onthespot/resources/translations" \
     $FFBIN \
     --paths="src/onthespot" \

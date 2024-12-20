@@ -38,7 +38,6 @@ pyinstaller --onefile --noconsole --noconfirm ^
     --hidden-import="zeroconf._utils.ipaddress" ^
     --hidden-import="zeroconf._handlers.answers" ^
     --add-data="src/onthespot/resources/translations/*.qm;onthespot/resources/translations" ^
-    --add-data="src/onthespot/resources/themes/*.qss;onthespot/resources/themes" ^
     --add-data="src/onthespot/gui/qtui/*.ui;onthespot/gui/qtui" ^
     --add-data="src/onthespot/resources/icons/*.png;onthespot/resources/icons" ^
     --add-binary="build/ffmpeg/ffmpeg-7.1-essentials_build/bin/ffmpeg.exe;onthespot/bin/ffmpeg" ^
