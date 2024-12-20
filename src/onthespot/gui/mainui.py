@@ -140,22 +140,27 @@ class MainWindow(QMainWindow):
 
 
     def open_theme_dialog(self):
-        color = QColorDialog().getColor()
+        colorpicker = QColorDialog(self)
+        colorpicker.setStyleSheet(config.get('theme'))
+        colorpicker.setWindowTitle("OnTheSpot - Notice")
 
-        if color.isValid():
-            r, g, b = color.red(), color.green(), color.blue()
-            luminance = (0.299 * r + 0.587 * g + 0.114 * b)
+        if colorpicker.exec() == QColorDialog.DialogCode.Accepted:
+            color = colorpicker.selectedColor()
 
-            if luminance < 128:
-                # Dark color, set light font
-                stylesheet = f'background-color: {color.name()}; color: white;'
-            else:
-                # Light color, set dark font
-                stylesheet = f'background-color: {color.name()}; color: black;'
-            config.set_('theme', stylesheet)
-            config.update()
-            self.centralwidget.setStyleSheet(stylesheet)
-            self.__splash_dialog.update_theme(stylesheet)
+            if color.isValid():
+                r, g, b = color.red(), color.green(), color.blue()
+                luminance = (0.299 * r + 0.587 * g + 0.114 * b)
+
+                if luminance < 128:
+                    # Dark color, set light font
+                    stylesheet = f'background-color: {color.name()}; color: white;'
+                else:
+                    # Light color, set dark font
+                    stylesheet = f'background-color: {color.name()}; color: black;'
+                config.set_('theme', stylesheet)
+                config.update()
+                self.centralwidget.setStyleSheet(stylesheet)
+                self.__splash_dialog.update_theme(stylesheet)
 
 
     def bind_button_inputs(self):
