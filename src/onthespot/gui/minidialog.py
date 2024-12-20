@@ -17,20 +17,13 @@ class MiniDialog(QDialog):
         uic.loadUi(os.path.join(self.path, 'qtui', 'notice.ui'), self)
         self.btn_close.clicked.connect(self.hide)
         logger.debug('Dialog item is ready..')
-
-        # Set theme
-        self.theme = config.get("theme")
-        self.theme_path = os.path.join(config.app_root, 'resources', 'themes', f'{self.theme}.qss')
-        if self.theme == "dark":
-            with open(self.theme_path, 'r') as f:
-                dark_theme = f.read()
-                self.setStyleSheet(dark_theme)
-        elif self.theme == "light":
-            with open(self.theme_path, 'r') as f:
-                light_theme = f.read()
-                self.setStyleSheet(light_theme)
+        self.setStyleSheet(config.get('theme'))
 
         self.lb_main.mousePressEvent = self.on_label_click
+
+
+    def update_theme(self, stylesheet):
+        self.setStyleSheet(stylesheet)
 
 
     def on_label_click(self, event):
@@ -44,6 +37,7 @@ class MiniDialog(QDialog):
             except Exception:
                 # No url in label
                 pass
+
 
     def run(self, content, btn_hidden=False):
         if btn_hidden:

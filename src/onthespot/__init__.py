@@ -50,6 +50,12 @@ def main():
     if isinstance(config.get("file_hertz"), str):
         config.set_("file_hertz", int(config.get("file_hertz")))
 
+    # Migration (>v1.0.4)
+    if config.get('theme') == 'dark':
+        config.set_('theme', f'background-color: #282828; color: white;')
+    elif config.get('theme') == 'light':
+        config.set_('theme', f'background-color: white; color: black;')
+
     # Set Application Version
     version = "v1.0.4"
     logger.info(f'OnTheSpot Version: {version}')

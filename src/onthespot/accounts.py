@@ -1,3 +1,4 @@
+from time import sleep
 from PyQt6.QtCore import QThread, pyqtSignal
 from .api.apple_music import apple_music_login_user, apple_music_get_token
 from .api.bandcamp import bandcamp_login_user
@@ -40,6 +41,7 @@ class FillAccountPool(QThread):
                 else:
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['pltvcid']), True)
+                        sleep(0.5)
                     continue
 
             elif service == 'bandcamp':
@@ -61,6 +63,7 @@ class FillAccountPool(QThread):
                 except Exception as e:
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}...!').format(account['login']['arl'][:30]), True)
+                        sleep(0.5)
                     continue
 
             elif service == 'soundcloud':
@@ -75,6 +78,7 @@ class FillAccountPool(QThread):
                 else:
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['client_id']), True)
+                        sleep(0.5)
                     continue
 
             elif service == 'spotify':
@@ -92,6 +96,7 @@ class FillAccountPool(QThread):
                 except Exception as e:
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
+                        sleep(0.5)
                     continue
 
             elif service == 'tidal':
@@ -106,6 +111,7 @@ class FillAccountPool(QThread):
                 else:
                     if self.gui is True:
                         self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
+                        sleep(0.5)
                     continue
 
             elif service == 'youtube':

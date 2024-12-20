@@ -656,7 +656,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-1543</y>
+             <y>-213</y>
              <width>627</width>
              <height>3255</height>
             </rect>
@@ -918,7 +918,7 @@
                      <item>
                       <widget class="QPushButton" name="toggle_theme_button">
                        <property name="text">
-                        <string>Dark/Light Theme</string>
+                        <string>Set Theme</string>
                        </property>
                       </widget>
                      </item>

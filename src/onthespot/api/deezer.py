@@ -223,8 +223,9 @@ def genurlkey(songid, md5origin, mediaver=4, fmt=1):
 def deezer_login_user(account):
     uuid = account['uuid']
     arl = account['login']['arl']
-    if uuid == 'public_deezer':
-        try:
+
+    try:
+        if uuid == 'public_deezer':
             # I have no idea why rentry 403s every scraping trick I've tried
             ia_url = f"http://archive.org/wayback/available?url=https://rentry.co/firehawk52"
             response = requests.get(ia_url)
@@ -251,11 +252,7 @@ def deezer_login_user(account):
                     public_arl = re.search(r'<code>(.*?)</code>', row)
                     public_arls.append(public_arl.group(1))
                 arl = random.choice(public_arls)
-        except Exception as e:
-            logger.error('Failed to fetch firehawk52 shared deezer accounts.')
-            return False
 
-    try:
         headers = {
             'Origin': 'https://www.deezer.com',
             'Accept-Encoding': 'utf-8',

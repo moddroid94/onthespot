@@ -20,6 +20,8 @@ def load_config(self):
     self.group_download_items.hide()
 
     # Icons
+    self.toggle_theme_button.setIcon(self.get_icon('light'))
+
     self.inp_language.insertItem(0, self.get_icon('en_US'), "English")
     self.inp_language.insertItem(1, self.get_icon('de_DE'), "Deutsch")
     self.inp_language.insertItem(2, self.get_icon('pt_PT'), "Português")

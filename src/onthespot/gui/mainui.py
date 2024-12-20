@@ -6,7 +6,7 @@ from urllib3.exceptions import MaxRetryError, NewConnectionError
 from PyQt6 import uic, QtGui
 from PyQt6.QtCore import QThread, QDir, Qt, pyqtSignal, QObject, QTimer
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton, QHBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QHeaderView, QLabel, QPushButton, QProgressBar, QTableWidgetItem, QFileDialog, QRadioButton, QHBoxLayout, QWidget, QColorDialog
 from ..accounts import get_account_token, FillAccountPool
 from ..api.apple_music import apple_music_add_account, apple_music_get_track_metadata
 from ..api.bandcamp import bandcamp_add_account, bandcamp_get_track_metadata
@@ -91,6 +91,7 @@ class MainWindow(QMainWindow):
         QApplication.setStyle("fusion")
         uic.loadUi(os.path.join(self.path, "qtui", "main.ui"), self)
         self.setWindowIcon(self.get_icon('onthespot'))
+        self.centralwidget.setStyleSheet(config.get('theme'))
 
         self.start_url = start_url
         self.inp_version.setText(config.get("version"))
@@ -126,23 +127,6 @@ class MainWindow(QMainWindow):
         # Bind button click
         self.bind_button_inputs()
 
-        # Set application theme
-        self.toggle_theme_button.clicked.connect(self.toggle_theme)
-        self.theme = config.get("theme")
-        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
-        if self.theme == "dark":
-            self.toggle_theme_button.setText(self.tr(" Light Theme"))
-            theme_icon = 'light'
-        elif self.theme == "light":
-            self.toggle_theme_button.setText(self.tr(" Dark Theme"))
-            theme_icon = 'dark'
-        self.toggle_theme_button.setIcon(self.get_icon(theme_icon))
-
-        with open(self.theme_path, 'r') as f:
-              theme = f.read()
-              self.setStyleSheet(theme)
-        logger.info(f"Set theme {self.theme}!")
-
         # Set the table header properties
         self.set_table_props()
         logger.info("Main window init completed !")
@@ -155,31 +139,23 @@ class MainWindow(QMainWindow):
         return self.icon_cache[name]
 
 
-    def load_dark_theme(self):
-        self.theme = "dark"
-        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
-        self.toggle_theme_button.setIcon(self.get_icon('light'))
-        self.toggle_theme_button.setText(self.tr(" Light Theme"))
-        with open(self.theme_path, 'r') as f:
-            dark_theme = f.read()
-            self.setStyleSheet(dark_theme)
+    def open_theme_dialog(self):
+        color = QColorDialog().getColor()
 
+        if color.isValid():
+            r, g, b = color.red(), color.green(), color.blue()
+            luminance = (0.299 * r + 0.587 * g + 0.114 * b)
 
-    def load_light_theme(self):
-        self.theme = "light"
-        self.theme_path = os.path.join(config.app_root,'resources', 'themes', f'{self.theme}.qss')
-        self.toggle_theme_button.setIcon(self.get_icon('dark'))
-        self.toggle_theme_button.setText(self.tr(" Dark Theme"))
-        with open(self.theme_path, 'r') as f:
-            light_theme = f.read()
-            self.setStyleSheet(light_theme)
-
-
-    def toggle_theme(self):
-        if self.theme == "light":
-            self.load_dark_theme()
-        elif self.theme == "dark":
-            self.load_light_theme()
+            if luminance < 128:
+                # Dark color, set light font
+                stylesheet = f'background-color: {color.name()}; color: white;'
+            else:
+                # Light color, set dark font
+                stylesheet = f'background-color: {color.name()}; color: black;'
+            config.set_('theme', stylesheet)
+            config.update()
+            self.centralwidget.setStyleSheet(stylesheet)
+            self.__splash_dialog.update_theme(stylesheet)
 
 
     def bind_button_inputs(self):
@@ -190,6 +166,8 @@ class MainWindow(QMainWindow):
 
         self.btn_save_config.clicked.connect(self.update_config)
         self.btn_reset_config.clicked.connect(self.reset_app_config)
+
+        self.toggle_theme_button.clicked.connect(self.open_theme_dialog)
 
         self.btn_progress_retry_all.clicked.connect(self.retry_all_failed_downloads)
         self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
