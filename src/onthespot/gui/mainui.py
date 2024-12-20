@@ -141,8 +141,10 @@ class MainWindow(QMainWindow):
 
     def open_theme_dialog(self):
         colorpicker = QColorDialog(self)
-        colorpicker.setStyleSheet(config.get('theme'))
+        colorpicker.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+        colorpicker.setWindowFlag(Qt.WindowType.Dialog, True)
         colorpicker.setWindowTitle("OnTheSpot - Notice")
+        colorpicker.setStyleSheet(config.get('theme'))
 
         if colorpicker.exec() == QColorDialog.DialogCode.Accepted:
             color = colorpicker.selectedColor()
@@ -176,8 +178,8 @@ class MainWindow(QMainWindow):
 
         self.btn_progress_retry_all.clicked.connect(self.retry_all_failed_downloads)
         self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
-        self.btn_download_root_browse.clicked.connect(self.__select_dir)
-        self.btn_download_tmp_browse.clicked.connect(self.__select_tmp_dir)
+        self.btn_download_root_browse.clicked.connect(lambda: self.select_dir(self.inp_download_root))
+        self.btn_download_tmp_browse.clicked.connect(lambda: self.select_dir(self.inp_tmp_dl_root))
         self.inp_tmp_dl_root.textChanged.connect(self.update_tmp_dir)
         self.inp_search_term.returnPressed.connect(self.fill_search_table)
         self.btn_progress_clear_complete.clicked.connect(self.remove_completed_from_download_list)
@@ -246,18 +248,13 @@ class MainWindow(QMainWindow):
         self.__show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
 
 
-    def __select_dir(self):
-        dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
+    def select_dir(self, output):
+        self.setStyleSheet(config.get('theme'))
+        dir_path = QFileDialog.getExistingDirectory(self, 'OnTheSpot - Notice', os.path.expanduser("~"))
         if dir_path.strip() != '':
-            self.inp_download_root.setText(QDir.toNativeSeparators(dir_path))
+            output.setText(QDir.toNativeSeparators(dir_path))
 
 
-    def __select_tmp_dir(self):
-        dir_path = QFileDialog.getExistingDirectory(None, 'Select a folder:', os.path.expanduser("~"))
-        if dir_path.strip() != '':
-            temp_path = QDir.toNativeSeparators(dir_path)
-            self.inp_tmp_dl_root.setText(temp_path)
-            temp_download_path.append(temp_path)
 
     def update_tmp_dir(self):
         temp_download_path.clear()
@@ -703,14 +700,10 @@ class MainWindow(QMainWindow):
         session = None
         self.lb_login_password.setDisabled(True)
         self.btn_login_add.setDisabled(True)
-
-        file_path, _ = QFileDialog.getOpenFileName(self, 'Select a file:', os.path.expanduser("~"), "Text Files (*.txt);;All Files (*);;")
+        self.select_dir(self.inp_login_password)
+        file_path = self.inp_login_password.text()
         if file_path:
-            try:
-                self.inp_login_password.setText(os.path.normpath(file_path.strip()))
-                session = apple_music_add_account(os.path.normpath(file_path.strip()))
-            except (TypeError, AttributeError):
-                pass
+            session = apple_music_add_account(file_path)
 
         if session:
             config.set_('parsing_acc_sn', len(account_pool))

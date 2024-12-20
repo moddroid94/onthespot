@@ -2,6 +2,7 @@ import os
 import re
 from PyQt6 import uic
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QDialog
 from ..otsconfig import config
 from ..runtimedata import get_logger
@@ -16,8 +17,11 @@ class MiniDialog(QDialog):
         self.path = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.path, 'qtui', 'notice.ui'), self)
         self.btn_close.clicked.connect(self.hide)
-        logger.debug('Dialog item is ready..')
+        self.setWindowIcon(QIcon(os.path.join(config.app_root, 'resources', 'icons', f'onthespot.png')))
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+        self.setWindowFlag(Qt.WindowType.Dialog, True)
         self.setStyleSheet(config.get('theme'))
+        logger.debug('Dialog item is ready..')
 
         self.lb_main.mousePressEvent = self.on_label_click
 
