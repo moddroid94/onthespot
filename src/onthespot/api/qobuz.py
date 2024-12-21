@@ -174,7 +174,7 @@ def qobuz_get_search_results(token, search_term, content_types):
                     'item_by': track.get('performer', '').get('name', ''),
                     'item_type': "track",
                     'item_service': "qobuz",
-                    'item_url': f'https://play.qobuz.com/track/{track['id']}',
+                    'item_url': f'https://play.qobuz.com/track/{track["id"]}',
                     'item_thumbnail_url': track.get("album", {}).get("image", {}).get("small", "")
                 })
 
@@ -188,7 +188,7 @@ def qobuz_get_search_results(token, search_term, content_types):
                     'item_by': album.get('artist', '').get('name', ''),
                     'item_type': "album",
                     'item_service': "qobuz",
-                    'item_url': f'https://play.qobuz.com/album/{album['id']}',
+                    'item_url': f'https://play.qobuz.com/album/{album["id"]}',
                     'item_thumbnail_url': album.get("image", {}).get("small", '')
                 })
 
@@ -202,7 +202,7 @@ def qobuz_get_search_results(token, search_term, content_types):
                     'item_by': artist.get('name', ''),
                     'item_type': "artist",
                     'item_service': "qobuz",
-                    'item_url': f'https://play.qobuz.com/artist/{artist['id']}',
+                    'item_url': f'https://play.qobuz.com/artist/{artist["id"]}',
                     'item_thumbnail_url': artist.get("picture", '')
                 })
 
@@ -216,7 +216,7 @@ def qobuz_get_search_results(token, search_term, content_types):
                     'item_by': playlist.get('owner', '').get('name', 'Qobuz'),
                     'item_type': "playlist",
                     'item_service': "qobuz",
-                    'item_url': f'https://play.qobuz.com/playlist/{playlist['id']}',
+                    'item_url': f'https://play.qobuz.com/playlist/{playlist["id"]}',
                     'item_thumbnail_url': playlist.get("image_rectangle", [])[0]
                 })
 
@@ -230,7 +230,7 @@ def qobuz_get_track_metadata(token, item_id):
 
     try:
         track_data = make_call(f'{BASE_URL}/track/get?track_id={item_id}', headers=headers)
-        album_data = make_call(f'{BASE_URL}/album/get?album_id={track_data.get('album', {}).get('id', '')}', headers=headers)
+        album_data = make_call(f'{BASE_URL}/album/get?album_id={track_data.get("album", {}).get("id", "")}', headers=headers)
     except Exception:
         return
 

@@ -57,7 +57,7 @@ def main():
         config.set_('theme', f'background-color: white; color: black;')
 
     # Set Application Version
-    version = "v1.0.4"
+    version = "v1.0.5"
     logger.info(f'OnTheSpot Version: {version}')
     config.set_("version", version)
 

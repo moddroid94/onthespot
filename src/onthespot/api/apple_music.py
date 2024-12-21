@@ -407,7 +407,7 @@ def apple_music_get_artist_album_ids(session, artist_id):
 
 def apple_music_get_playlist_data(session, playlist_id):
     logger.info(f"Get playlist data for playlist: {playlist_id}")
-    playlist_data = make_call(f"{BASE_URL}/catalog/{session.cookies.get("itua")}/playlists/{playlist_id}", session=session, skip_cache=True)
+    playlist_data = make_call(f"{BASE_URL}/catalog/{session.cookies.get('itua')}/playlists/{playlist_id}", session=session, skip_cache=True)
 
     playlist_name = playlist_data.get('data', [])[0].get('attributes', {}).get('name', '')
     playlist_by =  playlist_data.get('data', [])[0].get('attributes', {}).get('curatorName', '')

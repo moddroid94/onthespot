@@ -1,5 +1,5 @@
 Name:           onthespot
-Version:        1.0.4
+Version:        1.0.5
 Release:        1%{?dist}
 Summary:        A music downloader
 License:        GPL-2.0
@@ -47,5 +47,5 @@ install -m 0644 %{SOURCE2} %{buildroot}/usr/share/icons/hicolor/256x256/apps/
 /usr/share/applications/org.onthespot.OnTheSpot.desktop
 
 %changelog
-* Sat Nov 30 2024 Justin Donofrio <justin025@protonmail.com> - 1.0.4-1
+* Sat Nov 30 2024 Justin Donofrio <justin025@protonmail.com> - 1.0.5-1
 - Initial package creation

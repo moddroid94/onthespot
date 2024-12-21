@@ -1,5 +1,5 @@
 pkgname=onthespot-git
-pkgver=1.0.4
+pkgver=1.0.5
 _branch="main"
 pkgrel=1
 pkgdesc="Qt based music downloader written in python"
