@@ -23,6 +23,7 @@ mv squashfs-root OnTheSpot.AppDir
 
 echo " => Build OnTheSpot.whl"
 cd ..
+sed -i 's/git+https:\/\/github.com\/justin025\/librespot-python.git/librespot/' requirements.txt
 build/OnTheSpot.AppDir/AppRun -m build
 
 
