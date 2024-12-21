@@ -3,6 +3,7 @@ from .accounts import get_account_token
 from .api.apple_music import apple_music_get_search_results
 from .api.bandcamp import bandcamp_get_search_results
 from .api.deezer import deezer_get_search_results
+from .api.qobuz import qobuz_get_search_results
 from .api.soundcloud import soundcloud_get_search_results
 from .api.spotify import spotify_get_search_results
 from .api.tidal import tidal_get_search_results

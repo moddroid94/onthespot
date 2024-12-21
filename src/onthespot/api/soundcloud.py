@@ -125,10 +125,9 @@ def soundcloud_add_account():
 
 
 def soundcloud_get_token(parsing_index):
-    accounts = config.get("accounts")
-    client_id = accounts[parsing_index]['login']["client_id"]
-    app_version = accounts[parsing_index]['login']["app_version"]
-    app_locale = accounts[parsing_index]['login']["app_locale"]
+    client_id = account_pool[parsing_index]['login']["client_id"]
+    app_version = account_pool[parsing_index]['login']["app_version"]
+    app_locale = account_pool[parsing_index]['login']["app_locale"]
     return {"client_id": client_id, "app_version": app_version, "app_locale": app_locale}
 
 

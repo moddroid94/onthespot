@@ -13,6 +13,7 @@ from .accounts import get_account_token
 from .api.apple_music import apple_music_get_track_metadata, apple_music_get_decryption_key, apple_music_get_lyrics, apple_music_get_webplayback_info
 from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_website, genurlkey, calcbfkey, decryptfile
+from .api.qobuz import qobuz_get_track_metadata, qobuz_get_file_url
 from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import spotify_get_track_metadata, spotify_get_episode_metadata, spotify_get_lyrics
 from .api.tidal import tidal_get_track_metadata, tidal_get_lyrics, tidal_get_file_url
@@ -379,10 +380,10 @@ class DownloadWorker(QObject):
                                         if self.gui:
                                             self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
 
-                    elif item_service == "tidal":
+                    elif item_service in ("qobuz", "tidal"):
                         default_format = '.flac'
                         bitrate = "1411k"
-                        file_url = tidal_get_file_url(token, item_id)
+                        file_url = globals()[f"{item_service}_get_file_url"](token, item_id)
                         response = requests.get(file_url, stream=True)
                         total_size = int(response.headers.get('Content-Length', 0))
                         downloaded = 0

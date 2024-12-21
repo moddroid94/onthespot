@@ -4,6 +4,7 @@ from .accounts import get_account_token
 from .api.apple_music import apple_music_get_album_track_ids, apple_music_get_artist_album_ids, apple_music_get_playlist_data
 from .api.bandcamp import bandcamp_get_album_track_ids, bandcamp_get_artist_album_ids
 from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_data
+from .api.qobuz import qobuz_get_album_track_ids, qobuz_get_artist_album_ids, qobuz_get_playlist_data
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .api.spotify import spotify_get_album_track_ids, spotify_get_artist_album_ids, spotify_get_playlist_items, spotify_get_playlist_data, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_show_episode_ids
 from .api.tidal import tidal_get_album_track_ids, tidal_get_artist_album_ids, tidal_get_playlist_data, tidal_get_mix_data
@@ -15,11 +16,11 @@ logger = get_logger('parse_item')
 APPLE_MUSIC_URL_REGEX = re.compile(r'https?://music\.apple\.com/([a-z]{2})/(?P<type>album|playlist|artist)/(?P<title>[-a-z0-9]+)/(?P<id>[\w.]+)(?:\?i=(?P<track_id>\d+))?')
 BANDCAMP_URL_REGEX = re.compile(r'https?://[a-z0-9-]+\.bandcamp\.com(?:/(?P<type>track|album|music)/[a-z0-9-]+)?')
 DEEZER_URL_REGEX = re.compile(r'https?://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
+QOBUZ_URL_REGEX = re.compile(r"https?://(open\.|play\.)?qobuz.com/(?:[a-z]{2}-[a-z]{2}/)?(?P<type>album|track|artist|playlist|label)/(?P<id>[-a-z0-9]+)")
 SOUNDCLOUD_URL_REGEX = re.compile(r"https?://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https?://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
 TIDAL_URL_REGEX = re.compile(r"https?://(www\.|listen\.)?tidal.com/(browse/)?(?P<type>album|track|artist|playlist|mix)/(?P<id>[-a-z0-9]+)")
 YOUTUBE_URL_REGEX = re.compile(r"https?://(www\.|music\.)?youtube\.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
-#QOBUZ_INTERPRETER_URL_REGEX = re.compile(r"https?://www\.qobuz\.com/\w\w-\w\w/interpreter/[-\w]+/([-\w]+)")
 
 
 def parse_url(url):
@@ -46,6 +47,12 @@ def parse_url(url):
         item_id = match.group("id")
         item_type = match.group("type")
         item_service = 'deezer'
+
+    elif re.match(QOBUZ_URL_REGEX, url):
+        match = re.search(QOBUZ_URL_REGEX, url)
+        item_id = match.group("id")
+        item_type = match.group("type")
+        item_service = 'qobuz'
 
     elif re.match(SOUNDCLOUD_URL_REGEX, url):
         token = get_account_token('soundcloud')

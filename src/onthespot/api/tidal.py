@@ -132,9 +132,8 @@ def tidal_login_user(account):
 
 
 def tidal_get_token(parsing_index):
-    accounts = config.get("accounts")
-    access_token = accounts[parsing_index]['login']["access_token"]
-    country_code = accounts[parsing_index]['login']["country_code"]
+    access_token = account_pool[parsing_index]['login']["access_token"]
+    country_code = account_pool[parsing_index]['login']["country_code"]
     return {"access_token": access_token, "country_code": country_code}
 
 

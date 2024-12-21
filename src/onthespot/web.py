@@ -9,6 +9,7 @@ from .accounts import FillAccountPool, get_account_token
 from .api.apple_music import apple_music_get_track_metadata
 from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, deezer_add_account
+from .api.qobuz import qobuz_get_track_metadata
 from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
 from .api.tidal import tidal_get_track_metadata

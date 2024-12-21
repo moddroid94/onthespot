@@ -132,7 +132,7 @@ def apple_music_get_search_results(session, search_term, content_types):
     params['limit'] = config.get("max_search_results")
     params['types'] = ",".join(search_types)
 
-    results = make_call(f"{BASE_URL}/catalog/{session.cookies.get("itua")}/search", params=params, session=session, skip_cache=True)
+    results = make_call(f'{BASE_URL}/catalog/{session.cookies.get("itua")}/search', params=params, session=session, skip_cache=True)
 
     search_results = []
     for result in results['results']:

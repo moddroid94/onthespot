@@ -3,6 +3,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from .api.apple_music import apple_music_login_user, apple_music_get_token
 from .api.bandcamp import bandcamp_login_user
 from .api.deezer import deezer_login_user, deezer_get_token
+from .api.qobuz import qobuz_login_user, qobuz_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
 from .api.spotify import spotify_login_user, spotify_get_token
 from .api.tidal import tidal_login_user, tidal_get_token
@@ -29,93 +30,18 @@ class FillAccountPool(QThread):
             if not account['active']:
                 continue
 
-            if service == 'apple_music':
+            if self.gui is True:
+                self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['uuid']), True)
+
+            valid_login = globals()[f"{service}_login_user"](account)
+            if valid_login:
                 if self.gui is True:
-                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['pltvcid']), True)
-
-                valid_login = apple_music_login_user(account)
-                if valid_login:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['pltvcid']), True)
-                    continue
-                else:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['pltvcid']), True)
-                        sleep(0.5)
-                    continue
-
-            elif service == 'bandcamp':
-                bandcamp_login_user(account)
+                    self.progress.emit(self.tr('Session created for\n{0}!').format(account['uuid']), True)
                 continue
-
-            elif service == 'deezer':
+            else:
                 if self.gui is True:
-                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['arl'][:30]), True)
-                try:
-                    if deezer_login_user(account) is True:
-                        if self.gui is True:
-                            self.progress.emit(self.tr('Session created for\n{0}...!').format(account['login']['arl'][:30]), True)
-                        continue
-                    else:
-                        if self.gui is True:
-                            self.progress.emit(self.tr('Login failed for \n{0}...!').format(account['login']['arl'][:30]), True)
-                        continue
-                except Exception as e:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Login failed for \n{0}...!').format(account['login']['arl'][:30]), True)
-                        sleep(0.5)
-                    continue
-
-            elif service == 'soundcloud':
-                if self.gui is True:
-                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['client_id']), True)
-
-                valid_login = soundcloud_login_user(account)
-                if valid_login and account['uuid'] == 'public_soundcloud':
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['client_id']), True)
-                    continue
-                else:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['client_id']), True)
-                        sleep(0.5)
-                    continue
-
-            elif service == 'spotify':
-                if self.gui is True:
-                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['username']), True)
-                try:
-                    if spotify_login_user(account) is True:
-                        if self.gui is True:
-                            self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['username']), True)
-                        continue
-                    else:
-                        if self.gui is True:
-                            self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
-                        continue
-                except Exception as e:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
-                        sleep(0.5)
-                    continue
-
-            elif service == 'tidal':
-                if self.gui is True:
-                    self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['login']['username']), True)
-
-                valid_login = tidal_login_user(account)
-                if valid_login:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Session created for\n{0}!').format(account['login']['username']), True)
-                    continue
-                else:
-                    if self.gui is True:
-                        self.progress.emit(self.tr('Login failed for \n{0}!').format(account['login']['username']), True)
-                        sleep(0.5)
-                    continue
-
-            elif service == 'youtube':
-                youtube_login_user(account)
+                    self.progress.emit(self.tr('Login failed for \n{0}!').format(account['uuid']), True)
+                    sleep(0.5)
                 continue
 
         self.finished.emit()

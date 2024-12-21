@@ -11,6 +11,7 @@ from ..accounts import get_account_token, FillAccountPool
 from ..api.apple_music import apple_music_add_account, apple_music_get_track_metadata
 from ..api.bandcamp import bandcamp_add_account, bandcamp_get_track_metadata
 from ..api.deezer import deezer_add_account, deezer_get_track_metadata
+from ..api.qobuz import qobuz_add_account, qobuz_get_track_metadata
 from ..api.soundcloud import soundcloud_add_account, soundcloud_get_token, soundcloud_get_track_metadata
 from ..api.spotify import MirrorSpotifyPlayback, spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
 from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_track_metadata
@@ -627,8 +628,26 @@ class MainWindow(QMainWindow):
                 self.inp_login_password.clear()
                 )
 
-        # Soundcloud
+        # Qobuz
         elif self.inp_login_service.currentIndex() == 3:
+            self.inp_login_password.setDisabled(False)
+            self.lb_login_username.show()
+            self.lb_login_username.setText(self.tr("Email"))
+            self.inp_login_username.show()
+            self.lb_login_password.setText(self.tr("Password"))
+            self.lb_login_password.show()
+            self.inp_login_password.show()
+            self.btn_login_add.clicked.disconnect()
+            self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
+            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.clicked.connect(lambda:
+                (self.__show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
+                qobuz_add_account(self.inp_login_username.text(), self.inp_login_password.text())
+                )
+
+        # Soundcloud
+        elif self.inp_login_service.currentIndex() == 4:
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
@@ -650,7 +669,7 @@ class MainWindow(QMainWindow):
                 )
 
         # Spotify
-        elif self.inp_login_service.currentIndex() == 4:
+        elif self.inp_login_service.currentIndex() == 5:
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
@@ -667,7 +686,7 @@ class MainWindow(QMainWindow):
             self.btn_login_add.clicked.connect(self.add_spotify_account)
 
         # Tidal
-        elif self.inp_login_service.currentIndex() == 5:
+        elif self.inp_login_service.currentIndex() == 6:
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
@@ -680,7 +699,7 @@ class MainWindow(QMainWindow):
             self.btn_login_add.clicked.connect(self.add_tidal_account)
 
         # Youtube
-        elif self.inp_login_service.currentIndex() == 6:
+        elif self.inp_login_service.currentIndex() == 7:
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
