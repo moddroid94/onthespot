@@ -1,6 +1,7 @@
 import os
 # Required for librespot-python
 os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+import argparse
 import json
 import threading
 import time
@@ -186,7 +187,7 @@ def update_settings():
     return jsonify(success=True)
 
 
-def main():
+def main(host, port, debug):
     fill_account_pool = FillAccountPool()
 
     fill_account_pool.finished.connect(lambda: logger.info("Finished filling account pool."))
@@ -212,8 +213,14 @@ def main():
         mirrorplayback = MirrorSpotifyPlayback()
         mirrorplayback.start()
 
-    app.run(debug=True)
+    app.run(host=host, port=port, debug=debug)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', type=str, default='127.0.0.1', help='Host IP address')
+    parser.add_argument('--port', type=int, default=5000, help='Port number')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+    args = parser.parse_args()
+
+    main(args.host, args.port, args.debug)
