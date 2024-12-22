@@ -187,7 +187,13 @@ def update_settings():
     return jsonify(success=True)
 
 
-def main(host, port, debug):
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', type=str, default='127.0.0.1', help='Host IP address')
+    parser.add_argument('--port', type=int, default=5000, help='Port number')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+    args = parser.parse_args()
+
     fill_account_pool = FillAccountPool()
 
     fill_account_pool.finished.connect(lambda: logger.info("Finished filling account pool."))
@@ -213,14 +219,8 @@ def main(host, port, debug):
         mirrorplayback = MirrorSpotifyPlayback()
         mirrorplayback.start()
 
-    app.run(host=host, port=port, debug=debug)
+    app.run(host=args.host, port=args.port, debug=args.debug)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--host', type=str, default='127.0.0.1', help='Host IP address')
-    parser.add_argument('--port', type=int, default=5000, help='Port number')
-    parser.add_argument('--debug', action='store_true', help='Enable debug mode')
-    args = parser.parse_args()
-
-    main(args.host, args.port, args.debug)
+    main()
