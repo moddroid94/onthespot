@@ -155,11 +155,23 @@ class MainWindow(QMainWindow):
                 luminance = (0.299 * r + 0.587 * g + 0.114 * b)
 
                 if luminance < 128:
-                    # Dark color, set light font
-                    stylesheet = f'background-color: {color.name()}; color: white;'
+                    # Dark color, set light font and progress bar
+                    stylesheet = f'''
+                        background-color: {color.name()};
+                        color: white;
+                        QProgressBar::chunk {{
+                            background: #2596BE;
+                        }}
+                    '''
                 else:
-                    # Light color, set dark font
-                    stylesheet = f'background-color: {color.name()}; color: black;'
+                    # Light color, set dark font and progress bar
+                    stylesheet = f'''
+                        background-color: {color.name()};
+                        color: black;
+                        QProgressBar::chunk {{
+                            background: #81D4FA;
+                        }}
+                    '''
                 config.set_('theme', stylesheet)
                 config.update()
                 self.centralwidget.setStyleSheet(stylesheet)
