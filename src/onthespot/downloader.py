@@ -51,12 +51,11 @@ class DownloadWorker(QObject):
 
 
     def yt_dlp_progress_hook(self, item, d):
-        if self.gui:
-            progress = item['gui']['progress_bar'].value()
-            progress_str = re.search(r'(\d+\.\d+)%', d['_percent_str'])
-            updated_progress_value = round(float(progress_str.group(1))) - 1
-            if updated_progress_value >= progress:
-                self.progress.emit(item, self.tr("Downloading"), updated_progress_value)
+        progress = item['gui']['progress_bar'].value()
+        progress_str = re.search(r'(\d+\.\d+)%', d['_percent_str'])
+        updated_progress_value = round(float(progress_str.group(1))) - 1
+        if updated_progress_value >= progress:
+            self.progress.emit(item, self.tr("Downloading"), updated_progress_value)
 
 
     def run(self):
@@ -180,9 +179,8 @@ class DownloadWorker(QObject):
                                 self.progress.emit(item, self.tr("Adding To M3U"), 1)
                                 add_to_m3u_file(item, item_metadata)
 
-                        if self.gui:
-                            if item['item_status'] in ('Downloading', 'Setting Thumbnail', 'Adding To M3U'):
-                                self.progress.emit(item, self.tr("Already Exists"), 100)
+                        if self.gui and item['item_status'] in ('Downloading', 'Setting Thumbnail', 'Adding To M3U'):
+                            self.progress.emit(item, self.tr("Already Exists"), 100)
                         item['item_status'] = 'Already Exists'
                         logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
                         time.sleep(0.2)
@@ -250,16 +248,16 @@ class DownloadWorker(QObject):
                     elif item_service == "soundcloud":
                         bitrate = "128k"
                         default_format = ".mp3"
-                        progress_hook = lambda d: self.yt_dlp_progress_hook(item, d)
-                        ydl_opts = {
-                            "quiet": True,
-                            "no_warnings": True,
-                            "fixup": "never",
-                            "noprogress": True,
-                            "extract_audio": True,
-                            "outtmpl": temp_file_path,
-                            "progress_hooks": [progress_hook],
-                        }
+
+                        ydl_opts = {}
+                        ydl_opts['quiet'] = True
+                        ydl_opts['no_warnings'] = True
+                        ydl_opts['fixup'] = 'never'
+                        ydl_opts['noprogress'] = True
+                        ydl_opts['extract_audio'] = True
+                        ydl_opts['outtmpl'] = temp_file_path
+                        if self.gui:
+                            ydl_opts['progress_hooks'] = [lambda d: self.yt_dlp_progress_hook(item, d)]
                         with YoutubeDL(ydl_opts) as ydl:
                             ydl.download([item_metadata['file_url']])
 
@@ -349,16 +347,16 @@ class DownloadWorker(QObject):
                     elif item_service == "youtube":
                         default_format = '.opus'
                         bitrate = "256k"
-                        progress_hook = lambda d: self.yt_dlp_progress_hook(item, d)
-                        ydl_opts = {
-                            'quiet': True,
-                            "no_warnings": True,
-                            "noprogress": True,
-                            'extract_audio': True,
-                            'format': 'bestaudio',
-                            'outtmpl': temp_file_path,
-                            'progress_hooks': [progress_hook]
-                            }
+
+                        ydl_opts = {}
+                        ydl_opts['quiet'] = True
+                        ydl_opts['no_warnings'] = True
+                        ydl_opts['noprogress'] = True
+                        ydl_opts['extract_audio'] = True
+                        ydl_opts['format'] = 'bestaudio'
+                        ydl_opts['outtmpl'] = temp_file_path
+                        if self.gui:
+                            ydl_opts['progress_hooks'] = [lambda d: self.yt_dlp_progress_hook(item, d)]
                         with YoutubeDL(ydl_opts) as video:
                             video.download(f'https://www.youtube.com/watch?v={item["item_id"]}')
 
@@ -415,17 +413,16 @@ class DownloadWorker(QObject):
 
                         decryption_key = apple_music_get_decryption_key(token, stream_url, item_id)
 
-                        progress_hook = lambda d: self.yt_dlp_progress_hook(item, d)
-                        ydl_opts = {
-                            "quiet": True,
-                            "no_warnings": True,
-                            "outtmpl": temp_file_path,
-                            "allow_unplayable_formats": True,
-                            "fixup": "never",
-                            "allowed_extractors": ["generic"],
-                            "noprogress": True,
-                            "progress_hooks": [progress_hook],
-                        }
+                        ydl_opts = {}
+                        ydl_opts['quiet'] = True
+                        ydl_opts['no_warnings'] = True
+                        ydl_opts['outtmpl'] = temp_file_path
+                        ydl_opts['allow_unplayable_formats'] = True
+                        ydl_opts['fixup'] = 'never'
+                        ydl_opts['allowed_extractors'] = ['generic']
+                        ydl_opts['noprogress'] = True
+                        if self.gui:
+                            ydl_opts['progress_hooks'] = [lambda d: self.yt_dlp_progress_hook(item, d)]
                         with YoutubeDL(ydl_opts) as video:
                             video.download(stream_url)
 

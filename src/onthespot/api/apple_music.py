@@ -55,6 +55,7 @@ def apple_music_add_account(file_path):
 
 
 def apple_music_login_user(account):
+    logger.info('Logging into Apple Music account...')
     try:
         session = requests.Session()
         session.cookies.update(account['login'])

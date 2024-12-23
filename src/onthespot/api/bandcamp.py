@@ -10,6 +10,7 @@ logger = get_logger("api.bandcamp")
 
 
 def bandcamp_login_user(account):
+    logger.info('Logging into Bandcamp account...')
     try:
         # Ping to verify connectivity
         requests.get('https://bandcamp.com')

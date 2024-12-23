@@ -73,6 +73,7 @@ def tidal_add_account_pt2(device_code):
 
 
 def tidal_login_user(account):
+    logger.info('Logging into Tidal account...')
     try:
         # Ping to verify connectivity
         requests.get('https://tidal.com')

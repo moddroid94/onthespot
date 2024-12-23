@@ -261,12 +261,14 @@ class MainWindow(QMainWindow):
         self.__show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
 
 
-    def select_dir(self, output):
+    def select_dir(self, output, file=False):
         self.setStyleSheet(config.get('theme'))
-        dir_path = QFileDialog.getExistingDirectory(self, 'OnTheSpot - Notice', os.path.expanduser("~"))
-        if dir_path.strip() != '':
-            output.setText(QDir.toNativeSeparators(dir_path))
-
+        if file:
+            path, _ = QFileDialog.getOpenFileName(self, 'OnTheSpot - Select File', os.path.expanduser("~"), "All Files (*)")
+        else:
+            path = QFileDialog.getExistingDirectory(self, 'OnTheSpot - Select Directory', os.path.expanduser("~"))
+        if path.strip() != '':
+            output.setText(QDir.toNativeSeparators(path))
 
 
     def update_tmp_dir(self):
@@ -733,7 +735,7 @@ class MainWindow(QMainWindow):
         session = None
         self.lb_login_password.setDisabled(True)
         self.btn_login_add.setDisabled(True)
-        self.select_dir(self.inp_login_password)
+        self.select_dir(self.inp_login_password, file=True)
         file_path = self.inp_login_password.text()
         if file_path:
             session = apple_music_add_account(file_path)

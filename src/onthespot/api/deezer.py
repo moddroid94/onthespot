@@ -221,6 +221,7 @@ def genurlkey(songid, md5origin, mediaver=4, fmt=1):
 
 
 def deezer_login_user(account):
+    logger.info('Logging into Deezer account...')
     uuid = account['uuid']
     arl = account['login']['arl']
 

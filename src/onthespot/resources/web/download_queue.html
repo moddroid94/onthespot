@@ -6,16 +6,16 @@
     <title>OnTheSpot - Download Queue</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <script src="{{ url_for('static', filename='js/utils.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='utils.js') }}" defer></script>
 </head>
 <body>
     <div class="header">
         <ul>
-      <li><a href="https://github.com/justin025/onthespot/" target="_blank">OnTheSpot</a></li>
-      <li><a href="/search">Search</a></li>
-      <li><a class="active" href="/download_queue">Download Queue</a></li>
-      <li><a href="/settings">Settings</a></li>
-      <li><a href="/about">About</a></li>
+            <li class="hide-on-mobile"><a href="https://github.com/justin025/onthespot/" target="_blank">OnTheSpot</a></li>
+            <li><a href="/search">Search</a></li>
+            <li><a class="active" href="/download_queue">Downloads</a></li>
+            <li><a href="/settings">Settings</a></li>
+            <li><a href="/about">About</a></li>
         </ul>
     </div>
 
@@ -25,11 +25,14 @@
     <table>
         <thead>
             <tr>
-                <th>Item Name</th>
-                <th>Parent Category</th>
+                {% if config.show_search_thumbnails %}
+                <th>Image</th> <!-- This header is shown only if thumbnails are enabled -->
+                {% endif %}
+                <th>Name</th>
+                <th class="hide-on-mobile">By</th>
                 <th>Service</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody id="download-queue-table">
@@ -65,11 +68,17 @@
                     for (const key in data) {
                         if (data.hasOwnProperty(key)) {
                             const item = data[key];
-                            const row = document.createElement('tr');
 
-                            const itemImage = item.item_thumbnail ? `<img src="${item.item_thumbnail}" style="width: {{ config.search_thumb_height }}px; height: {{ config.search_thumb_height }}px; margin-right: 10px;">` : '';
+                            const showThumbnails = {{ config.show_download_thumbnails|tojson }};
+                            const itemImage = showThumbnails && item.item_thumbnail
+                            ? `<img src="${item.item_thumbnail}" style="width: {{ config.search_thumb_height }}px; height: {{ config.search_thumb_height }}px;">`
+                            : '';
 
                             const serviceIcon = item.item_service ? `<img src="/icons/${item.item_service}.png" style="width: 20px; height: 20px; margin-right: 5px;">` : '';
+
+                            const serviceNameSpan = document.createElement('span');
+                            serviceNameSpan.className = 'hide-on-mobile';
+                            serviceNameSpan.textContent = formatServiceName(item.item_service);
 
                             let copyButton = '';
                             let cancelButton = '';
@@ -98,19 +107,27 @@
                                 }
                             }
 
+                            const row = document.createElement('tr');
+
+                            // Conditionally create the cell for the image if thumbnails are enabled
+                            if (itemImage) {
+                                const cellImage = document.createElement('td');
+                                cellImage.innerHTML = itemImage; // Insert the item image
+                                row.appendChild(cellImage);
+                            }
+
                             const cell1 = document.createElement('td');
-                            cell1.style.display = "flex";
-                            cell1.style.alignItems = "center";
-                            cell1.style.paddingBottom = "14px";
-                            cell1.innerHTML = `${itemImage}${item.item_name}`;
+                            cell1.innerHTML = `${item.item_name}`;
                             row.appendChild(cell1);
 
                             const cell2 = document.createElement('td');
+                            cell2.className = 'hide-on-mobile';
                             cell2.textContent = capitalizeFirstLetter(item.parent_category) || 'N/A';
                             row.appendChild(cell2);
 
                             const cell3 = document.createElement('td');
-                            cell3.innerHTML = `${serviceIcon}${formatServiceName(item.item_service) || 'N/A'}`;
+                            cell3.innerHTML = `${serviceIcon}`;
+                            cell3.appendChild(serviceNameSpan);
                             row.appendChild(cell3);
 
                             const cell4 = document.createElement('td');
@@ -195,6 +212,34 @@
 
         window.onload = fetchItems;
         setInterval(fetchItems, 2000);
+    </script>
+    <script>
+        // Should be in user.js but flask doesn't seem to load them
+        function capitalizeFirstLetter(string) {
+            if (!string) return 'N/A';
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    console.log('Link copied to clipboard');
+                    // alert('Link copied to clipboard!');
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+        }
+
+        function formatServiceName(serviceName) {
+            const spacedServiceName = serviceName.replace(/_/g, ' ');
+
+            const formattedServiceName = spacedServiceName.split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+            return formattedServiceName;
+        }
     </script>
 </body>
 </html>

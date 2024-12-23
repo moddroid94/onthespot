@@ -25,6 +25,7 @@ def soundcloud_parse_url(url, token):
 
 
 def soundcloud_login_user(account):
+    logger.info('Logging into Soundcloud account...')
     try:
         # Add support for logging in
         if account['uuid'] == 'public_soundcloud':
@@ -85,9 +86,6 @@ def soundcloud_login_user(account):
                     "app_locale": "en",
                 }
             })
-
-
-            logger.info(f"Refreshed SoundCloud tokens as {client_id[:8]}******** {app_version[:8]}********")
             return True
     except Exception as e:
         logger.error(f"Unknown Exception: {str(e)}")

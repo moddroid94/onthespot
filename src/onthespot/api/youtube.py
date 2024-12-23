@@ -10,6 +10,7 @@ logger = get_logger("api.youtube")
 
 
 def youtube_login_user(account):
+    logger.info('Logging into Youtube account...')
     try:
         # Ping to verify connectivity
         requests.get('https://youtube.com')

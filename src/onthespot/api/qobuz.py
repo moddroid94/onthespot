@@ -32,6 +32,7 @@ def qobuz_add_account(email, password):
 
 
 def qobuz_login_user(account):
+    logger.info('Logging into Qobuz account...')
     try:
         session = requests.Session()
         response = session.get("https://play.qobuz.com/login")

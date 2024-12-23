@@ -78,7 +78,7 @@ def main():
         queue_worker.start()
 
     for i in range(config.get('maximum_download_workers')):
-        downloadworker = DownloadWorker(gui=True)
+        downloadworker = DownloadWorker(gui=False)
         downloadworker.start()
 
     fill_account_pool.wait()

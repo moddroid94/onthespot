@@ -6,59 +6,60 @@
     <title>OnTheSpot - Settings</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <script src="{{ url_for('static', filename='js/utils.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='utils.js') }}" defer></script>
 </head>
 <body>
     <div class="header">
         <ul>
-      <li><a href="https://github.com/justin025/onthespot/" target="_blank">OnTheSpot</a></li>
-      <li><a href="/search">Search</a></li>
-      <li><a href="/download_queue">Download Queue</a></li>
-      <li><a class="active" href="/settings">Settings</a></li>
-      <li><a href="/about">About</a></li>
+            <li class="hide-on-mobile"><a href="https://github.com/justin025/onthespot/" target="_blank">OnTheSpot</a></li>
+            <li><a href="/search">Search</a></li>
+            <li><a href="/download_queue">Downloads</a></li>
+            <li><a class="active" href="/settings">Settings</a></li>
+            <li><a href="/about">About</a></li>
         </ul>
     </div>
 
     <br>
 
     <h2>Account Pool</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Number</th>
-                <th>Username</th>
-                <th>Service</th>
-                <th>Account Type</th>
-                <th>Max Bitrate</th>
-                <th>Status</th>
-                <!--<th>Actions</th>-->
-            </tr>
-        </thead>
-        <tbody>
-            {% for account in account_pool %}
-            <tr>
-                <td>{{ loop.index - 1 }}</td>
-                <td>{{ account.username[:20] }}{% if account.username|length > 20 %}...{% endif %}</td>
-                <td><img src="/icons/{{ account.service }}.png" style="width: 20px; height: 20px; margin-right: 5px;">{{ account.service.replace('_', ' ').title() }}</td>
-                <td>{{ account.account_type|capitalize }}</td>
-                <td>{{ account.bitrate }}</td>
-                <td>{{ account.status|capitalize }}</td>
-                <!--<td>
-                    <button class="download-action-button" onclick="${onClickHandler}">
-                        <img src="icons/trash.png" alt="${altText}">
-                    </button>
-                </td>-->
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+    <form>
+        <table>
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">Username</th>
+                    <th>Service</th>
+                    <th class="hide-on-mobile">Account Type</th>
+                    <th>Max Bitrate</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in account_pool %}
+                <tr>
+                    <td>
+                        <label>
+                            <input type="radio" name="parsing_acc_sn" value="{{ loop.index - 1 }}" onclick="updateSettings()"
+                            {% if loop.index - 1 == config.parsing_acc_sn %} checked {% endif %}>
+                        </label>
+                    </td>
+                    <td style="max-width: 10px; overflow: hidden; text-overflow: ellipsis;">{{ account.username }}{% if account.username|length > 20 %}...{% endif %}</td>
+                    <td>
+                        <img src="/icons/{{ account.service }}.png" style="width: 20px; height: 20px; margin-right: 5px;">
+                        <span class="hide-on-mobile">{{ account.service.replace('_', ' ').title() }}</span>
+                    </td>
+                    <td class="hide-on-mobile">{{ account.account_type|capitalize }}</td>
+                    <td>{{ account.bitrate }}</td>
+                    <td>{{ account.status|capitalize }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    <p>*Logins are currently not supported, please login through the GUI*</p>
     <br>
 
     <form id="settings-form">
-
-        <label for="parsing_acc_sn">Active Account Number:</label>
-        <input type="number" id="parsing_acc_sn" value="{{ config.parsing_acc_sn }}" placeholder="Enter parsing account number"><br><br>
 
         <h2>General</h2>
 
@@ -324,8 +325,9 @@
     <script>
         function updateSettings() {
             console.log('Success:');
-            const parsingAccSn = document.getElementById('parsing_acc_sn').value;
-
+            const parsingAccSn = document.querySelector('input[name="parsing_acc_sn"]:checked')
+                ? document.querySelector('input[name="parsing_acc_sn"]:checked').value
+                : '';
             const downloadRoot = document.getElementById('download_root').value;
             const downloadCopyBtn = document.getElementById('download_copy_btn').checked;
             const downloadOpenBtn = document.getElementById('download_open_btn').checked;
@@ -519,5 +521,34 @@
             });
         }
     </script>
+        <script>
+            // Should be in user.js but flask doesn't seem to load them
+            function capitalizeFirstLetter(string) {
+                if (!string) return 'N/A';
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        console.log('Link copied to clipboard');
+                        // alert('Link copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+            }
+
+            function formatServiceName(serviceName) {
+                const spacedServiceName = serviceName.replace(/_/g, ' ');
+
+                const formattedServiceName = spacedServiceName.split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                return formattedServiceName;
+            }
+        </script>
+
 </body>
 </html>
