@@ -353,6 +353,15 @@ class MainWindow(QMainWindow):
 
         # Items
         pbar = QProgressBar()
+        pbar.setStyleSheet("""
+            QProgressBar {
+                text-align: center;
+            }
+            QProgressBar::chunk {
+                background-color: #2596BE;
+                color: white;
+            }
+        """)
         pbar.setValue(0)
         pbar.setMinimumHeight(30)
         if config.get("download_copy_btn"):
