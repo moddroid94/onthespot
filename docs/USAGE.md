@@ -42,8 +42,9 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **Thumbnail Size**|Change the size of thumbnail icons. |
 | **Max Search Results** | Limits the number of search results displayed for each media type (e.g., songs, albums). |
 | **Explicit Label** | Customize how explicit content is labeled in file names and the app (default: 🅴). |
-| **Disable Bulk Download Notices** | Disables pop-up messages while downloading multiple songs or episodes. |
+| **Disable Download Popups** | Disables pop-up messages while downloading items. |
 | **Mirror Spotify Playback** | Download currently playing song on the selected Spotify account |
+| **Only Download Youtube Audio** | If this setting is disabled OnTheSpot will download https://music.youtube.com/... as a track and https://www.youtube.com/... as a video. If this setting is enabled both will be downloaded, converted, and tagged in your selected audio format. |
 | **Windows 10 Explorer Thumbnails** | Embed thumbnails in a format that respects Windows 10 explorer and media player, this is an older format of ID3 and not widely supported. |
 | **Close To Tray** | Close application to tray on exit. |
 | **Check for Updates** | Automatically check for application updates. |

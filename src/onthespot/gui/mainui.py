@@ -738,7 +738,7 @@ class MainWindow(QMainWindow):
         elif self.inp_login_service.currentIndex() == 8:
             self.groupbox_generic_download_root.show()
             self.lb_generic_extractors.show()
-            self.lb_generic_extractors.setText(self.tr("<strong>The following services are officially supported by the Generic Downloader:</strong><br>{0}").format('<br>'.join(generic_list_extractors())))
+            self.lb_generic_extractors.setText(self.tr("<strong>The following services are officially supported by the Generic Downloader. Even if your website is not officially supported, generic downloader may be able to scrape media off it anyway.</strong><br>{0}").format('<br>'.join(generic_list_extractors())))
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()

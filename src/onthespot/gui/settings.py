@@ -141,6 +141,7 @@ def load_config(self):
     self.inp_embed_speechiness.setChecked(config.get('embed_speechiness'))
     self.inp_embed_valence.setChecked(config.get('embed_valence'))
     self.inp_mirror_spotify_playback.setChecked(config.get('mirror_spotify_playback'))
+    self.inp_only_download_youtube_audio.setChecked(config.get('only_download_youtube_audio'))
 
     # Disable scrolling to change values of QSpinBoxes and QComboBoxes
     do_not_scroll = [
@@ -281,4 +282,5 @@ def save_config(self):
     config.set_('embed_speechiness', self.inp_embed_speechiness.isChecked())
     config.set_('embed_valence', self.inp_embed_valence.isChecked())
     config.set_('mirror_spotify_playback', self.inp_mirror_spotify_playback.isChecked())
+    config.set_('only_download_youtube_audio', self.inp_only_download_youtube_audio.isChecked())
     config.update()

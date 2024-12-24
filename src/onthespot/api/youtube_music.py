@@ -65,7 +65,7 @@ def youtube_music_get_search_results(_, search_term, content_types):
                     'item_name': result['title'],
                     'item_by': result['channel'],
                     'item_type': "track",
-                    'item_service': "youtube",
+                    'item_service': "youtube_music",
                     'item_url': result['url'],
                     'item_thumbnail_url': f'https://i.ytimg.com/vi/{result["id"]}/hqdefault.jpg'
                 })

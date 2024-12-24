@@ -12,6 +12,7 @@ from .api.youtube_music import youtube_music_get_channel_track_ids, youtube_musi
 from .api.generic import generic_get_track_metadata
 from .runtimedata import account_pool, get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
 from .utils import format_local_id
+from .otsconfig import config
 
 logger = get_logger('parse_item')
 APPLE_MUSIC_URL_REGEX = re.compile(r'https?://music\.apple\.com/([a-z]{2})/(?P<type>album|playlist|artist)(?:/(?P<title>[-a-z0-9]+))?/(?P<id>[\w.-]+)(?:\?i=(?P<track_id>\d+))?(?:&.*)?$')
@@ -21,8 +22,8 @@ QOBUZ_URL_REGEX = re.compile(r"https?://(open\.|play\.)?qobuz.com/(?:[a-z]{2}-[a
 SOUNDCLOUD_URL_REGEX = re.compile(r"https?://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https?://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
 TIDAL_URL_REGEX = re.compile(r"https?://(www\.|listen\.)?tidal.com/(browse/)?(?P<type>album|track|artist|playlist|mix)/(?P<id>[-a-z0-9]+)")
-#YOUTUBE_URL_REGEX = re.compile(r"https?://(www\.|music\.)?youtube\.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
-YOUTUBE_URL_REGEX = re.compile(r"https?://music.youtube.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
+YOUTUBE_URL_REGEX = re.compile(r"https?://(www\.|music\.)?youtube\.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
+YOUTUBE_MUSIC_URL_REGEX = re.compile(r"https?://music.youtube.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
 
 
 def parse_url(url):
@@ -82,8 +83,22 @@ def parse_url(url):
             item_type = match.group('type')
             item_id = match.group('id')
 
-    elif re.match(YOUTUBE_URL_REGEX, url):
+    elif re.match(YOUTUBE_URL_REGEX, url) and config.get('only_download_youtube_audio'):
         match = re.search(YOUTUBE_URL_REGEX, url)
+        if match:
+            item_service = 'youtube_music'
+            if match.group('video_id'):
+                item_type = 'track'
+                item_id = match.group('video_id')
+            if match.group('channel_id'):
+                item_type = 'artist'
+                item_id = match.group('channel_id')
+            if match.group('playlist_id'):
+                item_type = 'playlist'
+                item_id = match.group('playlist_id')
+
+    elif re.match(YOUTUBE_MUSIC_URL_REGEX, url):
+        match = re.search(YOUTUBE_MUSIC_URL_REGEX, url)
         if match:
             item_service = 'youtube_music'
             if match.group('video_id'):
