@@ -444,7 +444,7 @@ class DownloadWorker(QObject):
                     elif item_service == 'generic':
                         temp_file_path = ''
                         ydl_opts = {}
-                        ydl_opts['format'] = 'best'
+                        ydl_opts['format'] = 'bestvideo+bestaudio/best'
                         ydl_opts['quiet'] = True
                         ydl_opts['no_warnings'] = True
                         ydl_opts['noprogress'] = True
