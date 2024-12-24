@@ -72,6 +72,7 @@ def load_config(self):
     self.inp_metadata_seperator.setText(config.get("metadata_seperator"))
     self.inp_maximum_queue_workers.setValue(config.get("maximum_queue_workers"))
     self.inp_maximum_download_workers.setValue(config.get("maximum_download_workers"))
+    self.inp_maximum_generic_resolution.setValue(config.get("maximum_generic_resolution"))
 
     # Checkboxes
     self.inp_overwrite_existing_metadata.setChecked(config.get("overwrite_existing_metadata"))
@@ -149,6 +150,7 @@ def load_config(self):
         "inp_language",
         "inp_max_search_results",
         "inp_search_thumb_height",
+        "inp_maximum_generic_resolution",
         "inp_file_hertz",
         "inp_download_delay",
         "inp_chunk_size",
@@ -215,6 +217,7 @@ def save_config(self):
     config.set_('illegal_character_replacement', self.inp_illegal_character_replacement.text())
     config.set_('maximum_queue_workers', self.inp_maximum_queue_workers.value())
     config.set_('maximum_download_workers', self.inp_maximum_download_workers.value())
+    config.set_('maximum_generic_resolution', self.inp_maximum_generic_resolution.value())
 
     # Checkboxes: config.set_('key', bool)
     config.set_('overwrite_existing_metadata', self.inp_overwrite_existing_metadata.isChecked())

@@ -656,9 +656,9 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-967</y>
+             <y>-976</y>
              <width>627</width>
-             <height>3646</height>
+             <height>3648</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1438,6 +1438,12 @@
                </item>
                <item>
                 <widget class="QGroupBox" name="gb0_7">
+                 <property name="autoFillBackground">
+                  <bool>false</bool>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true"/>
+                 </property>
                  <property name="title">
                   <string/>
                  </property>
@@ -1446,7 +1452,61 @@
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_102">
                   <item>
+                   <widget class="QGroupBox" name="groupBox_136">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_247">
+                     <item>
+                      <widget class="QLabel" name="lb_maximum_generic_resolution">
+                       <property name="text">
+                        <string>Maximum Generic Resolution</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_22">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_maximum_generic_resolution">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>false</bool>
+                       </property>
+                       <property name="minimum">
+                        <number>0</number>
+                       </property>
+                       <property name="maximum">
+                        <number>10000000</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
                    <widget class="QGroupBox" name="group_playlist_cfg_m3u_8">
+                    <property name="styleSheet">
+                     <string notr="true"/>
+                    </property>
                     <property name="title">
                      <string/>
                     </property>
@@ -1480,6 +1540,18 @@
                     </layout>
                    </widget>
                   </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb0_6">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_100">
                   <item>
                    <widget class="QGroupBox" name="group_playlist_cfg_m3u_9">
                     <property name="title">
@@ -1515,18 +1587,6 @@
                     </layout>
                    </widget>
                   </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb0_6">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_100">
                   <item>
                    <widget class="QGroupBox" name="group_playlist_cfg_m3u_7">
                     <property name="title">
@@ -1561,19 +1621,6 @@
                      </item>
                     </layout>
                    </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_17">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                  </layout>
                 </widget>

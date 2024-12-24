@@ -45,6 +45,7 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **Disable Download Popups** | Disables pop-up messages while downloading items. |
 | **Mirror Spotify Playback** | Download currently playing song on the selected Spotify account |
 | **Only Download Youtube Audio** | If this setting is disabled OnTheSpot will download https://music.youtube.com/... as a track and https://www.youtube.com/... as a video. If this setting is enabled both will be downloaded, converted, and tagged in your selected audio format. |
+| **Only Download Youtube Audio** | Maximum resolution to download generic videos in, if user specified resolution is not found the app will select based on yt-dlp's 'best' format. |
 | **Windows 10 Explorer Thumbnails** | Embed thumbnails in a format that respects Windows 10 explorer and media player, this is an older format of ID3 and not widely supported. |
 | **Close To Tray** | Close application to tray on exit. |
 | **Check for Updates** | Automatically check for application updates. |

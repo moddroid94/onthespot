@@ -89,6 +89,7 @@ class Config:
             "search_thumb_height": 60, # Thumbnail height ( they are of equal width and height )
             "metadata_seperator": "; ", # Seperator used for metadata fields that have multiple values
             "only_download_youtube_audio": True, # Convert Youtube videos to the user specified format
+            "maximum_generic_resolution": 1080, # Maximum video resolution for generic downloader
             "mirror_spotify_playback": False, # Mirror spotify playback
             "windows_10_explorer_thumbnails": False, # Use old id3 format to support windows 10 explorer (not the standard format)
             "overwrite_existing_metadata": False, # Overwrite metadata in files that 'Already Exist'

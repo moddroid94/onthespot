@@ -99,6 +99,9 @@
         <label for="only_download_youtube_audio">Only Download Youtube Audio</label>
         <input type="checkbox" id="only_download_youtube_audio" {% if config.only_download_youtube_audio %}checked{% endif %}><br><br>
 
+        <label for="maximum_generic_resolution">Maximum Generic Resolution:</label>
+        <input type="number" id="maximum_generic_resolution" value="{{ config.maximum_generic_resolution }}" placeholder="Enter maximum generic resolution"><br><br>
+
         <label for="windows_10_explorer_thumbnails">Windows 10 Explorer Thumbnails:</label>
         <input type="checkbox" id="windows_10_explorer_thumbnails" {% if config.windows_10_explorer_thumbnails %}checked{% endif %}><br><br>
 
@@ -343,6 +346,7 @@
             const explicitLabel = document.getElementById('explicit_label').value;
             const mirrorSpotifyPlayback = document.getElementById('mirror_spotify_playback').checked;
             const onlyDownloadYoutubeAudio = document.getElementById('only_download_youtube_audio').checked;
+            const maximumGenericResolution = document.getElementById('maximum_generic_resolution').value;
             const windows10ExplorerThumbnails = document.getElementById('windows_10_explorer_thumbnails').checked;
             const checkForUpdates = document.getElementById('check_for_updates').checked;
 
@@ -432,6 +436,7 @@
                 explicit_label: explicitLabel,
                 mirror_spotify_playback: mirrorSpotifyPlayback,
                 only_download_youtube_audio: onlyDownloadYoutubeAudio,
+                maximum_generic_resolution: maximumGenericResolution,
                 windows_10_explorer_thumbnails: windows10ExplorerThumbnails,
                 check_for_updates: checkForUpdates,
                 enable_search_tracks: enableSearchTracks,
