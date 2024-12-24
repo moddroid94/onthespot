@@ -56,6 +56,15 @@ def main():
     elif config.get('theme') == 'light':
         config.set_('theme', f'background-color: white; color: black;')
 
+    # Migration (>v1.0.5)
+    cfg_copy = config.get('accounts').copy()
+    for account in cfg_copy:
+        if account['uuid'] == 'public_youtube':
+            account['uuid'] = 'public_youtube_music'
+            account['service'] = 'youtube_music'
+    config.set_('accounts', cfg_copy)
+
+
     # Set Application Version
     version = "v1.0.5"
     logger.info(f'OnTheSpot Version: {version}')

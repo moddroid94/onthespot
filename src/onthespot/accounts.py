@@ -7,7 +7,8 @@ from .api.qobuz import qobuz_login_user, qobuz_get_token
 from .api.soundcloud import soundcloud_login_user, soundcloud_get_token
 from .api.spotify import spotify_login_user, spotify_get_token
 from .api.tidal import tidal_login_user, tidal_get_token
-from .api.youtube import youtube_login_user
+from .api.youtube_music import youtube_music_login_user
+from .api.generic import generic_login_user
 from .otsconfig import config
 from .runtimedata import get_logger, account_pool
 
@@ -30,16 +31,16 @@ class FillAccountPool(QThread):
             if not account['active']:
                 continue
 
-            if self.gui is True:
+            if self.gui:
                 self.progress.emit(self.tr('Attempting to create session for\n{0}...').format(account['uuid']), True)
 
             valid_login = globals()[f"{service}_login_user"](account)
             if valid_login:
-                if self.gui is True:
+                if self.gui:
                     self.progress.emit(self.tr('Session created for\n{0}!').format(account['uuid']), True)
                 continue
             else:
-                if self.gui is True:
+                if self.gui:
                     self.progress.emit(self.tr('Login failed for \n{0}!').format(account['uuid']), True)
                     sleep(0.5)
                 continue
@@ -48,7 +49,7 @@ class FillAccountPool(QThread):
 
 
 def get_account_token(item_service):
-    if item_service in ('bandcamp', 'youtube'):
+    if item_service in ('bandcamp', 'youtube_music', 'generic'):
         return
     parsing_index = config.get('parsing_acc_sn')
     service = account_pool[parsing_index]['service']

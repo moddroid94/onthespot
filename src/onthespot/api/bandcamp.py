@@ -37,7 +37,6 @@ def bandcamp_login_user(account):
         return False
 
 
-
 def bandcamp_add_account():
     cfg_copy = config.get('accounts').copy()
     new_user = {

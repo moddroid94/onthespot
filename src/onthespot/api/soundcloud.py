@@ -201,7 +201,8 @@ def soundcloud_get_track_metadata(token, item_id):
     params["app_locale"] = token['app_locale']
 
     track_data = make_call(f"{BASE_URL}/tracks/{item_id}", headers=headers, params=params)
-    track_file = requests.get(track_data["media"]["transcodings"][0]["url"], headers=headers, params=params).json()
+    # Some tracks fail with a drm error, disabling this in favour of yt-dlp's file parser
+    #track_file = requests.get(track_data["media"]["transcodings"][0]["url"], headers=headers, params=params).json()
     track_webpage = make_call(f"{track_data['permalink_url']}/albums", text=True)
     # Parse album webpage
     start_index = track_webpage.find('<h2>Appears in albums</h2>')
@@ -271,7 +272,7 @@ def soundcloud_get_track_metadata(token, item_id):
     info['title'] = track_data.get("title", "")
     info['track_number'] = track_number
     info['total_tracks'] = total_tracks
-    info['file_url'] = track_file.get("url", "")
+    #info['file_url'] = track_file.get("url", "")
     info['length'] = str(track_data.get("media", {}).get("transcodings", [{}])[0].get("duration", 0))
     info['artists'] = artists
     info['album_name'] = album_name

@@ -14,7 +14,7 @@ from .api.qobuz import qobuz_get_track_metadata
 from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
 from .api.tidal import tidal_get_track_metadata
-from .api.youtube import youtube_get_track_metadata
+from .api.youtube_music import youtube_music_get_track_metadata
 from .downloader import DownloadWorker
 from .otsconfig import config_dir, config
 from .parse_item import parsingworker, parse_url

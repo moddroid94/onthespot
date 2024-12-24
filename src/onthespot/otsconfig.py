@@ -47,6 +47,7 @@ class Config:
             "parsing_acc_sn": 0, # Serial number of account that will be used for parsing links
             "rotate_acc_sn": False, # Rotate active account for parsing and downloading tracks
             "download_root": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for downloads
+            "generic_download_root": os.path.join(os.path.expanduser("~"), "Downloads", "OnTheSpot"), # Root dir for downloads
             "download_delay": 3, # Seconds to wait before next download attempt
             "maximum_download_workers": 1, # Maximum number of download workers
             "maximum_queue_workers": 1, # Maximum number of queue workers
@@ -157,8 +158,8 @@ class Config:
                     }
                 },
                 {
-                    "uuid": "public_youtube",
-                    "service": "youtube",
+                    "uuid": "public_youtube_music",
+                    "service": "youtube_music",
                     "active": True,
                 },
             ] # Saved account information

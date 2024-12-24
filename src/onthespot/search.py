@@ -7,7 +7,7 @@ from .api.qobuz import qobuz_get_search_results
 from .api.soundcloud import soundcloud_get_search_results
 from .api.spotify import spotify_get_search_results
 from .api.tidal import tidal_get_search_results
-from .api.youtube import youtube_get_search_results
+from .api.youtube_music import youtube_music_get_search_results
 from .otsconfig import config
 from .parse_item import parse_url
 from .runtimedata import account_pool, get_logger
@@ -41,7 +41,9 @@ def get_search_results(search_term, content_types=None):
             return True
 
         logger.info(f"Search clicked with value term {search_term}")
-        if search_term != "":
-            account_type = account_pool[config.get('parsing_acc_sn')]['service']
-            token = get_account_token(account_type)
-            return globals()[f"{account_type}_get_search_results"](token, search_term, content_types)
+        service = account_pool[config.get('parsing_acc_sn')]['service']
+        if search_term != "" and service != 'generic':
+            token = get_account_token(service)
+            return globals()[f"{service}_get_search_results"](token, search_term, content_types)
+        else:
+            return False

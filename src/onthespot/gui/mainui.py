@@ -15,7 +15,8 @@ from ..api.qobuz import qobuz_add_account, qobuz_get_track_metadata
 from ..api.soundcloud import soundcloud_add_account, soundcloud_get_token, soundcloud_get_track_metadata
 from ..api.spotify import MirrorSpotifyPlayback, spotify_get_token, spotify_get_track_metadata, spotify_get_episode_metadata, spotify_new_session
 from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_track_metadata
-from ..api.youtube import youtube_add_account, youtube_get_track_metadata
+from ..api.youtube_music import youtube_music_add_account, youtube_music_get_track_metadata
+from ..api.generic import generic_add_account, generic_get_track_metadata, generic_list_extractors
 from ..downloader import DownloadWorker
 from ..otsconfig import config
 from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, pending, pending_lock, get_logger, temp_download_path
@@ -156,22 +157,10 @@ class MainWindow(QMainWindow):
 
                 if luminance < 128:
                     # Dark color, set light font and progress bar
-                    stylesheet = f'''
-                        background-color: {color.name()};
-                        color: white;
-                        QProgressBar::chunk {{
-                            background: #2596BE;
-                        }}
-                    '''
+                    stylesheet = f'background-color: {color.name()}; color: white;'
                 else:
                     # Light color, set dark font and progress bar
-                    stylesheet = f'''
-                        background-color: {color.name()};
-                        color: black;
-                        QProgressBar::chunk {{
-                            background: #81D4FA;
-                        }}
-                    '''
+                    stylesheet = f'background-color: {color.name()}; color: black;'
                 config.set_('theme', stylesheet)
                 config.update()
                 self.centralwidget.setStyleSheet(stylesheet)
@@ -192,6 +181,8 @@ class MainWindow(QMainWindow):
         self.btn_progress_retry_all.clicked.connect(self.retry_all_failed_downloads)
         self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
         self.btn_download_root_browse.clicked.connect(lambda: self.select_dir(self.inp_download_root))
+        self.btn_generic_download_root_browse.clicked.connect(lambda: self.select_dir(self.inp_generic_download_root))
+
         self.btn_download_tmp_browse.clicked.connect(lambda: self.select_dir(self.inp_tmp_dl_root))
         self.inp_tmp_dl_root.textChanged.connect(self.update_tmp_dir)
         self.inp_search_term.returnPressed.connect(self.fill_search_table)
@@ -431,19 +422,19 @@ class MainWindow(QMainWindow):
         rows = self.tbl_dl_progress.rowCount()
         self.tbl_dl_progress.insertRow(rows)
         if item_metadata.get('explicit', ''):
-            title = config.get('explicit_label', '') + ' ' + item_metadata['title']
+            title = config.get('explicit_label', '') + ' ' + item_metadata.get('title', '')
         else:
-            title = item_metadata['title']
-        if config.get('show_download_thumbnails'):
+            title = item_metadata.get('title', '')
+        if config.get('show_download_thumbnails') and item_metadata.get('image_url', ''):
             self.tbl_dl_progress.setRowHeight(rows, config.get("search_thumb_height"))
-            item_label = LabelWithThumb(title, item_metadata['image_url'])
+            item_label = LabelWithThumb(title, item_metadata.get('image_url', ''))
         else:
             item_label = QLabel(self.tbl_dl_progress)
             item_label.setText(title)
         # Add To List
         self.tbl_dl_progress.setItem(rows, 0, QTableWidgetItem(str(item['local_id'])))
         self.tbl_dl_progress.setCellWidget(rows, 1, item_label)
-        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata['artists']))
+        self.tbl_dl_progress.setItem(rows, 2, QTableWidgetItem(item_metadata.get('artists', '')))
         self.tbl_dl_progress.setItem(rows, 3, QTableWidgetItem(item_category))
         self.tbl_dl_progress.setItem(rows, 4, service_label)
         self.tbl_dl_progress.setCellWidget(rows, 5, status_label)
@@ -601,6 +592,9 @@ class MainWindow(QMainWindow):
 
 
     def set_login_fields(self):
+        self.groupbox_generic_download_root.hide()
+        self.lb_generic_extractors.hide()
+
         # Apple Music
         if self.inp_login_service.currentIndex() == 0:
             self.inp_login_password.setDisabled(True)
@@ -723,7 +717,7 @@ class MainWindow(QMainWindow):
             self.btn_login_add.setText(self.tr("Add Tidal Account"))
             self.btn_login_add.clicked.connect(self.add_tidal_account)
 
-        # Youtube
+        # Youtube Music
         elif self.inp_login_service.currentIndex() == 7:
             self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
@@ -733,10 +727,29 @@ class MainWindow(QMainWindow):
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
             self.btn_login_add.setIcon(QIcon())
-            self.btn_login_add.setText(self.tr("Add Youtube Account"))
+            self.btn_login_add.setText(self.tr("Add Youtube Music Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.__show_popup_dialog(self.tr("Public account added, please restart the app.")) or True) and
                 youtube_add_account()
+                )
+
+        # Generic (yt-dlp)
+        elif self.inp_login_service.currentIndex() == 8:
+            self.groupbox_generic_download_root.show()
+            self.lb_generic_extractors.show()
+            self.lb_generic_extractors.setText(self.tr("<strong>The following services are officially supported by the Generic Downloader:</strong><br>{0}").format('<br>'.join(generic_list_extractors())))
+            self.inp_login_password.setDisabled(False)
+            self.lb_login_username.hide()
+            self.inp_login_username.hide()
+            self.lb_login_password.hide()
+            self.inp_login_password.hide()
+            self.btn_login_add.clicked.disconnect()
+            self.btn_login_add.show()
+            self.btn_login_add.setIcon(QIcon())
+            self.btn_login_add.setText(self.tr("Add Generic Downloader"))
+            self.btn_login_add.clicked.connect(lambda:
+                (self.__show_popup_dialog(self.tr("Generic Downloader added, please restart the app.")) or True) and
+                generic_add_account()
                 )
 
 
@@ -833,6 +846,10 @@ class MainWindow(QMainWindow):
             return
         elif results is True:
             self.__show_popup_dialog(self.tr("Item is being parsed and will be added to the download queue shortly."))
+            self.inp_search_term.setText('')
+            return
+        elif results is False and account_pool[config.get('parsing_acc_sn')]['service'] == 'generic':
+            self.__show_popup_dialog(self.tr("Generic Downloader does not support search, please enter a supported url."))
             self.inp_search_term.setText('')
             return
         elif results is False:

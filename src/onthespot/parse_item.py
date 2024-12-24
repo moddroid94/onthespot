@@ -8,8 +8,9 @@ from .api.qobuz import qobuz_get_album_track_ids, qobuz_get_artist_album_ids, qo
 from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .api.spotify import spotify_get_album_track_ids, spotify_get_artist_album_ids, spotify_get_playlist_items, spotify_get_playlist_data, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_show_episode_ids
 from .api.tidal import tidal_get_album_track_ids, tidal_get_artist_album_ids, tidal_get_playlist_data, tidal_get_mix_data
-from .api.youtube import youtube_get_channel_track_ids, youtube_get_playlist_data
-from .runtimedata import get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
+from .api.youtube_music import youtube_music_get_channel_track_ids, youtube_music_get_playlist_data
+from .api.generic import generic_get_track_metadata
+from .runtimedata import account_pool, get_logger, parsing, download_queue, pending, parsing_lock, pending_lock
 from .utils import format_local_id
 
 logger = get_logger('parse_item')
@@ -20,7 +21,8 @@ QOBUZ_URL_REGEX = re.compile(r"https?://(open\.|play\.)?qobuz.com/(?:[a-z]{2}-[a
 SOUNDCLOUD_URL_REGEX = re.compile(r"https?://soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https?://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
 TIDAL_URL_REGEX = re.compile(r"https?://(www\.|listen\.)?tidal.com/(browse/)?(?P<type>album|track|artist|playlist|mix)/(?P<id>[-a-z0-9]+)")
-YOUTUBE_URL_REGEX = re.compile(r"https?://(www\.|music\.)?youtube\.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
+#YOUTUBE_URL_REGEX = re.compile(r"https?://(www\.|music\.)?youtube\.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
+YOUTUBE_URL_REGEX = re.compile(r"https?://music.youtube.com/(watch\?v=(?P<video_id>[a-zA-Z0-9_-]+)|channel/(?P<channel_id>[a-zA-Z0-9_-]+)|playlist\?list=(?P<playlist_id>[a-zA-Z0-9_-]+))")
 
 
 def parse_url(url):
@@ -83,7 +85,7 @@ def parse_url(url):
     elif re.match(YOUTUBE_URL_REGEX, url):
         match = re.search(YOUTUBE_URL_REGEX, url)
         if match:
-            item_service = 'youtube'
+            item_service = 'youtube_music'
             if match.group('video_id'):
                 item_type = 'track'
                 item_id = match.group('video_id')
@@ -94,8 +96,30 @@ def parse_url(url):
                 item_type = 'playlist'
                 item_id = match.group('playlist_id')
     else:
-        logger.info(f'Invalid Url: {url}')
-        return False
+        # Check if generic account is in account pool and if so
+        # parse url using yt-dlp, else return 'Invalid Url'.
+        try:
+            generic_enabled = False
+            for account in account_pool:
+                if account['service'] == 'generic':
+                    generic_enabled = True
+            if generic_enabled:
+                logger.info(f'Unable to parse url falling back to yt-dlp: {url}')
+                # Check if yt-dlp can parse track
+                item_metadata = generic_get_track_metadata('', url)
+                # Returns false if playlist, currently not supported
+                if item_metadata:
+                    item_service = 'generic'
+                    item_type = 'track'
+                    item_id = url
+                else:
+                    return True
+            else:
+                logger.info(f'Invalid Url: {url}')
+                return False
+        except Exception as e:
+            logger.info(f'Error Possibly Invalid Url: {url}, "{e}"')
+            return False
     with parsing_lock:
         parsing[item_id] = {
             'item_url': url,

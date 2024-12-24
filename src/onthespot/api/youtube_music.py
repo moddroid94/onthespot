@@ -9,16 +9,16 @@ from ..runtimedata import get_logger, account_pool
 logger = get_logger("api.youtube")
 
 
-def youtube_login_user(account):
+def youtube_music_login_user(account):
     logger.info('Logging into Youtube account...')
     try:
         # Ping to verify connectivity
         requests.get('https://youtube.com')
-        if account['uuid'] == 'public_youtube':
+        if account['uuid'] == 'public_youtube_music':
             account_pool.append({
                 "uuid": "public_youtube",
                 "username": 'yt-dlp',
-                "service": "youtube",
+                "service": "youtube_music",
                 "status": "active",
                 "account_type": "public",
                 "bitrate": "256k",
@@ -29,7 +29,7 @@ def youtube_login_user(account):
         account_pool.append({
             "uuid": account['uuid'],
             "username": 'yt-dlp',
-            "service": "youtube",
+            "service": "youtube_music",
             "status": "error",
             "account_type": "N/A",
             "bitrate": "N/A",
@@ -37,12 +37,11 @@ def youtube_login_user(account):
         return False
 
 
-
-def youtube_add_account():
+def youtube_music_add_account():
     cfg_copy = config.get('accounts').copy()
     new_user = {
-            "uuid": "public_youtube",
-            "service": "youtube",
+            "uuid": "public_youtube_music",
+            "service": "youtube_music",
             "active": True,
         }
     cfg_copy.append(new_user)
@@ -50,7 +49,7 @@ def youtube_add_account():
     config.update()
 
 
-def youtube_get_search_results(_, search_term, content_types):
+def youtube_music_get_search_results(_, search_term, content_types):
     ydl_opts = {
         'quiet': True,
         'extract_flat': True,
@@ -75,7 +74,7 @@ def youtube_get_search_results(_, search_term, content_types):
     return search_results
 
 
-def youtube_get_track_metadata(_, item_id):
+def youtube_music_get_track_metadata(_, item_id):
     url = f'https://music.youtube.com/watch?v={item_id}'
     request_key = md5(f'{url}'.encode()).hexdigest()
     cache_dir = os.path.join(config.get('_cache_dir'), 'reqcache')
@@ -145,7 +144,7 @@ def youtube_get_track_metadata(_, item_id):
     return info
 
 
-def youtube_get_playlist_data(_, playlist_id):
+def youtube_music_get_playlist_data(_, playlist_id):
     url = f'https://music.youtube.com/playlist?list={playlist_id}'
     ydl_opts = {
         'quiet': True,
@@ -164,7 +163,7 @@ def youtube_get_playlist_data(_, playlist_id):
     return playlist_name, playlist_by, track_ids
 
 
-def youtube_get_channel_track_ids(_, channel_id):
+def youtube_music_get_channel_track_ids(_, channel_id):
     url = f'https://music.youtube.com/channel/{channel_id}'
 
     ydl_opts = {
