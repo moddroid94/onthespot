@@ -70,6 +70,7 @@ def generic_get_track_metadata(_, url):
 
     return info
 
+
 def generic_list_extractors():
     extractors = extractor.gen_extractors()
     extractor_list = []

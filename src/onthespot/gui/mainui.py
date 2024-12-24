@@ -252,12 +252,9 @@ class MainWindow(QMainWindow):
         self.__show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
 
 
-    def select_dir(self, output, file=False):
+    def select_dir(self, output):
         self.setStyleSheet(config.get('theme'))
-        if file:
-            path, _ = QFileDialog.getOpenFileName(self, 'OnTheSpot - Select File', os.path.expanduser("~"), "All Files (*)")
-        else:
-            path = QFileDialog.getExistingDirectory(self, 'OnTheSpot - Select Directory', os.path.expanduser("~"))
+        path = QFileDialog.getExistingDirectory(self, 'OnTheSpot - Select Directory', os.path.expanduser("~"))
         if path.strip() != '':
             output.setText(QDir.toNativeSeparators(path))
 
@@ -597,18 +594,22 @@ class MainWindow(QMainWindow):
 
         # Apple Music
         if self.inp_login_service.currentIndex() == 0:
-            self.inp_login_password.setDisabled(True)
+            self.inp_login_password.setDisabled(False)
             self.lb_login_username.hide()
             self.inp_login_username.hide()
             self.lb_login_password.show()
-            self.inp_login_password.setPlaceholderText("Enter the path to your cookie file")
-            self.lb_login_password.setText(self.tr("Cookie File"))
+            self.inp_login_password.setPlaceholderText("Enter your apple music media-user-token")
+            self.lb_login_password.setText(self.tr("Media User Token"))
             self.inp_login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
-            self.btn_login_add.setText('')
-            self.btn_login_add.setIcon(self.get_icon('folder'))
-            self.btn_login_add.clicked.connect(self.add_apple_music_account_worker)
+            self.btn_login_add.setIcon(QIcon())
+            self.btn_login_add.setText(self.tr("Add Account"))
+            self.btn_login_add.clicked.connect(lambda:
+                (self.__show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
+                apple_music_add_account(self.inp_login_password.text()) and
+                self.inp_login_password.clear()
+                )
 
         # Bandcamp
         elif self.inp_login_service.currentIndex() == 1:
@@ -751,25 +752,6 @@ class MainWindow(QMainWindow):
                 (self.__show_popup_dialog(self.tr("Generic Downloader added, please restart the app.")) or True) and
                 generic_add_account()
                 )
-
-
-    def add_apple_music_account_worker(self):
-        session = None
-        self.lb_login_password.setDisabled(True)
-        self.btn_login_add.setDisabled(True)
-        self.select_dir(self.inp_login_password, file=True)
-        file_path = self.inp_login_password.text()
-        if file_path:
-            session = apple_music_add_account(file_path)
-
-        if session:
-            config.set_('parsing_acc_sn', len(account_pool))
-            config.update()
-            self.__show_popup_dialog(self.tr("Account added, please restart the app."))
-            self.btn_login_add.setDisabled(False)
-        else:
-            self.__show_popup_dialog(self.tr("Please enter a valid cookie path."))
-            self.btn_login_add.setDisabled(False)
 
 
     def add_spotify_account(self):

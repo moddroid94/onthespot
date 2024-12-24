@@ -64,7 +64,6 @@ def main():
             account['service'] = 'youtube_music'
     config.set_('accounts', cfg_copy)
 
-
     # Set Application Version
     version = "v1.0.5"
     logger.info(f'OnTheSpot Version: {version}')
