@@ -449,6 +449,7 @@ class DownloadWorker(QObject):
                         ydl_opts['no_warnings'] = True
                         ydl_opts['noprogress'] = True
                         ydl_opts['outtmpl'] = config.get('generic_download_root') + os.path.sep + '%(title)s.%(ext)s'
+                        ydl_opts['ffmpeg_location'] = config.get('_ffmpeg_bin_path')
                         ydl_opts['postprocessors'] = [{
                             'key': 'FFmpegMetadata',  # Enables embedding metadata
                         }]
