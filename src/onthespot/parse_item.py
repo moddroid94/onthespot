@@ -13,7 +13,7 @@ from .runtimedata import get_logger, parsing, download_queue, pending, parsing_l
 from .utils import format_local_id
 
 logger = get_logger('parse_item')
-APPLE_MUSIC_URL_REGEX = re.compile(r'https?://music\.apple\.com/([a-z]{2})/(?P<type>album|playlist|artist)/(?P<title>[-a-z0-9]+)/(?P<id>[\w.-]+)(?:\?i=(?P<track_id>\d+))?')
+APPLE_MUSIC_URL_REGEX = re.compile(r'https?://music\.apple\.com/([a-z]{2})/(?P<type>album|playlist|artist)(?:/(?P<title>[-a-z0-9]+))?/(?P<id>[\w.-]+)(?:\?i=(?P<track_id>\d+))?(?:&.*)?$')
 BANDCAMP_URL_REGEX = re.compile(r'https?://[a-z0-9-]+\.bandcamp\.com(?:/(?P<type>track|album|music)/[a-z0-9-]+)?')
 DEEZER_URL_REGEX = re.compile(r'https?://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
 QOBUZ_URL_REGEX = re.compile(r"https?://(open\.|play\.)?qobuz.com/(?:[a-z]{2}-[a-z]{2}/)?(?P<type>album|track|artist|playlist|label)/(?P<id>[-a-z0-9]+)")
