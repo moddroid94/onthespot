@@ -444,7 +444,12 @@ class DownloadWorker(QObject):
                     elif item_service == 'generic':
                         temp_file_path = ''
                         ydl_opts = {}
-                        ydl_opts['format'] = f'bestvideo[height<={config.get('maximum_generic_resolution')}]+bestaudio/best'
+                        # Prefer bestvideo in mp4 with specified resolution, then
+                        # just best video with specified resolution, and if neither
+                        # exist just go with best.
+                        ydl_opts['format'] = (f'(bestvideo[height<={config.get("maximum_generic_resolution")}][ext=mp4]+bestaudio[ext=m4a])/'
+                                            f'(bestvideo[height<={config.get("maximum_generic_resolution")}]+bestaudio)/'
+                                            f'best')
                         ydl_opts['quiet'] = True
                         ydl_opts['no_warnings'] = True
                         ydl_opts['noprogress'] = True
