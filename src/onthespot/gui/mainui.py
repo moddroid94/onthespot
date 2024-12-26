@@ -17,7 +17,7 @@ from ..api.spotify import MirrorSpotifyPlayback, spotify_get_token, spotify_get_
 from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_track_metadata
 from ..api.youtube_music import youtube_music_add_account, youtube_music_get_track_metadata
 from ..api.generic import generic_add_account, generic_get_track_metadata, generic_list_extractors
-from ..downloader import DownloadWorker
+from ..downloader import DownloadWorker, RetryWorker
 from ..otsconfig import config
 from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, pending, pending_lock, get_logger, temp_download_path
 from .dl_progressbtn import DownloadActionsButtons
@@ -121,6 +121,10 @@ class MainWindow(QMainWindow):
             downloadworker = DownloadWorker(gui=True)
             downloadworker.progress.connect(self.update_item_in_download_list)
             downloadworker.start()
+
+        if config.get('enable_retry_worker'):
+            retryworker = RetryWorker(gui=True)
+            retryworker.start()
 
         self.mirrorplayback = MirrorSpotifyPlayback()
         if config.get('mirror_spotify_playback'):

@@ -73,6 +73,7 @@ def load_config(self):
     self.inp_maximum_queue_workers.setValue(config.get("maximum_queue_workers"))
     self.inp_maximum_download_workers.setValue(config.get("maximum_download_workers"))
     self.inp_maximum_generic_resolution.setValue(config.get("maximum_generic_resolution"))
+    self.inp_retry_worker_delay.setValue(config.get("retry_worker_delay"))
 
     # Checkboxes
     self.inp_overwrite_existing_metadata.setChecked(config.get("overwrite_existing_metadata"))
@@ -80,6 +81,7 @@ def load_config(self):
     self.inp_embed_service_id.setChecked(config.get("embed_service_id"))
     self.inp_windows_explorer_thumbnails.setChecked(config.get("windows_10_explorer_thumbnails"))
     self.inp_close_to_tray.setChecked(config.get("close_to_tray"))
+    self.inp_enable_retry_worker.setChecked(config.get("enable_retry_worker"))
 
     self.inp_enable_search_tracks.setChecked(config.get("enable_search_tracks"))
     self.inp_enable_search_albums.setChecked(config.get("enable_search_albums"))
@@ -151,6 +153,7 @@ def load_config(self):
         "inp_max_search_results",
         "inp_search_thumb_height",
         "inp_maximum_generic_resolution",
+        "inp_retry_worker_delay",
         "inp_file_hertz",
         "inp_download_delay",
         "inp_chunk_size",
@@ -218,6 +221,7 @@ def save_config(self):
     config.set_('maximum_queue_workers', self.inp_maximum_queue_workers.value())
     config.set_('maximum_download_workers', self.inp_maximum_download_workers.value())
     config.set_('maximum_generic_resolution', self.inp_maximum_generic_resolution.value())
+    config.set_('retry_worker_delay', self.inp_retry_worker_delay.value())
 
     # Checkboxes: config.set_('key', bool)
     config.set_('overwrite_existing_metadata', self.inp_overwrite_existing_metadata.isChecked())
@@ -225,6 +229,7 @@ def save_config(self):
     config.set_('embed_service_id', self.inp_embed_service_id.isChecked())
     config.set_('windows_10_explorer_thumbnails', self.inp_windows_explorer_thumbnails.isChecked())
     config.set_('close_to_tray', self.inp_close_to_tray.isChecked())
+    config.set_('enable_retry_worker', self.inp_enable_retry_worker.isChecked())
 
     config.set_('enable_search_tracks', self.inp_enable_search_tracks.isChecked())
     config.set_('enable_search_albums', self.inp_enable_search_albums.isChecked())

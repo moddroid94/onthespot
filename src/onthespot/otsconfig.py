@@ -51,6 +51,8 @@ class Config:
             "download_delay": 3, # Seconds to wait before next download attempt
             "maximum_download_workers": 1, # Maximum number of download workers
             "maximum_queue_workers": 1, # Maximum number of queue workers
+            "enable_retry_worker": False, # Enable retry worker, automatically retries failed downloads after a set time
+            "retry_worker_delay": 10, # Amount of time to wait before retrying failed downloads, in minutes
             "track_path_formatter": "Tracks" + os.path.sep + "{album_artist}" + os.path.sep + "[{year}] {album}" + os.path.sep + "{track_number}. {name}", # Track path format string
             "podcast_path_formatter": "Episodes" + os.path.sep + "{album}" + os.path.sep + "{name}", # Episode path format string
             "playlist_path_formatter": "Playlists" + os.path.sep + "{playlist_name} by {playlist_owner}" + os.path.sep + "{playlist_number}. {name} - {artist}", # Playlist path format string

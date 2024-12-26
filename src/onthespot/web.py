@@ -15,7 +15,7 @@ from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get_track_metadata, spotify_get_episode_metadata
 from .api.tidal import tidal_get_track_metadata
 from .api.youtube_music import youtube_music_get_track_metadata
-from .downloader import DownloadWorker
+from .downloader import DownloadWorker, RetryWorker
 from .otsconfig import config_dir, config
 from .parse_item import parsingworker, parse_url
 from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock
@@ -210,8 +210,12 @@ def main():
         queue_worker.start()
 
     for i in range(config.get('maximum_download_workers')):
-        downloadworker = DownloadWorker(gui=False)
+        downloadworker = DownloadWorker()
         downloadworker.start()
+
+    if config.get('enable_retry_worker'):
+        retryworker = RetryWorker()
+        retryworker.start()
 
     fill_account_pool.wait()
 

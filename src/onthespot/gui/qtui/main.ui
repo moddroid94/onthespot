@@ -21,7 +21,7 @@
     <normaloff>../../resources/icon.png</normaloff>../../resources/icon.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QGroupBox #group_login_form_3, #gb0_0, #gb0_1, #gb0_2, #gb0_3, #gb0_4, #gb0_5, #gb0_6, gb0_7, #gb1_0, #gb1_1, #gb1_2, #gb1_3, #gb1_4, #gb1_5, #gb1_6, #gb1_7, #gb1_8, #gb1_9, #gb1_10, #gb1_11, #gb1_12, #gb1_13, #gb2_0, #gb2_1, #gb2_2, #gb2_3, #gb2_4, #gb2_5, #gb2_6, #gb2_7, #gb2_8, #gb2_9, #gb2_10, #gb2_11, #gb2_12, #gb2_13, #gb2_14, #gb2_15, #gb2_16, #gb2_17, #gb2_18 { border: 0;}</string>
+   <string notr="true">QGroupBox #group_login_form_3, #gb0_0, #gb0_1, #gb0_2, #gb0_3, #gb0_4, #gb0_5, #gb0_6, #gb0_7, #gb1_0, #gb1_1, #gb1_2, #gb1_3, #gb1_4, #gb1_5, #gb1_6, #gb1_7, #gb1_8, #gb1_9, #gb1_10, #gb1_11, #gb1_12, #gb1_13, #gb1_14, #gb2_0, #gb2_1, #gb2_2, #gb2_3, #gb2_4, #gb2_5, #gb2_6, #gb2_7, #gb2_8, #gb2_9, #gb2_10, #gb2_11, #gb2_12, #gb2_13, #gb2_14, #gb2_15, #gb2_16, #gb2_17, #gb2_18 { border: 0;}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
@@ -656,9 +656,9 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-976</y>
+             <y>-1911</y>
              <width>627</width>
-             <height>3648</height>
+             <height>3712</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -2535,6 +2535,98 @@
                      </item>
                      <item>
                       <widget class="QSpinBox" name="inp_maximum_download_workers">
+                       <property name="minimumSize">
+                        <size>
+                         <width>80</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="minimum">
+                        <number>1</number>
+                       </property>
+                       <property name="maximum">
+                        <number>999999</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_14">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_242">
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_26">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_41">
+                     <item>
+                      <widget class="QCheckBox" name="inp_enable_retry_worker">
+                       <property name="layoutDirection">
+                        <enum>Qt::RightToLeft</enum>
+                       </property>
+                       <property name="text">
+                        <string>Enable Retry Worker</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_15">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_133">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_243">
+                     <item>
+                      <widget class="QLabel" name="lb_chunk_size_9">
+                       <property name="text">
+                        <string>Retry Delay (m)</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_52">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_retry_worker_delay">
                        <property name="minimumSize">
                         <size>
                          <width>80</width>

@@ -194,10 +194,10 @@
         <label for="force_raw">Force Raw Download</label>
         <input type="checkbox" id="force_raw" {% if config.force_raw %}checked{% endif %}><br><br>
 
-        <label for="download_delay">Download Delay:</label>
+        <label for="download_delay">Download Delay (s):</label>
         <input type="number" id="download_delay" value="{{ config.download_delay }}" placeholder="Enter download delay"><br><br>
 
-        <label for="chunk_size">Chunk Size:</label>
+        <label for="chunk_size">Chunk Size (b):</label>
         <input type="number" id="chunk_size" value="{{ config.chunk_size }}" placeholder="Enter chunk size"><br><br>
 
         <label for="maximum_queue_workers">Maximum Queue Workers:</label>
@@ -205,6 +205,12 @@
 
         <label for="maximum_download_workers">Maximum Download Workers:</label>
         <input type="text" id="maximum_download_workers" value="{{ config.maximum_download_workers }}" placeholder="Enter maximum download workers"><br><br>
+
+        <label for="enable_retry_worker">Enable Retry Worker</label>
+        <input type="checkbox" id="enable_retry_worker" {% if config.enable_retry_worker %}checked{% endif %}><br><br>
+
+        <label for="retry_worker_delay">Retry Worker Delay (m):</label>
+        <input type="text" id="retry_worker_delay" value="{{ config.retry_worker_delay }}" placeholder="Enter retry worker delay"><br><br>
 
         <label for="translate_file_path">Translate File Path</label>
         <input type="checkbox" id="translate_file_path" {% if config.translate_file_path %}checked{% endif %}><br><br>
@@ -382,6 +388,8 @@
             const translateFilePath = document.getElementById('translate_file_path').checked;
             const maximumQueueWorkers = document.getElementById('maximum_queue_workers').value;
             const maximumDownloadWorkers = document.getElementById('maximum_download_workers').value;
+            const enableRetryWorker = document.getElementById('enable_retry_worker').value;
+            const retryWorkerDelay = document.getElementById('retry_worker_delay').value;
 
             const metadataSeparator = document.getElementById('metadata_seperator').value;
             const overwriteExistingMetadata = document.getElementById('overwrite_existing_metadata').checked;
@@ -470,6 +478,8 @@
                 translate_file_path: translateFilePath,
                 maximum_queue_workers: maximumQueueWorkers,
                 maximum_download_workers: maximumDownloadWorkers,
+                enable_retry_worker: enableRetryWorker,
+                retry_worker_delay: retryWorkerDelay,
                 metadata_separator: metadataSeparator,
                 overwrite_existing_metadata: overwriteExistingMetadata,
                 embed_cover: embedCover,

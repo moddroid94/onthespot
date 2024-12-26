@@ -26,6 +26,42 @@ from .utils import format_track_path, convert_audio_format, embed_metadata, set_
 logger = get_logger("downloader")
 
 
+class RetryWorker(QObject):
+    progress = pyqtSignal(dict, str, int)
+    def __init__(self, gui=False):
+        super().__init__()
+        self.gui = gui
+        self.thread = threading.Thread(target=self.run)
+        self.is_running = True
+
+
+    def start(self):
+        logger.info('Starting Retry Worker')
+        self.thread.start()
+
+
+    def run(self):
+        while self.is_running:
+            if download_queue:
+                with download_queue_lock:
+                    for local_id in download_queue.keys():
+                        logger.debug(f'Retrying : {local_id}')
+                        if download_queue[local_id]['item_status'] == "Failed":
+                            download_queue[local_id]['item_status'] = "Waiting"
+                            if self.gui:
+                                download_queue[local_id]['gui']['status_label'].setText(self.tr("Waiting"))
+                                download_queue[local_id]['gui']["btn"]['cancel'].show()
+                                download_queue[local_id]['gui']["btn"]['retry'].hide()
+            time.sleep(config.get('retry_worker_delay') * 60)
+            continue
+
+
+    def stop(self):
+        logger.info('Stopping Retry Worker')
+        self.is_running = False
+        self.thread.join()
+
+
 class DownloadWorker(QObject):
     progress = pyqtSignal(dict, str, int)
     def __init__(self, gui=False):
@@ -36,6 +72,7 @@ class DownloadWorker(QObject):
 
 
     def start(self):
+        logger.info('Starting Download Worker')
         self.thread.start()
 
 
