@@ -275,7 +275,7 @@ def apple_music_get_lyrics(session, item_id, item_type, metadata, filepath):
                 digit="0"
             else:
                 digit=""
-            lyrics_list.append(f'[length:{digit}{round((l_ms/1000)/60)}:{round((l_ms/1000)%60)}]\n')
+            lyrics_list.append(f'[length:{digit}{str((l_ms/1000)/60)[:1]}:{round((l_ms/1000)%60)}]\n')
 
         default_length = len(lyrics_list)
 
@@ -293,11 +293,12 @@ def apple_music_get_lyrics(session, item_id, item_type, metadata, filepath):
                             minutes, seconds = time_parts
                     else: # Format: SS.mmm
                         minutes = '0'
+                        seconds = begin_time
                     try:
                         seconds, milliseconds = seconds.split('.')
                     except (TypeError, ValueError):
                         milliseconds = '0'
-                    formatted_time = f"{int(minutes):02}:{int(seconds):02}.{int(milliseconds.replace('s', ''))}"
+                    formatted_time = f"{int(minutes):02}:{int(seconds):02}.{milliseconds.replace('s', '')[:2]}"
                     lyric = f'[{formatted_time}] {lyric}'
 
                 lyrics_list.append(lyric)
@@ -391,11 +392,19 @@ def apple_music_get_artist_album_ids(session, artist_id):
 def apple_music_get_playlist_data(session, playlist_id):
     logger.info(f"Get playlist data for playlist: {playlist_id}")
     playlist_data = make_call(f"{BASE_URL}/catalog/{session.cookies.get('itua')}/playlists/{playlist_id}", session=session, skip_cache=True)
-
     playlist_name = playlist_data.get('data', [])[0].get('attributes', {}).get('name', '')
     playlist_by =  playlist_data.get('data', [])[0].get('attributes', {}).get('curatorName', '')
 
     track_ids = []
-    for track in playlist_data.get('data', [])[0].get('relationships', {}).get('tracks', {}).get('data', []):
-        track_ids.append(track['id'])
+    offset = 0
+    while True:
+        url = f'{BASE_URL}/catalog/{session.cookies.get('itua')}/playlists/{playlist_id}/tracks?offset={offset}'
+        playlist_track_data = make_call(url, session=session, skip_cache=True)
+        for track in playlist_track_data.get('data', ''):
+            track_ids.append(track.get('id', ''))
+        if 'next' in playlist_track_data:
+            offset += 100
+        else:
+            break
+
     return playlist_name, playlist_by, track_ids

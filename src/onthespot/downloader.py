@@ -550,8 +550,8 @@ class DownloadWorker(QObject):
                     os.remove(temp_file_path)
                 if os.path.exists(file_path):
                     os.remove(file_path)
-                if os.path.exists(item['file_path']):
-                    os.remove(file_path)
+                if isinstance(item['file_path'], str) and os.path.exists(item['file_path']):
+                    os.remove(item['file_path'])
                 continue
 
 
