@@ -43,7 +43,7 @@ def apple_music_login_user(account):
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0",
                 "Accept": "application/json",
                 "Accept-Language": 'en-US',
-                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Encoding": "utf-8",
                 "content-type": "application/json",
                 "Media-User-Token": session.cookies.get_dict().get("media-user-token", ""),
                 "x-apple-renewal": "true",
@@ -64,7 +64,7 @@ def apple_music_login_user(account):
         session.headers.update({"authorization": f"Bearer {token}"})
         session.params = {"l": 'en-US'}
 
-        account_data = session.get(f'{BASE_URL}/me/account?meta=subscription&challenge%5BsubscriptionCapabilities%5D=voice%2Cpremium').json()
+        account_data = session.get(f'{BASE_URL}/me/account?meta=subscription').json()
         session.cookies.update({'itua': account_data.get('meta', {}).get('subscription', {}).get('storefront', '')})
 
         account_pool.append({
@@ -288,15 +288,15 @@ def apple_music_get_lyrics(session, item_id, item_type, metadata, filepath):
                         time_parts = begin_time.split(':')
                         if len(time_parts) == 3:  # Format: HH:MM:SS.mmm
                             hours, minutes, seconds = time_parts
-                            seconds, milliseconds = seconds.split('.')
                             minutes = int(minutes) + (int(hours) * 60)
                         elif len(time_parts) == 2:  # Format: MM:SS.mmm
                             minutes, seconds = time_parts
-                            seconds, milliseconds = seconds.split('.')
-                            hours = '0'
                     else: # Format: SS.mmm
-                        seconds, milliseconds = begin_time.split('.')
                         minutes = '0'
+                    try:
+                        seconds, milliseconds = seconds.split('.')
+                    except (TypeError, ValueError):
+                        milliseconds = '0'
                     formatted_time = f"{int(minutes):02}:{int(seconds):02}.{int(milliseconds.replace('s', ''))}"
                     lyric = f'[{formatted_time}] {lyric}'
 
