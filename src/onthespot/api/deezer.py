@@ -92,8 +92,8 @@ def deezer_get_track_metadata(_, item_id):
 
     # Fetch track_number
     track_number = None
-    for i, track in enumerate(album_data['tracks']['data']):
-        if track['id'] == int(item_id):
+    for i, track in enumerate(album_data.get('tracks', {})('data', [])):
+        if track.get('id', '') == int(item_id):
             track_number = i + 1
             break
     if not track_number:
@@ -108,7 +108,7 @@ def deezer_get_track_metadata(_, item_id):
     # Artists
     artists = []
     for artist in track_data.get('contributors', ''):
-        artists.append(artist['name'])
+        artists.append(artist.get('name', ''))
 
     info = {}
     info['title'] = track_data.get('title', '')
@@ -120,7 +120,7 @@ def deezer_get_track_metadata(_, item_id):
     # I opted to iterate through the list instead as seen above.
     #info['track_number'] = track_data.get('track_position', '')
     info['track_number'] = track_number
-    info['total_tracks'] = len(album_data.get("tracks", {}).get("data", ''))
+    info['total_tracks'] = len(album_data.get("tracks", {}).get("data", []))
     # Deezer returns disc number but not total discs
     # so it is scraped from the album_tracks, can
     # alternatively scrape album page.

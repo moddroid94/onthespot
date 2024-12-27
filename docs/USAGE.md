@@ -4,7 +4,7 @@
 ## 1. Logging into your accounts
 OnTheSpot supports various accounts and instructions for each are listed below, for further assistance please reach out for support on the community discord [here](https://discord.gg/GCQwRBFPk9).
 
-- **Apple Music**: Enter your media-user-token. It can be obtained in chrome by logging into https://music.apple.com, clicking ctrl + shift + i, clicking the 'Application' header, opening the music.apple.com cookie, and copying the media-user-token value. Please note a premium account is required to download music.
+- **Apple Music**: Enter your media-user-token. It can be obtained in chrome by logging into https://music.apple.com, pressing ctrl + shift + i to open inspect element, clicking the 'Application' header, opening the music.apple.com cookie, and copying the media-user-token value. Please note a premium account is required to download music.
 
 - **Bandcamp**: Bandcamp offers public downloads and does not require an account, simply click 'Add Bandcamp Account' and restart the app.
 

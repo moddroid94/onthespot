@@ -132,7 +132,6 @@ def bandcamp_get_track_metadata(_, url):
         json_data_str = match
         json_data_str = re.sub(r',\s*}', '}', json_data_str)  # Remove trailing commas
         album_data = json.loads(json_data_str)
-        print(album_data)
 
     # Year
     year = ''
@@ -161,13 +160,19 @@ def bandcamp_get_track_metadata(_, url):
     info['copyright'] = album_data.get('creditText', '')
     isrc = track_data.get('tralbum', {}).get('current', {}).get('isrc', '')
     info['isrc'] = isrc if isrc else ''
-    info['file_url'] = track_data.get('tralbum', {}).get('trackinfo', [{}])[0].get('file', {}).get('mp3-128', '')
+    info['is_playable'] = True
+
+    try:
+        info['file_url'] = track_data.get('tralbum', {}).get('trackinfo', [{}])[0].get('file', {}).get('mp3-128', '')
+    except AttributeError:
+        info['is_playable'] = False
+
     info['item_id'] = track_data.get('tralbum', {}).get('current', {}).get('id', '')
     lyrics = track_data.get('tralbum', {}).get('current', {}).get('lyrics', '')
     info['lyrics'] = lyrics if lyrics and not config.get('only_synced_lyrics') else ''
     info['genre'] = conv_list_format(album_data.get('keywords', []))
     info['image_url'] = thumbnail_url
-    info['is_playable'] = True
+
     return info
 
 def bandcamp_get_artist_album_ids(_, url):
