@@ -83,7 +83,7 @@ def parse_url(url):
             item_type = match.group('type')
             item_id = match.group('id')
 
-    elif re.match(YOUTUBE_URL_REGEX, url) and config.get('only_download_youtube_audio'):
+    elif not config.get('download_youtube_videos') and re.match(YOUTUBE_URL_REGEX, url):
         match = re.search(YOUTUBE_URL_REGEX, url)
         if match:
             item_service = 'youtube_music'

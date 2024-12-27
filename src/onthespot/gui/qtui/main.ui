@@ -21,7 +21,7 @@
     <normaloff>../../resources/icon.png</normaloff>../../resources/icon.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QGroupBox #group_login_form_3, #gb0_0, #gb0_1, #gb0_2, #gb0_3, #gb0_4, #gb0_5, #gb0_6, #gb0_7, #gb1_0, #gb1_1, #gb1_2, #gb1_3, #gb1_4, #gb1_5, #gb1_6, #gb1_7, #gb1_8, #gb1_9, #gb1_10, #gb1_11, #gb1_12, #gb1_13, #gb1_14, #gb2_0, #gb2_1, #gb2_2, #gb2_3, #gb2_4, #gb2_5, #gb2_6, #gb2_7, #gb2_8, #gb2_9, #gb2_10, #gb2_11, #gb2_12, #gb2_13, #gb2_14, #gb2_15, #gb2_16, #gb2_17, #gb2_18 { border: 0;}</string>
+   <string notr="true">QGroupBox #group_login_form_3, #gb0_0, #gb0_1, #gb0_2, #gb0_3, #gb0_4, #gb0_5, #gb0_6, #gb0_7, #gb1_0, #gb1_1, #gb1_2, #gb1_3, #gb1_4, #gb1_5, #gb1_6, #gb1_7, #gb1_8, #gb1_9, #gb1_10, #gb1_11, #gb1_12, #gb1_13, #gb1_14, #gb1_29, #gb2_0, #gb2_1, #gb2_2, #gb2_3, #gb2_4, #gb2_5, #gb2_6, #gb2_7, #gb2_8, #gb2_9, #gb2_10, #gb2_11, #gb2_12, #gb2_13, #gb2_14, #gb2_15, #gb2_16, #gb2_17, #gb2_18, #gb3_0, #gb3_1 { border: 0;}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
@@ -645,7 +645,67 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_12">
         <item>
-         <widget class="QScrollArea" name="scrollArea">
+         <widget class="QGroupBox" name="group_login_form_4">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="title">
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_76">
+           <item>
+            <widget class="QSpinBox" name="inp_settings_scrollarea_value">
+             <property name="maximum">
+              <number>9999999</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="inp_settings_bookmark_accounts">
+             <property name="text">
+              <string>Accounts</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="inp_settings_bookmark_general">
+             <property name="text">
+              <string>General</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="inp_settings_bookmark_audio_downloads">
+             <property name="text">
+              <string>Audio Downloads</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="inp_settings_bookmark_audio_metadata">
+             <property name="text">
+              <string>Audio Metadata</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="inp_settings_bookmark_video_downloads">
+             <property name="text">
+              <string>Video Downloads</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QScrollArea" name="settings_scroll_area">
           <property name="styleSheet">
            <string notr="true">QGroupBox #scrollArea, #adv_settings_scrollarea {border: 0;}</string>
           </property>
@@ -656,14 +716,17 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-1911</y>
+             <y>0</y>
              <width>627</width>
-             <height>3712</height>
+             <height>3842</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_16">
             <item>
              <widget class="QGroupBox" name="groupbox_accounts_3">
+              <property name="styleSheet">
+               <string notr="true">QGroupBox { font-weight: bold; }</string>
+              </property>
               <property name="title">
                <string>Accounts</string>
               </property>
@@ -846,45 +909,6 @@
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="groupbox_generic_download_root">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_117">
-                  <item>
-                   <widget class="QLabel" name="lb_download_root_2">
-                    <property name="text">
-                     <string>Generic Download Path</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLineEdit" name="inp_generic_download_root">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>0</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="btn_generic_download_root_browse">
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
                 <widget class="QTextEdit" name="lb_generic_extractors">
                  <property name="minimumSize">
                   <size>
@@ -903,7 +927,7 @@
             <item>
              <widget class="QGroupBox" name="gb0">
               <property name="styleSheet">
-               <string notr="true"/>
+               <string notr="true">QGroupBox { font-weight: bold; }</string>
               </property>
               <property name="title">
                <string>General</string>
@@ -945,12 +969,9 @@
                       </widget>
                      </item>
                      <item>
-                      <spacer name="horizontalSpacer_44">
+                      <spacer name="horizontalSpacer_24">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeType">
-                        <enum>QSizePolicy::Minimum</enum>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
@@ -975,12 +996,9 @@
                       </widget>
                      </item>
                      <item>
-                      <spacer name="horizontalSpacer_45">
+                      <spacer name="horizontalSpacer_39">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeType">
-                        <enum>QSizePolicy::Minimum</enum>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
@@ -991,34 +1009,14 @@
                       </spacer>
                      </item>
                      <item>
-                      <widget class="QLabel" name="lb_download_root">
+                      <widget class="QLabel" name="lb_explicit_label">
                        <property name="text">
-                        <string>Download Path</string>
+                        <string>Explicit Label</string>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="inp_download_root">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>0</width>
-                         <height>0</height>
-                        </size>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="btn_download_root_browse">
-                       <property name="text">
-                        <string/>
-                       </property>
-                      </widget>
+                      <widget class="QLineEdit" name="inp_explicit_label"/>
                      </item>
                     </layout>
                    </widget>
@@ -1301,28 +1299,6 @@
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_92">
                   <item>
-                   <widget class="QGroupBox" name="groupBox_33">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <property name="flat">
-                     <bool>false</bool>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_49">
-                     <item>
-                      <widget class="QLabel" name="lb_explicit_label">
-                       <property name="text">
-                        <string>Explicit Label</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="inp_explicit_label"/>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="QGroupBox" name="groupBox_18">
                     <property name="title">
                      <string/>
@@ -1340,6 +1316,44 @@
                      </item>
                      <item>
                       <spacer name="horizontalSpacer_3">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="group_playlist_cfg_m3u_8">
+                    <property name="styleSheet">
+                     <string notr="true"/>
+                    </property>
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_81">
+                     <item>
+                      <widget class="QCheckBox" name="inp_windows_explorer_thumbnails">
+                       <property name="toolTip">
+                        <string/>
+                       </property>
+                       <property name="layoutDirection">
+                        <enum>Qt::RightToLeft</enum>
+                       </property>
+                       <property name="text">
+                        <string>Windows 10 Explorer Thumbnails</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_18">
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
@@ -1399,160 +1413,6 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QGroupBox" name="group_playlist_cfg_m3u_13">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_103">
-                     <item>
-                      <widget class="QCheckBox" name="inp_only_download_youtube_audio">
-                       <property name="toolTip">
-                        <string/>
-                       </property>
-                       <property name="layoutDirection">
-                        <enum>Qt::RightToLeft</enum>
-                       </property>
-                       <property name="text">
-                        <string>Only Download YouTube Audio</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_23">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb0_7">
-                 <property name="autoFillBackground">
-                  <bool>false</bool>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true"/>
-                 </property>
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_102">
-                  <item>
-                   <widget class="QGroupBox" name="groupBox_136">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <property name="flat">
-                     <bool>false</bool>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_247">
-                     <item>
-                      <widget class="QLabel" name="lb_maximum_generic_resolution">
-                       <property name="text">
-                        <string>Maximum Generic Resolution</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_22">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QSpinBox" name="inp_maximum_generic_resolution">
-                       <property name="minimumSize">
-                        <size>
-                         <width>0</width>
-                         <height>0</height>
-                        </size>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>false</bool>
-                       </property>
-                       <property name="minimum">
-                        <number>0</number>
-                       </property>
-                       <property name="maximum">
-                        <number>10000000</number>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QGroupBox" name="group_playlist_cfg_m3u_8">
-                    <property name="styleSheet">
-                     <string notr="true"/>
-                    </property>
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_81">
-                     <item>
-                      <widget class="QCheckBox" name="inp_windows_explorer_thumbnails">
-                       <property name="toolTip">
-                        <string/>
-                       </property>
-                       <property name="layoutDirection">
-                        <enum>Qt::RightToLeft</enum>
-                       </property>
-                       <property name="text">
-                        <string>Windows 10 Explorer Thumbnails</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_18">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb0_6">
-                 <property name="title">
-                  <string/>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_100">
-                  <item>
                    <widget class="QGroupBox" name="group_playlist_cfg_m3u_9">
                     <property name="title">
                      <string/>
@@ -1587,6 +1447,18 @@
                     </layout>
                    </widget>
                   </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb0_6">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_100">
                   <item>
                    <widget class="QGroupBox" name="group_playlist_cfg_m3u_7">
                     <property name="title">
@@ -1622,6 +1494,19 @@
                     </layout>
                    </widget>
                   </item>
+                  <item>
+                   <spacer name="horizontalSpacer_40">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
                  </layout>
                 </widget>
                </item>
@@ -1631,85 +1516,57 @@
             <item>
              <widget class="QGroupBox" name="gb1">
               <property name="styleSheet">
-               <string notr="true"/>
+               <string notr="true">QGroupBox { font-weight: bold; }</string>
               </property>
               <property name="title">
-               <string>Downloads</string>
+               <string>Audio Downloads</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_27">
                <item>
-                <widget class="QGroupBox" name="gb1_13">
+                <widget class="QGroupBox" name="gb1_29">
                  <property name="title">
                   <string/>
                  </property>
                  <property name="flat">
                   <bool>true</bool>
                  </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_244">
+                 <layout class="QHBoxLayout" name="horizontalLayout_248">
                   <item>
-                   <widget class="QGroupBox" name="groupBox_134">
+                   <widget class="QGroupBox" name="gb1_31">
                     <property name="title">
                      <string/>
                     </property>
                     <property name="flat">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_245">
+                    <layout class="QHBoxLayout" name="horizontalLayout_265">
                      <item>
-                      <widget class="QLabel" name="lb_file_bitrate">
+                      <widget class="QLabel" name="lb_download_root">
                        <property name="text">
-                        <string>File Bitrate</string>
+                        <string>Audio Download Path</string>
                        </property>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="inp_file_bitrate"/>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QGroupBox" name="groupBox_135">
-                    <property name="title">
-                     <string/>
-                    </property>
-                    <property name="flat">
-                     <bool>false</bool>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_246">
-                     <item>
-                      <widget class="QLabel" name="lb_file_bitrate_2">
-                       <property name="text">
-                        <string>File Hertz</string>
+                      <widget class="QLineEdit" name="inp_download_root">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
                        </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_20">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QSpinBox" name="inp_file_hertz">
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
                          <height>0</height>
                         </size>
                        </property>
-                       <property name="minimum">
-                        <number>10000</number>
-                       </property>
-                       <property name="maximum">
-                        <number>10000000</number>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="btn_download_root_browse">
+                       <property name="text">
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -2031,6 +1888,88 @@
                       <widget class="QLineEdit" name="inp_ext_path">
                        <property name="enabled">
                         <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb1_13">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_244">
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_134">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_245">
+                     <item>
+                      <widget class="QLabel" name="lb_file_bitrate">
+                       <property name="text">
+                        <string>File Bitrate</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="inp_file_bitrate"/>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_135">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_246">
+                     <item>
+                      <widget class="QLabel" name="lb_file_bitrate_2">
+                       <property name="text">
+                        <string>File Hertz</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_20">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_file_hertz">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="minimum">
+                        <number>10000</number>
+                       </property>
+                       <property name="maximum">
+                        <number>10000000</number>
                        </property>
                       </widget>
                      </item>
@@ -2713,10 +2652,10 @@
             <item>
              <widget class="QGroupBox" name="gb2">
               <property name="styleSheet">
-               <string notr="true"/>
+               <string notr="true">QGroupBox { font-weight: bold; }</string>
               </property>
               <property name="title">
-               <string>Metadata</string>
+               <string>Audio Metadata</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_11">
                <item>
@@ -4162,6 +4101,167 @@
               </layout>
              </widget>
             </item>
+            <item>
+             <widget class="QGroupBox" name="gb2_19">
+              <property name="styleSheet">
+               <string notr="true">QGroupBox { font-weight: bold; }</string>
+              </property>
+              <property name="title">
+               <string>Video Downloads</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_13">
+               <item>
+                <widget class="QGroupBox" name="gb3_0">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_5">
+                  <item>
+                   <widget class="QGroupBox" name="groupbox_generic_download_root">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_7">
+                     <item>
+                      <widget class="QLabel" name="lb_download_root_2">
+                       <property name="text">
+                        <string>Video Download Path</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="inp_generic_download_root">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="btn_generic_download_root_browse">
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb3_1">
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <item>
+                   <widget class="QGroupBox" name="group_playlist_cfg_m3u_13">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_103">
+                     <item>
+                      <widget class="QCheckBox" name="inp_download_youtube_videos">
+                       <property name="toolTip">
+                        <string/>
+                       </property>
+                       <property name="layoutDirection">
+                        <enum>Qt::RightToLeft</enum>
+                       </property>
+                       <property name="text">
+                        <string>Download Youtube Videos</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_23">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox_136">
+                    <property name="title">
+                     <string/>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout_247">
+                     <item>
+                      <widget class="QLabel" name="lb_maximum_generic_resolution">
+                       <property name="text">
+                        <string>Preferred Video Resolution</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_22">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QSpinBox" name="inp_maximum_generic_resolution">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>false</bool>
+                       </property>
+                       <property name="minimum">
+                        <number>0</number>
+                       </property>
+                       <property name="maximum">
+                        <number>10000000</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
            </layout>
           </widget>
          </widget>
@@ -4179,6 +4279,9 @@
             <width>16777215</width>
             <height>50</height>
            </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
           </property>
           <property name="title">
            <string/>
@@ -4301,13 +4404,20 @@
               <bool>false</bool>
              </property>
              <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
              <property name="frame">
               <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="inp_export_logs">
+             <property name="text">
+              <string>Export Logs</string>
              </property>
             </widget>
            </item>
@@ -4345,7 +4455,9 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>&lt;html align=&quot;center&quot; style=&quot;font-size:14pt;&quot;&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt; font-weight:600;&quot;&gt;App Disclaimer&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;OnTheSpot is &lt;strong&gt;strictly&lt;/strong&gt; intended for &lt;strong&gt;educational, private and fair use only&lt;/strong&gt; in compliance with the &lt;a href=&quot;https://www.copyright.gov/dmca/&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;Digital Millennium Copyright Act (DMCA), Section 1201&lt;/a&gt;. It is not affiliated with or endorsed by any music streaming services or platforms. The &lt;strong&gt;contributors / developers&lt;/strong&gt; of OnTheSpot are not responsible for  &lt;strong&gt;any misuse&lt;/strong&gt;of the program or source code. &lt;strong&gt; Users are solely responsible for ensuring &lt;/strong&gt;that their use of &lt;strong&gt;OnTheSpot complies with all relevant/applicable laws in their country.&lt;/strong&gt;The &lt;strong&gt;creators&lt;/strong&gt; and &lt;strong&gt;contributors&lt;/strong&gt; of OnTheSpot assume &lt;strong&gt;no liability&lt;/strong&gt; for &lt;/span&gt;&lt;strong&gt;any misuse&lt;/strong&gt; of legal terms associated with the application or its source code.&lt;br/&gt;&lt;br/&gt;&lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;GPL-2.0 License&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html align=&quot;center&quot; style=&quot;font-size:14pt;&quot;&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt; font-weight:600;&quot;&gt;App Disclaimer&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;OnTheSpot is strictly intended for educational, private and fair use only in compliance with the &lt;a href=&quot;https://www.copyright.gov/dmca/&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;Digital Millennium Copyright Act (DMCA), Section 1201&lt;/a&gt;. It is not affiliated with or endorsed by any music streaming services or platforms. The contributors / developers of OnTheSpot are not responsible for  any misuse of the program or source code.  Users are solely responsible for ensuring that their use of OnTheSpot complies with all relevant/applicable laws in their country.The creators and contributors of OnTheSpot assume no liability for &lt;/span&gt;any misuse of legal terms associated with the application or its source code.&lt;br/&gt;&lt;br/&gt;&lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;GPL-2.0 License&lt;/body&gt;&lt;/html&gt;
+
+</string>
              </property>
              <property name="scaledContents">
               <bool>false</bool>

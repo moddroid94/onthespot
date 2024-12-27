@@ -1,4 +1,5 @@
 import os
+import shutil
 import threading
 import time
 import traceback
@@ -18,7 +19,7 @@ from ..api.tidal import tidal_add_account_pt1, tidal_add_account_pt2, tidal_get_
 from ..api.youtube_music import youtube_music_add_account, youtube_music_get_track_metadata
 from ..api.generic import generic_add_account, generic_get_track_metadata, generic_list_extractors
 from ..downloader import DownloadWorker, RetryWorker
-from ..otsconfig import config
+from ..otsconfig import config, cache_dir
 from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, pending, pending_lock, get_logger, temp_download_path
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
@@ -210,6 +211,18 @@ class MainWindow(QMainWindow):
         self.inp_download_queue_show_completed.stateChanged.connect(self.update_table_visibility)
 
         self.inp_mirror_spotify_playback.stateChanged.connect(self.manage_mirror_spotify_playback)
+
+        self.inp_settings_bookmark_accounts.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(0))
+        self.inp_settings_bookmark_general.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(328))
+        self.inp_settings_bookmark_audio_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(874))
+        self.inp_settings_bookmark_audio_metadata.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(2006))
+        self.inp_settings_bookmark_video_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(9999))
+
+        self.inp_export_logs.clicked.connect(lambda: shutil.copy(
+            os.path.join(cache_dir(), "onthespot", "logs", config.session_uuid, "onthespot.log"),
+            os.path.join(os.path.expanduser("~"), "Downloads", "onthespot.log")) and
+            self.__show_popup_dialog(self.tr("Logs exported to '{0}'").format(os.path.join(os.path.expanduser("~"), "Downloads", "onthespot.log") or True))
+            )
 
 
     def set_table_props(self):
@@ -593,7 +606,6 @@ class MainWindow(QMainWindow):
 
 
     def set_login_fields(self):
-        self.groupbox_generic_download_root.hide()
         self.lb_generic_extractors.hide()
 
         # Apple Music

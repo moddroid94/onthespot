@@ -96,8 +96,8 @@
         <label for="mirror_spotify_playback">Mirror Spotify Playback</label>
         <input type="checkbox" id="mirror_spotify_playback" {% if config.mirror_spotify_playback %}checked{% endif %}><br><br>
 
-        <label for="only_download_youtube_audio">Only Download Youtube Audio</label>
-        <input type="checkbox" id="only_download_youtube_audio" {% if config.only_download_youtube_audio %}checked{% endif %}><br><br>
+        <label for="download_youtube_videos">Download Youtube Videos</label>
+        <input type="checkbox" id="download_youtube_videos" {% if config.download_youtube_videos %}checked{% endif %}><br><br>
 
         <label for="maximum_generic_resolution">Maximum Generic Resolution:</label>
         <input type="number" id="maximum_generic_resolution" value="{{ config.maximum_generic_resolution }}" placeholder="Enter maximum generic resolution"><br><br>
@@ -351,7 +351,7 @@
             const maxSearchResults = document.getElementById('max_search_results').value;
             const explicitLabel = document.getElementById('explicit_label').value;
             const mirrorSpotifyPlayback = document.getElementById('mirror_spotify_playback').checked;
-            const onlyDownloadYoutubeAudio = document.getElementById('only_download_youtube_audio').checked;
+            const downloadYoutubeVideos = document.getElementById('download_youtube_videos').checked;
             const maximumGenericResolution = document.getElementById('maximum_generic_resolution').value;
             const windows10ExplorerThumbnails = document.getElementById('windows_10_explorer_thumbnails').checked;
             const checkForUpdates = document.getElementById('check_for_updates').checked;
@@ -443,7 +443,7 @@
                 max_search_results: maxSearchResults,
                 explicit_label: explicitLabel,
                 mirror_spotify_playback: mirrorSpotifyPlayback,
-                only_download_youtube_audio: onlyDownloadYoutubeAudio,
+                download_youtube_videos: downloadYoutubeVideos,
                 maximum_generic_resolution: maximumGenericResolution,
                 windows_10_explorer_thumbnails: windows10ExplorerThumbnails,
                 check_for_updates: checkForUpdates,

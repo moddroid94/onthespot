@@ -15,12 +15,18 @@ class NonScrollableComboBox(QComboBox):
 
 
 def load_config(self):
+    # Dev Tools
+    self.inp_settings_scrollarea_value.valueChanged.connect(self.settings_scroll_area.verticalScrollBar().setValue)
+    if not config.get('debug_mode'):
+        self.inp_settings_scrollarea_value.hide()
+
     # Hide Popup Settings
     self.group_search_items.hide()
     self.group_download_items.hide()
 
     # Icons
     self.toggle_theme_button.setIcon(self.get_icon('light'))
+    self.inp_export_logs.setIcon(self.get_icon('export_file'))
 
     self.inp_language.insertItem(0, self.get_icon('en_US'), "English")
     self.inp_language.insertItem(1, self.get_icon('de_DE'), "Deutsch")
@@ -144,7 +150,7 @@ def load_config(self):
     self.inp_embed_speechiness.setChecked(config.get('embed_speechiness'))
     self.inp_embed_valence.setChecked(config.get('embed_valence'))
     self.inp_mirror_spotify_playback.setChecked(config.get('mirror_spotify_playback'))
-    self.inp_only_download_youtube_audio.setChecked(config.get('only_download_youtube_audio'))
+    self.inp_download_youtube_videos.setChecked(config.get('download_youtube_videos'))
 
     # Disable scrolling to change values of QSpinBoxes and QComboBoxes
     do_not_scroll = [
@@ -290,5 +296,5 @@ def save_config(self):
     config.set_('embed_speechiness', self.inp_embed_speechiness.isChecked())
     config.set_('embed_valence', self.inp_embed_valence.isChecked())
     config.set_('mirror_spotify_playback', self.inp_mirror_spotify_playback.isChecked())
-    config.set_('only_download_youtube_audio', self.inp_only_download_youtube_audio.isChecked())
+    config.set_('download_youtube_videos', self.inp_download_youtube_videos.isChecked())
     config.update()
