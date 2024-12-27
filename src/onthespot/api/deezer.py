@@ -92,7 +92,7 @@ def deezer_get_track_metadata(_, item_id):
 
     # Fetch track_number
     track_number = None
-    for i, track in enumerate(album_data.get('tracks', {})('data', [])):
+    for i, track in enumerate(album_data.get('tracks', {}).get('data', [])):
         if track.get('id', '') == int(item_id):
             track_number = i + 1
             break

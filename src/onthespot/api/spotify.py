@@ -530,8 +530,8 @@ def spotify_get_track_metadata(token, item_id):
     track_data = make_call(f'{BASE_URL}/tracks?ids={item_id}&market=from_token', headers=headers)
     credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{item_id}/credits', headers=headers)
     track_audio_data = make_call(f'{BASE_URL}/audio-features/{item_id}', headers=headers)
-    album_data = make_call(track_data['tracks'][0]['album']['href'], headers=headers)
-    artist_data = make_call(track_data['tracks'][0]['artists'][0]['href'], headers=headers)
+    album_data = make_call(track_data.get('tracks', [])[0].get('album', {}).get('href', ''), headers=headers)
+    artist_data = make_call(track_data.get('tracks', [])[0].get('artists', {}).get('href', ''), headers=headers)
 
     artists = []
     for data in track_data.get('tracks', [{}])[0].get('artists', []):
