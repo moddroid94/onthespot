@@ -53,7 +53,7 @@ def deezer_add_account(arl):
 
 def deezer_get_album_track_ids(_, album_id):
     logger.info(f"Getting tracks from album: {album_id}")
-    album_data = make_call(f"{BASE_URL}/album/{album_id}")
+    album_data = make_call(f"{BASE_URL}/album/{album_id}?limit=10000")
     item_ids = []
     for track in album_data.get("tracks", {}).get("data", ''):
         item_ids.append(track['id'])
@@ -62,7 +62,7 @@ def deezer_get_album_track_ids(_, album_id):
 
 def deezer_get_artist_album_ids(_, artist_id):
     logger.info(f"Getting album ids for artist: '{artist_id}'")
-    album_data = make_call(f"{BASE_URL}/artist/{artist_id}/albums")
+    album_data = make_call(f"{BASE_URL}/artist/{artist_id}/albums?limit=10000")
     item_ids = []
     for album in album_data.get("data", ''):
         item_ids.append(album.get("id", ''))
@@ -71,7 +71,7 @@ def deezer_get_artist_album_ids(_, artist_id):
 
 def deezer_get_playlist_data(_, playlist_id):
     logger.info(f"Get playlist data for playlist: '{playlist_id}'")
-    playlist_data = make_call(f"{BASE_URL}/playlist/{playlist_id}")
+    playlist_data = make_call(f"{BASE_URL}/playlist/{playlist_id}?limit=10000")
 
     playlist_name = playlist_data.get("title", '')
     playlist_by = playlist_data.get("creator", {}).get("name", '')
@@ -86,11 +86,12 @@ def deezer_get_track_metadata(_, item_id):
     logger.info(f"Get track info for: '{item_id}'")
 
     track_data = make_call(f"{BASE_URL}/track/{item_id}")
-    album_data = make_call(f"{BASE_URL}/album/{track_data.get('album', {}).get('id', '')}")
-    album_tracks = make_call(f"{BASE_URL}/album/{track_data.get('album', {}).get('id', '')}/tracks")
+    album_data = make_call(f"{BASE_URL}/album/{track_data.get('album', {}).get('id', '')}?limit=10000")
+    album_tracks = make_call(f"{BASE_URL}/album/{track_data.get('album', {}).get('id', '')}/tracks?limit=10000")
     #album_page = make_call(f"https://www.deezer.com/album/{track_data.get('album', {}).get('id', '')}", text=True)
 
     # Fetch track_number
+    track_number = None
     for i, track in enumerate(album_data['tracks']['data']):
         if track['id'] == int(item_id):
             track_number = i + 1
@@ -98,6 +99,13 @@ def deezer_get_track_metadata(_, item_id):
     if not track_number:
         track_number = track_data.get('track_position', '')
 
+    # Total Discs
+    try:
+        total_discs = album_tracks.get('data', [])[-1].get('disk_number', '')
+    except Exception:
+        total_discs = track_data.get('disk_number', '')
+
+    # Artists
     artists = []
     for artist in track_data.get('contributors', ''):
         artists.append(artist['name'])
@@ -117,7 +125,7 @@ def deezer_get_track_metadata(_, item_id):
     # so it is scraped from the album_tracks, can
     # alternatively scrape album page.
     info['disc_number'] = track_data.get('disk_number', '')
-    info['total_discs'] = album_tracks.get('data', [])[-1].get('disk_number', '')
+    info['total_discs'] = total_discs
     info['release_year'] = track_data.get('release_date', '').split('-')[0]
     info['explicit'] = track_data.get('explicit_lyrics', '')
     info['bpm'] = track_data.get('bpm', '')

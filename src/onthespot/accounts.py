@@ -52,13 +52,13 @@ def get_account_token(item_service):
     if item_service in ('bandcamp', 'youtube_music', 'generic'):
         return
     parsing_index = config.get('parsing_acc_sn')
-    service = account_pool[parsing_index]['service']
-    if item_service == service and not config.get("rotate_acc_sn"):
+    account_service = account_pool[parsing_index]['service']
+    if item_service == account_service and not config.get("rotate_acc_sn"):
         return globals()[f"{item_service}_get_token"](parsing_index)
     else:
         for i in range(parsing_index + 1, parsing_index + len(account_pool) + 1):
             index = i % len(account_pool)
-            if account_pool[index]['service'] == item_service:
+            if item_service == account_service:
                 if config.get("rotate_acc_sn"):
                     config.set_('parsing_acc_sn', index)
                     config.update
