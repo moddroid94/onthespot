@@ -519,7 +519,7 @@ def set_music_thumbnail(filename, metadata):
             if os.path.exists(temp_name):
                 os.remove(temp_name)
 
-        if not config.get('save_album_cover'):
+        if not config.get('save_album_cover') and os.path.exists(image_path):
             os.remove(image_path)
 
 def fix_mp3_metadata(filename):

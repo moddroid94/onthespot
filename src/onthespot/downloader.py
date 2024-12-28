@@ -211,9 +211,11 @@ class DownloadWorker(QObject):
                                     if os.path.splitext(item['file_path'])[1] == '.mp3':
                                         fix_mp3_metadata(item['file_path'])
                                 else:
-                                    if self.gui:
-                                        self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
-                                    set_music_thumbnail(file_path, item_metadata)
+                                    if config.get('save_album_cover'):
+                                        item['item_status'] = 'Setting Thumbnail'
+                                        if self.gui:
+                                            self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
+                                        set_music_thumbnail(file_path, item_metadata)
 
                             # M3U
                             if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
@@ -551,9 +553,11 @@ class DownloadWorker(QObject):
                         if os.path.splitext(file_path)[1] == '.mp3':
                             fix_mp3_metadata(file_path)
                     else:
-                        if self.gui:
-                            self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
-                        set_music_thumbnail(file_path, item_metadata)
+                        if config.get('save_album_cover'):
+                            item['item_status'] = 'Setting Thumbnail'
+                            if self.gui:
+                                self.progress.emit(item, self.tr("Setting Thumbnail"), 99)
+                            set_music_thumbnail(file_path, item_metadata)
 
                     # M3U
                     if config.get('create_m3u_playlists') and item.get('parent_category') == 'playlist':
