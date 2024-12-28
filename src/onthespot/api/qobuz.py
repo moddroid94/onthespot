@@ -16,22 +16,6 @@ QOBUZ_LOGIN_URL = "https://play.qobuz.com/login"
 
 
 def qobuz_add_account(email, password):
-    cfg_copy = config.get('accounts').copy()
-    new_user = {
-        "uuid": str(uuid.uuid4()),
-        "service": "qobuz",
-        "active": True,
-        "login": {
-            "email": email,
-            "password": password,
-        }
-    }
-    cfg_copy.append(new_user)
-    config.set_('accounts', cfg_copy)
-    config.update()
-
-
-def qobuz_login_user(account):
     logger.info('Logging into Qobuz account...')
     try:
         session = requests.Session()
@@ -106,12 +90,38 @@ def qobuz_login_user(account):
         login_url = f"{BASE_URL}/user/login"
 
         params = {}
-        params['email'] = account['login']['email']
-        params['password'] = account['login']['password']
+        params['email'] = email
+        params['password'] = password
         params['app_id'] = app_id
 
         login_data = requests.get(login_url, params=params).json()
 
+        cfg_copy = config.get('accounts').copy()
+        new_user = {
+            "uuid": str(uuid.uuid4()),
+            "service": "qobuz",
+            "active": True,
+            "login": {
+                "email": email,
+                "password": password,
+                "app_id": app_id,
+                "app_secrets": app_secrets,
+                "user_auth_token": login_data['user_auth_token'],
+            }
+        }
+        cfg_copy.append(new_user)
+        config.set_('accounts', cfg_copy)
+        config.update()
+
+    except Exception as e:
+        logger.error(f"Unknown Exception: {str(e)}")
+        return False
+
+
+def qobuz_login_user(account):
+    try:
+        # Ping to verify connectivity
+        requests.get('https://qobuz.com')
         account_pool.append({
             "uuid": account['uuid'],
             "username": account['login']['email'],
@@ -122,9 +132,9 @@ def qobuz_login_user(account):
             "login": {
                 "email": account['login']['email'],
                 "password": account['login']['password'],
-                "app_id": app_id,
-                "app_secrets": app_secrets,
-                "user_auth_token": login_data['user_auth_token'],
+                "app_id": account['login']['app_id'],
+                "app_secrets": account['login']['app_secrets'],
+                "user_auth_token": account['login']['user_auth_token'],
             }
         })
         return True

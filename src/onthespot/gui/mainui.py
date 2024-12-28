@@ -678,8 +678,8 @@ class MainWindow(QMainWindow):
             self.btn_login_add.setIcon(QIcon())
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
-                (self.__show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
-                qobuz_add_account(self.inp_login_username.text(), self.inp_login_password.text())
+                qobuz_add_account(self.inp_login_username.text(), self.inp_login_password.text()) and
+                (self.__show_popup_dialog(self.tr("Account added, please restart the app.")) or True)
                 )
 
         # Soundcloud
