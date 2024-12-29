@@ -111,7 +111,7 @@ def sanitize_data(value):
         value = value.replace('<', char)
         value = value.replace('>', char)
         value = value.replace('|', char)
-        while value.endswith('.'):
+        while value.endswith('.') or value.endswith(' '):
             value = value[:-1]
     else:
         value = value.replace('/', char)
