@@ -398,7 +398,7 @@ def apple_music_get_playlist_data(session, playlist_id):
     track_ids = []
     offset = 0
     while True:
-        url = f'{BASE_URL}/catalog/{session.cookies.get('itua')}/playlists/{playlist_id}/tracks?offset={offset}'
+        url = f'{BASE_URL}/catalog/{session.cookies.get("itua")}/playlists/{playlist_id}/tracks?offset={offset}'
         playlist_track_data = make_call(url, session=session, skip_cache=True)
         for track in playlist_track_data.get('data', ''):
             track_ids.append(track.get('id', ''))
