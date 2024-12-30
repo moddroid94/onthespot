@@ -41,6 +41,7 @@ OnTheSpot supports various accounts and instructions for each are listed below, 
 
 - **Generic Downloader**: Generic Downloader uses yt-dlp to rip any available music or videos from a given webpage. A list of supported services is available in the app or [here](https://github.com/yt-dlp/yt-dlp/tree/master/yt_dlp/extractor). Even if your given website is not listed the generic downloader may be able to rip media anyway, just paste your url in the search bar. To activate generic downloader simply click 'Add Generic Downloader'.
 
+
 ## 2. Searching and Downloading Music
 The search bar is able to parse queries, urls, and text files.
 
@@ -52,11 +53,6 @@ If a file path is provided the app will parse each line in the file for urls beg
 
 
 ## 4. Configuration
-
-### General Configuration Options
-
-   <details open>
-   <summary><b>Open Configuration Table</b></summary>
 
 ### General Settings
 | **Option** | **Description** |
@@ -73,7 +69,6 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **Windows 10 Explorer Thumbnails** | Embed thumbnails in a format that respects Windows 10 explorer and media player, this is an older format of ID3 and not widely supported. |
 | **Close To Tray** | Close application to tray on exit. |
 | **Check for Updates** | Automatically check for application updates. |
-
 
 ### Audio Download Settings
 | **Option** | **Description** |
@@ -104,7 +99,6 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **Retry Delay (m)** | The time, in minutes, for the retry worker to wait before retrying failed items. |
 | **Translate File Path** | Translate file paths into the application language. |
 
-
 ### Metadata Settings
 | **Option** | **Description** |
 | ------ | ------ |
@@ -112,15 +106,12 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **Overwrite Existing Collection** | If a file already exists re-embed metadata in your selected format. |
 | **Embed Metadata Tags** | Select which metadata tags to embed in downloaded files (e.g., `artist`, `album`, `year`, `lyrics`, etc.). |
 
-
 ### Video Download Settings
 | **Option** | **Description** |
 | ------ | ------ |
 | **Video Download Path** | Videos downloaded using the Generic Downloader account will be downloaded to the following path |
 | **Download Youtube Videos** | If this setting is enable OnTheSpot will download https://music.youtube.com/... as audio and https://www.youtube.com/... as a video. If this setting is disabled both will be downloaded using your Youtube Music account. |
 | **Preferred Video Resolution** | If available, videos downloaded using the Generic Downloader account will use the resolution specified. |
-   </details>
-
 
 ### Track/Episode/Playlist Path Format
 
@@ -128,10 +119,6 @@ If a file path is provided the app will parse each line in the file for urls beg
   - Define how downloaded tracks are named using variables enclosed in `{}`.
 
 - **Available Variables**
-
-   <details open>
-   <summary><b>Open Variables Table</b></summary>
-
    | **Variable**      | **Description**                                     |
    | ----------------- | --------------------------------------------------- |
    | `{service}`       | The music service used to download your file        |
@@ -150,7 +137,6 @@ If a file path is provided the app will parse each line in the file for urls beg
    | `{playlist_name}` | Name of the playlist (if part of a playlist).       |
    | `{playlist_owner}`| Name of the playlist owner (if part of a playlist). |
    | `{playlist_number}`| Item number in a playlist (if part of a playlist). |
-   </details>
 
 > [!TIP]
 > **Example:**
