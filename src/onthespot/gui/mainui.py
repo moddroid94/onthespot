@@ -150,7 +150,7 @@ class MainWindow(QMainWindow):
         colorpicker = QColorDialog(self)
         colorpicker.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
         colorpicker.setWindowFlag(Qt.WindowType.Dialog, True)
-        colorpicker.setWindowTitle("OnTheSpot - Notice")
+        colorpicker.setWindowTitle("OnTheSpot - Color Picker")
         colorpicker.setStyleSheet(config.get('theme'))
 
         if colorpicker.exec() == QColorDialog.DialogCode.Accepted:
@@ -306,7 +306,7 @@ class MainWindow(QMainWindow):
         self.start_url = ''
         # Update Checker
         if config.get("check_for_updates"):
-            if is_latest_release() == False:
+            if not is_latest_release():
                 self.__show_popup_dialog(self.tr("<p>An update is available at the link below,<p><a style='color: #6495ed;' href='https://github.com/justin025/onthespot/releases/latest'>https://github.com/justin025/onthespot/releases/latest</a>"))
 
 

@@ -4438,39 +4438,62 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="ots_info_container">
-          <property name="title">
-           <string/>
-          </property>
-          <property name="flat">
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_15">
-           <item>
-            <widget class="QLabel" name="ots_disclaimer_label">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>&lt;html align=&quot;center&quot; style=&quot;font-size:14pt;&quot;&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt; font-weight:600;&quot;&gt;App Disclaimer&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;OnTheSpot is strictly intended for educational, private and fair use only in compliance with the &lt;a href=&quot;https://www.copyright.gov/dmca/&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;Digital Millennium Copyright Act (DMCA), Section 1201&lt;/a&gt;. It is not affiliated with or endorsed by any music streaming services or platforms. The contributors / developers of OnTheSpot are not responsible for  any misuse of the program or source code.  Users are solely responsible for ensuring that their use of OnTheSpot complies with all relevant/applicable laws in their country.The creators and contributors of OnTheSpot assume no liability for &lt;/span&gt;any misuse of legal terms associated with the application or its source code.&lt;br/&gt;&lt;br/&gt;&lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;GPL-2.0 License&lt;/body&gt;&lt;/html&gt;
-
-</string>
-             </property>
-             <property name="scaledContents">
-              <bool>false</bool>
-             </property>
-             <property name="wordWrap">
-              <bool>true</bool>
-             </property>
-             <property name="openExternalLinks">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>641</width>
+             <height>405</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="ots_disclaimer_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>&lt;h1 align=&quot;center&quot;&gt;Disclaimer&lt;/h1&gt;
+&lt;br&gt;
+&lt;p align=&quot;center&quot; style=&quot;font-size:14pt;&quot;&gt;
+    OnTheSpot is strictly intended for educational, private and fair use only in compliance with the
+    &lt;a href=&quot;https://www.copyright.gov/dmca/&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;
+        Digital Millennium Copyright Act (DMCA), Section 1201
+    &lt;/a&gt;
+    . It is not affiliated with or endorsed by any music streaming services or platforms.
+    The contributors / developers of OnTheSpot are not responsible for  any misuse of the
+    program or source code.  Users are solely responsible for ensuring that their use of
+    OnTheSpot complies with all relevant/applicable laws in their country.The creators
+    and contributors of OnTheSpot assume no liability for any misuse of legal terms
+    associated with the application or its source code.
+    &lt;br&gt;
+    &lt;br&gt;
+    &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html#SEC1&quot; style=&quot;text-decoration: underline; color:#64B5F6;&quot;&gt;
+        GPL-2.0 License
+    &lt;/a&gt;
+&lt;/p&gt;</string>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="openExternalLinks">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>

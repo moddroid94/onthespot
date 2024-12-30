@@ -86,6 +86,7 @@ def is_latest_release():
         if int(latest_version) > int(current_version):
             logger.info(f"Update Available: {int(latest_version)} > {int(current_version)}")
             return False
+    return True
 
 
 def open_item(item):

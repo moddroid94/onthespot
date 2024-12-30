@@ -4,16 +4,34 @@
 ## 1. Logging into your accounts
 OnTheSpot supports various accounts and instructions for each are listed below, for further assistance please reach out for support on the community discord [here](https://discord.gg/GCQwRBFPk9).
 
-- **Apple Music**: Enter your media-user-token. It can be obtained in chrome by logging into https://music.apple.com, pressing ctrl + shift + i to open inspect element, clicking the 'Application' header, opening the music.apple.com cookie, and copying the media-user-token value. Please note a premium account is required to download music.
+- **Apple Music**: Enter your media-user-token. It can be obtained in chrome by logging into https://music.apple.com, pressing ctrl + shift + i to open inspect element, clicking the 'Application' or 'Storage' header, opening the music.apple.com cookie, and copying the media-user-token value. Please note a premium account is required to download music.
 
 - **Bandcamp**: Bandcamp offers public downloads and does not require an account, simply click 'Add Bandcamp Account' and restart the app.
 
+- **Deezer**: Paste your arl into the bar provided and click add account. To get your arl log into the deezer website, press ctrl + shift + i to open inspect element, navigate to the 'Application' or 'Storage' header, and open the www.deezer.com cookie. Your arl should be listed under one of the values provided.
 
-- **Deezer**: Paste your ARL into the bar provided and click add account. To get your ARL log into the deezer website, open inspect element, navigate to application/storage, and open the deezer website's cookies. Your arl should be listed under one of the values provided.
+- **Qobuz**: To login to your Qobuz account simply enter your email and password, and restart the app. If you would like to login using your user_auth_token you can append the following to the accounts section of your config file.
+   ```python
+   {
+      # Random string of numbers and letters
+      "uuid": UUID,
+      "service": "qobuz",
+      "active": true,
+      "login": {
+            # Email is not used during token logins
+            "email": "email@example.com",
+            # Password is not used during token logins
+            "password": "n/a",
+            "app_id": APP_ID,
+            "app_secrets": [
+               APP_SECRET
+            ],
+            "user_auth_token": USER_AUTH_TOKEN
+      }
+   }
+   ```
 
-- **Qobuz**: To login to your Qobuz account simply enter your email and password, and restart the app.
-
-- **Soundcloud**: Soundcloud offers public downloads and does not require an account, simply click 'Add Soundcloud Account' and restart the app. *If you have a GO+ account and would like to support development please reach out*
+- **Soundcloud**: Soundcloud offers public downloads and does not require an account, simply click 'Add Soundcloud Account' and restart the app. *If you have a GO+ account and would like to support development please reach out.*
 
 - **Spotify**: Ensure that both OnTheSpot and the Spotify Desktop App are not restricted by a firewall or vpn so that they can communicate. Click add account and then head over to devices in the Spotify app. Under devices you should see 'OnTheSpot', select it. Once complete the app will prompt you to restart.
 
@@ -21,7 +39,7 @@ OnTheSpot supports various accounts and instructions for each are listed below, 
 
 - **Youtube Music**: Youtube Music offers public downloads and does not require an account, simply click 'Add Youtube Music Account' and restart the app.
 
-- **Generic Downloader**: Generic Downloader uses yt-dlp to rip any available music and videos from a given webpage. A list of supported services is available in the app or [here](https://github.com/yt-dlp/yt-dlp/tree/master/yt_dlp/extractor). Even if your given website is not listed the generic downloader may be able to rip media anyway, just paste your url in the search bar. To activate generic downloader simply click 'Add Generic Downloader'
+- **Generic Downloader**: Generic Downloader uses yt-dlp to rip any available music or videos from a given webpage. A list of supported services is available in the app or [here](https://github.com/yt-dlp/yt-dlp/tree/master/yt_dlp/extractor). Even if your given website is not listed the generic downloader may be able to rip media anyway, just paste your url in the search bar. To activate generic downloader simply click 'Add Generic Downloader'.
 
 ## 2. Searching and Downloading Music
 The search bar is able to parse queries, urls, and text files.
