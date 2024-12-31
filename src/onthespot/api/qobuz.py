@@ -301,7 +301,7 @@ def qobuz_get_album_track_ids(token, album_id):
     headers['X-App-Id'] = token['app_id']
 
     params = {}
-    params['limit'] = '10000'
+    params['limit'] = '500'
 
     album_data = make_call(f'{BASE_URL}/album/get?album_id={album_id}', headers=headers, params=params)
 
@@ -320,12 +320,30 @@ def qobuz_get_artist_album_ids(token, artist_id):
 
     params = {}
     params['release_type'] = 'album,epSingle,live'
-    params['limit'] = '10000'
+    params['limit'] = '500'
 
     album_data = make_call(f'{BASE_URL}/artist/getReleasesList?artist_id={artist_id}', headers=headers, params=params)
 
     item_ids = []
     for album in album_data.get('items', []):
+        item_ids.append(album.get('id', ''))
+    return item_ids
+
+
+def qobuz_get_label_album_ids(token, label_id):
+    logger.info(f"Getting album ids for label: '{label_id}'")
+
+    headers = {}
+    headers['X-User-Auth-Token'] = token['user_auth_token']
+    headers['X-App-Id'] = token['app_id']
+
+    params = {}
+    params['extra'] = 'albums'
+    params['limit'] = '500'
+    album_data = make_call(f'{BASE_URL}/label/get?label_id={label_id}', headers=headers, params=params)
+
+    item_ids = []
+    for album in album_data.get('albums', {}).get('items', []):
         item_ids.append(album.get('id', ''))
     return item_ids
 
@@ -338,7 +356,7 @@ def qobuz_get_playlist_data(token, playlist_id):
     headers['X-App-Id'] = token['app_id']
 
     params = {}
-    params['limit'] = '10000'
+    params['limit'] = '500'
 
     playlist_data = make_call(f'{BASE_URL}/playlist/get?playlist_id={playlist_id}&extra=track_ids', headers=headers, params=params, skip_cache=True)
 

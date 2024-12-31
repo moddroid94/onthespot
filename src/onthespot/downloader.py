@@ -248,17 +248,6 @@ class DownloadWorker(QObject):
                 # item['gui']['progressbar'] and self.gui into a download_track function.
                 try:
                     if item_service == "spotify":
-                        # Check if selected account is the same item service and if not find one
-                        parsing_index = config.get('parsing_acc_sn')
-                        if account_pool[parsing_index]['service'] == item_service:
-                            session = account_pool[parsing_index]['login']['session']
-                        else:
-                            for i in range(len(account_pool)):
-                                index = (parsing_index + i + 1) % len(account_pool)
-                                account = account_pool[index]
-                                if account['service'] == item_service:
-                                    session = account_pool[index]['login']['session']
-                                    break
 
                         default_format = ".ogg"
                         temp_file_path += default_format
@@ -269,11 +258,11 @@ class DownloadWorker(QObject):
 
                         quality = AudioQuality.HIGH
                         bitrate = "160k"
-                        if session.get_user_attribute("type") == "premium" and item_type == 'track':
+                        if token.get_user_attribute("type") == "premium" and item_type == 'track':
                             quality = AudioQuality.VERY_HIGH
                             bitrate = "320k"
 
-                        stream = session.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
+                        stream = token.content_feeder().load(audio_key, VorbisOnlyAudioQuality(quality), False, None)
                         total_size = stream.input_stream.size
                         downloaded = 0
                         with open(temp_file_path, 'wb') as file:
@@ -294,7 +283,7 @@ class DownloadWorker(QObject):
 
 
                     elif item_service == 'deezer':
-                        song = get_song_info_from_deezer_website(item['item_id'])
+                        song = get_song_info_from_deezer_website(token, item['item_id'])
 
                         song_quality = 1
                         song_format = 'MP3_128'
@@ -321,10 +310,10 @@ class DownloadWorker(QObject):
                             'Referer': 'https://www.deezer.com/login',
                         }
 
-                        track_data = token.post(
+                        track_data = token['session'].post(
                             "https://media.deezer.com/v1/get_url",
                             json={
-                                'license_token': account_pool[config.get('parsing_acc_sn')]['login']['license_token'],
+                                'license_token': token['license_token'],
                                 'media': [{
                                     'type': "FULL",
                                     'formats': [

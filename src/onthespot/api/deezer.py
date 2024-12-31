@@ -140,9 +140,9 @@ def deezer_get_track_metadata(_, item_id):
     return info
 
 
-def get_song_info_from_deezer_website(track_id):
+def get_song_info_from_deezer_website(token, track_id):
     url = f"https://www.deezer.com/us/track/{track_id}"
-    session = account_pool[config.get('parsing_acc_sn')]['login']['session']
+    session = token['session']
     resp = session.get(url)
     if resp.status_code == 404:
         logger.info(f'Received 404 while fetching MD5_ORIGIN, {url}')
@@ -329,7 +329,7 @@ def deezer_login_user(account):
 
 
 def deezer_get_token(parsing_index):
-    return account_pool[parsing_index]['login']['session']
+    return account_pool[parsing_index]['login']
 
 
 def deezer_get_search_results(_, search_term, content_types):

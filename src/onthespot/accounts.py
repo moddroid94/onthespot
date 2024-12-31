@@ -58,7 +58,7 @@ def get_account_token(item_service):
     else:
         for i in range(parsing_index + 1, parsing_index + len(account_pool) + 1):
             index = i % len(account_pool)
-            if item_service == account_service:
+            if item_service == account_pool[index]['service']:
                 if config.get("rotate_acc_sn"):
                     config.set_('parsing_acc_sn', index)
                     config.update
