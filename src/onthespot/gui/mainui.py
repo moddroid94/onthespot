@@ -231,36 +231,28 @@ class MainWindow(QMainWindow):
         self.tbl_sessions.horizontalHeader().setSectionsMovable(True)
         self.tbl_sessions.horizontalHeader().setSectionsClickable(True)
         self.tbl_sessions.horizontalHeader().resizeSection(0, 16)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
-        self.tbl_sessions.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
+        for i in range(1, 7):
+            self.tbl_sessions.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Stretch)
+        self.set_login_fields()
+
         # Search results table
         #self.tbl_search_results.setSortingEnabled(True)
         self.tbl_search_results.horizontalHeader().setSectionsMovable(True)
         self.tbl_search_results.horizontalHeader().setSectionsClickable(True)
         self.tbl_search_results.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        self.tbl_search_results.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        for i in range(1,5):
+            self.tbl_search_results.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
+
         # Download progress table
         #self.tbl_dl_progress.setSortingEnabled(True)
         self.tbl_dl_progress.horizontalHeader().setSectionsMovable(True)
         self.tbl_dl_progress.horizontalHeader().setSectionsClickable(True)
-        if config.get("debug_mode"):
-            self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
-        else:
+        if not config.get("debug_mode"):
             self.tbl_dl_progress.setColumnWidth(0, 0)
         self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
-        self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
-        self.set_login_fields()
+        for i in range(2,7):
+            self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
+
         return True
 
 
@@ -320,17 +312,13 @@ class MainWindow(QMainWindow):
             rows = self.tbl_sessions.rowCount()
 
             radiobutton = QRadioButton()
-            radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow()) and config.update())
+            radiobutton.clicked.connect(lambda: config.set_('parsing_acc_sn', self.tbl_sessions.currentRow()))
             if sn == config.get("parsing_acc_sn") + 1:
                 radiobutton.setChecked(True)
 
-            btn = QPushButton(self.tbl_sessions)
-            trash_icon = self.get_icon('trash')
-            btn.setIcon(trash_icon)
-            #btn.setText(self.tr(" Remove "))
-
-            btn.clicked.connect(self.user_table_remove_click)
-            btn.setMinimumHeight(30)
+            remove_btn = QPushButton(self.tbl_sessions)
+            remove_btn.setIcon(self.get_icon('trash'))
+            remove_btn.clicked.connect(self.user_table_remove_click)
 
             status = QTableWidgetItem(str(account["status"]).title())
             status.setIcon(self.get_icon(account["status"]))
@@ -340,12 +328,12 @@ class MainWindow(QMainWindow):
 
             self.tbl_sessions.insertRow(rows)
             self.tbl_sessions.setCellWidget(rows, 0, radiobutton)
-            self.tbl_sessions.setItem(rows, 1, QTableWidgetItem(account["username"]))
+            self.tbl_sessions.setItem(rows, 1, QTableWidgetItem(account["username"][:22]))
             self.tbl_sessions.setItem(rows, 2, QTableWidgetItem(service))
             self.tbl_sessions.setItem(rows, 3, QTableWidgetItem(str(account["account_type"]).title()))
             self.tbl_sessions.setItem(rows, 4, QTableWidgetItem(account["bitrate"]))
             self.tbl_sessions.setItem(rows, 5, QTableWidgetItem(status))
-            self.tbl_sessions.setCellWidget(rows, 6, btn)
+            self.tbl_sessions.setCellWidget(rows, 6, remove_btn)
         logger.info("Accounts table was populated !")
 
 
