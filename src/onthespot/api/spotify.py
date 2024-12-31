@@ -242,11 +242,22 @@ def spotify_get_token(parsing_index):
 
 def spotify_get_artist_album_ids(token, artist_id):
     logger.info(f"Getting album ids for artist: '{artist_id}'")
-    headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
-    artist_data = make_call(f'{BASE_URL}/artists/{artist_id}/albums?include_groups=album%2Csingle&limit=50', headers=headers) #%2Cappears_on%2Ccompilation
+    items = []
+    offset = 0
+    limit = 50
+    while True:
+        headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
+        url = f'{BASE_URL}/artists/{artist_id}/albums?include_groups=album%2Csingle&limit={limit}&offset={offset}' #%2Cappears_on%2Ccompilation
+        artist_data = make_call(url, headers=headers)
+
+        offset += limit
+        items.extend(artist_data['items'])
+
+        if artist_data['total'] <= offset:
+            break
 
     item_ids = []
-    for album in artist_data['items']:
+    for album in items:
         item_ids.append(album['id'])
     return item_ids
 
