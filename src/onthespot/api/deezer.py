@@ -131,7 +131,7 @@ def deezer_get_track_metadata(_, item_id):
     info['bpm'] = track_data.get('bpm', '')
     info['artists'] = conv_list_format(artists)
     info['image_url'] = track_data.get('album', {}).get('cover_xl', '')
-    info['album_artists'] = track_data.get('artist', {}).get('name', '')
+    info['album_artists'] = album_data.get('artist', {}).get('name', '')
     info['album_name'] = track_data.get('album', {}).get('title', '')
     info['album_type'] = album_data.get('record_type', '')
     info['is_playable'] = track_data.get('readable', '')
