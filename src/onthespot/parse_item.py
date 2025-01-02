@@ -307,7 +307,7 @@ def parsingworker():
                             }
 
                 elif current_type in ['show', 'audiobook']:
-                    item_ids = spotify_get_show_episode_ids(token, current_id)
+                    item_ids = globals()[f"{current_service}_get_show_episode_ids"](token, current_id)
                     for item_id in item_ids:
                         local_id = format_local_id(item_id)
                         with pending_lock:

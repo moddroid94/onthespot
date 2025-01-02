@@ -467,24 +467,22 @@ def spotify_get_album_track_ids(token, album_id):
 
 
 def spotify_get_search_results(token, search_term, content_types):
-    logger.info(
-        f"Get search result for term '{search_term}'"
-        )
+    logger.info(f"Get search result for term '{search_term}'")
     if content_types is None:
         content_types = ["track", "album", "playlist", "artist", "show", "episode", "audiobook"]
-    data = requests.get(
-        f"{BASE_URL}/search",
-        {
-            "limit": config.get("max_search_results"),
-            "offset": "0",
-            "q": search_term,
-            "type": ",".join(c_type for c_type in content_types)
-        },
-        headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
-    ).json()
+
+    headers = {}
+    headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
+
+    params = {}
+    params['limit'] = config.get("max_search_results")
+    params['offset'] = '0'
+    params['q'] = search_term
+    params['type'] = ",".join(c_type for c_type in content_types)
+
+    data = requests.get(f"{BASE_URL}/search", params=params, headers=headers).json()
 
     search_results = []
-
     for key in data.keys():
         for item in data[key]["items"]:
             item_type = item['type']
@@ -533,7 +531,9 @@ def spotify_get_search_results(token, search_term, content_types):
 
 
 def spotify_get_track_metadata(token, item_id):
-    headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
+    headers = {}
+    headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
+
     track_data = make_call(f'{BASE_URL}/tracks?ids={item_id}&market=from_token', headers=headers)
     credits_data = make_call(f'https://spclient.wg.spotify.com/track-credits-view/v0/experimental/{item_id}/credits', headers=headers)
     track_audio_data = make_call(f'{BASE_URL}/audio-features/{item_id}', headers=headers)
@@ -616,9 +616,10 @@ def spotify_get_track_metadata(token, item_id):
 
 def spotify_get_episode_metadata(token, episode_id):
     logger.info(f"Get episode info for episode by id '{episode_id}'")
-    headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
+    headers = {}
+    headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
     episode_data = make_call(f"{BASE_URL}/episodes/{episode_id}", headers=headers)
-    show_episode_ids = spotify_get_show_episode_ids(token.get("user-read-email"), episode_data.get('show', {}).get('id', ''))
+    show_episode_ids = spotify_get_show_episode_ids(token, episode_data.get('show', {}).get('id', ''))
     # I believe audiobook ids start with a 7 but to verify you can use https://api.spotify.com/v1/audiobooks/{id}
     # the endpoint could possibly be used to mark audiobooks in genre but it doesn't really provide any additional
     # metadata compared to show_data beyond abridged and unabridged.
