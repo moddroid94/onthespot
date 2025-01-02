@@ -53,7 +53,7 @@ class MirrorSpotifyPlayback(QObject):
                 # Account pool hasn't been filled yet
                 continue
             url = f"{BASE_URL}/me/player/currently-playing"
-            resp = requests.get(url, headers={"Authorization": f"Bearer {token.get("user-read-currently-playing")}"})
+            resp = requests.get(url, headers={"Authorization": f"Bearer {token.get('user-read-currently-playing')}"})
             if resp.status_code == 200:
                 data = resp.json()
                 if data['currently_playing_type'] == 'track':
@@ -246,7 +246,9 @@ def spotify_get_artist_album_ids(token, artist_id):
     offset = 0
     limit = 50
     while True:
-        headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
+        headers = {}
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
+
         url = f'{BASE_URL}/artists/{artist_id}/albums?include_groups=album%2Csingle&limit={limit}&offset={offset}' #%2Cappears_on%2Ccompilation
         artist_data = make_call(url, headers=headers)
 
@@ -264,7 +266,8 @@ def spotify_get_artist_album_ids(token, artist_id):
 
 def spotify_get_playlist_data(token, playlist_id):
     logger.info(f"Get playlist data for playlist: {playlist_id}")
-    headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
+    headers = {}
+    headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
     resp = make_call(f'{BASE_URL}/playlists/{playlist_id}', headers=headers, skip_cache=True)
     return resp['name'], resp['owner']['display_name']
 
@@ -278,11 +281,10 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
             elif item_type == "episode":
                 url = f"https://spclient.wg.spotify.com/transcript-read-along/v2/episode/{item_id}?format=json&market=from_token"
 
-            headers = {
-            'app-platform': 'WebPlayer',
-            'Authorization': f'Bearer {token.tokens().get("user-read-email")}',
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
-            }
+            headers = {}
+            headers['app-platform'] = 'WebPlayer'
+            headers['Authorization'] = f'Bearer {token.tokens().get("user-read-email")}'
+            headers['user-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
 
             resp = make_call(url, headers=headers)
             if resp == None:
@@ -374,7 +376,8 @@ def spotify_get_playlist_items(token, playlist_id):
 
     while True:
         url = f'{BASE_URL}/playlists/{playlist_id}/tracks?additional_types=track%2Cepisode&offset={offset}&limit={limit}'
-        headers = {'Authorization': f'Bearer {token.tokens().get("user-read-email")}'}
+        headers = {}
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
 
         resp = make_call(url, headers=headers, skip_cache=True)
 
@@ -394,7 +397,8 @@ def spotify_get_liked_songs(token):
 
     while True:
         url = f'{BASE_URL}/me/tracks?offset={offset}&limit={limit}'
-        headers = {'Authorization': f'Bearer {token.tokens().get("user-library-read")}'}
+        headers = {}
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
 
         resp = make_call(url, headers=headers, skip_cache=True)
 
@@ -413,8 +417,9 @@ def spotify_get_your_episodes(token):
     limit = 50
 
     while True:
+        headers = {}
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
         url = f'{BASE_URL}/me/episodes?offset={offset}&limit={limit}'
-        headers = {'Authorization': f'Bearer {token.tokens().get("user-library-read")}'}
 
         resp = make_call(url, headers=headers, skip_cache=True)
 
@@ -426,23 +431,6 @@ def spotify_get_your_episodes(token):
     return items
 
 
-def get_album_name(token, album_id):
-    logger.info(f"Get album info from album by id ''{album_id}'")
-    headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
-    resp = make_call(
-        f'{BASE_URL}/albums/{album_id}',
-        headers=headers
-        )
-    if m := re.search(r'(\d{4})', resp['release_date']):
-        return resp['artists'][0]['name'],\
-            m.group(1), resp['name'],\
-            resp['total_tracks']
-    else:
-        return resp['artists'][0]['name'],\
-            resp['release_date'], resp['name'],\
-            resp['total_tracks']
-
-
 def spotify_get_album_track_ids(token, album_id):
     logger.info(f"Getting tracks from album: {album_id}")
     tracks = []
@@ -451,7 +439,8 @@ def spotify_get_album_track_ids(token, album_id):
 
     while True:
         url=f'{BASE_URL}/albums/{album_id}/tracks?offset={offset}&limit={limit}'
-        headers = {"Authorization": f"Bearer {token.tokens().get("user-read-email")}"}
+        headers = {}
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
         resp = make_call(url, headers=headers)
 
         offset += limit
@@ -667,7 +656,8 @@ def spotify_get_show_episode_ids(token, show_id):
 
     while True:
         url = f'{BASE_URL}/shows/{show_id}/episodes?offset={offset}&limit={limit}'
-        headers = {'Authorization': f'Bearer {token.tokens().get("user-read-email")}'}
+        headers = {}
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
         resp = make_call(url, headers=headers)
 
         offset += limit
