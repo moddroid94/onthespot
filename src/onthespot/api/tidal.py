@@ -340,7 +340,7 @@ def tidal_get_file_url(token, item_id):
     params["playbackmode"] = "STREAM"
     params["assetpresentation"] = "FULL"
 
-    playback_info = make_call(f"{BASE_URL}/tracks/{item_id}/playbackinfopostpaywall", params=params, headers=headers)
+    playback_info = make_call(f"{BASE_URL}/tracks/{item_id}/playbackinfopostpaywall", params=params, headers=headers, skip_cache=True)
 
     manifest = json.loads(b64decode(playback_info["manifest"]).decode("utf-8"))
     flac_url = manifest["urls"][0]

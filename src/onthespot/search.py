@@ -42,7 +42,7 @@ def get_search_results(search_term, content_types=None):
 
         logger.info(f"Search clicked with value term {search_term}")
         service = account_pool[config.get('parsing_acc_sn')]['service']
-        if search_term != "" and service != 'generic':
+        if search_term and service != 'generic':
             token = get_account_token(service)
             return globals()[f"{service}_get_search_results"](token, search_term, content_types)
         else:
