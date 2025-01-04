@@ -94,17 +94,23 @@ def youtube_music_get_track_metadata(_, item_id):
 
     # Convert length to milliseconds
     timestamp = info_dict.get('duration_string', '')
-    if timestamp:
-        parts = timestamp.split(':')
-        if len(parts) == 3:
-            hours, minutes, seconds = map(int, parts)
-            total_seconds = (hours * 3600) + (minutes * 60) + seconds
-        elif len(parts) == 2:
-            minutes, seconds = map(int, parts)
-            total_seconds = (minutes * 60) + seconds
-        length = total_seconds * 1000
-    else:
-        length = ''
+    try:
+        if timestamp:
+            parts = timestamp.split(':')
+            if len(parts) == 3:
+                hours, minutes, seconds = map(int, parts)
+                total_seconds = (hours * 3600) + (minutes * 60) + seconds
+            elif len(parts) == 2:
+                minutes, seconds = map(int, parts)
+                total_seconds = (minutes * 60) + seconds
+            elif len(parts) == 1:
+                total_seconds = timestamp
+            length = total_seconds * 1000
+        else:
+            length = '0'
+    except Exception:
+        logger.error(f'Invalid timestamp: {timestamp}')
+        length = '0'
 
     # Get thumbnail url
     thumbnail_url = None
