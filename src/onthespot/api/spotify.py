@@ -528,6 +528,7 @@ def spotify_get_track_metadata(token, item_id):
     track_audio_data = make_call(f'{BASE_URL}/audio-features/{item_id}', headers=headers)
     album_data = make_call(f"{BASE_URL}/albums/{track_data.get('tracks', [])[0].get('album', {}).get('id', '')}", headers=headers)
     artist_data = make_call(f"{BASE_URL}/artists/{track_data.get('tracks', [])[0].get('artists', [])[0].get('id', '')}", headers=headers)
+    album_track_ids = spotify_get_album_track_ids(token, track_data.get('tracks', [])[0].get('album', {}).get('id', ''))
 
     artists = []
     for data in track_data.get('tracks', [{}])[0].get('artists', []):
@@ -540,6 +541,16 @@ def spotify_get_track_metadata(token, item_id):
         credits[role_title] = [
             artist.get('name', '') for artist in credit_block.get('artists', [])
         ]
+
+    # Track Number
+    track_number = None
+    if album_track_ids:
+        for i, track_id in enumerate(album_track_ids):
+            if track_id == str(item_id):
+                track_number = i + 1
+                break
+    if not track_number:
+        track_number = track_data.get('tracks', [{}])[0].get('track_number', '')
 
     info = {}
     info['artists'] = artists
@@ -555,7 +566,8 @@ def spotify_get_track_metadata(token, item_id):
         logger.info('Invalid thumbnail')
 
     info['release_year'] = track_data.get('tracks', [{}])[0].get('album', {}).get('release_date', '').split("-")[0]
-    info['track_number'] = track_data.get('tracks', [{}])[0].get('track_number', '')
+    #info['track_number'] = track_data.get('tracks', [{}])[0].get('track_number', '')
+    info['track_number'] = track_number 
     info['total_tracks'] = track_data.get('tracks', [{}])[0].get('album', {}).get('total_tracks', '')
     info['disc_number'] = track_data.get('tracks', [{}])[0].get('disc_number', '')
     info['total_discs'] = sorted([trk.get('disc_number', 0) for trk in album_data.get('tracks', {}).get('items', [])])[-1] if 'tracks' in album_data else 1

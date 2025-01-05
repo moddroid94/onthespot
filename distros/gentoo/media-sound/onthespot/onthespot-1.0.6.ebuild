@@ -33,6 +33,7 @@ RDEPEND="
 	dev-python/m3u8
 	dev-python/music-tag
 	dev-python/pillow
+	dev-python/protobuf
 	dev-python/pyqt6[network,widgets]
 	dev-python/pywidevine
 	dev-python/requests
