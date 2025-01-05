@@ -398,7 +398,7 @@ def spotify_get_liked_songs(token):
     while True:
         url = f'{BASE_URL}/me/tracks?offset={offset}&limit={limit}'
         headers = {}
-        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-library-read')}"
 
         resp = make_call(url, headers=headers, skip_cache=True)
 
@@ -418,7 +418,7 @@ def spotify_get_your_episodes(token):
 
     while True:
         headers = {}
-        headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
+        headers['Authorization'] = f"Bearer {token.tokens().get('user-library-read')}"
         url = f'{BASE_URL}/me/episodes?offset={offset}&limit={limit}'
 
         resp = make_call(url, headers=headers, skip_cache=True)
