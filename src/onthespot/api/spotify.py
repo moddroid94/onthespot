@@ -536,11 +536,12 @@ def spotify_get_track_metadata(token, item_id):
     artists = conv_list_format(artists)
 
     credits = {}
-    for credit_block in credits_data.get('roleCredits', []):
-        role_title = credit_block.get('roleTitle', '').lower()
-        credits[role_title] = [
-            artist.get('name', '') for artist in credit_block.get('artists', [])
-        ]
+    if credits_data:
+        for credit_block in credits_data.get('roleCredits', []):
+            role_title = credit_block.get('roleTitle', '').lower()
+            credits[role_title] = [
+                artist.get('name', '') for artist in credit_block.get('artists', [])
+            ]
 
     # Track Number
     track_number = None
