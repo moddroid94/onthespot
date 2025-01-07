@@ -22,6 +22,7 @@ HOMEPAGE="https://github.com/justin025/onthespot"
 
 LICENSE="GPL-2"
 SLOT="0"
+IUSE="webui"
 
 BDEPEND="
 	dev-python/packaging
@@ -41,10 +42,19 @@ RDEPEND="
 	media-libs/mutagen
 	media-video/ffmpeg[mp3,openssl,sdl]
 	net-misc/yt-dlp
+	webui? (
+		acct-group/onthespot
+		acct-user/onthespot
+	)
 "
 
 src_install() {
 	distutils-r1_src_install
+
+	if use webui ; then
+		newconfd "${FILESDIR}/${PN}.confd" "${PN}"
+		newinitd "${FILESDIR}/${PN}.initd" "${PN}"
+	fi
 
 	domenu "${S}"/src/onthespot/resources/org.onthespot.OnTheSpot.desktop
 	newicon -s 256 "${S}"/src/onthespot/resources/icons/onthespot.png onthespot.png
