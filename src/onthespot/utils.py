@@ -42,8 +42,8 @@ def make_call(url, params=None, headers=None, session=None, skip_cache=False, te
                     json_data = json.load(cf)
                 return json_data
             except json.JSONDecodeError:
-                logger.error(f'URL "{url}" cache has invalid data, retrying request!')
-                pass
+                logger.error(f'URL "{url}" cache has invalid data')
+		return None
         logger.debug(f'URL "{url}" has cache miss! HASH: {request_key}; Fetching data')
 
     if session is None:
