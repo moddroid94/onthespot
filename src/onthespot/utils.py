@@ -43,7 +43,7 @@ def make_call(url, params=None, headers=None, session=None, skip_cache=False, te
                 return json_data
             except json.JSONDecodeError:
                 logger.error(f'URL "{url}" cache has invalid data')
-		return None
+                return None
         logger.debug(f'URL "{url}" has cache miss! HASH: {request_key}; Fetching data')
 
     if session is None:
