@@ -61,10 +61,18 @@
 
     <form id="settings-form">
 
-        <h2>General</h2>
+        <h2>Web UI</h2>
 
-        <label for="download_root">Download Path:</label>
-        <input type="text" id="download_root" value="{{ config.download_root }}" placeholder="Enter download root"><br><br>
+        <label for="use_webui_login">Enable Web UI Login</label>
+        <input type="checkbox" id="use_webui_login" {% if config.use_webui_login %}checked{% endif %}><br><br>
+
+        <label for="webui_username">Web UI Username:</label>
+        <input type="text" id="webui_username" value="{{ config.webui_username }}" placeholder="Change current username"><br><br>
+
+        <label for="webui_password">Web UI Password:</label>
+        <input type="password" id="webui_password" value="{{ config.webui_password }}" placeholder="Change current password"><br><br>
+
+        <h2>General</h2>
 
         <label for="download_copy_btn">Download Copy Button</label>
         <input type="checkbox" id="download_copy_btn" {% if config.download_copy_btn %}checked{% endif %}><br><br>
@@ -96,19 +104,11 @@
         <label for="mirror_spotify_playback">Mirror Spotify Playback</label>
         <input type="checkbox" id="mirror_spotify_playback" {% if config.mirror_spotify_playback %}checked{% endif %}><br><br>
 
-        <label for="download_youtube_videos">Download Youtube Videos</label>
-        <input type="checkbox" id="download_youtube_videos" {% if config.download_youtube_videos %}checked{% endif %}><br><br>
-
-        <label for="maximum_generic_resolution">Maximum Generic Resolution:</label>
-        <input type="number" id="maximum_generic_resolution" value="{{ config.maximum_generic_resolution }}" placeholder="Enter maximum generic resolution"><br><br>
-
         <label for="windows_10_explorer_thumbnails">Windows 10 Explorer Thumbnails:</label>
         <input type="checkbox" id="windows_10_explorer_thumbnails" {% if config.windows_10_explorer_thumbnails %}checked{% endif %}><br><br>
 
         <label for="check_for_updates">Check for Updates</label>
         <input type="checkbox" id="check_for_updates" {% if config.check_for_updates %}checked{% endif %}><br><br>
-
-        <h2>Search</h2>
 
         <label for="enable_search_tracks">Enable Search Tracks</label>
         <input type="checkbox" id="enable_search_tracks" {% if config.enable_search_tracks %}checked{% endif %}><br><br>
@@ -132,7 +132,10 @@
         <input type="checkbox" id="enable_search_audiobooks" {% if config.enable_search_audiobooks %}checked{% endif %}><br><br>
 
 
-        <h2>Downloads</h2>
+        <h2>Audio Downloads</h2>
+
+        <label for="download_root">Audio Download Path:</label>
+        <input type="text" id="download_root" value="{{ config.download_root }}" placeholder="Enter download path"><br><br>
 
         <label for="media_format">Media Format:</label>
         <input type="text" id="media_format" value="{{ config.media_format }}" placeholder="Enter media format"><br><br>
@@ -215,7 +218,7 @@
         <label for="translate_file_path">Translate File Path</label>
         <input type="checkbox" id="translate_file_path" {% if config.translate_file_path %}checked{% endif %}><br><br>
 
-        <h2>Metadata</h2>
+        <h2>Audio Metadata</h2>
 
         <label for="metadata_seperator">Metadata Separator:</label>
         <input type="text" id="metadata_seperator" value="{{ config.metadata_seperator }}" placeholder="Enter metadata separator"><br><br>
@@ -331,6 +334,17 @@
         <label for="embed_valence">Embed Valence</label>
         <input type="checkbox" id="embed_valence" {% if config.embed_valence %}checked{% endif %}><br><br>
 
+        <h2>Video Downloads</h2>
+
+        <label for="generic_download_root">Video Download Path:</label>
+        <input type="text" id="generic_download_root" value="{{ config.generic_download_root }}" placeholder="Enter download path"><br><br>
+
+        <label for="download_youtube_videos">Download Youtube Videos</label>
+        <input type="checkbox" id="download_youtube_videos" {% if config.download_youtube_videos %}checked{% endif %}><br><br>
+
+        <label for="maximum_generic_resolution">Maximum Generic Resolution:</label>
+        <input type="number" id="maximum_generic_resolution" value="{{ config.maximum_generic_resolution }}" placeholder="Enter maximum generic resolution"><br><br>
+
         <button type="button" onclick="updateSettings()">Save Settings</button>
     </form>
 
@@ -340,184 +354,98 @@
             const parsingAccSn = document.querySelector('input[name="parsing_acc_sn"]:checked')
                 ? document.querySelector('input[name="parsing_acc_sn"]:checked').value
                 : '';
-            const downloadRoot = document.getElementById('download_root').value;
-            const downloadCopyBtn = document.getElementById('download_copy_btn').checked;
-            const downloadOpenBtn = document.getElementById('download_open_btn').checked;
-            const downloadLocateBtn = document.getElementById('download_locate_btn').checked;
-            const downloadDeleteBtn = document.getElementById('download_delete_btn').checked;
-            const showSearchThumbnails = document.getElementById('show_search_thumbnails').checked;
-            const showDownloadThumbnails = document.getElementById('show_download_thumbnails').checked;
-            const searchThumbHeight = document.getElementById('search_thumb_height').value;
-            const maxSearchResults = document.getElementById('max_search_results').value;
-            const explicitLabel = document.getElementById('explicit_label').value;
-            const mirrorSpotifyPlayback = document.getElementById('mirror_spotify_playback').checked;
-            const downloadYoutubeVideos = document.getElementById('download_youtube_videos').checked;
-            const maximumGenericResolution = document.getElementById('maximum_generic_resolution').value;
-            const windows10ExplorerThumbnails = document.getElementById('windows_10_explorer_thumbnails').checked;
-            const checkForUpdates = document.getElementById('check_for_updates').checked;
-
-            const enableSearchTracks = document.getElementById('enable_search_tracks').checked;
-            const enableSearchAlbums = document.getElementById('enable_search_albums').checked;
-            const enableSearchArtists = document.getElementById('enable_search_artists').checked;
-            const enableSearchPlaylists = document.getElementById('enable_search_playlists').checked;
-            const enableSearchEpisodes = document.getElementById('enable_search_episodes').checked;
-            const enableSearchShows = document.getElementById('enable_search_shows').checked;
-            const enableSearchAudiobooks = document.getElementById('enable_search_audiobooks').checked;
-
-            const mediaFormat = document.getElementById('media_format').value;
-            const trackPathFormatter = document.getElementById('track_path_formatter').value;
-            const podcastMediaFormat = document.getElementById('podcast_media_format').value;
-            const podcastPathFormatter = document.getElementById('podcast_path_formatter').value;
-            const usePlaylistPath = document.getElementById('use_playlist_path').checked;
-            const playlistPathFormatter = document.getElementById('playlist_path_formatter').value;
-            const createM3UPlaylists = document.getElementById('create_m3u_playlists').checked;
-            const m3uNameFormatter = document.getElementById('m3u_name_formatter').value;
-            const extSeparator = document.getElementById('ext_seperator').value;
-            const extPath = document.getElementById('ext_path').value;
-            const saveAlbumCover = document.getElementById('save_album_cover').checked;
-            const albumCoverFormat = document.getElementById('album_cover_format').value;
-            const illegalCharacterReplacement = document.getElementById('illegal_character_replacement').value;
-            const inpEnableLyrics = document.getElementById('inp_enable_lyrics').checked;
-            const onlySyncedLyrics = document.getElementById('only_synced_lyrics').checked;
-            const useLrcFile = document.getElementById('use_lrc_file').checked;
-            const fileBitrate = document.getElementById('file_bitrate').value;
-            const fileHertz = document.getElementById('file_hertz').value;
-            const rotateAccSn = document.getElementById('rotate_acc_sn').checked;
-            const forceRaw = document.getElementById('force_raw').checked;
-            const downloadDelay = document.getElementById('download_delay').value;
-            const translateFilePath = document.getElementById('translate_file_path').checked;
-            const maximumQueueWorkers = document.getElementById('maximum_queue_workers').value;
-            const maximumDownloadWorkers = document.getElementById('maximum_download_workers').value;
-            const enableRetryWorker = document.getElementById('enable_retry_worker').value;
-            const retryWorkerDelay = document.getElementById('retry_worker_delay').value;
-
-            const metadataSeparator = document.getElementById('metadata_seperator').value;
-            const overwriteExistingMetadata = document.getElementById('overwrite_existing_metadata').checked;
-            const embedCover = document.getElementById('embed_cover').checked;
-            const embedBranding = document.getElementById('embed_branding').checked;
-            const embedArtist = document.getElementById('embed_artist').checked;
-            const embedAlbum = document.getElementById('embed_album').checked;
-            const embedAlbumArtist = document.getElementById('embed_albumartist').checked;
-            const embedName = document.getElementById('embed_name').checked;
-            const embedYear = document.getElementById('embed_year').checked;
-            const embedDiscNumber = document.getElementById('embed_discnumber').checked;
-            const embedTrackNumber = document.getElementById('embed_tracknumber').checked;
-            const embedGenre = document.getElementById('embed_genre').checked;
-            const embedPerformers = document.getElementById('embed_performers').checked;
-            const embedProducers = document.getElementById('embed_producers').checked;
-            const embedWriters = document.getElementById('embed_writers').checked;
-            const embedLabel = document.getElementById('embed_label').checked;
-            const embedCopyright = document.getElementById('embed_copyright').checked;
-            const embedDescription = document.getElementById('embed_description').checked;
-            const embedLanguage = document.getElementById('embed_language').checked;
-            const embedIsrc = document.getElementById('embed_isrc').checked;
-            const embedLength = document.getElementById('embed_length').checked;
-            const embedKey = document.getElementById('embed_key').checked;
-            const embedBpm = document.getElementById('embed_bpm').checked;
-            const embedUrl = document.getElementById('embed_url').checked;
-            const embedLyrics = document.getElementById('embed_lyrics').checked;
-            const embedExplicit = document.getElementById('embed_explicit').checked;
-            const embedCompilation = document.getElementById('embed_compilation').checked;
-            const embedUpc = document.getElementById('embed_service_id').checked;
-            const embedServiceId = document.getElementById('embed_service_id').checked;
-            const embedTimeSignature = document.getElementById('embed_timesignature').checked;
-            const embedAcousticness = document.getElementById('embed_acousticness').checked;
-            const embedDanceability = document.getElementById('embed_danceability').checked;
-            const embedEnergy = document.getElementById('embed_energy').checked;
-            const embedInstrumentalness = document.getElementById('embed_instrumentalness').checked;
-            const embedLiveness = document.getElementById('embed_liveness').checked;
-            const embedLoudness = document.getElementById('embed_loudness').checked;
-            const embedSpeechiness = document.getElementById('embed_speechiness').checked;
-            const embedValence = document.getElementById('embed_valence').checked;
-
             const data = {
                 parsing_acc_sn: parsingAccSn,
-                download_root: downloadRoot,
-                download_copy_btn: downloadCopyBtn,
-                download_open_btn: downloadOpenBtn,
-                download_locate_btn: downloadLocateBtn,
-                download_delete_btn: downloadDeleteBtn,
-                show_search_thumbnails: showSearchThumbnails,
-                show_download_thumbnails: showDownloadThumbnails,
-                search_thumb_height: searchThumbHeight,
-                max_search_results: maxSearchResults,
-                explicit_label: explicitLabel,
-                mirror_spotify_playback: mirrorSpotifyPlayback,
-                download_youtube_videos: downloadYoutubeVideos,
-                maximum_generic_resolution: maximumGenericResolution,
-                windows_10_explorer_thumbnails: windows10ExplorerThumbnails,
-                check_for_updates: checkForUpdates,
-                enable_search_tracks: enableSearchTracks,
-                enable_search_albums: enableSearchAlbums,
-                enable_search_artists: enableSearchArtists,
-                enable_search_playlists: enableSearchPlaylists,
-                enable_search_episodes: enableSearchEpisodes,
-                enable_search_shows: enableSearchShows,
-                enable_search_audiobooks: enableSearchAudiobooks,
-                media_format: mediaFormat,
-                track_path_formatter: trackPathFormatter,
-                podcast_media_format: podcastMediaFormat,
-                podcast_path_formatter: podcastPathFormatter,
-                use_playlist_path: usePlaylistPath,
-                playlist_path_formatter: playlistPathFormatter,
-                create_m3u_playlists: createM3UPlaylists,
-                m3u_name_formatter: m3uNameFormatter,
-                ext_seperator: extSeparator,
-                ext_path: extPath,
-                save_album_cover: saveAlbumCover,
-                album_cover_format: albumCoverFormat,
-                illegal_character_replacement: illegalCharacterReplacement,
-                inp_enable_lyrics: inpEnableLyrics,
-                only_synced_lyrics: onlySyncedLyrics,
-                use_lrc_file: useLrcFile,
-                file_bitrate: fileBitrate,
-                file_hertz: fileHertz,
-                rotate_acc_sn: rotateAccSn,
-                force_raw: forceRaw,
-                download_delay: downloadDelay,
-                translate_file_path: translateFilePath,
-                maximum_queue_workers: maximumQueueWorkers,
-                maximum_download_workers: maximumDownloadWorkers,
-                enable_retry_worker: enableRetryWorker,
-                retry_worker_delay: retryWorkerDelay,
-                metadata_separator: metadataSeparator,
-                overwrite_existing_metadata: overwriteExistingMetadata,
-                embed_cover: embedCover,
-                embed_branding: embedBranding,
-                embed_artist: embedArtist,
-                embed_album: embedAlbum,
-                embed_albumartist: embedAlbumArtist,
-                embed_name: embedName,
-                embed_year: embedYear,
-                embed_discnumber: embedDiscNumber,
-                embed_tracknumber: embedTrackNumber,
-                embed_genre: embedGenre,
-                embed_performers: embedPerformers,
-                embed_producers: embedProducers,
-                embed_writers: embedWriters,
-                embed_label: embedLabel,
-                embed_copyright: embedCopyright,
-                embed_description: embedDescription,
-                embed_language: embedLanguage,
-                embed_isrc: embedIsrc,
-                embed_length: embedLength,
-                embed_key: embedKey,
-                embed_bpm: embedBpm,
-                embed_url: embedUrl,
-                embed_lyrics: embedLyrics,
-                embed_explicit: embedExplicit,
-                embed_compilation: embedCompilation,
-                embed_upc: embedUpc,
-                embed_service_id: embedServiceId,
-                embed_timesignature: embedTimeSignature,
-                embed_acousticness: embedAcousticness,
-                embed_danceability: embedDanceability,
-                embed_energy: embedEnergy,
-                embed_instrumentalness: embedInstrumentalness,
-                embed_liveness: embedLiveness,
-                embed_loudness: embedLoudness,
-                embed_speechiness: embedSpeechiness,
-                embed_valence: embedValence,
+                use_webui_login: document.getElementById('use_webui_login').checked,
+                webui_username: document.getElementById('webui_username').value,
+                webui_password: document.getElementById('webui_password').value,
+                download_copy_btn: document.getElementById('download_copy_btn').checked,
+                download_open_btn: document.getElementById('download_open_btn').checked,
+                download_locate_btn: document.getElementById('download_locate_btn').checked,
+                download_delete_btn: document.getElementById('download_delete_btn').checked,
+                show_search_thumbnails: document.getElementById('show_search_thumbnails').checked,
+                show_download_thumbnails: document.getElementById('show_download_thumbnails').checked,
+                search_thumb_height: document.getElementById('search_thumb_height').value,
+                max_search_results: document.getElementById('max_search_results').value,
+                explicit_label: document.getElementById('explicit_label').value,
+                mirror_spotify_playback: document.getElementById('mirror_spotify_playback').checked,
+                windows_10_explorer_thumbnails: document.getElementById('windows_10_explorer_thumbnails').checked,
+                check_for_updates: document.getElementById('check_for_updates').checked,
+                enable_search_tracks: document.getElementById('enable_search_tracks').checked,
+                enable_search_albums: document.getElementById('enable_search_albums').checked,
+                enable_search_artists: document.getElementById('enable_search_artists').checked,
+                enable_search_playlists: document.getElementById('enable_search_playlists').checked,
+                enable_search_episodes: document.getElementById('enable_search_episodes').checked,
+                enable_search_shows: document.getElementById('enable_search_shows').checked,
+                enable_search_audiobooks: document.getElementById('enable_search_audiobooks').checked,
+                download_root: document.getElementById('download_root').value,
+                media_format: document.getElementById('media_format').value,
+                track_path_formatter: document.getElementById('track_path_formatter').value,
+                podcast_media_format: document.getElementById('podcast_media_format').value,
+                podcast_path_formatter: document.getElementById('podcast_path_formatter').value,
+                use_playlist_path: document.getElementById('use_playlist_path').checked,
+                playlist_path_formatter: document.getElementById('playlist_path_formatter').value,
+                create_m3u_playlists: document.getElementById('create_m3u_playlists').checked,
+                m3u_name_formatter: document.getElementById('m3u_name_formatter').value,
+                ext_seperator: document.getElementById('ext_seperator').value,
+                ext_path: document.getElementById('ext_path').value,
+                save_album_cover: document.getElementById('save_album_cover').checked,
+                album_cover_format: document.getElementById('album_cover_format').value,
+                illegal_character_replacement: document.getElementById('illegal_character_replacement').value,
+                inp_enable_lyrics: document.getElementById('inp_enable_lyrics').checked,
+                only_synced_lyrics: document.getElementById('only_synced_lyrics').checked,
+                use_lrc_file: document.getElementById('use_lrc_file').checked,
+                file_bitrate: document.getElementById('file_bitrate').value,
+                file_hertz: document.getElementById('file_hertz').value,
+                rotate_acc_sn: document.getElementById('rotate_acc_sn').checked,
+                force_raw: document.getElementById('force_raw').checked,
+                download_delay: document.getElementById('download_delay').value,
+                translate_file_path: document.getElementById('translate_file_path').checked,
+                maximum_queue_workers: document.getElementById('maximum_queue_workers').value,
+                maximum_download_workers: document.getElementById('maximum_download_workers').value,
+                enable_retry_worker: document.getElementById('enable_retry_worker').value,
+                retry_worker_delay: document.getElementById('retry_worker_delay').value,
+                metadata_separator: document.getElementById('metadata_seperator').value,
+                overwrite_existing_metadata: document.getElementById('overwrite_existing_metadata').checked,
+                embed_cover: document.getElementById('embed_cover').checked,
+                embed_branding: document.getElementById('embed_branding').checked,
+                embed_artist: document.getElementById('embed_artist').checked,
+                embed_album: document.getElementById('embed_album').checked,
+                embed_albumartist: document.getElementById('embed_albumartist').checked,
+                embed_name: document.getElementById('embed_name').checked,
+                embed_year: document.getElementById('embed_year').checked,
+                embed_discnumber: document.getElementById('embed_discnumber').checked,
+                embed_tracknumber: document.getElementById('embed_tracknumber').checked,
+                embed_genre: document.getElementById('embed_genre').checked,
+                embed_performers: document.getElementById('embed_performers').checked,
+                embed_producers: document.getElementById('embed_producers').checked,
+                embed_writers: document.getElementById('embed_writers').checked,
+                embed_label: document.getElementById('embed_label').checked,
+                embed_copyright: document.getElementById('embed_copyright').checked,
+                embed_description: document.getElementById('embed_description').checked,
+                embed_language: document.getElementById('embed_language').checked,
+                embed_isrc: document.getElementById('embed_isrc').checked,
+                embed_length: document.getElementById('embed_length').checked,
+                embed_key: document.getElementById('embed_key').checked,
+                embed_bpm: document.getElementById('embed_bpm').checked,
+                embed_url: document.getElementById('embed_url').checked,
+                embed_lyrics: document.getElementById('embed_lyrics').checked,
+                embed_explicit: document.getElementById('embed_explicit').checked,
+                embed_compilation: document.getElementById('embed_compilation').checked,
+                embed_upc: document.getElementById('embed_service_id').checked,
+                embed_service_id: document.getElementById('embed_service_id').checked,
+                embed_timesignature: document.getElementById('embed_timesignature').checked,
+                embed_acousticness: document.getElementById('embed_acousticness').checked,
+                embed_danceability: document.getElementById('embed_danceability').checked,
+                embed_energy: document.getElementById('embed_energy').checked,
+                embed_instrumentalness: document.getElementById('embed_instrumentalness').checked,
+                embed_liveness: document.getElementById('embed_liveness').checked,
+                embed_loudness: document.getElementById('embed_loudness').checked,
+                embed_speechiness: document.getElementById('embed_speechiness').checked,
+                embed_valence: document.getElementById('embed_valence').checked,
+                generic_download_root: document.getElementById('generic_download_root').value,
+                download_youtube_videos: document.getElementById('download_youtube_videos').checked,
+                maximum_generic_resolution: document.getElementById('maximum_generic_resolution').value
             };
 
             fetch('/update_settings', {

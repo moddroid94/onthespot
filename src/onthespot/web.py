@@ -5,7 +5,8 @@ import argparse
 import json
 import threading
 import time
-from flask import Flask, jsonify, render_template, redirect, request, send_file, url_for
+from flask import Flask, jsonify, render_template, redirect, request, send_file, url_for, flash
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from .accounts import FillAccountPool, get_account_token
 from .api.apple_music import apple_music_get_track_metadata
 from .api.bandcamp import bandcamp_get_track_metadata
@@ -22,8 +23,12 @@ from .runtimedata import get_logger, account_pool, pending, download_queue, down
 from .search import get_search_results
 
 logger = get_logger("web")
+os.environ['FLASK_ENV'] = 'production'
 web_resources = os.path.join(config.app_root, 'resources', 'web')
 app = Flask('OnTheSpot', template_folder=web_resources, static_folder=web_resources)
+app.secret_key = os.urandom(24)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 class QueueWorker(threading.Thread):
@@ -61,10 +66,49 @@ class QueueWorker(threading.Thread):
                 time.sleep(0.2)
 
 
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+
+login_manager.login_view = "login"
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if not config.get('use_webui_login') or not config.get('webui_username'):
+        user = User('guest')
+        login_user(user)
+        return redirect(url_for('download_queue_page'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == config.get('webui_username') and password == config.get('webui_password'):
+            user = User(username)
+            login_user(user)
+            return redirect(url_for('download_queue_page'))
+        flash('Invalid credentials, please try again.')
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+
 @app.route('/items')
+@login_required
 def get_items():
     with download_queue_lock:
-        return jsonify(download_queue)
+        return jsonify(list(download_queue.items()))
 
 
 @app.route('/icons/<path:filename>')
@@ -74,11 +118,13 @@ def serve_icons(filename):
 
 
 @app.route('/download/<path:local_id>')
+@login_required
 def download_media(local_id):
     return send_file(download_queue[local_id]['file_path'], as_attachment=True)
 
 
 @app.route('/delete/<path:local_id>', methods=['DELETE'])
+@login_required
 def delete_media(local_id):
     os.remove(download_queue[local_id]['file_path'])
     download_queue[local_id]['item_status'] = 'Deleted'
@@ -86,24 +132,28 @@ def delete_media(local_id):
 
 
 @app.route('/cancel/<path:local_id>', methods=['POST'])
+@login_required
 def cancel_item(local_id):
     download_queue[local_id]['item_status'] = 'Cancelled'
     return jsonify(success=True)
 
 
 @app.route('/retry/<path:local_id>', methods=['POST'])
+@login_required
 def retry_item(local_id):
     download_queue[local_id]['item_status'] = 'Waiting'
     return jsonify(success=True)
 
 
 @app.route('/download/<path:url>', methods=['POST'])
+@login_required
 def download_file(url):
     parse_url(url)
     return jsonify(success=True)
 
 
 @app.route('/clear', methods=['POST'])
+@login_required
 def clear_items():
     keys_to_delete = []
 
@@ -119,6 +169,7 @@ def clear_items():
 
 
 @app.route('/download_queue')
+@login_required
 def download_queue_page():
     config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
     with open(config_path, 'r') as config_file:
@@ -127,11 +178,13 @@ def download_queue_page():
 
 
 @app.route('/')
+@login_required
 def index():
     return redirect(url_for('download_queue_page'))
 
 
 @app.route('/search')
+@login_required
 def search():
     config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
     with open(config_path, 'r') as config_file:
@@ -140,11 +193,13 @@ def search():
 
 
 @app.route('/about')
+@login_required
 def about():
     return render_template('about.html')
 
 
 @app.route('/search_results')
+@login_required
 def search_results():
     query = request.args.get('q', '')
 
@@ -169,6 +224,7 @@ def search_results():
 
 
 @app.route('/settings')
+@login_required
 def settings():
     config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
     with open(config_path, 'r') as config_file:
@@ -177,6 +233,7 @@ def settings():
 
 
 @app.route('/update_settings', methods=['POST'])
+@login_required
 def update_settings():
     data = request.json
     for key, value in data.items():
@@ -222,6 +279,9 @@ def main():
     if config.get('mirror_spotify_playback'):
         mirrorplayback = MirrorSpotifyPlayback()
         mirrorplayback.start()
+
+    if config.get('username') == 'admin' and config.get('password') == 'admin':
+        print('Default username and password is "admin"')
 
     app.run(host=args.host, port=args.port, debug=args.debug)
 

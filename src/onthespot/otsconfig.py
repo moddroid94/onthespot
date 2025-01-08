@@ -39,6 +39,9 @@ class Config:
         self.session_uuid = str(uuid.uuid4())
         self.__template_data = {
             "version": "", # Application version
+            "use_webui_login": False, # Enable Web UI Login Page
+            "webui_username": "", # Web UI Username
+            "webui_password": "", # Web UI Password
             "debug_mode": False, # Application version
             "close_to_tray": False, # Close application to tray
             "check_for_updates": True, # Check for updates

@@ -5,14 +5,6 @@ body {
     justify-content: center;
 }
 
-.download-action-button {
-    border: 2px solid #555555;
-    border-radius: 5px;
-    padding: 5px;
-    background: none;
-    cursor: pointer;
-}
-
 .header {
     background-color: #1e1e1e;
     padding: 10px;
@@ -53,22 +45,6 @@ body {
     height: 20px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    border: 1px solid #444444;
-    text-align: left;
-    padding: 8px;
-    color: #ffffff;
-}
-
-th {
-    background-color: #1a1a1a;
-}
-
 button {
     padding: 12px 20px;
     border: none;
@@ -103,7 +79,17 @@ input[type="number"], input[type="password"], input[type="text"] {
     width: 250px;
 }
 
-input[type="number"]:focus, input[type="password"]:focus, input[type="text"]:focus {
+input[type="submit"] {
+    background-color: #1e1e1e;
+    color: white;
+    border: 2px solid #1e1e1e;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.3s;
+    font-size: 12px;
+}
+
+input[type="number"]:focus, input[type="password"]:focus, input[type="text"]:focus, input[type="submit"]:focus {
     border-color: #1DB954;
 }
 
@@ -111,4 +97,33 @@ input[type="number"]:focus, input[type="password"]:focus, input[type="text"]:foc
     .hide-on-mobile {
         display: none; /* Hides the element */
     }
+}
+
+.col {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.row {
+    margin-bottom: 5px;
+}
+
+#main {
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 5em;
+    text-align: center;
+}
+
+#formplace {
+    padding: 10px;
+    text-align: left;
+}
+
+#loginButton {
+    float: right;
+}
+
+#logo img {
+    height: 11em;
 }

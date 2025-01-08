@@ -12,6 +12,7 @@ BuildRequires: python3-devel
 BuildRequires: python3-pip
 
 Requires: python3-flask
+Requires: python3-flask-login
 Requires: python3-mutagen
 Requires: python3-pillow
 Requires: python3-pyqt6

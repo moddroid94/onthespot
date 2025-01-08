@@ -30,6 +30,7 @@ BDEPEND="
 
 RDEPEND="
 	dev-python/flask
+	dev-python/flask-login
 	dev-python/librespot
 	dev-python/m3u8
 	dev-python/music-tag
