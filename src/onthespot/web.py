@@ -108,7 +108,7 @@ def logout():
 @login_required
 def get_items():
     with download_queue_lock:
-        return jsonify(list(download_queue.items()))
+        return jsonify(download_queue)
 
 
 @app.route('/icons/<path:filename>')
@@ -279,9 +279,6 @@ def main():
     if config.get('mirror_spotify_playback'):
         mirrorplayback = MirrorSpotifyPlayback()
         mirrorplayback.start()
-
-    if config.get('username') == 'admin' and config.get('password') == 'admin':
-        print('Default username and password is "admin"')
 
     app.run(host=args.host, port=args.port, debug=args.debug)
 
