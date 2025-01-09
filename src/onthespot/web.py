@@ -5,6 +5,7 @@ import argparse
 import json
 import threading
 import time
+import traceback
 from flask import Flask, jsonify, render_template, redirect, request, send_file, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from .accounts import FillAccountPool, get_account_token
@@ -37,34 +38,38 @@ class QueueWorker(threading.Thread):
 
     def run(self):
         while True:
-            if pending:
-                local_id = next(iter(pending))
+            try:
+                if pending:
+                    local_id = next(iter(pending))
+                    with pending_lock:
+                        item = pending.pop(local_id)
+                    token = get_account_token(item['item_service'])
+                    item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
+                    if item_metadata:
+                        with download_queue_lock:
+                            download_queue[local_id] = {
+                                'local_id': local_id,
+                                'available': True,
+                                "item_service": item["item_service"],
+                                "item_type": item["item_type"],
+                                'item_id': item['item_id'],
+                                'item_status': 'Waiting',
+                                "file_path": None,
+                                "item_name": item_metadata["title"],
+                                "item_by": item_metadata["artists"],
+                                'parent_category': item['parent_category'],
+                                'playlist_name': item.get('playlist_name', ''),
+                                'playlist_by': item.get('playlist_by', ''),
+                                'playlist_number': item.get('playlist_number', ''),
+                                'item_thumbnail': item_metadata["image_url"],
+                                'item_url': item_metadata["item_url"]
+                            }
+                else:
+                    time.sleep(0.2)
+            except Exception as e:
+                logger.error(f"Unknown Exception for {item}: {str(e)}\nTraceback: {traceback.format_exc()}")
                 with pending_lock:
-                    item = pending.pop(local_id)
-                token = get_account_token(item['item_service'])
-                item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                if item_metadata:
-                    with download_queue_lock:
-                        download_queue[local_id] = {
-                            'local_id': local_id,
-                            'available': True,
-                            "item_service": item["item_service"],
-                            "item_type": item["item_type"],
-                            'item_id': item['item_id'],
-                            'item_status': 'Waiting',
-                            "file_path": None,
-                            "item_name": item_metadata["title"],
-                            "item_by": item_metadata["artists"],
-                            'parent_category': item['parent_category'],
-                            'playlist_name': item.get('playlist_name', ''),
-                            'playlist_by': item.get('playlist_by', ''),
-                            'playlist_number': item.get('playlist_number', ''),
-                            'item_thumbnail': item_metadata["image_url"],
-                            'item_url': item_metadata["item_url"]
-                        }
-            else:
-                time.sleep(0.2)
-
+                    pending[local_id] = item
 
 class User(UserMixin):
     def __init__(self, id):

@@ -6,6 +6,7 @@ import logging
 import random
 import threading
 import time
+import traceback
 from cmd import Cmd
 from .accounts import FillAccountPool, get_account_token
 from .api.apple_music import apple_music_get_track_metadata
@@ -32,32 +33,36 @@ class QueueWorker(threading.Thread):
 
     def run(self):
         while True:
-            if pending:
-                local_id = next(iter(pending))
+            try:
+                if pending:
+                    local_id = next(iter(pending))
+                    with pending_lock:
+                        item = pending.pop(local_id)
+                    token = get_account_token(item['item_service'])
+                    item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
+                    if item_metadata:
+                        with download_queue_lock:
+                            download_queue[local_id] = {
+                                'local_id': local_id,
+                                'available': True,
+                                "item_service": item["item_service"],
+                                "item_type": item["item_type"],
+                                'item_id': item['item_id'],
+                                'item_status': 'Waiting',
+                                "file_path": None,
+                                "item_name": item_metadata["title"],
+                                "item_by": item_metadata["artists"],
+                                'parent_category': item['parent_category'],
+                                'playlist_name': item.get('playlist_name', ''),
+                                'playlist_by': item.get('playlist_by', ''),
+                                'playlist_number': item.get('playlist_number', '')
+                                }
+                else:
+                    time.sleep(0.2)
+            except Exception as e:
+                logger.error(f"Unknown Exception for {item}: {str(e)}\nTraceback: {traceback.format_exc()}")
                 with pending_lock:
-                    item = pending.pop(local_id)
-                token = get_account_token(item['item_service'])
-                item_metadata = globals()[f"{item['item_service']}_get_{item['item_type']}_metadata"](token, item['item_id'])
-                if item_metadata:
-                    with download_queue_lock:
-                        download_queue[local_id] = {
-                            'local_id': local_id,
-                            'available': True,
-                            "item_service": item["item_service"],
-                            "item_type": item["item_type"],
-                            'item_id': item['item_id'],
-                            'item_status': 'Waiting',
-                            "file_path": None,
-                            "item_name": item_metadata["title"],
-                            "item_by": item_metadata["artists"],
-                            'parent_category': item['parent_category'],
-                            'playlist_name': item.get('playlist_name', ''),
-                            'playlist_by': item.get('playlist_by', ''),
-                            'playlist_number': item.get('playlist_number', '')
-                            }
-            else:
-                time.sleep(0.2)
-
+                    pending[local_id] = item
 
 def main():
     print('\033[32mLogging In...\033[0m\n', end='', flush=True)
