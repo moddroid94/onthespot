@@ -46,7 +46,7 @@ class MirrorSpotifyPlayback(QObject):
         # Circular Import
         from ..accounts import get_account_token
         while self.is_running:
-            time.sleep(3)
+            time.sleep(5)
             try:
                 token = get_account_token('spotify').tokens()
             except (AttributeError, IndexError):
@@ -568,7 +568,7 @@ def spotify_get_track_metadata(token, item_id):
 
     info['release_year'] = track_data.get('tracks', [{}])[0].get('album', {}).get('release_date', '').split("-")[0]
     #info['track_number'] = track_data.get('tracks', [{}])[0].get('track_number', '')
-    info['track_number'] = track_number 
+    info['track_number'] = track_number
     info['total_tracks'] = track_data.get('tracks', [{}])[0].get('album', {}).get('total_tracks', '')
     info['disc_number'] = track_data.get('tracks', [{}])[0].get('disc_number', '')
     info['total_discs'] = sorted([trk.get('disc_number', 0) for trk in album_data.get('tracks', {}).get('items', [])])[-1] if 'tracks' in album_data else 1

@@ -326,7 +326,7 @@ class DownloadWorker(QObject):
                         ).json()
 
                         try:
-                            print(track_data)
+                            logger.debug(track_data)
                             url = track_data['data'][0]['media'][0]['sources'][0]['url']
                         except KeyError as e:
                             # Fallback to lowest quality

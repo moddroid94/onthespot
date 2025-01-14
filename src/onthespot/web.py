@@ -20,7 +20,7 @@ from .api.youtube_music import youtube_music_get_track_metadata
 from .downloader import DownloadWorker, RetryWorker
 from .otsconfig import config_dir, config
 from .parse_item import parsingworker, parse_url
-from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock
+from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock, download_workers, queue_workers
 from .search import get_search_results
 
 logger = get_logger("web")
@@ -173,6 +173,22 @@ def clear_items():
     return jsonify(success=True)
 
 
+@app.route('/restart_workers', methods=['POST'])
+@login_required
+def restart_workers():
+    for download_worker in download_workers:
+        download_worker.stop()
+
+    download_workers.clear()
+
+    for i in range(config.get('maximum_download_workers')):
+        download_worker = DownloadWorker()
+        download_worker.start()
+        download_workers.append(download_worker)
+
+    return jsonify(success=True)
+
+
 @app.route('/download_queue')
 @login_required
 def download_queue_page():
@@ -267,13 +283,15 @@ def main():
     thread.daemon = True
     thread.start()
 
-    for i in range(config.get('maximum_queue_workers')):
+    for _ in range(config.get('maximum_queue_workers')):
         queue_worker = QueueWorker()
         queue_worker.start()
+        queue_workers.append(queue_worker)
 
-    for i in range(config.get('maximum_download_workers')):
-        downloadworker = DownloadWorker()
-        downloadworker.start()
+    for _ in range(config.get('maximum_download_workers')):
+        download_worker = DownloadWorker()
+        download_worker.start()
+        download_workers.append(download_worker)
 
     if config.get('enable_retry_worker'):
         retryworker = RetryWorker()

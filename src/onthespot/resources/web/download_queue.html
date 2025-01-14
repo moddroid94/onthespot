@@ -23,6 +23,7 @@
     <div style="display: flex; align-items: center;">
         <p id="queue-status-message" style="margin-right: 10px;">Total Items: 0 | Progress: 0%</p>
         <button onclick="clearItems()">Clear Completed Items</button>
+        <button class="hide-on-mobile" onclick="restartWorkers()">Restart Workers</button>
     </div>
 
     <table>
@@ -208,6 +209,18 @@
 
         function clearItems() {
             fetch('/clear', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Clear completed successful');
+                    }
+            });
+        }
+
+        function restartWorkers() {
+            fetch('/restart_workers', {
                 method: 'POST'
             })
             .then(response => response.json())
