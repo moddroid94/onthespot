@@ -10,4 +10,4 @@ pyqt6_sip>=13.9.1
 pywidevine>=1.8.0
 requests>=2.32.3
 urllib3>=2.2.3
-yt-dlp>=2024.12.13
+yt-dlp>=2025.1.12

@@ -65,7 +65,7 @@ def main():
     config.set_('accounts', cfg_copy)
 
     # Set Application Version
-    version = "v1.0.6"
+    version = "v1.0.7"
     logger.info(f'OnTheSpot Version: {version}')
     config.set_("version", version)
 
