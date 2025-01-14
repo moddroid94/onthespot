@@ -152,6 +152,7 @@ def format_track_path(item, item_metadata):
 
     item_path = path.format(
         service=sanitize_data(item.get('item_service', '')).title(),
+        service_id=str(item.get('item_id', '')),
         artist=sanitize_data(item_metadata.get('artists', '')),
         album=sanitize_data(album),
         album_artist=sanitize_data(item_metadata.get('album_artists', '')),
@@ -165,6 +166,7 @@ def format_track_path(item, item_metadata):
         explicit=sanitize_data(str(config.get('explicit_label')) if item_metadata.get('explicit') else ''),
         trackcount=item_metadata.get('total_tracks', 1),
         disccount=item_metadata.get('total_discs', 1),
+        isrc=str(item_metadata.get('isrc', '')),
         playlist_name=sanitize_data(item.get('playlist_name', '')),
         playlist_owner=sanitize_data(item.get('playlist_by', '')),
         playlist_number=sanitize_data(item.get('playlist_number', '')),
@@ -564,6 +566,7 @@ def add_to_m3u_file(item, item_metadata):
 
     EXTINF = config.get('ext_path').format(
         service=item.get('item_service', '').title(),
+        service_id=str(item.get('item_id', '')),
         artist=item_metadata.get('artists', ''),
         album=item_metadata.get('album_name', ''),
         album_artist=item_metadata.get('album_artists', ''),
@@ -577,6 +580,7 @@ def add_to_m3u_file(item, item_metadata):
         explicit=str(config.get('explicit_label')) if item_metadata.get('explicit', '') else '',
         trackcount=item_metadata.get('total_tracks', 1),
         disccount=item_metadata.get('total_discs', 1),
+        isrc=str(item_metadata.get('isrc', '')),
         playlist_name=item.get('playlist_name', ''),
         playlist_owner=item.get('playlist_by', ''),
         playlist_number=item.get('playlist_number', ''),

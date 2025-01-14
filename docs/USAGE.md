@@ -14,7 +14,7 @@ OnTheSpot supports various accounts and instructions for each are listed below, 
    ```python
    {
       # Random string of numbers and letters
-      "uuid": UUID,
+      "uuid": "ABC123",
       "service": "qobuz",
       "active": true,
       "login": {
@@ -121,7 +121,8 @@ If a file path is provided the app will parse each line in the file for urls beg
 - **Available Variables**
    | **Variable**      | **Description**                                     |
    | ----------------- | --------------------------------------------------- |
-   | `{service}`       | The music service used to download your file        |
+   | `{service}`       | The music service used to download your file.       |
+   | `{service_id}`    | The tracks native id on the selected music service. |
    | `{artist}`        | Name of the artist(s).                              |
    | `{album_artist}`  | Name of the album artist(s).                        |
    | `{album_type}`    | Name of the artist type (single, album, etc).       |
@@ -134,6 +135,7 @@ If a file path is provided the app will parse each line in the file for urls beg
    | `{genre}`         | Genre of the song.                                  |
    | `{label}`         | Name of the record label.                           |
    | `{explicit}`      | Displays 'Explicit Label' if the song is marked explicit (default: 🅴). |
+   | `{isrc}`          | ISRC of the currently playing track.                |
    | `{playlist_name}` | Name of the playlist (if part of a playlist).       |
    | `{playlist_owner}`| Name of the playlist owner (if part of a playlist). |
    | `{playlist_number}`| Item number in a playlist (if part of a playlist). |
