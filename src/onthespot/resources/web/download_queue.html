@@ -96,7 +96,7 @@
                                     copyButton = createButton('icons/link.png', 'Copy Link', `copyToClipboard('${item.item_url}')`);
                                 }
 
-                                if (item.item_status === 'Waiting') {
+                                if (!['Failed', 'Cancelled', 'Deleted', 'Already Exists', 'Downloaded'].includes(item.item_status)) {
                                     cancelButton = createButton('icons/stop.png', 'Stop Download', `handleCancel('${item.local_id}')`);
                                 }
 
@@ -186,7 +186,13 @@
             let cancelledCount = 0;
 
             for (let row of tableBody.rows) {
+
+                {% if config.show_download_thumbnails %}
                 const statusCell = row.cells[5];
+                {% else %}
+                const statusCell = row.cells[4];
+                {% endif %}
+
                 if (statusCell) {
                     const statusText = statusCell.textContent.trim();
 

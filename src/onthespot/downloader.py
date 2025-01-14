@@ -349,10 +349,11 @@ class DownloadWorker(QObject):
                                 downloaded += len(data)
                                 data_chunks += data
 
-                                if self.gui and downloaded != total_size:
+                                if downloaded != total_size:
                                     if item['item_status'] == 'Cancelled':
                                         raise Exception("Download cancelled by user.")
-                                    self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
+                                    if self.gui:
+                                        self.progress.emit(item, self.tr("Downloading"), int((downloaded / total_size) * 100))
 
                             key = calcbfkey(song["SNG_ID"])
 

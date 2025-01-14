@@ -181,6 +181,16 @@ def restart_workers():
 
     download_workers.clear()
 
+    item_urls = []
+    for key, value in download_queue.items():
+        item_urls.append(value.get('item_url'))
+
+    with download_queue_lock:
+        download_queue.clear()
+
+    for url in item_urls:
+        parse_url(url)
+
     for i in range(config.get('maximum_download_workers')):
         download_worker = DownloadWorker()
         download_worker.start()
