@@ -39,6 +39,8 @@ OnTheSpot supports various accounts and instructions for each are listed below, 
 
 - **Youtube Music**: Youtube Music offers public downloads and does not require an account, simply click 'Add Youtube Music Account' and restart the app.
 
+- **Crunchyroll**: To login to your Qobuz account simply enter your email and password, and restart the app.
+
 - **Generic Downloader**: Generic Downloader uses yt-dlp to rip any available music or videos from a given webpage. A list of supported services is available in the app or [here](https://github.com/yt-dlp/yt-dlp/tree/master/yt_dlp/extractor). Even if your given website is not listed the generic downloader may be able to rip media anyway, just paste your url in the search bar. To activate generic downloader simply click 'Add Generic Downloader'.
 
 
@@ -57,7 +59,6 @@ If a file path is provided the app will parse each line in the file for urls beg
 ### General Settings
 | **Option** | **Description** |
 | ------ | ------ |
-| **Download Path** | Root folder where all downloaded media will be saved. |
 | **Theme** | Choose the application theme (`light` or `dark`). |
 | **Explicit Label** | Customize how explicit content is labeled in file names and the app (default: 🅴). |
 | **Download Buttons** | Adds extra functionalities to the download queue. |
@@ -69,10 +70,20 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **Windows 10 Explorer Thumbnails** | Embed thumbnails in a format that respects Windows 10 explorer and media player, this is an older format of ID3 and not widely supported. |
 | **Close To Tray** | Close application to tray on exit. |
 | **Check for Updates** | Automatically check for application updates. |
+| **Illegal Character Replacement** | Replace illegal characters in the filepath with the value specified (e.g., `/`, `\`, `<`, `>`, `*`, etc.). |
+| **Rotate Active Account** | Automatically rotate between added accounts for downloading to minimize the chance of hitting rate limits. |
+| **Raw Media Download** | Downloads an unmodified file from whatever service is selected. With this enabled file conversion and the embedding of any metadata is skipped. Lyrics and cover art will still be downloaded. |
+| **Download Delay (s)** | The time,in seconds, to wait before initiating the next download. Helps prevent rate limits. |
+| **Download Chunk Size (b)** | The chunk size, in bytes, in which to download files. |
+| **Maximum Queue Workers** | Set the maximum number of queue workers. Setting a higher number will queue songs faster, only change this setting if you know what you're doing. Changes to this setting require you to restart the app take effect. |
+| **Maximum Download Workers** | Set the maximum number of download workers. Only change this setting if you know what you're doing. Changes to this setting require you to restart the app to take effect. |
+| **Enable Retry Worker** | Creates a worker that automatically retries failed downloads after a specified amount of time. Changes to this setting require you to restart the app to take effect. |
+| **Retry Delay (m)** | The time, in minutes, for the retry worker to wait before retrying failed items. |
 
 ### Audio Download Settings
 | **Option** | **Description** |
 | ------ | ------ |
+| **Audio Download Path** | Root folder where all downloaded media will be saved. |
 | **Track/Episode Format** | Select the file format to output your downloaded tracks or podcasts (e.g. `mp3`, `m4a`, `flac`, `ogg`, `wav`). For a complete list of supported codecs please see the following [list](https://ffmpeg.org/ffmpeg-formats.html). |
 | [**Track/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
 | **Use Custom Playlist Path** | Enable the use of a custom path format for playlists. |
@@ -85,18 +96,9 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **File Hertz** | Set the hertz of a converted file, default value is 44100 |
 | **Save Album Cover** | Save album cover as an image with a default format of cover.png |
 | **Album Cover Format** | The image format to save album covers in (default: png) |
-| **Illegal Character Replacement** | Replace illegal characters in the filepath with the value specified (e.g., `/`, `\`, `<`, `>`, `*`, etc.). |
 | **Download Lyrics\*** | Enable downloading of lyrics for each track/episode. *This feature may require a premium account.* |
 | **Download Synced Lyrics Only\*** | Only download synced lyrics for tracks. *This feature may require a premium account.*|
 | **Save LRC File\*** | Save lyrics in an `.lrc` file alongside the track. *This feature may require a premium account.*|
-| **Rotate Active Account** | Automatically rotate between added accounts for downloading to minimize the chance of hitting rate limits. |
-| **Raw Media Download** | Downloads an unmodified file from whatever service is selected. With this enabled file conversion and the embedding of any metadata is skipped. Lyrics and cover art will still be downloaded. |
-| **Download Delay (s)** | The time,in seconds, to wait before initiating the next download. Helps prevent rate limits. |
-| **Download Chunk Size (b)** | The chunk size, in bytes, in which to download files. |
-| **Maximum Queue Workers** | Set the maximum number of queue workers. Setting a higher number will queue songs faster, only change this setting if you know what you're doing. Changes to this setting require you to restart the app take effect. |
-| **Maximum Download Workers** | Set the maximum number of download workers. Only change this setting if you know what you're doing. Changes to this setting require you to restart the app to take effect. |
-| **Enable Retry Worker** | Creates a worker that automatically retries failed downloads after a specified amount of time. Changes to this setting require you to restart the app to take effect. |
-| **Retry Delay (m)** | The time, in minutes, for the retry worker to wait before retrying failed items. |
 | **Translate File Path** | Translate file paths into the application language. |
 
 ### Metadata Settings
@@ -110,8 +112,12 @@ If a file path is provided the app will parse each line in the file for urls beg
 | **Option** | **Description** |
 | ------ | ------ |
 | **Video Download Path** | Videos downloaded using the Generic Downloader account will be downloaded to the following path |
-| **Download Youtube Videos** | If this setting is enable OnTheSpot will download https://music.youtube.com/... as audio and https://www.youtube.com/... as a video. If this setting is disabled both will be downloaded using your Youtube Music account. |
+| **Movie/Episode Format** | Select the file format to output your downloaded tracks or podcasts (e.g. `mp3`, `m4a`, `flac`, `ogg`, `wav`). For a complete list of supported codecs please see the following [list](https://ffmpeg.org/ffmpeg-formats.html). |
+| [**Movie/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
 | **Preferred Video Resolution** | If available, videos downloaded using the Generic Downloader account will use the resolution specified. |
+| **Download Subtitles** | Specify whether you would like to download subtitles if available. |
+| **Preferred Audio/Subtitle Language** | Preferred download language for the specified media format, formatted as en-US. |
+| **Download All Available Audio/Subtitles** | Download all available audio or subtitles for a given video. |
 
 ### Track/Episode/Playlist Path Format
 

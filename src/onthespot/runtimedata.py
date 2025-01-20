@@ -37,7 +37,7 @@ download_workers = []
 init_tray = False
 
 
-def set_init_tray(value):
+def setinit_tray(value):
     global init_tray
     init_tray = value
 
