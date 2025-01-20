@@ -124,31 +124,42 @@ If a file path is provided the app will parse each line in the file for urls beg
 - **Customize File Names**
   - Define how downloaded tracks are named using variables enclosed in `{}`.
 
-- **Available Variables**
+- **Universal Variables**
    | **Variable**      | **Description**                                     |
    | ----------------- | --------------------------------------------------- |
    | `{service}`       | The music service used to download your file.       |
    | `{service_id}`    | The tracks native id on the selected music service. |
+   | `{name}`          | Name of the track.                                  |
+   | `{year}`          | Release year of the track.                          |
+   | `{explicit}`      | Displays 'Explicit Label' if the song is marked explicit (default: 🅴). |
+
+- **Audio Variables**
+   | **Variable**      | **Description**                                     |
+   | ----------------- | --------------------------------------------------- |
    | `{artist}`        | Name of the artist(s).                              |
    | `{album_artist}`  | Name of the album artist(s).                        |
    | `{album_type}`    | Name of the artist type (single, album, etc).       |
-   | `{name}`          | Name of the track.                                  |
-   | `{year}`          | Release year of the track.                          |
-   | `{track_number}`  | Track number on the album.                          |
-   | `{trackcount}`    | Total number of tracks in the album                 |
    | `{disc_number}`   | Disc number (if applicable).                        |
    | `{discccount}`    | Total number of discs in the album (if applicable). |
    | `{genre}`         | Genre of the song.                                  |
    | `{label}`         | Name of the record label.                           |
-   | `{explicit}`      | Displays 'Explicit Label' if the song is marked explicit (default: 🅴). |
+   | `{track_number}`  | Track number on the album.                          |
+   | `{trackcount}`    | Total number of tracks in the album                 |
    | `{isrc}`          | ISRC of the currently playing track.                |
    | `{playlist_name}` | Name of the playlist (if part of a playlist).       |
    | `{playlist_owner}`| Name of the playlist owner (if part of a playlist). |
    | `{playlist_number}`| Item number in a playlist (if part of a playlist). |
 
+- **Show Variables**
+   | **Variable**      | **Description**                                     |
+   | ----------------- | --------------------------------------------------- |
+   | `{show_name}` | Name of the playlist (if part of a playlist).           |
+   | `{season_number}`| Name of the playlist owner (if part of a playlist).  |
+   | `{episode_number}`| Item number in a playlist (if part of a playlist).  |
+
 > [!TIP]
 > **Example:**
-> Setting the format to `{artist} - {name}.mp3` will result in files named like `Artist Name - Song Title.mp3`.
+> Setting the format to `{artist} - {name}` will result in files named like `Artist Name - Song Title.mp3`.
 
 
 ## 6. Saving Your Configuration

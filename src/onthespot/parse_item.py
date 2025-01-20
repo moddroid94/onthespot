@@ -6,7 +6,7 @@ from .api.apple_music import apple_music_get_album_track_ids, apple_music_get_ar
 from .api.bandcamp import bandcamp_get_album_track_ids, bandcamp_get_artist_album_ids
 from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_data
 from .api.qobuz import qobuz_get_album_track_ids, qobuz_get_artist_album_ids, qobuz_get_label_album_ids, qobuz_get_playlist_data
-from .api.soundcloud import soundcloud_parse_url, soundcloud_get_setitems
+from .api.soundcloud import soundcloud_parse_url, soundcloud_get_set_items
 from .api.spotify import spotify_get_album_track_ids, spotify_get_artist_album_ids, spotify_get_playlist_items, spotify_get_playlist_data, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_podcast_episode_ids
 from .api.tidal import tidal_get_album_track_ids, tidal_get_artist_album_ids, tidal_get_playlist_data, tidal_get_mix_data
 from .api.youtube_music import youtube_music_get_channel_track_ids, youtube_music_get_playlist_data
@@ -170,8 +170,8 @@ def parsingworker():
 
                 if current_service == "soundcloud":
                     if current_type in ("album", "playlist"):
-                        setdata = soundcloud_get_setitems(token, current_url)
-                        for index, track in enumerate(setdata['tracks']):
+                        set_data = soundcloud_get_set_items(token, current_url)
+                        for index, track in enumerate(set_data['tracks']):
                             item_id = track['id']
                             local_id = format_local_id(item_id)
                             with pending_lock:
@@ -180,9 +180,9 @@ def parsingworker():
                                     'item_service': 'soundcloud',
                                     'item_type': 'track',
                                     'item_id': item_id,
-                                    'parent_category': 'playlist' if not setdata['is_album'] else 'album',
-                                    'playlist_name': setdata['title'],
-                                    'playlist_by': setdata['user']['username'],
+                                    'parent_category': 'playlist' if not set_data['is_album'] else 'album',
+                                    'playlist_name': set_data['title'],
+                                    'playlist_by': set_data['user']['username'],
                                     'playlist_number': str(index + 1)
                                 }
                         continue

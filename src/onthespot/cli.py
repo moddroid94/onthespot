@@ -116,7 +116,7 @@ class CLI(Cmd):
 
     def do_config(self, arg):
         parts = arg.split()
-        if arg == "resetsettings":
+        if arg == "reset_settings":
             config.rollback()
             print('\033[32mReset settings, please restart the app.\033[0m')
 
@@ -182,7 +182,7 @@ class CLI(Cmd):
             print("  add_account [service]")
             print("  select_account [index]")
             print("  delete_account [index]")
-            print("  resetsettings")
+            print("  reset_settings")
             print(f"  \033[36mAdditional options can be found at {config_dir()}{os.path.sep}otsconfig.json\033[0m")
 
 

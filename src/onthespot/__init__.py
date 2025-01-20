@@ -10,7 +10,7 @@ from .gui.mainui import MainWindow
 from .gui.minidialog import MiniDialog
 from .otsconfig import config
 from .parse_item import parsingworker
-from .runtimedata import get_logger, setinit_tray
+from .runtimedata import get_logger, set_init_tray
 
 logger = get_logger('gui')
 
@@ -129,7 +129,7 @@ def main():
     window = MainWindow(_dialog, start_url)
 
     if config.get('close_to_tray'):
-        setinit_tray(True)
+        set_init_tray(True)
         tray_app = TrayApp(window)
 
     app.setDesktopFileName('org.onthespot.OnTheSpot')

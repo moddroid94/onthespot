@@ -174,7 +174,7 @@ def soundcloud_get_search_results(token, search_term, content_types):
     return search_results
 
 
-def soundcloud_get_setitems(token, url):
+def soundcloud_get_set_items(token, url):
     logger.info(f"Getting set items for {url}")
     headers = {}
     headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
@@ -185,8 +185,8 @@ def soundcloud_get_setitems(token, url):
     params["app_locale"] = token['app_locale']
 
     try:
-        setdata = make_call(f"{BASE_URL}/resolve?url={url}", headers=headers, params=params, skip_cache=True)
-        return setdata
+        set_data = make_call(f"{BASE_URL}/resolve?url={url}", headers=headers, params=params, skip_cache=True)
+        return set_data
     except (TypeError, KeyError):
         logger.info(f"Failed to parse tracks for set: {url}")
 
