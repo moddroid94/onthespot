@@ -83,15 +83,15 @@ If a file path is provided the app will parse each line in the file for urls beg
 ### Audio Download Settings
 | **Option** | **Description** |
 | ------ | ------ |
-| **Audio Download Path** | Root folder where all downloaded media will be saved. |
+| **Audio Download Path** | Root folder where all downloaded audio will be saved. |
 | **Track/Episode Format** | Select the file format to output your downloaded tracks or podcasts (e.g. `mp3`, `m4a`, `flac`, `ogg`, `wav`). For a complete list of supported codecs please see the following [list](https://ffmpeg.org/ffmpeg-formats.html). |
-| [**Track/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
+| [**Track/Episode Path**](#media-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
 | **Use Custom Playlist Path** | Enable the use of a custom path format for playlists. |
-| [**Playlist Path**](#trackplaylist-path-format) | Customize the file naming pattern for playlists using variables like `{artist}`, `{album}`, etc. |
+| [**Playlist Path**](#media-path-format) | Customize the file naming pattern for playlists using variables like `{artist}`, `{album}`, etc. |
 | **Create M3U Files for Playlists** | If enabled create an M3U file for downloaded tracks in a playlist. |
-| [**M3U Path**](#trackplaylist-path-format) | Customize the download path of created M3U files using variables like `{artist}`, `{album}`, etc. |
-| [**EXTINF Seperator**](#trackplaylist-path-format) | M3U EXTINF metadata / list seperator. |
-| [**EXTINF Path**](#trackplaylist-path-format) | Customize the M3U EXTINF label using variables like `{artist}`, `{album}`, etc. |
+| [**M3U Path**](#media-path-format) | Customize the download path of created M3U files using variables like `{artist}`, `{album}`, etc. |
+| [**EXTINF Seperator**](#media-path-format) | M3U EXTINF metadata / list seperator. |
+| [**EXTINF Path**](#media-path-format) | Customize the M3U EXTINF label using variables like `{artist}`, `{album}`, etc. |
 | **File Bitrate** | Set the bitrate of a converted file, default value is 320k. This setting is not respected by some lossless codecs, results may vary depending on your chosen filetype. |
 | **File Hertz** | Set the hertz of a converted file, default value is 44100 |
 | **Save Album Cover** | Save album cover as an image with a default format of cover.png |
@@ -111,18 +111,18 @@ If a file path is provided the app will parse each line in the file for urls beg
 ### Video Download Settings
 | **Option** | **Description** |
 | ------ | ------ |
-| **Video Download Path** | Videos downloaded using the Generic Downloader account will be downloaded to the following path |
-| **Movie/Episode Format** | Select the file format to output your downloaded tracks or podcasts (e.g. `mp3`, `m4a`, `flac`, `ogg`, `wav`). For a complete list of supported codecs please see the following [list](https://ffmpeg.org/ffmpeg-formats.html). |
-| [**Movie/Episode Path**](#trackplaylist-path-format) | Customize the file naming pattern for tracks, episodes, and playlists using variables like `{artist}`, `{album}`, etc. |
-| **Preferred Video Resolution** | If available, videos downloaded using the Generic Downloader account will use the resolution specified. |
+| **Video Download Path** | Root folder where all downloaded video will be saved. |
+| **Movie/Episode Format** | Select the file format to output your downloaded movies or episodes (e.g. `mp4`, `mkv`). For a complete list of supported codecs please see the following [list](https://ffmpeg.org/ffmpeg-formats.html). |
+| [**Movie/Episode Path**](#media-path-format) | Customize the file naming pattern for movies and episodes using variables like `{artist}`, `{album}`, etc. |
+| **Preferred Video Resolution** | If available, videos downloaded  will use the resolution specified. |
 | **Download Subtitles** | Specify whether you would like to download subtitles if available. |
 | **Preferred Audio/Subtitle Language** | Preferred download language for the specified media format, formatted as en-US. |
 | **Download All Available Audio/Subtitles** | Download all available audio or subtitles for a given video. |
 
-### Track/Episode/Playlist Path Format
+### Media Path Format
 
 - **Customize File Names**
-  - Define how downloaded tracks are named using variables enclosed in `{}`.
+  - Define how downloaded media is named using variables enclosed in `{}`.
 
 - **Universal Variables**
    | **Variable**      | **Description**                                     |
