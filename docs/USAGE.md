@@ -92,10 +92,11 @@ If a file path is provided the app will parse each line in the file for urls beg
 | [**M3U Path**](#media-path-format) | Customize the download path of created M3U files using variables like `{artist}`, `{album}`, etc. |
 | [**EXTINF Seperator**](#media-path-format) | M3U EXTINF metadata / list seperator. |
 | [**EXTINF Path**](#media-path-format) | Customize the M3U EXTINF label using variables like `{artist}`, `{album}`, etc. |
-| **File Bitrate** | Set the bitrate of a converted file, default value is 320k. This setting is not respected by some lossless codecs, results may vary depending on your chosen filetype. |
-| **File Hertz** | Set the hertz of a converted file, default value is 44100 |
 | **Save Album Cover** | Save album cover as an image with a default format of cover.png |
 | **Album Cover Format** | The image format to save album covers in (default: png) |
+| **File Bitrate** | Set the bitrate of a converted file, default value is 320k. This setting is not respected by some lossless codecs, results may vary depending on your chosen filetype. |
+| **File Hertz** | Set the hertz of a converted file, default value is 44100 |
+| **Use Custom File Bitrate** | Use the user specified 'File Bitrate' field, if disabled the app will use the maximum value allowed by your account. |
 | **Download Lyrics\*** | Enable downloading of lyrics for each track/episode. *This feature may require a premium account.* |
 | **Download Synced Lyrics Only\*** | Only download synced lyrics for tracks. *This feature may require a premium account.*|
 | **Save LRC File\*** | Save lyrics in an `.lrc` file alongside the track. *This feature may require a premium account.*|

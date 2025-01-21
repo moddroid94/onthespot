@@ -132,10 +132,11 @@ class Config:
             "m3u_path_formatter": "M3U" + os.path.sep + "{playlist_name} by {playlist_owner}", # M3U name format string
             "extinf_separator": "; ", # M3U EXTINF metadata separator
             "extinf_label": "{playlist_number}. {artist} - {name}", # M3U EXTINF path
-            "file_bitrate": "320k", # Converted file bitrate
-            "file_hertz": 44100, # Converted file hertz
             "save_album_cover": False, # Save album covers to a file
             "album_cover_format": "png", # Album cover format
+            "file_bitrate": "320k", # Converted file bitrate
+            "file_hertz": 44100, # Converted file hertz
+            "use_custom_file_bitrate": False, # Use bitrate specified by file bitrate
             "download_lyrics": False, # Enable lyrics download
             "save_lrc_file": False, # Download .lrc file alongside track
             "only_download_synced_lyrics": False, # Only download synced lyrics

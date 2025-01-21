@@ -597,7 +597,9 @@ class DownloadWorker(QObject):
                         if self.gui:
                             self.progress.emit(item, self.tr("Converting"), 99)
 
-                        convert_audio_format(file_path, default_format)
+                        if config.get('use_custom_file_bitrate'):
+                            bitrate = config.get("file_bitrate")
+                        convert_audio_format(file_path, bitrate, default_format)
 
                         embed_metadata(item, item_metadata)
 

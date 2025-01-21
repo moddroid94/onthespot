@@ -187,7 +187,7 @@ def format_item_path(item, item_metadata):
     return item_path
 
 
-def convert_audio_format(filename, default_format):
+def convert_audio_format(filename, bitrate, default_format):
     if os.path.isfile(os.path.abspath(filename)):
         target_path = os.path.abspath(filename)
         file_name = os.path.basename(target_path)
@@ -216,7 +216,7 @@ def convert_audio_format(filename, default_format):
                 #'-f', filetype.split('.')[1],
                 '-ac', '2',
                 '-ar', f'{config.get("file_hertz")}',
-                '-b:a', f'{config.get("file_bitrate")}'
+                '-b:a', bitrate
                 ]
 
         # Add user defined parameters
