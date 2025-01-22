@@ -18,7 +18,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../../../../../../../../resources/icon.png</normaloff>../../../../../../../../../../../resources/icon.png</iconset>
+    <normaloff>../../../../../../../../../../../../../../resources/icon.png</normaloff>../../../../../../../../../../../../../../resources/icon.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">QGroupBox #group_login_form_3, #gb0_0, #gb0_1, #gb0_2, #gb0_3, #gb0_4, #gb0_5, #gb0_6, #gb0_7, #gb1_0, #gb1_1, #gb1_2, #gb1_3, #gb1_4, #gb1_5, #gb1_6, #gb1_7, #gb1_8, #gb1_9, #gb1_10, #gb1_11, #gb1_12, #gb1_13, #gb1_14, #gb1_29, #gb2_0, #gb2_1, #gb2_2, #gb2_3, #gb2_4, #gb2_5, #gb2_6, #gb2_7, #gb2_8, #gb2_9, #gb2_10, #gb2_11, #gb2_12, #gb2_13, #gb2_14, #gb2_15, #gb2_16, #gb2_17, #gb2_18, #gb3_0, #gb3_1, #gb3_2, #gb3_3, #gb3_4, #gb3_5, #gb3_6 { border: 0;}</string>
@@ -40,7 +40,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -533,7 +533,7 @@
            <item>
             <widget class="QPushButton" name="btn_progress_retry_all">
              <property name="text">
-              <string>Retry Failed</string>
+              <string>Retry Cancelled/Failed</string>
              </property>
             </widget>
            </item>
@@ -716,7 +716,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-1924</y>
+             <y>0</y>
              <width>627</width>
              <height>4132</height>
             </rect>
