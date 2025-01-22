@@ -38,6 +38,10 @@ def parse_args():
             key, value = arg[2:].split('=', 1)
             overrides[key] = value
 
+    if args.download:
+        if not (args.download.startswith("http://") or args.download.startswith("https://")):
+            parser.error("Parameter --download only accept URLs.")
+
     return args, overrides
 
 # logging.disable(logging.CRITICAL)
