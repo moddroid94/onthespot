@@ -211,7 +211,7 @@ def convert_audio_format(filename, bitrate, default_format):
         # Check if media format is service default
         if filetype == default_format:
             command += ['-c:a', 'copy']
-        else:
+        elif filetype != '.opus':
             command += [
                 #'-f', filetype.split('.')[1],
                 '-ac', '2',

@@ -175,7 +175,7 @@ def spotify_login_user(account):
         session = None
         try:
             session = Session.Builder(conf=config).stored_file(session_json_path).create()
-        except ConnectionRefusedError:
+        except Exception:
             time.sleep(3)
             session = Session.Builder(conf=config).stored_file(session_json_path).create()
         logger.debug("Session created")
