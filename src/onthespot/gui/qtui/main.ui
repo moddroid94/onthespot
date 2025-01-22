@@ -716,7 +716,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-1888</y>
+             <y>-3485</y>
              <width>627</width>
              <height>4132</height>
             </rect>
@@ -4171,7 +4171,7 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="btn_generic_audio_download_path_browse">
+                      <widget class="QPushButton" name="btn_video_download_path">
                        <property name="text">
                         <string/>
                        </property>
@@ -4707,8 +4707,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>641</width>
-             <height>405</height>
+             <width>140</width>
+             <height>1309</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">

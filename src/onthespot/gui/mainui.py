@@ -188,7 +188,7 @@ class MainWindow(QMainWindow):
         self.btn_progress_retry_all.clicked.connect(self.retry_all_failed_downloads)
         self.btn_progress_cancel_all.clicked.connect(self.cancel_all_downloads)
         self.btn_audio_download_path_browse.clicked.connect(lambda: self.select_dir(self.audio_download_path))
-        self.btn_generic_audio_download_path_browse.clicked.connect(lambda: self.select_dir(self.generic_audio_download_path))
+        self.btn_video_download_path.clicked.connect(lambda: self.select_dir(self.video_download_path))
 
         self.btn_download_tmp_browse.clicked.connect(lambda: self.select_dir(self.tmp_dl_root))
         self.tmp_dl_root.textChanged.connect(self.update_tmp_dir)
@@ -217,7 +217,7 @@ class MainWindow(QMainWindow):
         self.settings_bookmark_accounts.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(0))
         self.settings_bookmark_general.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(328))
         self.settings_bookmark_audio_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(1160))
-        self.settings_bookmark_audio_metadata.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(1930))
+        self.settings_bookmark_audio_metadata.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(2000))
         self.settings_bookmark_video_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(9999))
 
         self.export_logs.clicked.connect(lambda: shutil.copy(

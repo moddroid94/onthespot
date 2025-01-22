@@ -51,7 +51,7 @@ def load_config(self):
     #self.btn_reconfig.setIcon(self.get_icon('trash'))
     self.btn_save_config.setIcon(self.get_icon('save'))
     self.btn_audio_download_path_browse.setIcon(self.get_icon('folder'))
-    self.btn_generic_audio_download_path_browse.setIcon(self.get_icon('folder'))
+    self.btn_video_download_path.setIcon(self.get_icon('folder'))
     self.btn_download_tmp_browse.setIcon(self.get_icon('folder'))
     self.btn_search.setIcon(self.get_icon('search'))
     self.btn_search_filter_toggle.setIcon(self.get_icon('collapse_down'))

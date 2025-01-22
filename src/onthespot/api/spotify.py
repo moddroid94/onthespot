@@ -173,7 +173,11 @@ def spotify_login_user(account):
         config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
         # For some reason initialising session as None prevents premature application exit
         session = None
-        session = Session.Builder(conf=config).stored_file(session_json_path).create()
+        try:
+            session = Session.Builder(conf=config).stored_file(session_json_path).create()
+        except ConnectionRefusedError:
+            time.sleep(3)
+            session = Session.Builder(conf=config).stored_file(session_json_path).create()
         logger.debug("Session created")
         logger.info(f"Login successful for user '{username[:4]}*******'")
         account_type = session.get_user_attribute("type")
