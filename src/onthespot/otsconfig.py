@@ -138,8 +138,9 @@ class Config:
             "file_hertz": 44100, # Converted file hertz
             "use_custom_file_bitrate": False, # Use bitrate specified by file bitrate
             "download_lyrics": False, # Enable lyrics download
-            "save_lrc_file": False, # Download .lrc file alongside track
             "only_download_synced_lyrics": False, # Only download synced lyrics
+            "only_download_plain_lyrics": False, # Only download plain lyrics
+            "save_lrc_file": False, # Download .lrc file alongside track
             "translate_file_path": False, # Translate downloaded file path to application language
 
             # Audio Metadata Settings

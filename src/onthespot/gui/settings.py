@@ -155,8 +155,9 @@ def load_config(self):
     self.file_hertz.setValue(config.get("file_hertz"))
     self.use_custom_file_bitrate.setChecked(config.get("use_custom_file_bitrate"))
     self.download_lyrics.setChecked(config.get("download_lyrics"))
-    self.save_lrc_file.setChecked(config.get("save_lrc_file"))
     self.only_download_synced_lyrics.setChecked(config.get("only_download_synced_lyrics"))
+    self.only_download_plain_lyrics.setChecked(config.get("only_download_plain_lyrics"))
+    self.save_lrc_file.setChecked(config.get("save_lrc_file"))
     self.translate_file_path.setChecked(config.get("translate_file_path"))
 
     # Audio Metadata Settings
@@ -267,8 +268,9 @@ def save_config(self):
     config.set('file_hertz', self.file_hertz.value())
     config.set('use_custom_file_bitrate', self.use_custom_file_bitrate.isChecked())
     config.set('download_lyrics', self.download_lyrics.isChecked())
-    config.set('save_lrc_file', self.save_lrc_file.isChecked())
     config.set('only_download_synced_lyrics', self.only_download_synced_lyrics.isChecked())
+    config.set('only_download_plain_lyrics', self.only_download_plain_lyrics.isChecked())
+    config.set('save_lrc_file', self.save_lrc_file.isChecked())
     config.set('translate_file_path', self.translate_file_path.isChecked())
 
     # Audio Metadata Settings

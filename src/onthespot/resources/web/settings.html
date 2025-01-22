@@ -219,11 +219,14 @@
         <label for="download_lyrics">Enable Lyrics Download:</label>
         <input type="checkbox" id="download_lyrics" {% if config.download_lyrics %}checked{% endif %}><br><br>
 
-        <label for="save_lrc_file">Save LRC File:</label>
-        <input type="checkbox" id="save_lrc_file" {% if config.save_lrc_file %}checked{% endif %}><br><br>
-
         <label for="only_download_synced_lyrics">Only Download Synced Lyrics:</label>
         <input type="checkbox" id="only_download_synced_lyrics" {% if config.only_download_synced_lyrics %}checked{% endif %}><br><br>
+
+        <label for="only_download_plain_lyrics">Only Download Plain Lyrics:</label>
+        <input type="checkbox" id="only_download_plain_lyrics" {% if config.only_download_plain_lyrics %}checked{% endif %}><br><br>
+
+        <label for="save_lrc_file">Save LRC File:</label>
+        <input type="checkbox" id="save_lrc_file" {% if config.save_lrc_file %}checked{% endif %}><br><br>
 
         <label for="translate_file_path">Translate File Path:</label>
         <input type="checkbox" id="translate_file_path" {% if config.translate_file_path %}checked{% endif %}><br><br>
@@ -445,8 +448,9 @@
                 file_hertz: document.getElementById('file_hertz').value,
                 use_custom_file_bitrate: document.getElementById('use_custom_file_bitrate').checked,
                 download_lyrics: document.getElementById('download_lyrics').checked,
-                save_lrc_file: document.getElementById('save_lrc_file').checked,
                 only_download_synced_lyrics: document.getElementById('only_download_synced_lyrics').checked,
+                only_download_plain_lyrics: document.getElementById('only_download_plain_lyrics').checked,
+                save_lrc_file: document.getElementById('save_lrc_file').checked,
                 translate_file_path: document.getElementById('translate_file_path').checked,
                 // Audio Metadata Settings
                 metadata_separator: document.getElementById('metadata_separator').value,

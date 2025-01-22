@@ -193,7 +193,7 @@ class DownloadWorker(QObject):
                                     logger.info('Overwriting Existing Metadata')
 
                                     # Lyrics
-                                    if item_service in ("spotify", "tidal"):
+                                    if item_service in ("apple_music", "spotify", "tidal") and config.get('download_lyrics'):
                                         item['item_status'] = 'Getting Lyrics'
                                         if self.gui:
                                             self.progress.emit(item, self.tr("Getting Lyrics"), 99)
@@ -574,7 +574,7 @@ class DownloadWorker(QObject):
                     # Audio Formatting
                     if item_type in ('track', 'podcast_episode'):
                         # Lyrics
-                        if item_service in ("apple_music", "spotify", "tidal"):
+                        if item_service in ("apple_music", "spotify", "tidal") and config.get('download_lyrics'):
                             item['item_status'] = 'Getting Lyrics'
                             if self.gui:
                                 self.progress.emit(item, self.tr("Getting Lyrics"), 99)

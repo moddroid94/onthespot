@@ -295,38 +295,35 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
                 logger.info(f"Failed to find lyrics for {item_type}: {item_id}")
                 return None
 
-            if config.get("embed_branding"):
-                lyrics.append('[re:OnTheSpot]')
+            if not config.get('only_download_plain_lyrics'):
+                if config.get("embed_branding"):
+                    lyrics.append('[re:OnTheSpot]')
 
-            for key in metadata.keys():
-                value = metadata[key]
+                for key in metadata.keys():
+                    value = metadata[key]
+                    if key in ['title', 'track_title', 'tracktitle'] and config.get("embed_name"):
+                        title = value
+                        lyrics.append(f'[ti:{title}]')
+                    elif key == 'artists' and config.get("embed_artist"):
+                        artist = value
+                        lyrics.append(f'[ar:{artist}]')
+                    elif key in ['album_name', 'album'] and config.get("embed_album"):
+                        album = value
+                        lyrics.append(f'[al:{album}]')
+                    elif key in ['writers'] and config.get("embed_writers"):
+                        author = value
+                        lyrics.append(f'[au:{author}]')
 
-                if key in ['title', 'track_title', 'tracktitle'] and config.get("embed_name"):
-                    title = value
-                    lyrics.append(f'[ti:{title}]')
+                if item_type == "track":
+                    lyrics.append(f'[by:{resp["lyrics"]["provider"]}]')
 
-                elif key == 'artists' and config.get("embed_artist"):
-                    artist = value
-                    lyrics.append(f'[ar:{artist}]')
-
-                elif key in ['album_name', 'album'] and config.get("embed_album"):
-                    album = value
-                    lyrics.append(f'[al:{album}]')
-
-                elif key in ['writers'] and config.get("embed_writers"):
-                    author = value
-                    lyrics.append(f'[au:{author}]')
-
-            if item_type == "track":
-                lyrics.append(f'[by:{resp["lyrics"]["provider"]}]')
-
-            if config.get("embed_length"):
-                l_ms = int(metadata['length'])
-                if round((l_ms/1000)/60) < 10:
-                    digit="0"
-                else:
-                    digit=""
-                lyrics.append(f'[length:{digit}{round((l_ms/1000)/60)}:{round((l_ms/1000)%60)}]\n')
+                if config.get("embed_length"):
+                    l_ms = int(metadata['length'])
+                    if round((l_ms/1000)/60) < 10:
+                        digit="0"
+                    else:
+                        digit=""
+                    lyrics.append(f'[length:{digit}{round((l_ms/1000)/60)}:{round((l_ms/1000)%60)}]\n')
 
             default_length = len(lyrics)
 
@@ -334,7 +331,10 @@ def spotify_get_lyrics(token, item_id, item_type, metadata, filepath):
                 if resp["lyrics"]["syncType"] == "LINE_SYNCED":
                     for line in resp["lyrics"]["lines"]:
                         minutes, seconds = divmod(int(line['startTimeMs']) / 1000, 60)
-                        lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["words"]}')
+                        if not config.get('only_download_plain_lyrics'):
+                            lyrics.append(f'[{minutes:0>2.0f}:{seconds:05.2f}] {line["words"]}')
+                        else:
+                            lyrics.append(line["words"])
                 elif resp["lyrics"]["syncType"] == "UNSYNCED" and not config.get("only_download_synced_lyrics"):
                     lyrics = [line['words'] for line in resp['lyrics']['lines']]
 
