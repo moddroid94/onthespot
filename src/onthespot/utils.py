@@ -211,11 +211,11 @@ def convert_audio_format(filename, bitrate, default_format):
         # Check if media format is service default
         if filetype == default_format:
             command += ['-c:a', 'copy']
-        elif filetype != '.opus':
+        else:
             command += [
                 #'-f', filetype.split('.')[1],
                 '-ac', '2',
-                '-ar', f'{config.get("file_hertz")}',
+                '-ar', f'{config.get("file_hertz") if filetype != '.opus' else 48000}',
                 '-b:a', bitrate
                 ]
 
