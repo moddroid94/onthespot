@@ -259,11 +259,13 @@ def update_settings():
         if isinstance(value, str) and value.isdigit():
             value = int(value)
         config.set(key, value)
-        config.update()
+        config.save()
     return jsonify(success=True)
 
 
 def main():
+    config.migration()
+    print(f'OnTheSpot Version: {config.get("version")}')
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', type=str, default='127.0.0.1', help='Host IP address')
     parser.add_argument('--port', type=int, default=5000, help='Port number')

@@ -40,7 +40,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="search">
        <attribute name="title">
@@ -716,7 +716,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>0</y>
+             <y>-1960</y>
              <width>627</width>
              <height>4132</height>
             </rect>
@@ -2550,7 +2550,7 @@
                         <enum>Qt::RightToLeft</enum>
                        </property>
                        <property name="text">
-                        <string>Download Synced Lyrics Only*</string>
+                        <string>Only Download Synced Lyrics*</string>
                        </property>
                       </widget>
                      </item>
@@ -4729,8 +4729,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>641</width>
-             <height>405</height>
+             <width>140</width>
+             <height>1309</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">

@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
                     # Light color, set dark font and progress bar
                     stylesheet = f'background-color: {color.name()}; color: black;'
                 config.set('theme', stylesheet)
-                config.update()
+                config.save()
                 self.centralwidget.setStyleSheet(stylesheet)
                 self.__splash_dialog.update_theme(stylesheet)
 
@@ -259,7 +259,7 @@ class MainWindow(QMainWindow):
 
 
     def reset_app_config(self):
-        config.rollback()
+        config.reset()
         self.show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
 
 
@@ -580,12 +580,12 @@ class MainWindow(QMainWindow):
         accounts = config.get('accounts').copy()
         del accounts[index]
         config.set('accounts', accounts)
-        config.update()
+        config.save()
 
         self.tbl_sessions.removeRow(index)
         if config.get('active_account_number') == index or config.get('active_account_number') >= len(account_pool):
             config.set('active_account_number', 0)
-            config.update()
+            config.save()
             try:
                 self.tbl_sessions.cellWidget(0, 0).setChecked(True)
             except AttributeError:
@@ -798,7 +798,7 @@ class MainWindow(QMainWindow):
             self.show_popup_dialog(self.tr("Account added, please restart the app."))
             self.btn_login_add.setText(self.tr("Please Restart The App"))
             config.set('active_account_number', len(account_pool))
-            config.update()
+            config.save()
         else:
             self.show_popup_dialog(self.tr("Account already exists."))
             self.btn_login_add.setText(self.tr("Add Account"))
@@ -822,7 +822,7 @@ class MainWindow(QMainWindow):
             self.show_popup_dialog(self.tr("Account added, please restart the app."))
             self.btn_login_add.setText(self.tr("Please Restart The App"))
             config.set('active_account_number', len(account_pool))
-            config.update()
+            config.save()
         else:
             self.show_popup_dialog(self.tr("Account already exists."))
             self.btn_login_add.setText(self.tr("Add Account"))

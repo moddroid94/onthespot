@@ -148,7 +148,7 @@ def spotify_new_session():
                 zs.close()
                 cfg_copy.append(new_user)
                 config.set('accounts', cfg_copy)
-                config.update()
+                config.save()
                 logger.info("New account added to config.")
                 return True
 

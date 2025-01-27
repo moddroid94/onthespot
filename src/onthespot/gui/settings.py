@@ -326,4 +326,4 @@ def save_config(self):
     config.set('download_all_available_audio', self.download_all_available_audio.isChecked())
     config.set('download_all_available_subtitles', self.download_all_available_subtitles.isChecked())
 
-    config.update()
+    config.save()

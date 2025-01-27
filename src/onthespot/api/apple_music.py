@@ -30,7 +30,7 @@ def apple_music_add_account(media_user_token):
     }
     cfg_copy.append(new_user)
     config.set('accounts', cfg_copy)
-    config.update()
+    config.save()
 
 
 def apple_music_login_user(account):

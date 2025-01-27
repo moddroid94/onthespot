@@ -46,7 +46,7 @@ def youtube_music_add_account():
         }
     cfg_copy.append(new_user)
     config.set('accounts', cfg_copy)
-    config.update()
+    config.save()
 
 
 def youtube_music_get_search_results(_, search_term, content_types):

@@ -76,7 +76,7 @@ def crunchyroll_add_account(email, password):
         }
     cfg_copy.append(new_user)
     config.set('accounts', cfg_copy)
-    config.update()
+    config.save()
 
 
 def crunchyroll_get_token(parsing_index):

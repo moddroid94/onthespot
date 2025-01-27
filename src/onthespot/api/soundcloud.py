@@ -71,7 +71,7 @@ def soundcloud_login_user(account):
                     account['login']['client_id'] = client_id
                     account['login']['app_version'] = app_version
             config.set('accounts', cfg_copy)
-            config.update()
+            config.save()
 
             account_pool.append({
                 "uuid": "public_soundcloud",
@@ -119,7 +119,7 @@ def soundcloud_add_account():
     }
     cfg_copy.append(new_user)
     config.set('accounts', cfg_copy)
-    config.update()
+    config.save()
 
 
 def soundcloud_get_token(parsing_index):

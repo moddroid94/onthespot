@@ -27,9 +27,9 @@ from .search import get_search_results
 
 def parse_args():
     parser = argparse.ArgumentParser(description="OnTheSpot CLI Downloader")
-    
+
     parser.add_argument('--download', help="Rechercher et télécharger automatiquement un élément via une requête")
-    
+
     args, unknown_args = parser.parse_known_args()
 
     overrides = {}
@@ -86,10 +86,11 @@ class QueueWorker(threading.Thread):
                     pending[local_id] = item
 
 def main():
+    config.migration()
+    print(f'OnTheSpot Version: {config.get("version")}')
     args, cli_overrides = parse_args()
     config.apply_overrides(cli_overrides)
 
-    print("Final configuration after overriding:")
     for key, value in cli_overrides.items():
         print(f"{key}={value}")
 
@@ -155,7 +156,7 @@ class CLI(Cmd):
     def do_config(self, arg):
         parts = arg.split()
         if arg == "reset_settings":
-            config.rollback()
+            config.reset()
             print('\033[32mReset settings, please restart the app.\033[0m')
 
         if arg == "list_accounts":
@@ -177,7 +178,7 @@ class CLI(Cmd):
                 if session == True:
                     print("\033[32mAccount added, please restart the app.\033[0m")
                     config.set('active_account_number', config.get('active_account_number') + 1)
-                    config.update()
+                    config.save()
                 elif session == False:
                     print("\033[32mAccount already exists.\033[0m")
 
@@ -198,7 +199,7 @@ class CLI(Cmd):
             try:
                 account_number = int(parts[1])
                 config.set('active_account_number', account_number)
-                config.update()
+                config.save()
                 print(f"\033[32mSelected account number: {account_number}\033[0m")
             except ValueError:
                 print("\033[32mInvalid account number. Please enter a valid integer.\033[0m")
@@ -209,7 +210,7 @@ class CLI(Cmd):
                 accounts = config.get('accounts').copy()
                 del accounts[account_number]
                 config.set('accounts', accounts)
-                config.update()
+                config.save()
                 del account_pool[account_number]
                 print(f"\033[32mDeleted account number: {account_number}\033[0m")
             except ValueError:
@@ -449,7 +450,7 @@ def display_game_over(win, score):
     win.clear()
     if score > config.get('snake_high_score', 0):
         config.set('snake_high_score', score)
-        config.update()
+        config.save()
     win.addstr(win.getmaxyx()[0] // 2 - 1, win.getmaxyx()[1] // 2 - 10, 'Game Over!', curses.color_pair(1))
     win.addstr(win.getmaxyx()[0] // 2, win.getmaxyx()[1] // 2 - 10, f'Score: {score}', curses.A_BOLD)
     win.addstr(win.getmaxyx()[0] // 2 + 1, win.getmaxyx()[1] // 2 - 10, f'High Score: {config.get('snake_high_score', 0)}', curses.A_BOLD)
