@@ -170,16 +170,6 @@
                 return false;
             }
 
-            function createButton(iconSrc, altText, onClickHandler, url = '') {
-                return `
-                    <button class="download-action-button" onclick="${onClickHandler}">
-                        <a href=${url}>
-                            <img src="${iconSrc}" alt="${altText}">
-                        </a>
-                    </button>
-                `;
-            }
-
             function updateStatusMessage() {
                 const tableBody = document.getElementById('download-queue-table');
                 const totalCount = tableBody.rows.length;

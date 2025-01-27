@@ -70,17 +70,9 @@
                             serviceNameSpan.className = 'hide-on-mobile';
                             serviceNameSpan.textContent = formatServiceName(item.item_service);
 
-                            const copyButton = `
-                                <button class="download-action-button hide-on-mobile" onclick="copyToClipboard('${item.item_url}')">
-                                    <img src="icons/link.png" alt="Copy">
-                                </button>
-                            `;
+                            const copyButton = createButton('icons/link.png', 'Copy Link', `copyToClipboard('${item.item_url}')`, `${item.item_url}`);
+                            const downloadButton = createButton('icons/download.png', 'Download', `handleDownload('${item.item_url}')`);
 
-                            const downloadButton = `
-                                <button class="download-action-button" onclick="handleDownload('${item.item_url}')">
-                                    <img src="icons/download.png" alt="Download">
-                                </button>
-                            `;
 
                             const row = document.createElement('tr');
 
