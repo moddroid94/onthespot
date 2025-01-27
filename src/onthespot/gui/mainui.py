@@ -221,7 +221,7 @@ class MainWindow(QMainWindow):
         self.settings_bookmark_video_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(9999))
 
         self.export_logs.clicked.connect(lambda: shutil.copy(
-            os.path.join(cache_dir(), "onthespot", "logs", config.session_uuid, "onthespot.log"),
+            os.path.join(cache_dir(), "logs", config.session_uuid, "onthespot.log"),
             os.path.join(os.path.expanduser("~"), "Downloads", "onthespot.log")) and
             self.show_popup_dialog(self.tr("Logs exported to '{0}'").format(os.path.join(os.path.expanduser("~"), "Downloads", "onthespot.log") or True))
             )

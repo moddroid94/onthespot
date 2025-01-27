@@ -176,6 +176,7 @@ def crunchyroll_get_show_episode_ids(token, show_id):
 
     return episode_ids
 
+
 def crunchyroll_get_decryption_key(token, item_id):
     cdm = Cdm.from_device(Device.loads(WVN_KEY))
 

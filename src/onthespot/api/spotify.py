@@ -101,10 +101,10 @@ class MirrorSpotifyPlayback(QObject):
 
 
 def spotify_new_session():
-    os.makedirs(os.path.join(cache_dir(), 'onthespot', 'sessions'), exist_ok=True)
+    os.makedirs(os.path.join(cache_dir(), 'sessions'), exist_ok=True)
 
     uuid_uniq = str(uuid.uuid4())
-    session_json_path = os.path.join(os.path.join(cache_dir(), 'onthespot', 'sessions'),
+    session_json_path = os.path.join(os.path.join(cache_dir(), 'sessions'),
                  f"ots_login_{uuid_uniq}.json")
 
     CLIENT_ID: str = "65b708073fc0480ea92a077233ca87bd"
@@ -160,7 +160,7 @@ def spotify_login_user(account):
         uuid = account['uuid']
         username = account['login']['username']
 
-        session_dir = os.path.join(cache_dir(), "onthespot", "sessions")
+        session_dir = os.path.join(cache_dir(), "sessions")
         os.makedirs(session_dir, exist_ok=True)
         session_json_path = os.path.join(session_dir, f"ots_login_{uuid}.json")
         try:
@@ -215,7 +215,7 @@ def spotify_login_user(account):
 
 
 def spotify_re_init_session(account):
-    session_json_path = os.path.join(cache_dir(), "onthespot", "sessions", f"ots_login_{account['uuid']}.json")
+    session_json_path = os.path.join(cache_dir(), "sessions", f"ots_login_{account['uuid']}.json")
     try:
         config = Session.Configuration.Builder().set_stored_credential_file(session_json_path).build()
         logger.debug("Session config created")

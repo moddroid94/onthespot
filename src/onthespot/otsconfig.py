@@ -4,37 +4,29 @@ import uuid
 from shutil import which
 
 def config_dir():
-    if os.name == "nt":
-        if 'APPDATA' in os.environ:
-            return os.environ["APPDATA"]
-        elif 'LOCALAPPDATA' in os.environ:
-            return os.environ["LOCALAPPDATA"]
-        else:
-            return os.path.join(os.path.expanduser("~"), ".config")
+    if os.name == "nt" and 'APPDATA' in os.environ:
+        base_dir = os.environ["APPDATA"]
+    elif os.name == "nt" and 'LOCALAPPDATA' in os.environ:
+        base_dir = os.environ["LOCALAPPDATA"]
+    elif 'XDG_CONFIG_HOME' in os.environ:
+        base_dir = os.environ["XDG_CONFIG_HOME"]
     else:
-        if 'XDG_CONFIG_HOME' in os.environ:
-            return os.environ["XDG_CONFIG_HOME"]
-        else:
-            return os.path.join(os.path.expanduser("~"), ".config")
-
+        base_dir = os.path.join(os.path.expanduser("~"), ".config")
+    return os.path.join(base_dir, 'onthespot')
 
 def cache_dir():
-    if os.name == "nt":
-        if 'TEMP' in os.environ:
-            return os.environ["TEMP"]
-        else:
-            return os.path.join(os.path.expanduser("~"), ".cache")
+    if os.name == "nt" and 'TEMP' in os.environ:
+        base_dir = os.environ["TEMP"]
+    elif 'XDG_CACHE_HOME' in os.environ:
+        base_dir = os.environ["XDG_CACHE_HOME"]
     else:
-        if 'XDG_CACHE_HOME' in os.environ:
-            return os.environ["XDG_CACHE_HOME"]
-        else:
-            return os.path.join(os.path.expanduser("~"), ".cache")
-
+        base_dir = os.path.join(os.path.expanduser("~"), ".cache")
+    return os.path.join(base_dir, 'onthespot')
 
 class Config:
     def __init__(self, cfg_path=None):
         if cfg_path is None or not os.path.isfile(cfg_path):
-            cfg_path = os.path.join(config_dir(), "onthespot", "otsconfig.json")
+            cfg_path = os.path.join(config_dir(), "otsconfig.json")
         self.__cfg_path = cfg_path
         self.ext_ = ".exe" if os.name == "nt" else ""
         self.session_uuid = str(uuid.uuid4())
@@ -250,8 +242,8 @@ class Config:
         else:
             print('Failed to find ffmpeg binary, please consider installing ffmpeg or defining its path.')
         print("Using ffmpeg binary at: ", self.get('_ffmpeg_bin_path'))
-        self.set('_log_file', os.path.join(cache_dir(), "onthespot", "logs", self.session_uuid, "onthespot.log"))
-        self.set('_cache_dir', os.path.join(cache_dir(), "onthespot"))
+        self.set('_log_file', os.path.join(cache_dir(), "logs", self.session_uuid, "onthespot.log"))
+        self.set('_cache_dir', cache_dir())
         try:
             os.makedirs(
                 os.path.dirname(self.get("_log_file")), exist_ok=True

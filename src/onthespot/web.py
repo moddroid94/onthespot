@@ -3,6 +3,8 @@ import os
 os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
 import argparse
 import json
+import subprocess
+import sys
 import threading
 import time
 import traceback
@@ -19,7 +21,7 @@ from .api.tidal import tidal_get_track_metadata
 from .api.youtube_music import youtube_music_get_track_metadata
 from .api.crunchyroll import crunchyroll_get_episode_metadata
 from .downloader import DownloadWorker, RetryWorker
-from .otsconfig import config_dir, config
+from .otsconfig import cache_dir, config_dir, config
 from .parse_item import parsingworker, parse_url
 from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock, download_workers, queue_workers
 from .search import get_search_results
@@ -76,13 +78,12 @@ class User(UserMixin):
     def __init__(self, id):
         self.id = id
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
 
 
-login_manager.login_view = "login"
+login_manager.login_view = "/login"
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -103,110 +104,17 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/logout')
+@app.route('/api/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
 
-@app.route('/items')
-@login_required
-def get_items():
-    with download_queue_lock:
-        return jsonify(download_queue)
-
-
 @app.route('/icons/<path:filename>')
 def serve_icons(filename):
     icon_path = os.path.join(config.app_root, 'resources', 'icons', filename)
     return send_file(icon_path)
-
-
-@app.route('/download/<path:local_id>')
-@login_required
-def download_media(local_id):
-    return send_file(download_queue[local_id]['file_path'], as_attachment=True)
-
-
-@app.route('/delete/<path:local_id>', methods=['DELETE'])
-@login_required
-def delete_media(local_id):
-    os.remove(download_queue[local_id]['file_path'])
-    download_queue[local_id]['item_status'] = 'Deleted'
-    return jsonify(success=True)
-
-
-@app.route('/cancel/<path:local_id>', methods=['POST'])
-@login_required
-def cancel_item(local_id):
-    download_queue[local_id]['item_status'] = 'Cancelled'
-    return jsonify(success=True)
-
-
-@app.route('/retry/<path:local_id>', methods=['POST'])
-@login_required
-def retry_item(local_id):
-    download_queue[local_id]['item_status'] = 'Waiting'
-    return jsonify(success=True)
-
-
-@app.route('/download/<path:url>', methods=['POST'])
-@login_required
-def download_file(url):
-    parse_url(url)
-    return jsonify(success=True)
-
-
-@app.route('/clear', methods=['POST'])
-@login_required
-def clear_items():
-    keys_to_delete = []
-
-    for local_id, item in download_queue.items():
-        if item["item_status"] == "Downloaded" or \
-           item["item_status"] == "Already Exists" or \
-           item["item_status"] == "Cancelled" or \
-           item["item_status"] == "Deleted":
-            keys_to_delete.append(local_id)
-    for key in keys_to_delete:
-        del download_queue[key]
-    return jsonify(success=True)
-
-
-@app.route('/restart_workers', methods=['POST'])
-@login_required
-def restart_workers():
-    for download_worker in download_workers:
-        download_worker.stop()
-
-    download_workers.clear()
-
-    item_urls = []
-    for key, value in download_queue.items():
-        item_urls.append(value.get('item_url'))
-
-    with download_queue_lock:
-        download_queue.clear()
-
-    for url in item_urls:
-        parse_url(url)
-
-    for i in range(config.get('maximum_download_workers')):
-        download_worker = DownloadWorker()
-        download_worker.start()
-        download_workers.append(download_worker)
-
-    return jsonify(success=True)
-
-
-@app.route('/download_queue')
-@login_required
-def download_queue_page():
-    config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
-    with open(config_path, 'r') as config_file:
-        config_data = json.load(config_file)
-    return render_template('download_queue.html', config=config_data)
 
 
 @app.route('/')
@@ -218,10 +126,28 @@ def index():
 @app.route('/search')
 @login_required
 def search():
-    config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
+    config_path = os.path.join(config_dir(), 'otsconfig.json')
     with open(config_path, 'r') as config_file:
         config_data = json.load(config_file)
     return render_template('search.html', config=config_data)
+
+
+@app.route('/download_queue')
+@login_required
+def download_queue_page():
+    config_path = os.path.join(config_dir(), 'otsconfig.json')
+    with open(config_path, 'r') as config_file:
+        config_data = json.load(config_file)
+    return render_template('download_queue.html', config=config_data)
+
+
+@app.route('/settings')
+@login_required
+def settings():
+    config_path = os.path.join(config_dir(), 'otsconfig.json')
+    with open(config_path, 'r') as config_file:
+        config_data = json.load(config_file)
+    return render_template('settings.html', config=config_data, account_pool=account_pool)
 
 
 @app.route('/about')
@@ -230,7 +156,7 @@ def about():
     return render_template('about.html')
 
 
-@app.route('/search_results')
+@app.route('/api/search_results')
 @login_required
 def search_results():
     query = request.args.get('q')
@@ -255,16 +181,77 @@ def search_results():
     return jsonify(results)
 
 
-@app.route('/settings')
+@app.route('/api/clear_completed', methods=['POST'])
 @login_required
-def settings():
-    config_path = os.path.join(config_dir(), 'onthespot', 'otsconfig.json')
-    with open(config_path, 'r') as config_file:
-        config_data = json.load(config_file)
-    return render_template('settings.html', config=config_data, account_pool=account_pool)  # Render the settings.html file
+def clear_items():
+    keys_to_delete = []
+
+    for local_id, item in download_queue.items():
+        if item["item_status"] == "Downloaded" or \
+           item["item_status"] == "Already Exists" or \
+           item["item_status"] == "Cancelled" or \
+           item["item_status"] == "Deleted":
+            keys_to_delete.append(local_id)
+    for key in keys_to_delete:
+        del download_queue[key]
+    return jsonify(success=True)
 
 
-@app.route('/update_settings', methods=['POST'])
+@app.route('/api/restart', methods=['POST'])
+@login_required
+def restart():
+    logger.info("Caching Download Queue...")
+    with open(os.path.join(cache_dir(), 'cached_download_queue.txt'), 'w') as file:
+        for local_id, item in download_queue.items():
+            file.write(item['item_url'] + '\n')
+    logger.info("Restarting...")
+    subprocess.Popen([sys.executable, '-m', 'onthespot.web'] + (sys.argv[1:]))
+    os._exit(0)
+
+
+@app.route('/api/download_queue')
+@login_required
+def get_items():
+    with download_queue_lock:
+        return jsonify(download_queue)
+
+
+@app.route('/api/cancel/<path:local_id>', methods=['POST'])
+@login_required
+def cancel_item(local_id):
+    download_queue[local_id]['item_status'] = 'Cancelled'
+    return jsonify(success=True)
+
+
+@app.route('/api/retry/<path:local_id>', methods=['POST'])
+@login_required
+def retry_item(local_id):
+    download_queue[local_id]['item_status'] = 'Waiting'
+    return jsonify(success=True)
+
+
+@app.route('/api/download/<path:local_id>')
+@login_required
+def download_media(local_id):
+    return send_file(download_queue[local_id]['file_path'], as_attachment=True)
+
+
+@app.route('/api/parse_url/<path:url>', methods=['POST'])
+@login_required
+def parse_download(url):
+    parse_url(url)
+    return jsonify(success=True)
+
+
+@app.route('/api/delete/<path:local_id>', methods=['DELETE'])
+@login_required
+def delete_media(local_id):
+    os.remove(download_queue[local_id]['file_path'])
+    download_queue[local_id]['item_status'] = 'Deleted'
+    return jsonify(success=True)
+
+
+@app.route('/api/update_settings', methods=['POST'])
 @login_required
 def update_settings():
     data = request.json
@@ -313,6 +300,12 @@ def main():
     if config.get('mirror_spotify_playback'):
         mirrorplayback = MirrorSpotifyPlayback()
         mirrorplayback.start()
+
+    cached_file_path = os.path.join(cache_dir(), 'cached_download_queue.txt')
+    if os.path.isfile(cached_file_path):
+        logger.info(f'Found cached download queue at {cached_file_path}, appending items to download queue...')
+        get_search_results(cached_file_path)
+        os.remove(cached_file_path)
 
     app.run(host=args.host, port=args.port, debug=args.debug)
 
