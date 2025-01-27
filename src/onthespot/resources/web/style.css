@@ -1,6 +1,14 @@
+:root {
+    --background: #121212;
+    --text-color: #ffffff;
+    --accent: #4CAF50;
+    --row-odd: #262626;
+    --row-even: #1f1f1f;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #121212;
+    background-color: var(--background);
     color: #ffffff;
     justify-content: center;
 }
@@ -44,7 +52,7 @@ body {
 }
 
 .header a.active {
-    background-color: #1DB954;
+    background-color: var(--accent);
     color: #121212;
 }
 
@@ -59,7 +67,7 @@ table {
 }
 
 th, td {
-    border: 1px solid #444444;
+    border: 2px solid #1f1f1f;
     text-align: left;
     padding: 8px;
     color: #ffffff;
@@ -69,12 +77,20 @@ th {
     background-color: #1a1a1a;
 }
 
+tr:nth-child(odd) {
+    background-color: var(--row-odd);
+}
+
+tr:nth-child(even) {
+    background-color: var(--row-even);
+}
+
 button {
     padding: 12px 20px;
     margin-left: 10px;
     border: none;
     border-radius: 10px;
-    background-color: #1DB954;
+    background-color: var(--accent);
     color: white;
     cursor: pointer;
     font-size: 12px;
@@ -93,10 +109,48 @@ input {
     padding: 10px 12px;
 }
 
+input:where([type="checkbox"]) {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    position: relative;
+    color: inherit;
+    font-size: inherit;
+    width: 13px;
+    height: 50%;
+    box-sizing: content-box;
+    border: 1px solid;
+    border-radius: 20px;
+}
+
+input:where([type="checkbox"])::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(0, -50%);
+    box-sizing: border-box;
+    width: 0.7em;
+    height: 0.7em;
+    margin: 0 0.15em;
+    border: 1px solid;
+    border-radius: 50%;
+    background: currentcolor;
+    transition: 0.3s;
+}
+
+input:where([type="checkbox"]):checked {
+    background: var(--accent);
+}
+
+input:where([type="checkbox"]):checked::before {
+    left: 1.2em;
+}
+
 input[type="number"], input[type="password"], input[type="text"] {
-    background-color: #1e1e1e;
+    background-color: #2f2f2f;
     color: white;
-    border: 2px solid #1e1e1e;
+    border: 2px solid #2f2f2f;
     border-radius: 10px;
     outline: none;
     transition: border-color 0.3s;
@@ -105,7 +159,11 @@ input[type="number"], input[type="password"], input[type="text"] {
 }
 
 input[type="number"]:focus, input[type="password"]:focus, input[type="text"]:focus {
-    border-color: #1DB954;
+    border-color: var(--accent);
+}
+
+input:not(:checked):hover {
+    background: #373737;
 }
 
 @media screen and (max-width: 600px) {
