@@ -25,27 +25,21 @@ from .parse_item import parsingworker, parse_url
 from .runtimedata import account_pool, pending, download_queue, download_queue_lock, pending_lock
 from .search import get_search_results
 
+#logging.disable(logging.CRITICAL)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="OnTheSpot CLI Downloader")
 
-    parser.add_argument('--download', help="Rechercher et télécharger automatiquement un élément via une requête")
+    parser.add_argument('--download', help="Download a single item from URL and exit")
 
     args, unknown_args = parser.parse_known_args()
-
-    overrides = {}
-    for arg in unknown_args:
-        if arg.startswith('--') and '=' in arg:
-            key, value = arg[2:].split('=', 1)
-            overrides[key] = value
 
     if args.download:
         if not (args.download.startswith("http://") or args.download.startswith("https://")):
             parser.error("Parameter --download only accept URLs.")
 
-    return args, overrides
-
-# logging.disable(logging.CRITICAL)
-logger = logging.getLogger("cli")
+    return args
 
 class QueueWorker(threading.Thread):
     def __init__(self):
@@ -88,11 +82,7 @@ class QueueWorker(threading.Thread):
 def main():
     config.migration()
     print(f'OnTheSpot Version: {config.get("version")}')
-    args, cli_overrides = parse_args()
-    config.apply_overrides(cli_overrides)
-
-    for key, value in cli_overrides.items():
-        print(f"{key}={value}")
+    args = parse_args()
 
     print('\033[32mLogging In...\033[0m\n', end='', flush=True)
 
@@ -124,16 +114,19 @@ def main():
         mirrorplayback.start()
 
     if args.download:
-        print(f"\033[32mSearching and downloading: {args.download}\033[0m")
-        CLI().onecmd(f"search {args.download}")
-
-        while not any(item['item_status'] in ("Waiting", "Downloading") for item in download_queue.values()):
-            time.sleep(0.1)
-
-        while any(item['item_status'] not in ("Downloaded", "Failed", "Cancelled") for item in download_queue.values()):
+        print(f"\033[32mParsing URL: {args.download}\033[0m")
+        parse_url(args.download)
+        while not download_queue:
             time.sleep(1)
 
-        print("\033[32mDownload finished. Exiting...\033[0m")
+            while any(item['item_status'] not in ('Downloaded', 'Already Exists', 'Failed', 'Unavailable') for item in download_queue.values()):
+                time.sleep(1)
+
+            for item in download_queue.values():
+                if item['item_status'] in ('Unavailable', 'Failed'):
+                    print(f"\033[31mItem ID {item['item_id']} {item['item_status']}'\033[0m")
+
+        print("\033[32mDownload Completed. Exiting...\033[0m")
         os._exit(0)
 
     CLI().cmdloop()
