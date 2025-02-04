@@ -5,24 +5,26 @@ from shutil import which
 
 
 def config_dir():
-    if os.name == "nt" and 'APPDATA' in os.environ:
-        base_dir = os.environ["APPDATA"]
-    elif os.name == "nt" and 'LOCALAPPDATA' in os.environ:
-        base_dir = os.environ["LOCALAPPDATA"]
-    elif 'XDG_CONFIG_HOME' in os.environ:
-        base_dir = os.environ["XDG_CONFIG_HOME"]
+    if os.path.exists(os.environ.get('ONTHESPOTDIR', '')):
+        return os.environ['ONTHESPOTDIR']
+    elif os.name == 'nt' and os.path.exists(os.environ.get('APPDATA', '')):
+        base_dir = os.environ['APPDATA']
+    elif os.name == 'nt' and os.path.exists(os.environ.get('LOCALAPPDATA', '')):
+        base_dir = os.environ['LOCALAPPDATA']
+    elif os.path.exists(os.environ.get('XDG_CONFIG_HOME', '')):
+        base_dir = os.environ['XDG_CONFIG_HOME']
     else:
-        base_dir = os.path.join(os.path.expanduser("~"), ".config")
+        base_dir = os.path.join(os.path.expanduser('~'), '.config')
     return os.path.join(base_dir, 'onthespot')
 
 
 def cache_dir():
-    if os.name == "nt" and 'TEMP' in os.environ:
-        base_dir = os.environ["TEMP"]
-    elif 'XDG_CACHE_HOME' in os.environ:
-        base_dir = os.environ["XDG_CACHE_HOME"]
+    if os.name == 'nt' and os.path.exists(os.environ.get('TEMP', '')):
+        base_dir = os.environ['TEMP']
+    elif os.path.exists(os.environ.get('XDG_CACHE_HOME', '')):
+        base_dir = os.environ['XDG_CACHE_HOME']
     else:
-        base_dir = os.path.join(os.path.expanduser("~"), ".cache")
+        base_dir = os.path.join(os.path.expanduser('~'), '.cache')
     return os.path.join(base_dir, 'onthespot')
 
 

@@ -716,7 +716,7 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-1960</y>
+             <y>0</y>
              <width>627</width>
              <height>4132</height>
             </rect>
@@ -841,7 +841,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="lb_login_username">
+                   <widget class="QLabel" name="login_username_label">
                     <property name="text">
                      <string>Username</string>
                     </property>
@@ -867,7 +867,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="lb_login_password">
+                   <widget class="QLabel" name="login_password_label">
                     <property name="text">
                      <string>Password</string>
                     </property>

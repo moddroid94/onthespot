@@ -1,4 +1,3 @@
-import asyncio
 import os
 import shutil
 import threading
@@ -603,12 +602,11 @@ class MainWindow(QMainWindow):
 
         # Apple Music
         if self.login_service.currentIndex() == 1:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.show()
-            self.login_password.setPlaceholderText("Enter your apple music media-user-token")
-            self.lb_login_password.setText(self.tr("Media User Token"))
+            self.login_password_label.show()
+            self.login_password.setPlaceholderText("Enter your media-user-token")
+            self.login_password_label.setText(self.tr("Media User Token"))
             self.login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
@@ -622,10 +620,9 @@ class MainWindow(QMainWindow):
 
         # Bandcamp
         elif self.login_service.currentIndex() == 2:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.hide()
+            self.login_password_label.hide()
             self.login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
@@ -638,12 +635,11 @@ class MainWindow(QMainWindow):
 
         # Deezer
         elif self.login_service.currentIndex() == 3:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.show()
-            self.login_password.setPlaceholderText("Enter your deezer arl")
-            self.lb_login_password.setText(self.tr("ARL"))
+            self.login_password_label.show()
+            self.login_password.setPlaceholderText("Enter your arl")
+            self.login_password_label.setText(self.tr("ARL"))
             self.login_password.show()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
@@ -657,13 +653,12 @@ class MainWindow(QMainWindow):
 
         # Qobuz
         elif self.login_service.currentIndex() == 4:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.show()
-            self.lb_login_username.setText(self.tr("Email"))
+            self.login_username_label.show()
+            self.login_username_label.setText(self.tr("Email"))
             self.login_username.show()
             self.login_username.setPlaceholderText("Enter your email")
-            self.lb_login_password.show()
-            self.lb_login_password.setText(self.tr("Password"))
+            self.login_password_label.show()
+            self.login_password_label.setText(self.tr("Password"))
             self.login_password.show()
             self.login_password.setPlaceholderText("Enter your password")
             self.btn_login_add.clicked.disconnect()
@@ -677,32 +672,26 @@ class MainWindow(QMainWindow):
 
         # Soundcloud
         elif self.login_service.currentIndex() == 5:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.hide()
-            self.login_password.hide()
-            #self.lb_login_username.show()
-            #self.lb_login_username.setText(self.tr("Client ID"))
-            #self.login_username.show()
-            #self.lb_login_password.show()
-            #self.lb_login_password.setText(self.tr("App Version"))
-            #self.login_password.show()
+            self.login_password_label.show()
+            self.login_password_label.setText(self.tr("OAuth Token"))
+            self.login_password.show()
+            self.login_password.setPlaceholderText("Enter your oauth_token")
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
             self.btn_login_add.setIcon(QIcon())
-            self.btn_login_add.setText(self.tr("Add Soundcloud Account"))
+            self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
-                (self.show_popup_dialog(self.tr("Public account added, please restart the app.\nLogging into personal accounts is currently unsupported, if you have a GO+ account please consider lending it to the dev team.")) or True) and
-                soundcloud_add_account()
+                (self.show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
+                soundcloud_add_account(oauth_token=self.login_password.text())
                 )
 
         # Spotify
         elif self.login_service.currentIndex() == 6:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.hide()
+            self.login_password_label.hide()
             self.login_password.hide()
             try:
                 self.btn_login_add.clicked.disconnect()
@@ -716,10 +705,9 @@ class MainWindow(QMainWindow):
 
         # Tidal
         elif self.login_service.currentIndex() == 7:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.hide()
+            self.login_password_label.hide()
             self.login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
@@ -729,10 +717,9 @@ class MainWindow(QMainWindow):
 
         # Youtube Music
         elif self.login_service.currentIndex() == 8:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.hide()
+            self.login_password_label.hide()
             self.login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
@@ -745,13 +732,12 @@ class MainWindow(QMainWindow):
 
         # Crunchyroll
         elif self.login_service.currentIndex() == 10:
-            self.login_password.setDisabled(False)
-            self.lb_login_username.show()
-            self.lb_login_username.setText(self.tr("Email"))
+            self.login_username_label.show()
+            self.login_username_label.setText(self.tr("Email"))
             self.login_username.show()
             self.login_username.setPlaceholderText("Enter your email")
-            self.lb_login_password.show()
-            self.lb_login_password.setText(self.tr("Password"))
+            self.login_password_label.show()
+            self.login_password_label.setText(self.tr("Password"))
             self.login_password.show()
             self.login_password.setPlaceholderText("Enter your password")
             self.btn_login_add.clicked.disconnect()
@@ -768,10 +754,9 @@ class MainWindow(QMainWindow):
             self.groupbox_generic_audio_download_path.show()
             self.lb_generic_extractors.show()
             self.lb_generic_extractors.setText(self.tr("<strong>The following services are officially supported by the Generic Downloader. Even if your website is not officially supported, generic downloader may be able to download media off it anyway.</strong><br>{0}").format('<br>'.join(generic_list_extractors())))
-            self.login_password.setDisabled(False)
-            self.lb_login_username.hide()
+            self.login_username_label.hide()
             self.login_username.hide()
-            self.lb_login_password.hide()
+            self.login_password_label.hide()
             self.login_password.hide()
             self.btn_login_add.clicked.disconnect()
             self.btn_login_add.show()
@@ -802,7 +787,8 @@ class MainWindow(QMainWindow):
         else:
             self.show_popup_dialog(self.tr("Account already exists."))
             self.btn_login_add.setText(self.tr("Add Account"))
-            self.btn_login_add.setDisabled(False)
+        self.login_service.setDisabled(False)
+        self.btn_login_add.setDisabled(False)
 
 
     def add_tidal_account(self):
@@ -826,7 +812,8 @@ class MainWindow(QMainWindow):
         else:
             self.show_popup_dialog(self.tr("Account already exists."))
             self.btn_login_add.setText(self.tr("Add Account"))
-            self.btn_login_add.setDisabled(False)
+        self.login_service.setDisabled(False)
+        self.btn_login_add.setDisabled(False)
 
 
     def fill_search_table(self):

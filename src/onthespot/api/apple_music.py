@@ -4,7 +4,7 @@ import m3u8
 from pathlib import Path
 import requests
 import re
-import uuid
+from uuid import uuid4
 import xml.etree.ElementTree as ET
 from pywidevine import PSSH, Cdm, Device
 from pywidevine.license_protocol_pb2 import WidevinePsshData
@@ -21,7 +21,7 @@ WVN_LICENSE_URL = "https://play.itunes.apple.com/WebObjects/MZPlay.woa/wa/acquir
 def apple_music_add_account(media_user_token):
     cfg_copy = config.get('accounts').copy()
     new_user = {
-        "uuid": str(uuid.uuid4()),
+        "uuid": str(uuid4()),
         "service": "apple_music",
         "active": True,
         "login": {

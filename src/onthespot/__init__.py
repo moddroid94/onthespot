@@ -44,7 +44,6 @@ class TrayApp:
 
 
 def main():
-    logger.info('Starting application in \n3\n2\n1')
     config.migration()
     logger.info(f'OnTheSpot Version: {config.get("version")}')
 

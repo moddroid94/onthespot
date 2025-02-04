@@ -286,7 +286,6 @@ class DownloadWorker(QObject):
                         stream_internal = stream.input_stream.stream()
                         del stream_internal, stream.input_stream
 
-
                     elif item_service == 'deezer':
                         song = get_song_info_from_deezer_website(token, item['item_id'])
 
@@ -374,29 +373,36 @@ class DownloadWorker(QObject):
                                 self.progress.emit(item, self.tr("Failed"), 0)
                             self.readd_item_to_download_queue(item)
 
-
                     elif item_service in ("soundcloud", "youtube_music"):
+                        item_url = item_metadata['item_url']
                         ydl_opts = {}
+                        if item_service == "soundcloud":
+                            if token['oauth_token']:
+                                # Bitrate and format extracted later in the function as not all soundcloud songs have m4a available
+                                ydl_opts['format'] = 'bestaudio'
+                                ydl_opts['username'] = 'oauth'
+                                ydl_opts['password'] = token['oauth_token']
+                            else:
+                                default_format = ".mp3"
+                                bitrate = "128k"
+                                ydl_opts['format'] = 'bestaudio[ext=mp3]'
+                        elif item_service == "youtube_music":
+                            default_format = '.m4a'
+                            bitrate = "256k"
+                            ydl_opts['format'] = 'bestaudio[ext=m4a]'
                         ydl_opts['quiet'] = True
                         ydl_opts['no_warnings'] = True
                         ydl_opts['noprogress'] = True
                         ydl_opts['extract_audio'] = True
                         ydl_opts['outtmpl'] = temp_file_path
-                        if item_service == "soundcloud":
-                            item_url = item_metadata['item_url']
-                            default_format = ".mp3"
-                            bitrate = "128k"
-                            ydl_opts['format'] = 'bestaudio[ext=mp3]'
-                        elif item_service == "youtube_music":
-                            item_url = f'https://music.youtube.com/watch?v={item["item_id"]}'
-                            default_format = '.m4a'
-                            bitrate = "256k"
-                            ydl_opts['format'] = 'bestaudio[ext=m4a]'
                         if self.gui:
                             ydl_opts['progress_hooks'] = [lambda d: self.yt_dlp_progress_hook(item, d)]
                         with YoutubeDL(ydl_opts) as video:
+                            if item_service == "soundcloud" and token['oauth_token']:
+                                info_dict = video.extract_info(item_url)
+                                bitrate = f"{info_dict.get('abr')}k"
+                                default_format = f".{info_dict.get('audio_ext')}"
                             video.download(item_url)
-
 
                     elif item_service in ("bandcamp", "qobuz", "tidal"):
                         if item_service in ("qobuz", "tidal"):
