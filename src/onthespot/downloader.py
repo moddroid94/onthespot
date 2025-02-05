@@ -379,7 +379,7 @@ class DownloadWorker(QObject):
                         if item_service == "soundcloud":
                             if token['oauth_token']:
                                 # Bitrate and format extracted later in the function as not all soundcloud songs have m4a available
-                                ydl_opts['format'] = 'bestaudio'
+                                ydl_opts['format'] = 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio'
                                 ydl_opts['username'] = 'oauth'
                                 ydl_opts['password'] = token['oauth_token']
                             else:

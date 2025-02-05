@@ -489,6 +489,7 @@ def embed_metadata(item, metadata):
 
 
 def set_music_thumbnail(filename, metadata):
+    if metadata['image_url']:
         target_path = os.path.abspath(filename)
         file_name = os.path.basename(target_path)
         filetype = os.path.splitext(file_name)[1]
