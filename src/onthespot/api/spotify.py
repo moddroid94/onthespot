@@ -455,7 +455,8 @@ def spotify_get_album_track_ids(token, album_id):
 
     item_ids = []
     for track in tracks:
-        item_ids.append(track['id'])
+        if track:
+            item_ids.append(track['id'])
     return item_ids
 
 
@@ -675,6 +676,7 @@ def spotify_get_podcast_episode_ids(token, show_id):
         url = f'{BASE_URL}/shows/{show_id}/episodes?offset={offset}&limit={limit}'
         headers = {}
         headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
+        print(headers)
         resp = make_call(url, headers=headers)
 
         offset += limit
@@ -685,5 +687,6 @@ def spotify_get_podcast_episode_ids(token, show_id):
 
     item_ids = []
     for episode in episodes:
-        item_ids.append(episode['id'])
+        if episode:
+            item_ids.append(episode['id'])
     return item_ids

@@ -14,7 +14,7 @@ OnTheSpot supports various accounts and instructions for each are listed below, 
    ```python
    {
       # Random string of numbers and letters
-      "uuid": "ABC123",
+      "uuid": "private_qobuz_1",
       "service": "qobuz",
       "active": true,
       "login": {
@@ -31,7 +31,7 @@ OnTheSpot supports various accounts and instructions for each are listed below, 
    }
    ```
 
-- **Soundcloud**: Soundcloud offers public downloads and does not require an account, simply click 'Add Soundcloud Account' and restart the app. *If you have a GO+ account and would like to support development please reach out.*
+- **Soundcloud**: Paste your oauth-token into the bar provided and click add account. To get your oauth-token log into the soundcloud website, press ctrl + shift + i to open inspect element, navigate to the 'Application' or 'Storage' header, and open the soundcloud.com cookie. Your oauth-token should be listed under one of the values provided.
 
 - **Spotify**: Ensure that both OnTheSpot and the Spotify Desktop App are not restricted by a firewall or vpn so that they can communicate. Click add account and then head over to devices in the Spotify app. Under devices you should see 'OnTheSpot', select it. Once complete the app will prompt you to restart.
 
@@ -39,7 +39,7 @@ OnTheSpot supports various accounts and instructions for each are listed below, 
 
 - **Youtube Music**: Youtube Music offers public downloads and does not require an account, simply click 'Add Youtube Music Account' and restart the app.
 
-- **Crunchyroll**: To login to your Qobuz account simply enter your email and password, and restart the app.
+- **Crunchyroll**: To login to your Crunchyroll account simply enter your email and password, and restart the app.
 
 - **Generic Downloader**: Generic Downloader uses yt-dlp to rip any available music or videos from a given webpage. A list of supported services is available in the app or [here](https://github.com/yt-dlp/yt-dlp/tree/master/yt_dlp/extractor). Even if your given website is not listed the generic downloader may be able to rip media anyway, just paste your url in the search bar. To activate generic downloader simply click 'Add Generic Downloader'.
 
