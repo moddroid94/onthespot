@@ -236,7 +236,7 @@ def convert_audio_format(filename, bitrate, default_format):
         os.remove(temp_name)
 
 
-def convert_video_format(output_path, output_format, video_file_parts, subtitle_files):
+def convert_video_format(output_path, output_format, video_files):
     target_path = os.path.abspath(output_path)
     file_name = os.path.basename(target_path)
     filetype = os.path.splitext(file_name)[1]
@@ -248,11 +248,23 @@ def convert_video_format(output_path, output_format, video_file_parts, subtitle_
     # Existing command initialization
     command = [config.get('_ffmpeg_bin_path')]
 
-    for file in video_file_parts:
-        command += ['-i', file]
+    current_type = ''
+    format_map = []
+    for map_index, file in enumerate(video_files):
+        if current_type != file["type"]:
+            i = 0
+            current_type = file["type"]
+        command += ['-i', file['path']]
+        format_map += ['-map', f'{map_index}:{current_type[:1]}']
 
-    for file in subtitle_files:
-        command += ['-i', file]
+        if file['type'] in ('audio', 'subtitle'):
+            language = file.get('language')
+            format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'title={file.get('language')}']
+            format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'language={file.get('language')[:2]}']
+
+        i += 1
+
+    command += format_map
 
     # Set log level based on environment variable
     if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
@@ -275,14 +287,11 @@ def convert_video_format(output_path, output_format, video_file_parts, subtitle_
     else:
         subprocess.check_call(command, shell=False)
 
-    for file in video_file_parts:
-        if os.path.exists(file):
-            os.remove(file)
-
-    if output_format == "mkv":
-        for file in subtitle_files:
-            if os.path.exists(file):
-                os.remove(file)
+    for file in video_files:
+        if os.path.exists(file['path']):
+            if file['format'] in ('srt', 'ass', 'vtt') and output_format != "mkv":
+                continue
+            os.remove(file['path'])
 
     os.rename(temp_file_path, output_path + '.' + output_format)
 

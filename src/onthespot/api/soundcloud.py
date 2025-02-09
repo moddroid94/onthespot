@@ -191,7 +191,7 @@ def soundcloud_get_search_results(token, search_term, content_types):
                 'item_thumbnail_url': playlist["artwork_url"]
             })
 
-    logger.info(search_results)
+    logger.debug(search_results)
     return search_results
 
 

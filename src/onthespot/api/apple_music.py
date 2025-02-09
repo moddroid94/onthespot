@@ -349,7 +349,7 @@ def apple_music_get_decryption_key(session, stream_url, item_id):
 
         license_data = session.post(WVN_LICENSE_URL, json=json).json()
 
-        wvn_license = license_data.get("license", '')
+        wvn_license = license_data.get('license')
 
         cdm.parse_license(cdm_session, wvn_license)
         decryption_key = next(
@@ -383,7 +383,7 @@ def apple_music_get_artist_album_ids(session, artist_id):
 
     item_ids = []
     for album in album_data.get('data', [])[0].get('relationships', {}).get('albums', {}).get('data', []):
-        item_ids.append(album.get("id", ''))
+        item_ids.append(album.get('id'))
     return item_ids
 
 

@@ -667,7 +667,9 @@ class MainWindow(QMainWindow):
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
                 qobuz_add_account(self.login_username.text(), self.login_password.text()) and
-                (self.show_popup_dialog(self.tr("Account added, please restart the app.")) or True)
+                (self.show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
+                self.login_username.clear() and
+                self.login_password.clear()
                 )
 
         # Soundcloud
@@ -684,7 +686,8 @@ class MainWindow(QMainWindow):
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
-                soundcloud_add_account(oauth_token=self.login_password.text())
+                soundcloud_add_account(oauth_token=self.login_password.text()) and
+                self.login_password.clear()
                 )
 
         # Spotify
@@ -746,7 +749,9 @@ class MainWindow(QMainWindow):
             self.btn_login_add.setText(self.tr("Add Account"))
             self.btn_login_add.clicked.connect(lambda:
                 (self.show_popup_dialog(self.tr("Account added, please restart the app.")) or True) and
-                crunchyroll_add_account(self.login_username.text(), self.login_password.text())
+                crunchyroll_add_account(self.login_username.text(), self.login_password.text()) and
+                self.login_username.clear() and
+                self.login_password.clear()
                 )
 
         # Generic (yt-dlp)

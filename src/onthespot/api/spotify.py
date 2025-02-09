@@ -676,7 +676,6 @@ def spotify_get_podcast_episode_ids(token, show_id):
         url = f'{BASE_URL}/shows/{show_id}/episodes?offset={offset}&limit={limit}'
         headers = {}
         headers['Authorization'] = f"Bearer {token.tokens().get('user-read-email')}"
-        print(headers)
         resp = make_call(url, headers=headers)
 
         offset += limit

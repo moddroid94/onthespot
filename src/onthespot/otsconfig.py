@@ -182,9 +182,9 @@ class Config:
 
             # Video Download Settings
             "video_download_path": os.path.join(os.path.expanduser("~"), "Videos", "OnTheSpot"), # Root dir for audio downloads
-            "movie_file_format": "mp4",
+            "movie_file_format": "mkv",
             "movie_path_formatter": "Movies" + os.path.sep + "{name} ({release_year})", # Show path format string
-            "show_file_format": "mp4",
+            "show_file_format": "mkv",
             "show_path_formatter": "Shows" + os.path.sep + "{show_name}" + os.path.sep + "Season {season_number}" + os.path.sep + "{episode_number}. {name}", # Show path format string
             "preferred_video_resolution": 1080, # Maximum video resolution for Generic Downloader
             "download_subtitles": False, # Download Subtitles
