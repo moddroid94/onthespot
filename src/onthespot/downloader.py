@@ -485,11 +485,11 @@ class DownloadWorker(QObject):
 
                     # Video
                     elif item_service == "crunchyroll":
+                        # Get versions and close stream
                         mpd_url, stream_token, default_audio_locale, headers, versions, subtitle_formats = crunchyroll_get_mpd_info(token, item_id)
-                        decryption_key = crunchyroll_get_decryption_key(token, item_id, mpd_url, stream_token)
+                        crunchyroll_close_stream(token, item_id, stream_token)
 
                         ydl_opts = {}
-                        ydl_opts['http_headers'] = headers
                         ydl_opts['quiet'] = True
                         ydl_opts['no_warnings'] = True
                         ydl_opts['allow_unplayable_formats'] = True
@@ -499,64 +499,47 @@ class DownloadWorker(QObject):
                         if self.gui:
                             ydl_opts['progress_hooks'] = [lambda d: self.yt_dlp_progress_hook(item, d)]
 
-                        # I would prefer to download video and audio together but yt-dlp
-                        # appends a format string when ext is used together.
+                        # Extract preferred language
                         encrypted_files = []
-
-                        if self.gui:
-                            self.progress.emit(item, self.tr("Downloading Video"), 1)
-                        ydl_video_opts = ydl_opts
-                        ydl_opts['outtmpl'] = temp_file_path + '.%(ext)s.%(ext)s'
-                        ydl_video_opts['format'] = (f'(bestvideo[height<={config.get("preferred_video_resolution")}][ext=mp4]/bestvideo)')
-                        with YoutubeDL(ydl_video_opts) as video:
-                            encrypted_files.append({
-                                'path': video.prepare_filename(video.extract_info(mpd_url, download=False)),
-                                'type': 'video',
-                                'decryption_key': decryption_key
-                            })
-                            video.download(mpd_url)
-
-                        token = get_account_token(item_service)
-                        headers['Authorization'] = f'Bearer {token}'
-                        ydl_opts['http_headers'] = headers
-
-                        if self.gui:
-                            self.progress.emit(item, self.tr("Downloading Audio"), 1)
-                        ydl_audio_opts = ydl_opts
-                        ydl_audio_opts['outtmpl'] = temp_file_path + f' - {default_audio_locale}.%(ext)s.%(ext)s'
-                        ydl_audio_opts['format'] = ('(bestaudio[ext=m4a]/bestaudio)')
-                        with YoutubeDL(ydl_audio_opts) as audio:
-                            encrypted_files.append({
-                                'path': audio.prepare_filename(audio.extract_info(mpd_url, download=False)),
-                                'decryption_key': decryption_key,
-                                'type': 'audio',
-                                'language': default_audio_locale
-                            })
-                            audio.download(mpd_url)
-
-                        token = get_account_token(item_service)
-                        crunchyroll_close_stream(token, item_id, stream_token)
-
-                        # Extract additional audio languages
+                        subtitle_formats = []
                         for version in versions:
-                            if version['audio_locale'] == default_audio_locale:
-                                continue
                             if version['audio_locale'] in config.get('preferred_audio_language').split(',') or config.get('download_all_available_audio'):
                                 token = get_account_token(item_service)
+                                headers['Authorization'] = f'Bearer {token}'
+                                ydl_opts['http_headers'] = headers
+                                ydl_opts['outtmpl'] = temp_file_path + f' - {version['audio_locale']}.%(ext)s.%(ext)s'
+
                                 try:
                                     mpd_url, stream_token, audio_locale, headers, versions, additional_subtitle_formats = crunchyroll_get_mpd_info(token, version['guid'])
+                                    subtitle_formats += additional_subtitle_formats
+                                    decryption_key = crunchyroll_get_decryption_key(token, version['guid'], mpd_url, stream_token)
                                 except Exception as e:
                                     logger.error(e)
                                     continue
-                                subtitle_formats += additional_subtitle_formats
-                                decryption_key = crunchyroll_get_decryption_key(token, version['guid'], mpd_url, stream_token)
+
+                                if self.gui:
+                                    self.progress.emit(item, self.tr("Downloading Video"), 1)
+                                ydl_video_opts = ydl_opts
+                                ydl_video_opts['format'] = (f'(bestvideo[height<={config.get("preferred_video_resolution")}][ext=mp4]/bestvideo)')
+                                with YoutubeDL(ydl_video_opts) as video:
+                                    encrypted_files.append({
+                                        'path': video.prepare_filename(video.extract_info(mpd_url, download=False)),
+                                        'type': 'video',
+                                        'decryption_key': decryption_key,
+                                        'language': version['audio_locale']
+                                    })
+                                    video.download(mpd_url)
+
+                                # I would prefer to download video and audio together but yt-dlp
+                                # appends a format string when ext is used together.
+                                token = get_account_token(item_service)
+                                headers['Authorization'] = f'Bearer {token}'
+                                ydl_opts['http_headers'] = headers
 
                                 if self.gui:
                                     self.progress.emit(item, self.tr("Downloading Audio"), 1)
                                 ydl_audio_opts = ydl_opts
-                                ydl_audio_opts['outtmpl'] = temp_file_path + f' - {version['audio_locale']}.%(ext)s.%(ext)s'
                                 ydl_audio_opts['format'] = ('(bestaudio[ext=m4a]/bestaudio)')
-                                ydl_audio_opts['http_headers'] = headers
                                 with YoutubeDL(ydl_audio_opts) as audio:
                                     encrypted_files.append({
                                         'path': audio.prepare_filename(audio.extract_info(mpd_url, download=False)),

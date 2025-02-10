@@ -257,7 +257,7 @@ def convert_video_format(output_path, output_format, video_files):
         command += ['-i', file['path']]
         format_map += ['-map', f'{map_index}:{current_type[:1]}']
 
-        if file['type'] in ('audio', 'subtitle'):
+        if file.get('language'):
             language = file.get('language')
             format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'title={file.get('language')}']
             format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'language={file.get('language')[:2]}']
@@ -661,7 +661,11 @@ def add_to_m3u_file(item, item_metadata):
 
     # Check if the item_path is already in the M3U file
     with open(m3u_path, 'r', encoding='utf-8') as m3u_file:
-        m3u_item_header = f"#EXTINF:{round(int(item_metadata['length'])/1000)}, {EXTINF}"
+        try:
+            ext_length = round(int(item_metadata['length'])/1000)
+        except Exception:
+            ext_length = '-1'
+        m3u_item_header = f"#EXTINF:{ext_length}, {EXTINF}"
         m3u_contents = m3u_file.readlines()
         if m3u_item_header not in [line.strip() for line in m3u_contents]:
             with open(m3u_path, 'a', encoding='utf-8') as m3u_file:

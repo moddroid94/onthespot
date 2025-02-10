@@ -1,15 +1,15 @@
 import base64
 from hashlib import md5
-import re
 import json
 import os
-from uuid import uuid4
+import re
 import requests
 import time
-from yt_dlp import YoutubeDL
+from uuid import uuid4
 from pywidevine.cdm import Cdm
 from pywidevine.pssh import PSSH
 from pywidevine.device import Device
+from yt_dlp import YoutubeDL
 from ..constants import WVN_KEY
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool
@@ -135,7 +135,7 @@ def crunchyroll_get_search_results(token, search_term, _):
     params={}
     params['q'] = search_term
     params['n'] = config.get('max_search_results')
-    params["locale"] = config.get('preferred_subtitle_language').split(',')[0]
+    params["locale"] = 'en-US'
     #params["type"] = "top_results,series,movie_listing,episode"
 
     search_data = requests.get(f'{BASE_URL}/content/v2/discover/search', headers=headers, params=params).json()
@@ -183,7 +183,7 @@ def crunchyroll_get_episode_metadata(token, item_id):
     headers['Content-Type'] = 'application/json'
     headers['User-Agent'] = f'Crunchyroll/{APP_VERSION} Android/13 okhttp/4.12.0'
 
-    url = f'{BASE_URL}/content/v2/cms/objects/{item_id.split('/')[0]}?ratings=true&images=true&locale=en-US'
+    url = f'{BASE_URL}/content/v2/cms/objects/{item_id.split("/")[0]}?ratings=true&images=true&locale=en-US'
     episode_data = make_call(url, headers=headers)
     # intro and credit timestamps
     #https://static.crunchyroll.com/skip-events/production/G4VUQ588P.json
@@ -239,7 +239,7 @@ def crunchyroll_get_mpd_info(token, episode_id):
 
     params={}
     params['queue'] = False
-    params["locale"] = config.get('preferred_audio_language').split(',')[0]
+    params["locale"] = 'en-US'
 
     # Ensure you properly delete session otherwise app will lockup
     url = f"https://cr-play-service.prd.crunchyrollsvc.com/v1/{episode_id.split('/')[0]}/android/phone/play"
@@ -301,5 +301,5 @@ def crunchyroll_close_stream(token, episode_id, stream_token):
     headers['Content-Type'] = 'application/json'
     headers['User-Agent'] = f'Crunchyroll/{APP_VERSION} Android/13 okhttp/4.12.0'
 
-    url = f'https://cr-play-service.prd.crunchyrollsvc.com/v1/token/{episode_id.split('/')[0]}/{stream_token}'
+    url = f'https://cr-play-service.prd.crunchyrollsvc.com/v1/token/{episode_id.split("/")[0]}/{stream_token}'
     resp = requests.delete(url, headers=headers)
