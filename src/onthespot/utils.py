@@ -209,7 +209,10 @@ def convert_audio_format(filename, bitrate, default_format):
             command += ['-loglevel', 'error', '-hide_banner', '-nostats']
 
         # Check if media format is service default
-        if filetype == default_format:
+
+        if filetype == default_format and config.get('use_custom_file_bitrate'):
+            command += ['-b:a', bitrate]
+        elif filetype == default_format:
             command += ['-c:a', 'copy']
         else:
             command += [
