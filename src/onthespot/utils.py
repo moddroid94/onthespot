@@ -239,7 +239,7 @@ def convert_audio_format(filename, bitrate, default_format):
         os.remove(temp_name)
 
 
-def convert_video_format(output_path, output_format, video_files):
+def convert_video_format(output_path, output_format, video_files, item_metadata):
     target_path = os.path.abspath(output_path)
     file_name = os.path.basename(target_path)
     filetype = os.path.splitext(file_name)[1]
@@ -258,15 +258,17 @@ def convert_video_format(output_path, output_format, video_files):
             i = 0
             current_type = file["type"]
         command += ['-i', file['path']]
-        format_map += ['-map', f'{map_index}:{current_type[:1]}']
 
-        if file.get('language'):
-            language = file.get('language')
-            format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'title={file.get('language')}']
-            format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'language={file.get('language')[:2]}']
+        if current_type != 'chapter':
+            format_map += ['-map', f'{map_index}:{current_type[:1]}']
+            if file.get('language'):
+                language = file.get('language')
+                format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'title={file.get('language')}']
+                format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'language={file.get('language')[:2]}']
 
         i += 1
 
+    format_map += [f'-metadata', f'title={item_metadata['title']}']
     command += format_map
 
     # Set log level based on environment variable

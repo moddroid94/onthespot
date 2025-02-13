@@ -185,11 +185,11 @@ def crunchyroll_get_episode_metadata(token, item_id):
 
     url = f'{BASE_URL}/content/v2/cms/objects/{item_id.split("/")[0]}?ratings=true&images=true&locale=en-US'
     episode_data = make_call(url, headers=headers)
-    # intro and credit timestamps
+    # intro and credit timestamps (done in downloader step)
     #https://static.crunchyroll.com/skip-events/production/G4VUQ588P.json
-    # genre
+    # genre (dont think mkv supports this)
     #https://www.crunchyroll.com/content/v2/discover/categories?guid=G1XHJV0XM&locale=en-US
-    # copyright
+    # copyright (dont think mkv supports this)
     #https://static.crunchyroll.com/copyright/G1XHJV0XM.json
 
     info_dict = episode_data['data'][0]

@@ -501,6 +501,7 @@ class DownloadWorker(QObject):
 
                         # Extract preferred language
                         encrypted_files = []
+                        video_files = []
                         subtitle_formats = []
                         for version in versions:
                             if version['audio_locale'] in config.get('preferred_audio_language').split(',') or config.get('download_all_available_audio'):
@@ -548,12 +549,30 @@ class DownloadWorker(QObject):
                                         'language': version['audio_locale']
                                     })
                                     audio.download(mpd_url)
+
                                 crunchyroll_close_stream(token, item_id, stream_token)
+
+                                # Download Chapters
+                                if not config.get('raw_media_download'):
+                                    if self.gui:
+                                        self.progress.emit(item, self.tr("Downloading Chapters"), 1)
+                                    chapter_data = requests.get(f'https://static.crunchyroll.com/skip-events/production/{version['guid']}.json').json()
+                                    chapter_file = temp_file_path + f' - {version['audio_locale']}.txt'
+                                    with open(chapter_file, 'w', encoding='utf-8') as file:
+                                        file.write(';FFMETADATA1\n')
+                                        for entry in ['intro', 'credits']:
+                                            if chapter_data.get(entry):
+                                                file.write(f'[CHAPTER]\nTIMEBASE=1/1\nSTART={chapter_data[entry].get('start')}\nEND={chapter_data[entry].get('end')}\ntitle={entry.title()}\nlanguage={version['audio_locale']}\n')
+                                    video_files.append({
+                                        'path': chapter_file,
+                                        'type': 'chapter',
+                                        'format': 'txt',
+                                        'language': version['audio_locale']
+                                    })
 
                         if self.gui:
                             self.progress.emit(item, self.tr("Decrypting"), 99)
 
-                        video_files = []
                         for encrypted_file in encrypted_files:
                             decrypted_temp_file_path = os.path.splitext(encrypted_file['path'])[0]
                             video_files.append({
@@ -598,7 +617,7 @@ class DownloadWorker(QObject):
                                     subtitle_file = temp_file_path + f' - {lang}.{subtitle_format['extension']}'
                                     if not os.path.exists(subtitle_file):
                                         subtitle_data = requests.get(subtitle_format['url']).text
-                                        with open(subtitle_file, "w") as file:
+                                        with open(subtitle_file, 'w', encoding='utf-8') as file:
                                             file.write(subtitle_data)
                                     video_files.append({
                                         'path': subtitle_file,
@@ -711,7 +730,7 @@ class DownloadWorker(QObject):
                                 output_format = config.get("show_file_format")
                             elif item_type == "movie":
                                 output_format = config.get("movie_file_format")
-                            convert_video_format(file_path, output_format, video_files)
+                            convert_video_format(file_path, output_format, video_files, item_metadata)
                             item['file_path'] = file_path + '.' + output_format
                         else:
                             item['file_path'] = file_path + '.mp4'
