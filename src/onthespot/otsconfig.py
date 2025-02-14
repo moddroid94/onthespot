@@ -74,6 +74,11 @@ class Config:
                     "service": "youtube_music",
                     "active": True,
                 },
+                {
+                    "uuid": "public_crunchyroll",
+                    "service": "crunchyroll",
+                    "active": True,
+                },
             ], # Saved account information
 
             # Web UI Settings

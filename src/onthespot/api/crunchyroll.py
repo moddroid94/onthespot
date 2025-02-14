@@ -24,19 +24,34 @@ BASE_URL = "https://beta-api.crunchyroll.com"
 def crunchyroll_login_user(account):
     try:
         headers = {}
-        headers['Authorization'] = f'Basic {PUBLIC_TOKEN}'
-        headers['Connection'] = 'Keep-Alive'
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
-        headers['User-Agent'] = f'Crunchyroll/{APP_VERSION} Android/13 okhttp/4.12.0'
 
-        payload = {}
-        payload['username'] = account['login']['email']
-        payload['password'] = account['login']['password']
-        payload['grant_type'] = 'password'
-        payload['scope'] = 'offline_access'
-        payload['device_id'] = account['uuid']
-        payload['device_name'] = 'OnTheSpot'
-        payload['device_type'] = 'OnTheSpot'
+        if account['uuid'] == 'public_crunchyroll':
+            response = requests.get("https://static.crunchyroll.com/vilos-v2/web/vilos/js/bundle.js")
+            tokens = re.search(r'prod="([\w-]+:[\w-]+)",\w+\.staging="([\w-]+:[\w-]+)",\w+\.proto0="([\w-]+:[\w-]+)"', response.text)
+            if not tokens:
+                raise ValueError("Couldn't find tokens.")
+            prod, staging, proto = tokens.groups()
+            prod_token = base64.b64encode(prod.encode("iso-8859-1")).decode()
+
+            headers['Authorization'] = f'Basic {prod_token}'
+            headers['ETP-Anonymous-ID'] = str(uuid4())
+
+            payload = {}
+            payload['grant_type'] = 'client_id'
+        else:
+            headers['Authorization'] = f'Basic {PUBLIC_TOKEN}'
+            headers['Connection'] = 'Keep-Alive'
+            headers['User-Agent'] = f'Crunchyroll/{APP_VERSION} Android/13 okhttp/4.12.0'
+
+            payload = {}
+            payload['username'] = account['login']['email']
+            payload['password'] = account['login']['password']
+            payload['grant_type'] = 'password'
+            payload['scope'] = 'offline_access'
+            payload['device_id'] = account['uuid']
+            payload['device_name'] = 'OnTheSpot'
+            payload['device_type'] = 'OnTheSpot'
 
         token_data = requests.post(f"{BASE_URL}/auth/v1/token", headers=headers, data=payload).json()
         token = token_data.get('access_token')
@@ -45,38 +60,53 @@ def crunchyroll_login_user(account):
 
         header_b64, payload_b64, signature_b64 = token.split('.')
         jwt_data = json.loads(base64.urlsafe_b64decode(f'{payload_b64}==='))
-        premium = False
-        if 'cr_premium' in jwt_data['benefits']:
-            premium = True
+        account_type = 'free'
+        if jwt_data.get('status') == 'ANONYMOUS':
+            account_type = 'public'
+        elif 'cr_premium' in jwt_data.get('benefits', {}):
+            account_type = 'premium'
 
-        account_pool.append({
-            "uuid": account['uuid'],
-            "username": account['login']['email'],
-            "service": "crunchyroll",
-            "status": "active",
-            "account_type": 'premium' if premium else 'free',
-            "bitrate": "1080p",
-            "login": {
-                "email": account['login']['email'],
-                "password": account['login']['password'],
-                "token": token,
-                "refresh_token": refresh_token,
-                "token_expiry": token_expiry
-            }
-        })
+        if account['uuid'] == 'public_crunchyroll':
+            account_pool.append({
+                "uuid": account['uuid'],
+                "username": account['uuid'],
+                "service": "crunchyroll",
+                "status": "active",
+                "account_type": account_type,
+                "bitrate": "1080p",
+                "login": {
+                    "token": token,
+                    "refresh_token": prod_token,
+                    "token_expiry": token_expiry
+                }
+            })
+        else:
+            account_pool.append({
+                "uuid": account['uuid'],
+                "username": account['login']['email'],
+                "service": "crunchyroll",
+                "status": "active",
+                "account_type": account_type,
+                "bitrate": "1080p",
+                "login": {
+                    "email": account['login']['email'],
+                    "password": account['login']['password'],
+                    "token": token,
+                    "refresh_token": refresh_token,
+                    "token_expiry": token_expiry
+                }
+            })
         return True
     except Exception as e:
         logger.error(f"Unknown Exception: {str(e)}")
         account_pool.append({
             "uuid": account['uuid'],
-            "username": account['login']['email'],
+            "username": account['uuid'],
             "service": "crunchyroll",
             "status": "error",
             "account_type": "N/A",
             "bitrate": "N/A",
             "login": {
-                "email": account['login']['email'],
-                "password": account['login']['password'],
                 "token": None,
                 "refresh_token": None,
                 "token_expiry": None
@@ -88,7 +118,7 @@ def crunchyroll_login_user(account):
 def crunchyroll_add_account(email, password):
     cfg_copy = config.get('accounts').copy()
     new_user = {
-            "uuid": str(uuid.uuid4()),
+            "uuid": str(uuid4()),
             "service": "crunchyroll",
             "active": True,
             "login": {
@@ -104,24 +134,33 @@ def crunchyroll_add_account(email, password):
 def crunchyroll_get_token(parsing_index):
     if time.time() >= account_pool[parsing_index]['login']['token_expiry']:
         headers = {}
-        headers['Authorization'] = f'Basic {PUBLIC_TOKEN}'
-        headers['Connection'] = 'Keep-Alive'
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
-        headers['User-Agent'] = f'Crunchyroll/{APP_VERSION} Android/13 okhttp/4.12.0'
+        if account_pool[parsing_index]['uuid'] == 'public_crunchyroll':
+            headers['Authorization'] = f'Basic {account_pool[parsing_index]['login']['refresh_token']}'
+            headers['ETP-Anonymous-ID'] = str(uuid4())
 
-        payload = {}
-        payload['refresh_token'] = account_pool[parsing_index]['login']['refresh_token']
-        payload['grant_type'] = 'refresh_token'
-        payload['scope'] = 'offline_access'
-        payload['device_id'] = account_pool[parsing_index]['uuid']
-        payload['device_name'] = 'OnTheSpot'
-        payload['device_type'] = 'OnTheSpot'
+            payload = {}
+            payload['grant_type'] = 'client_id'
 
-        token_data = requests.post(f"{BASE_URL}/auth/v1/token", headers=headers, data=payload).json()
+            token_data = requests.post(f"{BASE_URL}/auth/v1/token", headers=headers, data=payload).json()
+        else:
+            headers['Authorization'] = f'Basic {PUBLIC_TOKEN}'
+            headers['Connection'] = 'Keep-Alive'
+            headers['User-Agent'] = f'Crunchyroll/{APP_VERSION} Android/13 okhttp/4.12.0'
+
+            payload = {}
+            payload['refresh_token'] = account_pool[parsing_index]['login']['refresh_token']
+            payload['grant_type'] = 'refresh_token'
+            payload['scope'] = 'offline_access'
+            payload['device_id'] = account_pool[parsing_index]['uuid']
+            payload['device_name'] = 'OnTheSpot'
+            payload['device_type'] = 'OnTheSpot'
+
+            token_data = requests.post(f"{BASE_URL}/auth/v1/token", headers=headers, data=payload).json()
+            account_pool[parsing_index]['login']['refresh_token'] = token_data.get('refresh_token')
+
         account_pool[parsing_index]['login']['token'] = token_data.get('access_token')
-        account_pool[parsing_index]['login']['refresh_token'] = token_data.get('refresh_token')
         account_pool[parsing_index]['login']['token_expiry'] = time.time() + token_data.get('expires_in')
-
     return account_pool[parsing_index]['login']['token']
 
 
@@ -187,7 +226,7 @@ def crunchyroll_get_episode_metadata(token, item_id):
     info_dict = episode_data['data'][0]
     # Doesn't seem to work with android bearer.
     #genre_data = make_call(f'{BASE_URL}/content/v2/discover/categories?guid={item_id.split("/")[0]}&locale=en-US', headers=headers)
-    # Headers not required, 403 means data does not exist
+    # Headers not required, 403 means data does not exist or more likely crunchyroll owns the rights to the media.
     copyright_data = make_call(f'https://static.crunchyroll.com/copyright/{item_id.split("/")[0]}.json')
     # intro and credit timestamps (done in downloader step)
     #https://static.crunchyroll.com/skip-events/production/G4VUQ588P.json
