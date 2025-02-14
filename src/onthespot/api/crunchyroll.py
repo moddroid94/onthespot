@@ -13,7 +13,7 @@ from yt_dlp import YoutubeDL
 from ..constants import WVN_KEY
 from ..otsconfig import config
 from ..runtimedata import get_logger, account_pool
-from ..utils import make_call
+from ..utils import make_call, conv_list_format
 
 logger = get_logger("api.crunchyroll")
 PUBLIC_TOKEN = "dC1rZGdwMmg4YzNqdWI4Zm4wZnE6eWZMRGZNZnJZdktYaDRKWFMxTEVJMmNDcXUxdjVXYW4="
@@ -183,28 +183,40 @@ def crunchyroll_get_episode_metadata(token, item_id):
     headers['Content-Type'] = 'application/json'
     headers['User-Agent'] = f'Crunchyroll/{APP_VERSION} Android/13 okhttp/4.12.0'
 
-    url = f'{BASE_URL}/content/v2/cms/objects/{item_id.split("/")[0]}?ratings=true&images=true&locale=en-US'
-    episode_data = make_call(url, headers=headers)
+    episode_data = make_call(f'{BASE_URL}/content/v2/cms/objects/{item_id.split("/")[0]}?ratings=true&images=true&locale=en-US', headers=headers)
+    info_dict = episode_data['data'][0]
+    # Doesn't seem to work with android bearer.
+    #genre_data = make_call(f'{BASE_URL}/content/v2/discover/categories?guid={item_id.split("/")[0]}&locale=en-US', headers=headers)
+    # Headers not required, 403 means data does not exist
+    copyright_data = make_call(f'https://static.crunchyroll.com/copyright/{item_id.split("/")[0]}.json')
     # intro and credit timestamps (done in downloader step)
     #https://static.crunchyroll.com/skip-events/production/G4VUQ588P.json
-    # genre (dont think mkv supports this)
-    #https://www.crunchyroll.com/content/v2/discover/categories?guid=G1XHJV0XM&locale=en-US
-    # copyright (dont think mkv supports this)
-    #https://static.crunchyroll.com/copyright/G1XHJV0XM.json
+    # I believe this url gives you the difference in time between different audio formats or skips, if applicable else 403. Not entirely sure.
+    #https://static.crunchyroll.com/datalab-intro-v2/G14U4XX4N.json
 
-    info_dict = episode_data['data'][0]
+    #genres = []
+    #for genre in genre_data['data']:
+    #    genres.append(genre.get('localization', {}).get('title'))
+
+    copyright_string = ''
+    if copyright_data:
+        copyright_string = copyright_data.get('long_copyright')
 
     info = {}
     info['title'] = info_dict.get('title')
     info['description'] = info_dict.get('description')
     info['image_url'] = info_dict.get('images', {}).get('thumbnail', [])[0][-1].get('source')
     info['show_name'] = info_dict.get('episode_metadata').get('series_title')
-    info['season_number'] = info_dict.get('episode_metadata').get('season_number')
-    info['episode_number'] = info_dict.get('episode_metadata').get('episode_number')
+    info['season_number'] = info_dict.get('episode_metadata', {}).get('season_number')
+    info['episode_number'] = info_dict.get('episode_metadata', {}).get('episode_number')
     info['item_url'] = f"https://www.crunchyroll.com/watch/{item_id}"
+    #info['genre'] = conv_list_format(genres)
+    info['copyright'] = copyright_string
+    info['versions'] = info_dict.get('episode_metadata', {}).get('versions', {})
+    # Not accurate
     #info['release_year'] = info_dict.get('release_year') if info_dict.get('release_year') else info_dict.get('upload_date')[:4]
     info['item_id'] = item_id.split('/')[0]
-    info['explicit'] = True if int(info_dict.get('episode_metadata').get('extended_maturity_rating').get('rating')) >= 17 else False
+    info['explicit'] = True if int(info_dict.get('episode_metadata', {}).get('extended_maturity_rating', {}).get('rating')) >= 17 else False
     info['is_playable'] = True
 
     return info

@@ -239,7 +239,7 @@ def convert_audio_format(filename, bitrate, default_format):
         os.remove(temp_name)
 
 
-def convert_video_format(output_path, output_format, video_files, item_metadata):
+def convert_video_format(item, output_path, output_format, video_files, item_metadata):
     target_path = os.path.abspath(output_path)
     file_name = os.path.basename(target_path)
     filetype = os.path.splitext(file_name)[1]
@@ -268,18 +268,30 @@ def convert_video_format(output_path, output_format, video_files, item_metadata)
 
         i += 1
 
-    format_map += [f'-metadata', f'title={item_metadata['title']}']
+    format_map += [f'-metadata', f'title={item_metadata.get('title')}']
+    #format_map += [f'-metadata', f'genre={item_metadata.get('genre')}']
+    format_map += [f'-metadata', f'copyright={item_metadata.get('copyright')}']
+    format_map += [f'-metadata', f'description={item_metadata.get('description')}']
+    #format_map += [f'-metadata', f'year={item_metadata.get('release_year')}']
+    # TV Show Specific Tags
+    if item['item_type'] == 'episode':
+        format_map += [f'-metadata', f'show={item_metadata.get('show_name')}']
+        format_map += [f'-metadata', f'episode_id={item_metadata.get('episode_number')}']
+        format_map += [f'-metadata', f'tvsn={item_metadata.get('season_number')}']
+
     command += format_map
 
     # Set log level based on environment variable
     if int(os.environ.get('SHOW_FFMPEG_OUTPUT', 0)) == 0:
         command += ['-loglevel', 'error', '-hide_banner', '-nostats']
 
-    command += ['-c', 'copy']
-
     # Add user defined parameters
     for param in config.get('ffmpeg_args'):
         command.append(param)
+
+    command += ['-c', 'copy']
+    if output_format == 'mp4':
+        command += ['-c:s', 'mov_text']
 
     # Add output parameter at last
     command += [temp_file_path]
@@ -294,8 +306,6 @@ def convert_video_format(output_path, output_format, video_files, item_metadata)
 
     for file in video_files:
         if os.path.exists(file['path']):
-            if file['format'] in ('srt', 'ass', 'vtt') and output_format != "mkv":
-                continue
             os.remove(file['path'])
 
     os.rename(temp_file_path, output_path + '.' + output_format)

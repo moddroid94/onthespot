@@ -485,10 +485,6 @@ class DownloadWorker(QObject):
 
                     # Video
                     elif item_service == "crunchyroll":
-                        # Get versions and close stream
-                        mpd_url, stream_token, default_audio_locale, headers, versions, subtitle_formats = crunchyroll_get_mpd_info(token, item_id)
-                        crunchyroll_close_stream(token, item_id, stream_token)
-
                         ydl_opts = {}
                         ydl_opts['quiet'] = True
                         ydl_opts['no_warnings'] = True
@@ -503,13 +499,8 @@ class DownloadWorker(QObject):
                         encrypted_files = []
                         video_files = []
                         subtitle_formats = []
-                        for version in versions:
+                        for version in item_metadata['versions']:
                             if version['audio_locale'] in config.get('preferred_audio_language').split(',') or config.get('download_all_available_audio'):
-                                token = get_account_token(item_service)
-                                headers['Authorization'] = f'Bearer {token}'
-                                ydl_opts['http_headers'] = headers
-                                ydl_opts['outtmpl'] = temp_file_path + f' - {version['audio_locale']}.%(ext)s.%(ext)s'
-
                                 try:
                                     mpd_url, stream_token, audio_locale, headers, versions, additional_subtitle_formats = crunchyroll_get_mpd_info(token, version['guid'])
                                     subtitle_formats += additional_subtitle_formats
@@ -517,6 +508,11 @@ class DownloadWorker(QObject):
                                 except Exception as e:
                                     logger.error(e)
                                     continue
+
+                                token = get_account_token(item_service)
+                                headers['Authorization'] = f'Bearer {token}'
+                                ydl_opts['http_headers'] = headers
+                                ydl_opts['outtmpl'] = temp_file_path + f' - {version['audio_locale']}.%(ext)s.%(ext)s'
 
                                 if self.gui:
                                     self.progress.emit(item, self.tr("Downloading Video"), 1)
@@ -556,19 +552,22 @@ class DownloadWorker(QObject):
                                 if not config.get('raw_media_download'):
                                     if self.gui:
                                         self.progress.emit(item, self.tr("Downloading Chapters"), 1)
-                                    chapter_data = requests.get(f'https://static.crunchyroll.com/skip-events/production/{version['guid']}.json').json()
                                     chapter_file = temp_file_path + f' - {version['audio_locale']}.txt'
-                                    with open(chapter_file, 'w', encoding='utf-8') as file:
-                                        file.write(';FFMETADATA1\n')
-                                        for entry in ['intro', 'credits']:
-                                            if chapter_data.get(entry):
-                                                file.write(f'[CHAPTER]\nTIMEBASE=1/1\nSTART={chapter_data[entry].get('start')}\nEND={chapter_data[entry].get('end')}\ntitle={entry.title()}\nlanguage={version['audio_locale']}\n')
-                                    video_files.append({
-                                        'path': chapter_file,
-                                        'type': 'chapter',
-                                        'format': 'txt',
-                                        'language': version['audio_locale']
-                                    })
+                                    if not os.path.exists(chapter_file):
+                                        resp = requests.get(f'https://static.crunchyroll.com/skip-events/production/{version['guid']}.json')
+                                        if resp.status_code == 200:
+                                            chapter_data = resp.json()
+                                            with open(chapter_file, 'w', encoding='utf-8') as file:
+                                                file.write(';FFMETADATA1\n')
+                                                for entry in ['intro', 'credits']:
+                                                    if chapter_data.get(entry):
+                                                        file.write(f'[CHAPTER]\nTIMEBASE=1/1\nSTART={chapter_data[entry].get('start')}\nEND={chapter_data[entry].get('end')}\ntitle={entry.title()}\nlanguage={version['audio_locale']}\n')
+                                            video_files.append({
+                                                'path': chapter_file,
+                                                'type': 'chapter',
+                                                'format': 'txt',
+                                                'language': version['audio_locale']
+                                            })
 
                         if self.gui:
                             self.progress.emit(item, self.tr("Decrypting"), 99)
@@ -722,7 +721,7 @@ class DownloadWorker(QObject):
                             os.rename(file['path'], final_path)
                             file['path'] = final_path
 
-                        if not config.get("raw_media_format"):
+                        if not config.get("raw_media_download"):
                             item['item_status'] = 'Converting'
                             if self.gui:
                                 self.progress.emit(item, self.tr("Converting"), 99)
@@ -730,7 +729,7 @@ class DownloadWorker(QObject):
                                 output_format = config.get("show_file_format")
                             elif item_type == "movie":
                                 output_format = config.get("movie_file_format")
-                            convert_video_format(file_path, output_format, video_files, item_metadata)
+                            convert_video_format(item, file_path, output_format, video_files, item_metadata)
                             item['file_path'] = file_path + '.' + output_format
                         else:
                             item['file_path'] = file_path + '.mp4'
