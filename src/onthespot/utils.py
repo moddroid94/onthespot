@@ -218,7 +218,7 @@ def convert_audio_format(filename, bitrate, default_format):
             command += [
                 #'-f', filetype.split('.')[1],
                 '-ac', '2',
-                '-ar', f'{config.get("file_hertz") if filetype != '.opus' else 48000}',
+                '-ar', f'{config.get("file_hertz") if filetype != ".opus" else 48000}',
                 '-b:a', bitrate
                 ]
 
@@ -263,21 +263,21 @@ def convert_video_format(item, output_path, output_format, video_files, item_met
             format_map += ['-map', f'{map_index}:{current_type[:1]}']
             if file.get('language'):
                 language = file.get('language')
-                format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'title={file.get('language')}']
-                format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'language={file.get('language')[:2]}']
+                format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'title={file.get("language")}']
+                format_map += [f'-metadata:s:{current_type[:1]}:{i}', f'language={file.get("language")[:2]}']
 
         i += 1
 
-    format_map += [f'-metadata', f'title={item_metadata.get('title')}']
-    #format_map += [f'-metadata', f'genre={item_metadata.get('genre')}']
-    format_map += [f'-metadata', f'copyright={item_metadata.get('copyright')}']
-    format_map += [f'-metadata', f'description={item_metadata.get('description')}']
-    #format_map += [f'-metadata', f'year={item_metadata.get('release_year')}']
+    format_map += [f'-metadata', f'title={item_metadata.get("title")}']
+    #format_map += [f'-metadata', f'genre={item_metadata.get("genre")}']
+    format_map += [f'-metadata', f'copyright={item_metadata.get("copyright")}']
+    format_map += [f'-metadata', f'description={item_metadata.get("description")}']
+    #format_map += [f'-metadata', f'year={item_metadata.get("release_year")}']
     # TV Show Specific Tags
     if item['item_type'] == 'episode':
-        format_map += [f'-metadata', f'show={item_metadata.get('show_name')}']
-        format_map += [f'-metadata', f'episode_id={item_metadata.get('episode_number')}']
-        format_map += [f'-metadata', f'tvsn={item_metadata.get('season_number')}']
+        format_map += [f'-metadata', f'show={item_metadata.get("show_name")}']
+        format_map += [f'-metadata', f'episode_id={item_metadata.get("episode_number")}']
+        format_map += [f'-metadata', f'tvsn={item_metadata.get("season_number")}']
 
     command += format_map
 

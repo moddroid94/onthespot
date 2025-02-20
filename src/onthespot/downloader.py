@@ -512,7 +512,7 @@ class DownloadWorker(QObject):
                                 token = get_account_token(item_service)
                                 headers['Authorization'] = f'Bearer {token}'
                                 ydl_opts['http_headers'] = headers
-                                ydl_opts['outtmpl'] = temp_file_path + f' - {version['audio_locale']}.%(ext)s.%(ext)s'
+                                ydl_opts['outtmpl'] = temp_file_path + f' - {version["audio_locale"]}.%(ext)s.%(ext)s'
 
                                 if self.gui:
                                     self.progress.emit(item, self.tr("Downloading Video"), 1)
@@ -552,16 +552,16 @@ class DownloadWorker(QObject):
                                 if not config.get('raw_media_download'):
                                     if self.gui:
                                         self.progress.emit(item, self.tr("Downloading Chapters"), 1)
-                                    chapter_file = temp_file_path + f' - {version['audio_locale']}.txt'
+                                    chapter_file = temp_file_path + f' - {version["audio_locale"]}.txt'
                                     if not os.path.exists(chapter_file):
-                                        resp = requests.get(f'https://static.crunchyroll.com/skip-events/production/{version['guid']}.json')
+                                        resp = requests.get(f'https://static.crunchyroll.com/skip-events/production/{version["guid"]}.json')
                                         if resp.status_code == 200:
                                             chapter_data = resp.json()
                                             with open(chapter_file, 'w', encoding='utf-8') as file:
                                                 file.write(';FFMETADATA1\n')
                                                 for entry in ['intro', 'credits']:
                                                     if chapter_data.get(entry):
-                                                        file.write(f'[CHAPTER]\nTIMEBASE=1/1\nSTART={chapter_data[entry].get('start')}\nEND={chapter_data[entry].get('end')}\ntitle={entry.title()}\nlanguage={version['audio_locale']}\n')
+                                                        file.write(f"[CHAPTER]\nTIMEBASE=1/1\nSTART={chapter_data[entry].get('start')}\nEND={chapter_data[entry].get('end')}\ntitle={entry.title()}\nlanguage={version['audio_locale']}\n")
                                             video_files.append({
                                                 'path': chapter_file,
                                                 'type': 'chapter',
@@ -613,7 +613,7 @@ class DownloadWorker(QObject):
                                     continue
                                 finished_sub_langs.append(lang)
                                 if lang in config.get('preferred_subtitle_language').split(',') or config.get('download_all_available_subtitles'):
-                                    subtitle_file = temp_file_path + f' - {lang}.{subtitle_format['extension']}'
+                                    subtitle_file = temp_file_path + f' - {lang}.{subtitle_format["extension"]}'
                                     if not os.path.exists(subtitle_file):
                                         subtitle_data = requests.get(subtitle_format['url']).text
                                         with open(subtitle_file, 'w', encoding='utf-8') as file:

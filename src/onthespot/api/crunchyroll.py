@@ -136,7 +136,7 @@ def crunchyroll_get_token(parsing_index):
         headers = {}
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
         if account_pool[parsing_index]['uuid'] == 'public_crunchyroll':
-            headers['Authorization'] = f'Basic {account_pool[parsing_index]['login']['refresh_token']}'
+            headers['Authorization'] = f"Basic {account_pool[parsing_index]['login']['refresh_token']}"
             headers['ETP-Anonymous-ID'] = str(uuid4())
 
             payload = {}
