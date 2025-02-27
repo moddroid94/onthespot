@@ -41,6 +41,7 @@ class Config:
             "debug_mode": False, # Application version
             "language_index": 0, # Language Index
             "m3u_format": "m3u8", # M3U file format
+            "use_double_digit_path_numbers": False, # Append a 0 to single digit path numbers, for instance 1 -> 01
             "ffmpeg_args": [], # Extra arguments for ffmpeg
 
             # Accounts
