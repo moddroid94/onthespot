@@ -142,7 +142,7 @@ class DownloadWorker(QObject):
                 if self.gui:
                     self.progress.emit(item, self.tr("Downloading"), 1)
 
-                token = get_account_token(item_service, rotate=True)
+                token = get_account_token(item_service, rotate=config.get("rotate_active_account_number"))
 
                 try:
                     item_metadata = globals()[f"{item_service}_get_{item_type}_metadata"](token, item_id)

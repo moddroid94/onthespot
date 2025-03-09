@@ -54,7 +54,7 @@ def get_account_token(item_service, rotate=False):
         return
     parsing_index = config.get('active_account_number')
     account_service = account_pool[parsing_index]['service']
-    if item_service == account_service and not config.get("rotate_active_account_number"):
+    if item_service == account_service and not rotate:
         return globals()[f"{item_service}_get_token"](parsing_index)
     else:
         for i in range(parsing_index + 1, parsing_index + len(account_pool) + 1):
