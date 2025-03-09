@@ -2,6 +2,7 @@ import os
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QSpinBox, QComboBox, QWidget
 from ..otsconfig import config
+from ..utils import format_bytes
 
 
 class NonScrollableSpinBox(QSpinBox):
@@ -15,6 +16,9 @@ class NonScrollableComboBox(QComboBox):
 
 
 def load_config(self):
+    self.version.setText(config.get("version"))
+    self.statistics.setText(self.tr("{0} / {1}").format(config.get('total_downloaded_items'), format_bytes(config.get('total_downloaded_data'))))
+
     # Dev Tools
     self.settings_scrollarea_value.valueChanged.connect(self.settings_scroll_area.verticalScrollBar().setValue)
     if not config.get('debug_mode'):
@@ -27,12 +31,11 @@ def load_config(self):
     # Icons
     self.toggle_theme_button.setIcon(self.get_icon('light'))
     self.export_logs.setIcon(self.get_icon('export_file'))
+    self.donate.setIcon(self.get_icon('filled_heart'))
 
     self.language.insertItem(0, self.get_icon('en_US'), "English")
     self.language.insertItem(1, self.get_icon('de_DE'), "Deutsch")
     self.language.insertItem(2, self.get_icon('pt_PT'), "Português")
-    self.language.insertItem(999, self.get_icon('pirate_flag'), "Contribute")
-    self.language.currentIndexChanged.connect(self.contribute)
 
     self.login_service.insertItem(0, "Audio")
     self.login_service.insertItem(1, self.get_icon('apple_music'), "Apple Music")

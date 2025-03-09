@@ -722,3 +722,12 @@ def strip_metadata(item):
         else:
             subprocess.check_call(command, shell=False)
         os.remove(temp_name)
+
+
+def format_bytes(size):
+    units = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
+    index = 0
+    while size >= 1024 and index < len(units) - 1:
+        size /= 1024
+        index += 1
+    return f"{size:.2f} {units[index]}"

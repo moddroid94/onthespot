@@ -388,7 +388,7 @@ class DownloadWorker(QObject):
                                 ydl_opts['format'] = 'bestaudio[ext=mp3]'
                         elif item_service == "youtube_music":
                             default_format = '.m4a'
-                            bitrate = "256k"
+                            bitrate = "128k"
                             ydl_opts['format'] = 'bestaudio[ext=m4a]'
                         ydl_opts['quiet'] = True
                         ydl_opts['no_warnings'] = True
@@ -738,7 +738,12 @@ class DownloadWorker(QObject):
                 logger.info("Item Successfully Downloaded")
                 if self.gui:
                     self.progress.emit(item, self.tr("Downloaded"), 100)
-
+                try:
+                    config.set('total_downloaded_data', config.get('total_downloaded_data') + os.path.getsize(item['file_path']))
+                    config.set('total_downloaded_items', config.get('total_downloaded_items') + 1)
+                    config.save()
+                except Exception:
+                    pass
                 time.sleep(config.get("download_delay"))
                 self.readd_item_to_download_queue(item)
                 continue

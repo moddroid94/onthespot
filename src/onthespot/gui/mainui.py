@@ -25,7 +25,7 @@ from ..runtimedata import account_pool, download_queue, download_queue_lock, get
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from .thumb_listitem import LabelWithThumb
-from ..utils import is_latest_release, open_item
+from ..utils import is_latest_release, open_item, format_bytes
 from ..search import get_search_results
 
 logger = get_logger('gui.main_ui')
@@ -81,13 +81,6 @@ class MainWindow(QMainWindow):
             self.hide()
 
 
-    # Remove Later
-    def contribute(self):
-        if self.language.currentIndex() == self.language.count() - 1:
-            url = "https://github.com/justin025/OnTheSpot/tree/main#contributing"
-            open_item(url)
-
-
     def __init__(self, _dialog, start_url=''):
         super(MainWindow, self).__init__()
         self.path = os.path.dirname(os.path.realpath(__file__))
@@ -98,8 +91,6 @@ class MainWindow(QMainWindow):
         self.centralwidget.setStyleSheet(config.get('theme'))
 
         self.start_url = start_url
-        self.version.setText(config.get("version"))
-        self.session_uuid.setText(config.session_uuid)
         logger.info(f"Initialising main window, logging session : {config.session_uuid}")
 
         # Fill the value from configs
@@ -215,8 +206,8 @@ class MainWindow(QMainWindow):
 
         self.settings_bookmark_accounts.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(0))
         self.settings_bookmark_general.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(328))
-        self.settings_bookmark_audio_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(1160))
-        self.settings_bookmark_audio_metadata.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(2000))
+        self.settings_bookmark_audio_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(1176))
+        self.settings_bookmark_audio_metadata.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(2019))
         self.settings_bookmark_video_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(9999))
 
         self.export_logs.clicked.connect(lambda: shutil.copy(
@@ -224,6 +215,7 @@ class MainWindow(QMainWindow):
             os.path.join(os.path.expanduser("~"), "Downloads", "onthespot.log")) and
             self.show_popup_dialog(self.tr("Logs exported to '{0}'").format(os.path.join(os.path.expanduser("~"), "Downloads", "onthespot.log") or True))
             )
+        self.donate.clicked.connect(lambda: open_item('https://justin025.github.io/about.html'))
 
 
     def set_table_props(self):
@@ -480,6 +472,7 @@ class MainWindow(QMainWindow):
 
 
     def update_item_in_download_list(self, item, status, progress):
+        self.statistics.setText(self.tr("{0} / {1}").format(config.get('total_downloaded_items'), format_bytes(config.get('total_downloaded_data'))))
         with download_queue_lock:
             item['gui']['status_label'].setText(status)
             item['gui']['progress_bar'].setValue(progress)
