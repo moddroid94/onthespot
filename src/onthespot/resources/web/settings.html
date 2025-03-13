@@ -32,7 +32,7 @@
                         <th class="hide-on-mobile">Account Type</th>
                         <th>Max Resolution</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="hide-on-mobile">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,7 +52,7 @@
                         <td class="hide-on-mobile">{{ account.account_type|capitalize }}</td>
                         <td>{{ account.bitrate }}</td>
                         <td>{{ account.status|capitalize }}</td>
-                        <td>
+                        <td class="hide-on-mobile">
                             <button value="{{ account.uuid }}" class="download-action-button" onclick="removeAccount(this.value)">
                                 <img src="/icons/trash.png" loading="lazy">
                             </button>
@@ -64,7 +64,7 @@
         </form>
 
         <div style="display: flex; align-items: center; margin-top: 20px;">
-            <select id="login_services" style="width: auto;" onchange="handleServiceChange()">
+            <select id="login_services" style="width: auto;" onchange="handleServiceChange()" class="hide-on-mobile">
                 <option value="">Audio:</option>
                 <option value="apple_music">Apple Music</option>
                 <option value="bandcamp">Bandcamp</option>
@@ -79,12 +79,12 @@
                 <option value="crunchyroll">Crunchyroll</option>
                 <option value="generic">Generic</option>
             </select>
-            <input type="text" id="login_username" placeholder="Enter your email">
-            <input type="text" id="login_password" placeholder="Enter your password">
-            <button id="login_button" type="button" onclick="addAccount()">Add Account</button>
-            <p id="login_notice"></p>
+            <input type="text" id="login_username" placeholder="Enter your email" class="hide-on-mobile">
+            <input type="text" id="login_password" placeholder="Enter your password" class="hide-on-mobile">
+            <button id="login_button" type="button" onclick="addAccount()" class="hide-on-mobile">Add Account</button>
+            <p id="login_notice" class="hide-on-mobile"></p>
         </div>
-        <br>
+        <br class="hide-on-mobile">
 
         <form id="settings-form">
 

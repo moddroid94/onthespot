@@ -27,11 +27,11 @@
             </div>
 
             <div style="display: flex; align-items: center;">
-                <button onclick="clearItems()">Clear Completed/Cancelled</button>
-                <button onclick="cancelItems()">Cancel All</button>
-                <button onclick="retryItems()">Retry Cancelled/Failed</button>
+                <button onclick="clearItems()" class="hide-on-mobile">Clear Completed/Cancelled</button>
+                <button onclick="cancelItems()" class="hide-on-mobile">Cancel All</button>
+                <button onclick="retryItems()" class="hide-on-mobile">Retry Cancelled/Failed</button>
                 <button class="hide-on-mobile" onclick="restartWorkers()" style="margin-left: 10px;">Restart Workers</button>
-                <button class="download-action-button"  onclick="toggleDownloadQueueFilters()">
+                <button class="download-action-button"  onclick="toggleDownloadQueueFilters()" class="hide-on-mobile">
                     <img id="download_queue_filters_icon" src="/icons/collapse_down.png" loading="lazy" style="width: 20px; height: 20px;">
                 </button>
             </div>
@@ -61,8 +61,8 @@
                     <th>Name</th>
                     <th class="hide-on-mobile">By</th>
                     <th>Service</th>
-                    <th class="hide-on-mobile">Status</th>
-                    <th>Progress</th>
+                    <th>Status</th>
+                    <th class="hide-on-mobile">Progress</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -178,6 +178,7 @@
                                 row.appendChild(cell4);
 
                                 const progressCell = document.createElement('td');
+                                progressCell.className = 'hide-on-mobile';
                                 const progressValue = item.progress || 0;
                                 progressCell.innerHTML = `
                                     <div style="width: 100%; background-color: #777777; border-radius: 5px; position: relative;">
