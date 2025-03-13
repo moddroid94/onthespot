@@ -30,14 +30,14 @@ function createButton(iconSrc, altText, onClickHandler, url = null) {
         return `
             <button class="download-action-button" onclick="${onClickHandler}">
                 <a href="${url}" onclick="event.preventDefault();">
-                    <img src="${iconSrc}" alt="${altText}">
+                    <img src="${iconSrc}" loading="lazy" alt="${altText}">
                 </a>
             </button>
         `;
     } else {
         return `
             <button class="download-action-button" onclick="${onClickHandler}">
-                <img src="${iconSrc}" alt="${altText}">
+                <img src="${iconSrc}" loading="lazy" alt="${altText}">
             </button>
         `;
     }

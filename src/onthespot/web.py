@@ -8,22 +8,23 @@ import sys
 import threading
 import time
 import traceback
-from flask import Flask, jsonify, render_template, redirect, request, send_file, url_for, flash
+from flask import Flask, jsonify, render_template, redirect, request, send_file, url_for, flash, Response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from .accounts import FillAccountPool, get_account_token
-from .api.apple_music import apple_music_get_track_metadata
+from .api.apple_music import apple_music_get_track_metadata, apple_music_add_account
 from .api.bandcamp import bandcamp_get_track_metadata
 from .api.deezer import deezer_get_track_metadata, deezer_add_account
-from .api.qobuz import qobuz_get_track_metadata
-from .api.soundcloud import soundcloud_get_track_metadata
+from .api.qobuz import qobuz_get_track_metadata, qobuz_add_account
+from .api.soundcloud import soundcloud_get_track_metadata, soundcloud_add_account
 from .api.spotify import MirrorSpotifyPlayback, spotify_new_session, spotify_get_track_metadata, spotify_get_podcast_episode_metadata
 from .api.tidal import tidal_get_track_metadata
-from .api.youtube_music import youtube_music_get_track_metadata
-from .api.crunchyroll import crunchyroll_get_episode_metadata
+from .api.youtube_music import youtube_music_get_track_metadata, youtube_music_add_account
+from .api.crunchyroll import crunchyroll_get_episode_metadata, crunchyroll_add_account
+from .api.generic import generic_add_account
 from .downloader import DownloadWorker, RetryWorker
 from .otsconfig import cache_dir, config_dir, config
 from .parse_item import parsingworker, parse_url
-from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock, download_workers, queue_workers
+from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock
 from .search import get_search_results
 
 logger = get_logger("web")
@@ -65,7 +66,8 @@ class QueueWorker(threading.Thread):
                                 'playlist_by': item.get('playlist_by'),
                                 'playlist_number': item.get('playlist_number'),
                                 'item_thumbnail': item_metadata["image_url"],
-                                'item_url': item_metadata["item_url"]
+                                'item_url': item_metadata["item_url"],
+                                'progress': 0
                             }
                 else:
                     time.sleep(0.2)
@@ -181,19 +183,35 @@ def search_results():
     return jsonify(results)
 
 
-@app.route('/api/clear_completed', methods=['POST'])
+@app.route('/api/clear_items', methods=['POST'])
 @login_required
 def clear_items():
     keys_to_delete = []
-
     for local_id, item in download_queue.items():
-        if item["item_status"] == "Downloaded" or \
-           item["item_status"] == "Already Exists" or \
-           item["item_status"] == "Cancelled" or \
-           item["item_status"] == "Deleted":
+        if item["item_status"] in ("Downloaded", "Already Exists", "Cancelled", "Unavailable", "Deleted"):
             keys_to_delete.append(local_id)
     for key in keys_to_delete:
         del download_queue[key]
+    return jsonify(success=True)
+
+
+@app.route('/api/cancel_items', methods=['POST'])
+@login_required
+def cancel_items():
+    for local_id, item in download_queue.items():
+        if item["item_status"] == "Waiting":
+            with download_queue_lock:
+                download_queue[local_id]['item_status'] = 'Cancelled'
+    return jsonify(success=True)
+
+
+@app.route('/api/retry_items', methods=['POST'])
+@login_required
+def retry_items():
+    for local_id, item in download_queue.items():
+        if item["item_status"] in ("Failed", "Cancelled"):
+            with download_queue_lock:
+                download_queue[local_id]['item_status'] = 'Waiting'
     return jsonify(success=True)
 
 
@@ -213,8 +231,7 @@ def restart():
 @login_required
 def get_items():
     with download_queue_lock:
-        return jsonify(download_queue)
-
+        return Response(json.dumps(download_queue), mimetype='application/json')
 
 @app.route('/api/cancel/<path:local_id>', methods=['POST'])
 @login_required
@@ -263,6 +280,46 @@ def update_settings():
     return jsonify(success=True)
 
 
+@app.route('/api/add_account', methods=['POST'])
+@login_required
+def add_account():
+    account = request.get_json()
+    if account['service'] == 'apple_music':
+        apple_music_add_account(account['password'])
+    elif account['service'] == "bandcamp":
+        bandcamp_add_account()
+    elif account['service'] == "deezer":
+        deezer_add_account(account['password'])
+    elif account['service'] == "qobuz":
+        qobuz_add_account(account['email'], account['password'])
+    elif account['service'] == "soundcloud":
+        soundcloud_add_account(account['password'])
+    elif account['service'] == "youtube_music":
+        youtube_music_add_account()
+    elif account['service'] == "crunchyroll":
+        crunchyroll_add_account(account['email'], account['password'])
+    elif account['service'] == "generic":
+        generic_add_account()
+    config.set('active_account_number', config.get('active_account_number') + 1)
+    config.save()
+    return jsonify(success=True)
+
+
+@app.route('/api/remove_account/<path:uuid>', methods=['DELETE'])
+@login_required
+def remove_account(uuid):
+    accounts = config.get('accounts').copy()
+    for i, account in enumerate(accounts):
+        if account['uuid'] == uuid:
+            account_number = i
+    del account_pool[account_number]
+    del accounts[account_number]
+    config.set('accounts', accounts)
+    config.set('active_account_number', 0)
+    config.save()
+    return jsonify(success=True)
+
+
 def main():
     config.migration()
     print(f'OnTheSpot Version: {config.get("version")}')
@@ -286,12 +343,10 @@ def main():
     for _ in range(config.get('maximum_queue_workers')):
         queue_worker = QueueWorker()
         queue_worker.start()
-        queue_workers.append(queue_worker)
 
     for _ in range(config.get('maximum_download_workers')):
         download_worker = DownloadWorker()
         download_worker.start()
-        download_workers.append(download_worker)
 
     if config.get('enable_retry_worker'):
         retryworker = RetryWorker()

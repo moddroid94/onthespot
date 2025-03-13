@@ -105,7 +105,6 @@ class DownloadWorker(QObject):
                 try:
                     if download_queue:
                         with download_queue_lock:
-
                             # Mark item as unavailable for other download workers
                             iterator = iter(download_queue)
                             while True:
@@ -233,6 +232,7 @@ class DownloadWorker(QObject):
                             item['item_status'] = 'Already Exists'
                             logger.info(f"File already exists, Skipping download for track by id '{item_id}'")
                             time.sleep(0.2)
+                            item['progress'] = 100
                             self.readd_item_to_download_queue(item)
                             break
 
@@ -658,6 +658,7 @@ class DownloadWorker(QObject):
                     continue
 
                 if item_service != 'generic':
+                    item['progress'] = 99
                     # Audio Formatting
                     if item_type in ('track', 'podcast_episode'):
                         # Lyrics
@@ -736,6 +737,7 @@ class DownloadWorker(QObject):
 
                 item['item_status'] = 'Downloaded'
                 logger.info("Item Successfully Downloaded")
+                item['progress'] = 100
                 if self.gui:
                     self.progress.emit(item, self.tr("Downloaded"), 100)
                 try:

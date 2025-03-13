@@ -31,9 +31,6 @@ parsing_lock = threading.Lock()
 pending_lock = threading.Lock()
 download_queue_lock = threading.Lock()
 
-queue_workers = []
-download_workers = []
-
 init_tray = False
 
 

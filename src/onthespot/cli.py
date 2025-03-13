@@ -218,8 +218,6 @@ class CLI(Cmd):
                     try:
                         apple_music_add_account(media_user_token)
                         print("\033[32mApple Music account added successfully. Please restart the app.\033[0m")
-                        config.set('active_account_number', config.get('active_account_number') + 1)
-                        config.save()
                     except Exception as e:
                         print(f"\033[31mError while adding Apple Music account: {e}\033[0m")
                 else:
@@ -231,8 +229,6 @@ class CLI(Cmd):
                 try:
                     bandcamp_add_account()
                     print("\033[32mBandcamp account added successfully. Please restart the app.\033[0m")
-                    config.set('active_account_number', config.get('active_account_number') + 1)
-                    config.save()
                 except Exception as e:
                     print(f"\033[31mError while adding Bandcamp account: {e}\033[0m")
             elif parts[1] == "crunchyroll":
@@ -245,8 +241,6 @@ class CLI(Cmd):
                     try:
                         crunchyroll_add_account(email, password)
                         print("\033[32mCrunchyroll account added successfully. Please restart the app.\033[0m")
-                        config.set('active_account_number', config.get('active_account_number') + 1)
-                        config.save()
                     except Exception as e:
                         print(f"\033[31mError while adding Crunchyroll account: {e}\033[0m")
                 else:
@@ -259,8 +253,6 @@ class CLI(Cmd):
                     try:
                         deezer_add_account(arl)
                         print("\033[32mDeezer account added successfully. Please restart the app.\033[0m")
-                        config.set('active_account_number', config.get('active_account_number') + 1)
-                        config.save()
                     except Exception as e:
                         print(f"\033[31mError while adding Deezer account: {e}\033[0m")
                 else:
@@ -271,8 +263,6 @@ class CLI(Cmd):
                 try:
                     generic_add_account()
                     print("\033[32mGeneric platform support added successfully. Please restart the app.\033[0m")
-                    config.set('active_account_number', config.get('active_account_number') + 1)
-                    config.save()
                 except Exception as e:
                     print(f"\033[31mError while adding Generic platform support: {e}\033[0m")
                 return
@@ -286,8 +276,6 @@ class CLI(Cmd):
                     try:
                         qobuz_add_account(email, password)
                         print("\033[32mQobuz account added successfully. Please restart the app.\033[0m")
-                        config.set('active_account_number', config.get('active_account_number') + 1)
-                        config.save()
                     except Exception as e:
                         print(f"\033[31mError while adding Qobuz account: {e}\033[0m")
                 else:
@@ -300,8 +288,6 @@ class CLI(Cmd):
                     try:
                         soundcloud_add_account(oauth_token)
                         print("\033[32mSoundCloud account added successfully. Please restart the app.\033[0m")
-                        config.set('active_account_number', config.get('active_account_number') + 1)
-                        config.save()
                     except Exception as e:
                         print(f"\033[31mError while adding SoundCloud account: {e}\033[0m")
                 else:
@@ -314,8 +300,6 @@ class CLI(Cmd):
                     session = spotify_new_session()
                     if session:
                         print("\033[32mAccount added, please restart the app.\n\033[0m")
-                        config.set('active_account_number', config.get('active_account_number') + 1)
-                        config.save()
                     else:
                         print("\033[31mAccount already exists.\033[0m")
 
@@ -333,8 +317,7 @@ class CLI(Cmd):
                         result = tidal_add_account_pt2(device_code)
                         if result:
                             print("\033[32mTidal account added successfully. Please restart the app.\033[0m")
-                            config.set('active_account_number', config.get('active_account_number') + 1)
-                            config.save()
+
                         else:
                             print("\033[31mFailed to add Tidal account.\033[0m")
                     except Exception as e:
@@ -349,13 +332,14 @@ class CLI(Cmd):
                 try:
                     youtube_music_add_account()
                     print("\033[32mYouTube Music public account added successfully. Please restart the app.\033[0m")
-                    config.set('active_account_number', config.get('active_account_number') + 1)
-                    config.save()
                 except Exception as e:
                     print(f"\033[31mError while adding YouTube Music account: {e}\033[0m")
                 return
             else:
                 print("\033[31mUnknown service.\033[0m")
+                return
+            config.set('active_account_number', config.get('active_account_number') + 1)
+            config.save()
             return
 
         if arg.startswith("select_account"):
