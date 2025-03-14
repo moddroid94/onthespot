@@ -30,6 +30,7 @@ def load_config(self):
 
     # Icons
     self.toggle_theme_button.setIcon(self.get_icon('light'))
+    self.clear_cache.setIcon(self.get_icon('trash'))
     self.export_logs.setIcon(self.get_icon('export_file'))
     self.donate.setIcon(self.get_icon('filled_heart'))
 

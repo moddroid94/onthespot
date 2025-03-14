@@ -210,6 +210,11 @@ class MainWindow(QMainWindow):
         self.settings_bookmark_audio_metadata.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(2019))
         self.settings_bookmark_video_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(9999))
 
+
+        self.clear_cache.clicked.connect(lambda: shutil.rmtree(
+            os.path.join(cache_dir(), "reqcache")) and
+            self.show_popup_dialog(self.tr("Cache Cleared"))
+            )
         self.export_logs.clicked.connect(lambda: shutil.copy(
             os.path.join(cache_dir(), "logs", config.session_uuid, "onthespot.log"),
             os.path.join(os.path.expanduser("~"), "Downloads", "onthespot.log")) and
@@ -251,7 +256,7 @@ class MainWindow(QMainWindow):
 
     def reset_app_config(self):
         config.reset()
-        self.show_popup_dialog("The application setting was cleared successfully !\n Please restart the application.")
+        self.show_popup_dialog(self.tr("The application setting was cleared successfully !\n Please restart the application."))
 
 
     def select_dir(self, output):

@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
+    <width>712</width>
     <height>527</height>
    </rect>
   </property>
@@ -717,7 +717,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>627</width>
+             <width>656</width>
              <height>4132</height>
             </rect>
            </property>
@@ -4710,6 +4710,13 @@
             </spacer>
            </item>
            <item>
+            <widget class="QPushButton" name="clear_cache">
+             <property name="text">
+              <string>Clear Cache</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="export_logs">
              <property name="text">
               <string>Export Logs</string>
@@ -4736,8 +4743,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>140</width>
-             <height>1353</height>
+             <width>670</width>
+             <height>405</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">

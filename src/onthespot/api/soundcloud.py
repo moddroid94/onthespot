@@ -114,7 +114,7 @@ def soundcloud_login_user(account):
         logger.error(f"Unknown Exception: {str(e)}")
         account_pool.append({
             "uuid": "public_soundcloud",
-            "username": username,
+            "username": 'N/A',
             "service": "soundcloud",
             "status": "error",
             "account_type": "N/A",
