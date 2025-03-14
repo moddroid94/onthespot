@@ -226,7 +226,7 @@ def tidal_get_track_metadata(token, item_id):
 
     # Track Number
     track_number = None
-    for i, track in enumerate(album_data.get('included', [])):
+    for i, track in enumerate(album_data.get('data', {}).get('relationships', {}).get('items', {}).get('data', [])):
         if track.get('id') == str(item_id):
             track_number = i + 1
             break
