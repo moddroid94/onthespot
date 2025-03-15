@@ -56,12 +56,12 @@ If you prefer to build OnTheSpot yourself, follow these steps.
 ## 3. Install Via Pip or Run The App From Source
 You can install the app via pip, ensure you have ffmpeg, python, and git installed in your path. Run the commands below to setup the environment:
 ```bash
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 ```
 Next you can download and run the app by installing via pip:
 ```bash
-python -m pip install git+https://github.com/justin025/onthespot
+python3 -m pip install git+https://github.com/justin025/onthespot --force
 
 onthespot-cli #cli
 onthespot-gui #gui
@@ -73,7 +73,7 @@ git clone https://github.com/justin025/onthespot
 
 cd onthespot/src
 
-python -m onthespot.cli #cli
-python -m onthespot.__init__ #gui
-python -m onthespot.web #web ui
+python3 -m onthespot.cli #cli
+python3 -m onthespot.__init__ #gui
+python3 -m onthespot.web #web ui
 ```

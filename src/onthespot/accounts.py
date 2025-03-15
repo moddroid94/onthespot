@@ -61,7 +61,7 @@ def get_account_token(item_service, rotate=False):
             index = i % len(account_pool)
             if item_service == account_pool[index]['service']:
                 if config.get("rotate_active_account_number"):
-                    logger.debug(f'Returning {account_pool[index]['service']} account number {index}: {account_pool[index]['uuid']}')
+                    logger.debug(f"Returning {account_pool[index]['service']} account number {index}: {account_pool[index]['uuid']}")
                     config.set('active_account_number', index)
                     config.save()
                 return globals()[f"{item_service}_get_token"](index)

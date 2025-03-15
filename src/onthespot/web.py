@@ -157,7 +157,7 @@ def settings():
 @app.route('/about')
 @login_required
 def about():
-    return render_template('about.html', version=config.get("version"), statistics=f'{config.get('total_downloaded_items')} / {format_bytes(config.get('total_downloaded_data'))}')
+    return render_template('about.html', version=config.get("version"), statistics=f"{config.get('total_downloaded_items')} / {format_bytes(config.get('total_downloaded_data'))}")
 
 
 @app.route('/api/search_results')
