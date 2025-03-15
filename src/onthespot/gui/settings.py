@@ -142,11 +142,11 @@ def load_config(self):
     self.enable_search_audiobooks.setChecked(config.get("enable_search_audiobooks"))
 
     # Download Queue Filter Settings
-    self.enable_show_waiting.setChecked(config.get("download_queue_show_waiting"))
-    self.enable_show_failed.setChecked(config.get("download_queue_show_failed"))
-    self.enable_show_cancelled.setChecked(config.get("download_queue_show_cancelled"))
-    self.enable_show_unavailable.setChecked(config.get("download_queue_show_unavailable"))
-    self.enable_show_completed.setChecked(config.get("download_queue_show_completed"))
+    self.download_queue_show_waiting.setChecked(config.get("download_queue_show_waiting"))
+    self.download_queue_show_failed.setChecked(config.get("download_queue_show_failed"))
+    self.download_queue_show_cancelled.setChecked(config.get("download_queue_show_cancelled"))
+    self.download_queue_show_unavailable.setChecked(config.get("download_queue_show_unavailable"))
+    self.download_queue_show_completed.setChecked(config.get("download_queue_show_completed"))
 
     # Audio Download Settings
     self.audio_download_path.setText(config.get("audio_download_path"))

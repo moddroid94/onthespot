@@ -80,7 +80,7 @@
 
         <div style="display: flex; align-items: center; margin-top: 20px;">
             <select id="login_services" style="width: auto;" onchange="handleServiceChange()" class="hide-on-mobile">
-                <option value="">Audio:</option>
+                <option value="" disabled>Audio:</option>
                 <option value="apple_music">Apple Music</option>
                 <option value="bandcamp">Bandcamp</option>
                 <option value="deezer">Deezer</option>
@@ -89,8 +89,8 @@
                 <option value="spotify">Spotify</option>
                 <option value="tidal">Tidal</option>
                 <option value="youtube_music">Youtube Music</option>
-                <option value=""></option>
-                <option value="">Video:</option>
+                <option value="" disabled></option>
+                <option value="" disabled>Video:</option>
                 <option value="crunchyroll">Crunchyroll</option>
                 <option value="generic">Generic</option>
             </select>
@@ -1021,12 +1021,14 @@
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'block';
                     loginPassword.placeholder = 'Enter your user-media-token';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Account'
                     loginNotice.style.display = 'none';
                 }
                 else if (loginServices.value === 'bandcamp') {
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'none';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Public Bandcamp Account'
                     loginNotice.style.display = 'none';
                 }
@@ -1034,6 +1036,7 @@
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'block';
                     loginPassword.placeholder = 'Enter your arl';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Account'
                     loginNotice.style.display = 'none';
                 }
@@ -1042,6 +1045,7 @@
                     loginUsername.placeholder = 'Enter your email';
                     loginPassword.style.display = 'block';
                     loginPassword.placeholder = 'Enter your password';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Account'
                     loginNotice.style.display = 'none';
                 }
@@ -1049,6 +1053,7 @@
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'block';
                     loginPassword.placeholder = 'Enter your oauth-token';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Account'
                     loginNotice.style.display = 'none';
                 }
@@ -1056,17 +1061,20 @@
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'none';
                     loginButton.style.display = 'none'
+                    loginNotice.style.display = 'block';
                     loginNotice.textContent = 'Logins for this service are not currently supported, please login through the desktop app and modify your config accordingly.';
                 }
                 else if (loginServices.value === 'tidal') {
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'none';
                     loginButton.style.display = 'none'
-                    loginNotice.textContent = 'Logins for this service are not currently supported, please login through the desktop app and copy modify your config accordingly.';
+                    loginNotice.style.display = 'block';
+                    loginNotice.textContent = 'Logins for this service are not currently supported, please login through the desktop app and modify your config accordingly.';
                 }
                 else if (loginServices.value === 'youtube_music') {
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'none';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Public Youtube Music Account'
                     loginNotice.style.display = 'none';
                 }
@@ -1075,14 +1083,22 @@
                     loginUsername.placeholder = 'Enter your email';
                     loginPassword.style.display = 'block';
                     loginPassword.placeholder = 'Enter your password';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Account'
                     loginNotice.style.display = 'none';
                 }
                 else if (loginServices.value === 'generic') {
                     loginUsername.style.display = 'none';
                     loginPassword.style.display = 'none';
+                    loginButton.style.display = 'block'
                     loginButton.textContent = 'Add Generic Account'
                     loginNotice.style.display = 'none';
+                }
+                else {
+                    loginUsername.style.display = 'none';
+                    loginPassword.style.display = 'none';
+                    loginButton.style.display = 'none'
+                    loginNotice.style.display = 'none'
                 }
             }
 
