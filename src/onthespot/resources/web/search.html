@@ -21,10 +21,48 @@
 
         <br>
 
-        <form onsubmit="submitSearch(event)">
-            <input style="margin-right: 0px;" type="text" id="search-bar" name="q" placeholder="Search by name">
-            <button type="submit">Search</button>
-        </form>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center;">
+                <form onsubmit="submitSearch(event)">
+                    <input style="margin-right: 0px;" type="text" id="search-bar" name="q" placeholder="Search by name">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
+            <div style="display: flex; align-items: center;">
+                <button class="download-action-button"  onclick="toggleVisibility()" class="hide-on-mobile">
+                    <img id="collapse_button_icon" src="/icons/collapse_down.png" loading="lazy" style="width: 20px; height: 20px;">
+                </button>
+            </div>
+        </div>
+
+        <div id="toggle_visibility" style="display: none;  margin-top: 20px; margin-bottom: 15px;">
+            <hr style="border: 1px solid #fff; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center;">
+                    <p style="margin-right: 5px; margin-left: 15px;">Search For:</p>
+                    <label style="margin-right: 5px; margin-left: 15px;" for="enable_search_tracks">Tracks</label>
+                    <input type="checkbox" id="enable_search_tracks" {% if config.enable_search_tracks %}checked{% endif %}>
+                    <label style="margin-right: 5px; margin-left: 15px;" for="enable_search_albums">Albums</label>
+                    <input type="checkbox" id="enable_search_albums" {% if config.enable_search_albums %}checked{% endif %}>
+                    <label style="margin-right: 5px; margin-left: 15px;" for="enable_search_playlists">Playlists</label>
+                    <input type="checkbox" id="enable_search_playlists" {% if config.enable_search_playlists %}checked{% endif %}>
+                    <label style="margin-right: 5px; margin-left: 15px;" for="enable_search_artists">Artists</label>
+                    <input type="checkbox" id="enable_search_artists" {% if config.enable_search_artists %}checked{% endif %}>
+                    <label style="margin-right: 5px; margin-left: 15px;" for="enable_search_episodes">Episodes</label>
+                    <input type="checkbox" id="enable_search_episodes" {% if config.enable_search_episodes %}checked{% endif %}>
+                    <label style="margin-right: 5px; margin-left: 15px;" for="enable_search_podcasts">Podcasts</label>
+                    <input type="checkbox" id="enable_search_podcasts" {% if config.enable_search_podcasts %}checked{% endif %}>
+                    <label style="margin-right: 5px; margin-left: 15px;" for="enable_search_audiobooks">Audiobooks</label>
+                    <input type="checkbox" id="enable_search_audiobooks" {% if config.enable_search_audiobooks %}checked{% endif %}>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <button class="download-action-button"  onclick="updateSettings(returnSearchFilters())">
+                        <img src="/icons/save.png" loading="lazy" style="width: 20px; height: 20px;">
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <br>
 
@@ -47,6 +85,19 @@
         </table>
 
         <script>
+            function returnSearchFilters() {
+                const filterData = {
+                    enable_search_tracks: document.getElementById('enable_search_tracks').checked,
+                    enable_search_albums: document.getElementById('enable_search_albums').checked,
+                    enable_search_artists: document.getElementById('enable_search_artists').checked,
+                    enable_search_playlists: document.getElementById('enable_search_playlists').checked,
+                    enable_search_episodes: document.getElementById('enable_search_episodes').checked,
+                    enable_search_podcasts: document.getElementById('enable_search_podcasts').checked,
+                    enable_search_audiobooks: document.getElementById('enable_search_audiobooks').checked,
+                    }
+                return filterData
+                }
+
             function submitSearch(event) {
                 event.preventDefault();
                 const query = document.getElementById('search-bar').value;

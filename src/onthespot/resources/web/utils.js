@@ -42,3 +42,38 @@ function createButton(iconSrc, altText, onClickHandler, url = null) {
         `;
     }
 }
+
+function updateSettings(data) {
+    fetch('/api/update_settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+function toggleVisibility() {
+    const div = document.getElementById('toggle_visibility');
+    const img = document.getElementById('collapse_button_icon');
+    // Check current display style and toggle
+    if (div.style.display === 'none' || div.style.display === '') {
+        div.style.display = 'block'; // Show the div
+        img.src = '/icons/collapse_up.png'
+    } else {
+        div.style.display = 'none'; // Hide the div
+        img.src = '/icons/collapse_down.png'
+    }
+}

@@ -20,8 +20,23 @@
         </div>
 
         <br>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center;">
+                <h2>Account Pool</h2>
+            </div>
 
-        <h2>Account Pool</h2>
+            <div style="display: flex; align-items: center;">
+                {% if config.use_webui_login%}
+                <button class="download-action-button"  onclick="window.location.href='/api/logout';">
+                    <img src="/icons/leave.png" loading="lazy" style="width: 20px; height: 20px;">
+                </button>
+                {% endif %}
+                <button class="download-action-button"  onclick="updateSettings(returnSettingsData())">
+                    <img src="/icons/save.png" loading="lazy" style="width: 20px; height: 20px;">
+                </button>
+            </div>
+        </div>
+
         <form>
             <table>
                 <thead>
@@ -40,7 +55,7 @@
                     <tr>
                         <td style="width: 10px">
                             <label>
-                                <input type="radio" name="active_account_number" value="{{ loop.index - 1 }}" onclick="updateSettings()"
+                                <input type="radio" name="active_account_number" value="{{ loop.index - 1 }}" onclick="updateSettings(returnSettingsData())"
                                 {% if loop.index - 1 == config.active_account_number %} checked {% endif %}>
                             </label>
                         </td>
@@ -301,67 +316,6 @@
                     </td>
                     <td>
                         <input type="number" id="retry_worker_delay" value="{{ config.retry_worker_delay }}" placeholder="Enter retry delay">
-                    </td>
-                </tr>
-            </table>
-
-            <h2>Search Settings</h2>
-
-            <table>
-                <tr>
-                    <td style="width: 50%;">
-                        <label for="enable_search_tracks">Enable Search for Tracks:</label>
-                    </td>
-                    <td style="width: 50%;">
-                        <input type="checkbox" class="sliding_button" id="enable_search_tracks" {% if config.enable_search_tracks %}checked{% endif %}>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="enable_search_albums">Enable Search for Albums:</label>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="sliding_button" id="enable_search_albums" {% if config.enable_search_albums %}checked{% endif %}>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="enable_search_playlists">Enable Search for Playlists:</label>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="sliding_button" id="enable_search_playlists" {% if config.enable_search_playlists %}checked{% endif %}>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="enable_search_artists">Enable Search for Artists:</label>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="sliding_button" id="enable_search_artists" {% if config.enable_search_artists %}checked{% endif %}>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="enable_search_episodes">Enable Search for Episodes:</label>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="sliding_button" id="enable_search_episodes" {% if config.enable_search_episodes %}checked{% endif %}>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="enable_search_podcasts">Enable Search for Podcasts:</label>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="sliding_button" id="enable_search_podcasts" {% if config.enable_search_podcasts %}checked{% endif %}>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="enable_search_audiobooks">Enable Search for Audiobooks:</label>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="sliding_button" id="enable_search_audiobooks" {% if config.enable_search_audiobooks %}checked{% endif %}>
                     </td>
                 </tr>
             </table>
@@ -939,16 +893,15 @@
                     </td>
                 </tr>
             </table>
-            <button type="button" onclick="updateSettings()">Save Settings</button>
         </form>
 
         <script>
-            function updateSettings() {
-                console.log('Success:');
+            function returnSettingsData() {
                 const activeAccountNumber = document.querySelector('input[name="active_account_number"]:checked')
                     ? document.querySelector('input[name="active_account_number"]:checked').value
                     : '';
-                const data = {
+
+                const settingsData = {
                     // Account Settings
                     active_account_number: activeAccountNumber,
                     // Web UI Settings
@@ -979,14 +932,6 @@
                     maximum_download_workers: document.getElementById('maximum_download_workers').value,
                     enable_retry_worker: document.getElementById('enable_retry_worker').checked,
                     retry_worker_delay: document.getElementById('retry_worker_delay').value,
-                    // Search Settings
-                    enable_search_tracks: document.getElementById('enable_search_tracks').checked,
-                    enable_search_albums: document.getElementById('enable_search_albums').checked,
-                    enable_search_playlists: document.getElementById('enable_search_playlists').checked,
-                    enable_search_artists: document.getElementById('enable_search_artists').checked,
-                    enable_search_episodes: document.getElementById('enable_search_episodes').checked,
-                    enable_search_podcasts: document.getElementById('enable_search_podcasts').checked,
-                    enable_search_audiobooks: document.getElementById('enable_search_audiobooks').checked,
                     // Audio Download Settings
                     audio_download_path: document.getElementById('audio_download_path').value,
                     track_file_format: document.getElementById('track_file_format').value,
@@ -1061,26 +1006,7 @@
                     download_all_available_audio: document.getElementById('download_all_available_audio').checked,
                     download_all_available_subtitles: document.getElementById('download_all_available_subtitles').checked,
                 };
-
-                fetch('/api/update_settings', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Success:', data);
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
+                return settingsData
             }
 
             function handleServiceChange() {

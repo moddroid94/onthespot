@@ -211,8 +211,9 @@ class MainWindow(QMainWindow):
         self.settings_bookmark_video_downloads.clicked.connect(lambda: self.settings_scroll_area.verticalScrollBar().setValue(9999))
 
 
-        self.clear_cache.clicked.connect(lambda: shutil.rmtree(
-            os.path.join(cache_dir(), "reqcache")) and
+        self.clear_cache.clicked.connect(lambda:
+            shutil.rmtree(os.path.join(cache_dir(), "reqcache")) and
+            shutil.rmtree(os.path.join(cache_dir(), "logs")) and
             self.show_popup_dialog(self.tr("Cache Cleared"))
             )
         self.export_logs.clicked.connect(lambda: shutil.copy(

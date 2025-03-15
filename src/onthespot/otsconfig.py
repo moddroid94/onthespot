@@ -125,6 +125,13 @@ class Config:
             "enable_search_podcasts": True, # Enable listed category in search
             "enable_search_audiobooks": True, # Enable listed category in search
 
+            # Download Queue Filter Settings
+            "download_queue_show_waiting": True, # Enable listed filter in download queue
+            "download_queue_show_failed": True, # Enable listed filter in download queue
+            "download_queue_show_cancelled": True, # Enable listed filter in download queue
+            "download_queue_show_unavailable": True, # Enable listed filter in download queue
+            "download_queue_show_completed": True, # Enable listed filter in download queue
+
             # Audio Download Settings
             "audio_download_path": os.path.join(os.path.expanduser("~"), "Music", "OnTheSpot"), # Root dir for audio downloads
             "track_file_format": "mp3", # Song track media format

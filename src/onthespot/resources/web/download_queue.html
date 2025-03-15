@@ -20,10 +20,9 @@
         </div>
 
         <br>
-        <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
             <div style="display: flex; align-items: center;">
                 <p id="queue-status-message" style="margin-right: 10px;">Total Items: 0 | Progress: 0%</p>
-
             </div>
 
             <div style="display: flex; align-items: center;">
@@ -31,24 +30,33 @@
                 <button onclick="cancelItems()" class="hide-on-mobile">Cancel All</button>
                 <button onclick="retryItems()" class="hide-on-mobile">Retry Cancelled/Failed</button>
                 <button class="hide-on-mobile" onclick="restartWorkers()" style="margin-left: 10px;">Restart Workers</button>
-                <button class="download-action-button"  onclick="toggleDownloadQueueFilters()" class="hide-on-mobile">
-                    <img id="download_queue_filters_icon" src="/icons/collapse_down.png" loading="lazy" style="width: 20px; height: 20px;">
+                <button class="download-action-button"  onclick="toggleVisibility()" class="hide-on-mobile">
+                    <img id="collapse_button_icon" src="/icons/collapse_down.png" loading="lazy" style="width: 20px; height: 20px;">
                 </button>
             </div>
         </div>
 
-        <div id="download_queue_filters" style="display: none;  margin-top: 20px;">
+        <div id="toggle_visibility" style="display: none;  margin-top: 20px; margin-bottom: 15px;">
             <hr style="border: 1px solid #fff; margin-bottom: 20px;">
-            <label for="show_completed" style="margin-right: 5px; margin-left: 15px;">Show Completed:</label>
-            <input type="checkbox" id="show_completed" checked>
-            <label for="show_cancelled" style="margin-right: 5px; margin-left: 15px;">Show Cancelled:</label>
-            <input type="checkbox" id="show_cancelled" checked>
-            <label for="show_failed" style="margin-right: 5px; margin-left: 15px;">Show Failed:</label>
-            <input type="checkbox" id="show_failed" checked>
-            <label for="show_unavailable" style="margin-right: 5px; margin-left: 15px;">Show Unavailable:</label>
-            <input type="checkbox" id="show_unavailable" checked>
-            <label for="show_waiting" style="margin-right: 5px; margin-left: 15px;">Show Waiting:</label>
-            <input style="margin-bottom: 20px;" type="checkbox" id="show_waiting" checked>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center;">
+                    <label for="download_queue_show_waiting" style="margin-right: 5px; margin-left: 15px;">Show Waiting:</label>
+                    <input type="checkbox" id="download_queue_show_waiting" {% if config.download_queue_show_waiting %}checked{% endif %}>
+                    <label for="download_queue_show_failed" style="margin-right: 5px; margin-left: 15px;">Show Failed:</label>
+                    <input type="checkbox" id="download_queue_show_failed" {% if config.download_queue_show_failed %}checked{% endif %}>
+                    <label for="download_queue_show_cancelled" style="margin-right: 5px; margin-left: 15px;">Show Cancelled:</label>
+                    <input type="checkbox" id="download_queue_show_cancelled" {% if config.download_queue_show_cancelled %}checked{% endif %}>
+                    <label for="download_queue_show_unavailable" style="margin-right: 5px; margin-left: 15px;">Show Unavailable:</label>
+                    <input type="checkbox" id="download_queue_show_unavailable" {% if config.download_queue_show_unavailable %}checked{% endif %}>
+                    <label for="download_queue_show_completed" style="margin-right: 5px; margin-left: 15px;">Show Completed:</label>
+                    <input type="checkbox" id="download_queue_show_completed" {% if config.download_queue_show_completed %}checked{% endif %}>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <button class="download-action-button"  onclick="updateSettings(returnFilterData())" class="hide-on-mobile">
+                        <img src="/icons/save.png" loading="lazy" style="width: 20px; height: 20px;">
+                    </button>
+                </div>
+            </div>
         </div>
 
         <table>
@@ -73,6 +81,17 @@
 
         <script>
             const config = {{ config | tojson | safe }};
+            function returnFilterData() {
+                const filterData = {
+                    download_queue_show_waiting: document.getElementById('download_queue_show_waiting').checked,
+                    download_queue_show_completed: document.getElementById('download_queue_show_completed').checked,
+                    download_queue_show_cancelled: document.getElementById('download_queue_show_cancelled').checked,
+                    download_queue_show_failed: document.getElementById('download_queue_show_failed').checked,
+                    download_queue_show_unavailable: document.getElementById('download_queue_show_unavailable').checked,
+                    }
+                return filterData
+                }
+
 
             function fetchItems() {
                 fetch('/api/download_queue')
@@ -80,62 +99,39 @@
                         return response.json();
                     })
                     .then(data => {
+                        let totalCount = 0;
+                        let completedCount = 0;
+                        const isWaitingChecked = document.getElementById('download_queue_show_waiting').checked;
+                        const isCompletedChecked = document.getElementById('download_queue_show_completed').checked;
+                        const isCancelledChecked = document.getElementById('download_queue_show_cancelled').checked;
+                        const isFailedChecked = document.getElementById('download_queue_show_failed').checked;
+                        const isUnavailableChecked = document.getElementById('download_queue_show_unavailable').checked;
+                        // Update Table
                         const tableBody = document.getElementById('download-queue-table');
                         tableBody.innerHTML = '';
-
                         for (const key in data) {
                             if (data.hasOwnProperty(key)) {
                                 const item = data[key];
-                                // Table Filters
-                                if (!document.getElementById('show_completed').checked &&
-                                    (item.item_status === 'Downloaded' || item.item_status === 'Already Exists')) {
-                                    continue;
+                                // Count For Progress Header
+                                totalCount++;
+                                if (['Downloaded', 'Already Exists', 'Cancelled'].includes(item.item_status)) {
+                                    completedCount++;
                                 }
-                                if (!document.getElementById('show_cancelled').checked &&
-                                    (item.item_status === 'Cancelled')) {
+
+                                // Check if item is filtered
+                                if (!isWaitingChecked && item.item_status === 'Waiting') {
                                     continue;
-                                }
-                                if (!document.getElementById('show_failed').checked &&
-                                    (item.item_status === 'Failed')) {
+                                } else if (!isCompletedChecked && (item.item_status === 'Downloaded' || item.item_status === 'Already Exists')) {
                                     continue;
-                                }
-                                if (!document.getElementById('show_unavailable').checked &&
-                                    (item.item_status === 'Unavailable')) {
+                                } else if (!isCancelledChecked && item.item_status === 'Cancelled') {
                                     continue;
-                                }
-                                if (!document.getElementById('show_waiting').checked &&
-                                    (item.item_status === 'Waiting')) {
+                                } else if (!isFailedChecked && item.item_status === 'Failed') {
+                                    continue;
+                                } else if (!isUnavailableChecked && item.item_status === 'Unavailable') {
                                     continue;
                                 }
 
                                 // Fill Table
-                                let copyButton = '';
-                                let cancelButton = '';
-                                let retryButton = '';
-                                let downloadButton = '';
-                                let deleteButton = '';
-
-                                if (config.download_copy_btn) {
-                                    copyButton = createButton('icons/link.png', 'Copy Link', `copyToClipboard('${item.item_url}')`, `${item.item_url}`);
-                                }
-
-                                if (!['Failed', 'Cancelled', 'Deleted', 'Already Exists', 'Downloaded'].includes(item.item_status)) {
-                                    cancelButton = createButton('icons/stop.png', 'Stop Download', `handleCancel('${item.local_id}')`);
-                                }
-
-                                if (['Failed', 'Cancelled', 'Deleted'].includes(item.item_status)) {
-                                    retryButton = createButton('icons/retry.png', 'Retry Download', `handleRetry('${item.local_id}')`);
-                                }
-
-                                if (['Downloaded', 'Already Exists'].includes(item.item_status)) {
-                                    if (config.download_open_btn) {
-                                        downloadButton = createButton('icons/file.png', 'Open File', `window.location.href='/api/download/${item.local_id}'`, `/api/download/${item.local_id}`);
-                                    }
-                                    if (config.download_delete_btn) {
-                                        deleteButton = createButton('icons/trash.png', 'Delete File', `handleDelete('${item.local_id}')`);
-                                    }
-                                }
-
                                 const row = document.createElement('tr');
 
                                 const cell0 = document.createElement('td');
@@ -189,6 +185,29 @@
                                 `;
                                 row.appendChild(progressCell);
 
+
+                                let copyButton = '';
+                                let cancelButton = '';
+                                let retryButton = '';
+                                let downloadButton = '';
+                                let deleteButton = '';
+                                if (config.download_copy_btn) {
+                                    copyButton = createButton('icons/link.png', 'Copy Link', `copyToClipboard('${item.item_url}')`, `${item.item_url}`);
+                                }
+                                if (!['Failed', 'Cancelled', 'Deleted', 'Already Exists', 'Downloaded'].includes(item.item_status)) {
+                                    cancelButton = createButton('icons/stop.png', 'Stop Download', `handleCancel('${item.local_id}')`);
+                                }
+                                if (['Failed', 'Cancelled', 'Deleted'].includes(item.item_status)) {
+                                    retryButton = createButton('icons/retry.png', 'Retry Download', `handleRetry('${item.local_id}')`);
+                                }
+                                if (['Downloaded', 'Already Exists'].includes(item.item_status)) {
+                                    if (config.download_open_btn) {
+                                        downloadButton = createButton('icons/file.png', 'Open File', `window.location.href='/api/download/${item.local_id}'`, `/api/download/${item.local_id}`);
+                                    }
+                                    if (config.download_delete_btn) {
+                                        deleteButton = createButton('icons/trash.png', 'Delete File', `handleDelete('${item.local_id}')`);
+                                    }
+                                }
                                 const cell5 = document.createElement('td');
                                 cell5.innerHTML = `${copyButton}${cancelButton}${retryButton}${downloadButton}${deleteButton}`;
                                 row.appendChild(cell5);
@@ -196,35 +215,12 @@
                                 tableBody.appendChild(row);
                                 }
                             }
+                        // Update Progress Header
+                        const percentComplete = totalCount > 0 ? ((completedCount / totalCount) * 100).toFixed(2) : 0;
+                        document.getElementById('queue-status-message').textContent = `Total Items: ${completedCount}/${totalCount} | Progress: ${percentComplete}%`;
                         })
-                        updateStatusMessage();
-                    }
-
-            function updateStatusMessage() {
-                const tableBody = document.getElementById('download-queue-table');
-                let completedCount = 0;
-                let totalCount = 0
-
-                for (let row of tableBody.rows) {
-
-                    {% if config.show_download_thumbnails %}
-                    const statusCell = row.cells[5];
-                    {% else %}
-                    const statusCell = row.cells[4];
-                    {% endif %}
-
-                    if (statusCell) {
-                        totalCount++;
-                        const statusText = statusCell.textContent.trim();
-                        if (['Downloaded', 'Already Exists', 'Cancelled'].includes(statusText)) {
-                            completedCount++;
-                        }
-                    }
                 }
 
-                const percentComplete = totalCount > 0 ? ((completedCount / totalCount) * 100).toFixed(2) : 0;
-                document.getElementById('queue-status-message').textContent = `Total Items: ${completedCount}/${totalCount} | Progress: ${percentComplete}%`;
-            }
 
             function clearItems() {
                 fetch('/api/clear_items', {
@@ -317,19 +313,6 @@
                     }
                 })
                 .catch(error => console.error('Error:', error));
-            }
-
-            function toggleDownloadQueueFilters() {
-                const div = document.getElementById('download_queue_filters');
-                const btn = document.getElementById('download_queue_filters_icon');
-                // Check current display style and toggle
-                if (div.style.display === 'none' || div.style.display === '') {
-                    div.style.display = 'block'; // Show the div
-                    btn.src = '/icons/collapse_up.png'
-                } else {
-                    div.style.display = 'none'; // Hide the div
-                    btn.src = '/icons/collapse_down.png'
-                }
             }
 
             window.onload = fetchItems;

@@ -3,6 +3,7 @@ import os
 os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 import threading
@@ -26,6 +27,7 @@ from .otsconfig import cache_dir, config_dir, config
 from .parse_item import parsingworker, parse_url
 from .runtimedata import get_logger, account_pool, pending, download_queue, download_queue_lock, pending_lock
 from .search import get_search_results
+from .utils import format_bytes
 
 logger = get_logger("web")
 os.environ['FLASK_ENV'] = 'production'
@@ -155,7 +157,7 @@ def settings():
 @app.route('/about')
 @login_required
 def about():
-    return render_template('about.html')
+    return render_template('about.html', version=config.get("version"), statistics=f'{config.get('total_downloaded_items')} / {format_bytes(config.get('total_downloaded_data'))}')
 
 
 @app.route('/api/search_results')
@@ -250,8 +252,10 @@ def retry_item(local_id):
 @app.route('/api/download/<path:local_id>')
 @login_required
 def download_media(local_id):
-    return send_file(download_queue[local_id]['file_path'], as_attachment=True)
-
+    if local_id != 'logs':
+        return send_file(download_queue[local_id]['file_path'], as_attachment=True)
+    else:
+        return send_file(os.path.join(cache_dir(), "logs", config.session_uuid, "onthespot.log"), as_attachment=True)
 
 @app.route('/api/parse_url/<path:url>', methods=['POST'])
 @login_required
@@ -317,6 +321,14 @@ def remove_account(uuid):
     config.set('accounts', accounts)
     config.set('active_account_number', 0)
     config.save()
+    return jsonify(success=True)
+
+
+@app.route('/api/clear_cache', methods=['DELETE'])
+@login_required
+def clear_cache():
+    shutil.rmtree(os.path.join(cache_dir(), "reqcache"))
+    shutil.rmtree(os.path.join(cache_dir(), "logs"))
     return jsonify(success=True)
 
 
