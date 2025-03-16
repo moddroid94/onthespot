@@ -37,7 +37,7 @@ class Config:
         self.session_uuid = str(uuid.uuid4())
         self.__template_data = {
             # System Variables
-            "version": "v1.0.7", # Application version
+            "version": "v1.1.0", # Application version
             "debug_mode": False, # Enable debug mode
             "language_index": 0, # Language Index
             "total_downloaded_items": 0, # Total downloaded items
@@ -203,6 +203,7 @@ class Config:
             "show_path_formatter": "Shows" + os.path.sep + "{show_name}" + os.path.sep + "Season {season_number}" + os.path.sep + "{episode_number}. {name}", # Show path format string
             "preferred_video_resolution": 1080, # Maximum video resolution for Generic Downloader
             "download_subtitles": False, # Download Subtitles
+            "download_chapters": False, # Download Chapters
             "preferred_audio_language": "en-US",
             "preferred_subtitle_language": "en-US",
             "download_all_available_audio": False,
@@ -340,7 +341,7 @@ class Config:
             self.set('accounts', cfg_copy)
 
             # Migration (>v1.0.7)
-            if int(self.get('version').replace('v', '').replace('.', '')) < 108:
+            if int(self.get('version').replace('v', '').replace('.', '')) < 110:
                 updated_keys = [
                     ('active_account_number', 'parsing_acc_sn'),
                     ('thumbnail_size', 'search_thumb_height'),

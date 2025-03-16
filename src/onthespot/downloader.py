@@ -549,7 +549,7 @@ class DownloadWorker(QObject):
                                 crunchyroll_close_stream(token, item_id, stream_token)
 
                                 # Download Chapters
-                                if not config.get('raw_media_download'):
+                                if not config.get('raw_media_download') and config.get('download_chapters'):
                                     if self.gui:
                                         self.progress.emit(item, self.tr("Downloading Chapters"), 1)
                                     chapter_file = temp_file_path + f' - {version["audio_locale"]}.txt'
