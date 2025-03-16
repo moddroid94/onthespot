@@ -175,25 +175,16 @@ def apple_music_get_track_metadata(session, item_id):
     params = {}
     params['include'] = 'lyrics'
     track_data = make_call(f'{BASE_URL}/catalog/{session.cookies.get("itua")}/songs/{item_id}', params=params, session=session)
-    album_id = track_data.get('data', [])[0].get('relationships', {}).get('albums', {}).get('data', [])[0].get('id', {})
-    album_data = make_call(f'{BASE_URL}/catalog/{session.cookies.get("itua")}/albums/{album_id}', session=session)
+    try:
+        album_id = track_data.get('data', [])[0].get('relationships', {}).get('albums', {}).get('data', [])[0].get('id', {})
+        album_data = make_call(f'{BASE_URL}/catalog/{session.cookies.get("itua")}/albums/{album_id}', session=session)
+    except Exception:
+        album_data = ''
 
     # Artists
     artists = []
     for artist in track_data.get('data', [])[0].get('attributes', {}).get('artistName').replace("&", ",").split(","):
         artists.append(artist.strip())
-
-    # Track Number
-    track_number = None
-    for i, track in enumerate(album_data.get('data', [])[0].get('relationships', {}).get('tracks', {}).get('data', [])):
-        if track.get('id') == str(item_id):
-            track_number = i + 1
-            break
-    if not track_number:
-        track_number = track_data.get('data', [])[0].get('attributes', {}).get('trackNumber')
-
-    # Total Discs
-    total_discs = album_data.get('data', [])[0].get('relationships', {}).get('tracks', {}).get('data', [])[-1].get('attributes', {}).get('discNumber')
 
     info = {}
     info['item_id'] = track_data.get('data', [])[0].get('id')
@@ -218,22 +209,36 @@ def apple_music_get_track_metadata(session, item_id):
     info['explicit'] = True if track_data.get('data', [])[0].get('attributes', {}).get('contentRating') == 'explicit' else False
     info['artists'] = conv_list_format(artists)
 
-    info['copyright'] = album_data.get('data', [])[0].get('attributes', {}).get('copyright')
-    info['upc'] = album_data.get('data', [])[0].get('attributes', {}).get('upc')
-    info['label'] = album_data.get('data', [])[0].get('attributes', {}).get('recordLabel')
-    info['total_tracks'] = album_data.get('data', [])[0].get('attributes', {}).get('trackCount')
-
-    album_type = 'album'
-    if album_data.get('data', [])[0].get('attributes', {}).get('isSingle'):
-        album_type = 'single'
-    if album_data.get('data', [])[0].get('attributes', {}).get('isCompilation'):
-        album_type = 'compilation'
-    info['album_type'] = album_type
-
     info['album_artists'] = artists[0]
 
-    info['track_number'] = track_number
-    info['total_discs'] = total_discs
+    if album_data:
+        info['copyright'] = album_data.get('data', [])[0].get('attributes', {}).get('copyright')
+        info['upc'] = album_data.get('data', [])[0].get('attributes', {}).get('upc')
+        info['label'] = album_data.get('data', [])[0].get('attributes', {}).get('recordLabel')
+        info['total_tracks'] = album_data.get('data', [])[0].get('attributes', {}).get('trackCount')
+
+        album_type = 'album'
+        if album_data.get('data', [])[0].get('attributes', {}).get('isSingle'):
+            album_type = 'single'
+        if album_data.get('data', [])[0].get('attributes', {}).get('isCompilation'):
+            album_type = 'compilation'
+        info['album_type'] = album_type
+
+        # Track Number
+        track_number = None
+
+        for i, track in enumerate(album_data.get('data', [])[0].get('relationships', {}).get('tracks', {}).get('data', [])):
+            if track.get('id') == str(item_id):
+                track_number = i + 1
+                break
+        if not track_number:
+            track_number = track_data.get('data', [])[0].get('attributes', {}).get('trackNumber')
+
+        # Total Discs
+        total_discs = album_data.get('data', [])[0].get('relationships', {}).get('tracks', {}).get('data', [])[-1].get('attributes', {}).get('discNumber')
+
+        info['track_number'] = track_number
+        info['total_discs'] = total_discs
 
     return info
 
