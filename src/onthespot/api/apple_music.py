@@ -191,7 +191,10 @@ def apple_music_get_track_metadata(session, item_id):
     info['album_name'] = track_data.get('data', [])[0].get('attributes', {}).get('albumName')
     info['genre'] = conv_list_format(track_data.get('data', [])[0].get('attributes', {}).get('genreNames', []))
     #info['track_number'] = track_data.get('data', [])[0].get('attributes', {}).get('trackNumber')
-    info['release_year'] = track_data.get('data', [])[0].get('attributes', {}).get('releaseDate').split('-')[0]
+    try:
+        info['release_year'] = track_data.get('data', [])[0].get('attributes', {}).get('releaseDate').split('-')[0]
+    except Exception:
+        pass
     info['length'] = str(track_data.get('data', [])[0].get('attributes', {}).get('durationInMillis'))
     info['isrc'] = track_data.get('data', [])[0].get('attributes', {}).get('isrc')
 
