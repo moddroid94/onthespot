@@ -247,6 +247,8 @@ class Config:
             ffmpeg_path = os.environ['FFMPEG_PATH']
         elif os.name != 'nt' and os.path.exists('/usr/bin/ffmpeg'):
             ffmpeg_path = '/usr/bin/ffmpeg'
+        elif os.path.exists(shutil.which('ffmpeg')):
+            ffmpeg_path = shutil.which('ffmpeg')
         elif os.path.isfile(os.path.join(self.app_root, 'bin', 'ffmpeg', 'ffmpeg' + self.ext_)):
             print('Failed to find system ffmpeg binary, falling back to bundled binary !')
             ffmpeg_path = os.path.abspath(os.path.join(self.app_root, 'bin', 'ffmpeg', 'ffmpeg' + self.ext_))

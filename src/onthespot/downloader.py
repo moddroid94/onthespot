@@ -53,7 +53,8 @@ class RetryWorker(QObject):
                                 download_queue[local_id]['gui']['status_label'].setText(self.tr("Waiting"))
                                 download_queue[local_id]['gui']["btn"]['cancel'].show()
                                 download_queue[local_id]['gui']["btn"]['retry'].hide()
-            time.sleep(config.get('retry_worker_delay') * 60)
+            if config.get('retry_worker_delay') > 0:
+                time.sleep(config.get('retry_worker_delay') * 60)
             continue
 
 
