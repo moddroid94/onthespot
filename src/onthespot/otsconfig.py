@@ -209,39 +209,31 @@ class Config:
             "download_all_available_audio": False,
             "download_all_available_subtitles": False,
         }
+        # Load Config
         if os.path.isfile(self.__cfg_path):
             self.__config = json.load(open(cfg_path, "r"))
         else:
             try:
                 os.makedirs(os.path.dirname(self.__cfg_path), exist_ok=True)
             except (FileNotFoundError, PermissionError):
-                fallback_path = os.path.abspath(
-                    os.path.join('.config', 'otsconfig.json')
-                    )
-                print(
-                    'Critical error.. Configuration file could not be '
-                    'created at "{self.__cfg_path}"; Trying : {fallback_path}'
-                    )
+                print('Failed to create config dir, attempting fallback path.')
+                fallback_path = os.path.abspath(os.path.join(os.path.expanduser('~'), '.config', 'otsconfig.json'))
                 self.__cfg_path = fallback_path
                 os.makedirs(os.path.dirname(self.__cfg_path), exist_ok=True)
             with open(self.__cfg_path, "w") as cf:
                 cf.write(json.dumps(self.__template_data, indent=4))
             self.__config = self.__template_data
+        # Make Download Dirs
         try:
             os.makedirs(self.get("audio_download_path"), exist_ok=True)
             os.makedirs(self.get("video_download_path"), exist_ok=True)
         except (FileNotFoundError, PermissionError):
-            print(
-                'Current download root cannot be set up at "',
-                self.get("audio_download_path"),
-                '"; Falling back to : ',
-                self.__template_data.get('audio_download_path')
-                )
-            self.set(
-                'audio_download_path', self.__template_data.get('audio_download_path')
-                )
+            print('Failed to create download dir, attempting fallback path.')
+            self.set('audio_download_path', self.__template_data.get('audio_download_path'))
+            self.set('video_download_path', self.__template_data.get('video_download_path'))
             os.makedirs(self.get("audio_download_path"), exist_ok=True)
-        # Set ffmpeg path
+            os.makedirs(self.get("video_download_path"), exist_ok=True)
+        # Set FFMPEG Path
         self.app_root = os.path.dirname(os.path.realpath(__file__))
         if os.path.exists(os.environ.get('FFMPEG_PATH', '')):
             ffmpeg_path = os.environ['FFMPEG_PATH']
@@ -378,7 +370,7 @@ class Config:
         elif self.get("language_index") == 2:
             self.set("language", "pt_PT")
         else:
-            logger.info(f'Unknown language index: {self.get("language_index")}')
+            print(f'Unknown language index: {self.get("language_index")}')
             self.set("language", "en_US")
         self.save()
 

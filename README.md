@@ -32,6 +32,8 @@ For more further documentation, please see the following:
 1. [**Installation Guide**](docs/INSTALLATION.md)
 2. [**Basic Usage Instructions**](docs/USAGE.md)
 
+> [!CAUTION]
+> Currently 1 user has reported having their Spotify account locked, the account was returned to them by emailing support. This notice will be updated if any further cases come to our attention.
 
 ## Screenshots
 ![Search](assets/images/search.png)
