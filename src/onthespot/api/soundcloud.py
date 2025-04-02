@@ -29,39 +29,22 @@ def soundcloud_parse_url(url, token):
 def soundcloud_login_user(account):
     logger.info('Logging into Soundcloud account...')
     try:
-        response = requests.get("https://soundcloud.com")
-
-        page_text = response.text
-
-        client_id_url_match = re.finditer(
-            r"<script\s+crossorigin\s+src=\"([^\"]+)\"",
-                page_text,
-            )
-
-        *_, client_id_url_match = client_id_url_match
-
-        #if client_id_url_match:
-            #logger.info("Found client_id_url:", client_id_url_match.group(1))  # Access the captured group
-        #else:
-            #logger.info(f"Failed to fetch free soundcloud client_id: {response.status_code}")
-
-        client_id_url = client_id_url_match.group(1)
+        page_text = requests.get("https://soundcloud.com").text
 
         app_version_match = re.search(
             r'<script>window\.__sc_version="(\d+)"</script>',
             page_text,
         )
-        if app_version_match is None:
-            raise Exception(f"Could not find app version in {client_id_url}")
-
         app_version = app_version_match.group(1)
 
-        response2 = requests.get(client_id_url)
-
-        page_text2 = response2.text
-
-        client_id_match = re.search(r'client_id:\s*"(\w+)"', page_text2)
-        assert client_id_match is not None
+        client_id_url_match = re.finditer(
+            r"<script\s+crossorigin\s+src=\"([^\"]+)\"",
+                page_text,
+            )
+        *_, client_id_url_match = client_id_url_match
+        client_id_url = client_id_url_match.group(1)
+        client_id_page_text = requests.get(client_id_url).text
+        client_id_match = re.search(r'client_id:\s*"(\w+)"', client_id_page_text)
         client_id = client_id_match.group(1)
 
         cfg_copy = config.get('accounts').copy()
@@ -282,14 +265,14 @@ def soundcloud_get_track_metadata(token, item_id):
     copyright_data = conv_list_format(copyright_list)
 
     info = {}
-    info['image_url'] = track_data.get("artwork_url")
+    info['image_url'] = track_data.get("artwork_url").replace('large', 'original')
     info['description'] = str(track_data.get("description"))
-    info['genre'] = conv_list_format([track_data.get('genre', [])])
+    info['genre'] = track_data.get('genre')
 
-    label = track_data.get('label_name', "")
+    label = track_data.get('label_name')
     if label:
         info['label'] = label
-    info['item_url'] = track_data.get('permalink_url', "")
+    info['item_url'] = track_data.get('permalink_url')
 
     release_date = track_data.get("release_date")
     last_modified = track_data.get("last_modified")

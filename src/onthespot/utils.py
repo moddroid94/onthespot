@@ -103,15 +103,9 @@ def sanitize_data(value):
         return ''
     char = config.get("illegal_character_replacement")
     if os.name == 'nt':
-        value = value.replace('\\', char)
-        value = value.replace('/', char)
-        value = value.replace(':', char)
-        value = value.replace('*', char)
-        value = value.replace('?', char)
-        value = value.replace('"', char)
-        value = value.replace('<', char)
-        value = value.replace('>', char)
-        value = value.replace('|', char)
+        illegal_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
+        for illegal_char in illegal_chars:
+            value = value.replace(illegal_char, char)
         while value.endswith('.') or value.endswith(' '):
             value = value[:-1]
     else:
