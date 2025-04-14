@@ -619,7 +619,7 @@ def display_game_over(win, score):
         config.save()
     win.addstr(win.getmaxyx()[0] // 2 - 1, win.getmaxyx()[1] // 2 - 10, 'Game Over!', curses.color_pair(1))
     win.addstr(win.getmaxyx()[0] // 2, win.getmaxyx()[1] // 2 - 10, f'Score: {score}', curses.A_BOLD)
-    win.addstr(win.getmaxyx()[0] // 2 + 1, win.getmaxyx()[1] // 2 - 10, f'High Score: {config.get('snake_high_score', 0)}', curses.A_BOLD)
+    win.addstr(win.getmaxyx()[0] // 2 + 1, win.getmaxyx()[1] // 2 - 10, f"High Score: {config.get('snake_high_score', 0)}", curses.A_BOLD)
     win.addstr(win.getmaxyx()[0] // 2 + 2, win.getmaxyx()[1] // 2 - 10, 'Press r to retry or q to quit.')
     win.refresh()
 
