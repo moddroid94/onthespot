@@ -41,7 +41,7 @@ RDEPEND="
 	dev-python/requests
 	dev-python/urllib3
 	media-libs/mutagen
-	media-video/ffmpeg[mp3,openssl,sdl]
+	media-video/ffmpeg[lame,openssl,sdl]
 	net-misc/yt-dlp
 	webui? (
 		acct-group/onthespot

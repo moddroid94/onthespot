@@ -424,7 +424,7 @@ class MainWindow(QMainWindow):
         status_label.setText(self.tr("Waiting"))
         status_label.setStyleSheet("background-color: transparent;")
         actions = DownloadActionsButtons(item['local_id'], item_metadata, pbar, copy_btn, cancel_btn, retry_btn, open_btn, locate_btn, delete_btn)
-    
+
         rows = self.tbl_dl_progress.rowCount()
         self.tbl_dl_progress.insertRow(rows)
         if item_metadata.get('explicit'):
@@ -881,7 +881,7 @@ class MainWindow(QMainWindow):
             download_btn = QPushButton(self.tbl_search_results)
             download_btn.setIcon(self.get_icon('download'))
             download_btn.setMinimumHeight(30)
-            download_btn.setStyleSheet("QPushButton { background-color: palette(button);  }")
+            download_btn.setStyleSheet(config.get('theme'))
             download_btn.clicked.connect(lambda x,
                                     item_name=result['item_name'],
                                     item_url=result['item_url'],
@@ -894,7 +894,7 @@ class MainWindow(QMainWindow):
             copy_btn = QPushButton(self.tbl_search_results)
             copy_btn.setIcon(self.get_icon('link'))
             copy_btn.setMinimumHeight(30)
-            copy_btn.setStyleSheet("QPushButton { background-color: palette(button); }")
+            copy_btn.setStyleSheet(config.get('theme'))
             copy_btn.clicked.connect(lambda x, item_url=result['item_url']: copy_btn_clicked(item_url))
 
             btn_layout = QHBoxLayout()
@@ -921,7 +921,6 @@ class MainWindow(QMainWindow):
                 item_label.setText(result['item_name'])
             item_label.setStyleSheet("background-color: transparent;")
 
-
             self.tbl_search_results.setCellWidget(rows, 0, item_label)
             self.tbl_search_results.setItem(rows, 1, QTableWidgetItem(str(result['item_by'])))
             self.tbl_search_results.setItem(rows, 2, QTableWidgetItem(result['item_type'].replace('podcast_', '').title()))
@@ -929,7 +928,6 @@ class MainWindow(QMainWindow):
             self.tbl_search_results.setCellWidget(rows, 4, btn_widget)
             self.tbl_search_results.horizontalHeader().resizeSection(0, 450)
             self.tbl_search_results.horizontalHeader().resizeSection(4, 100)
-            
 
             self.search_term.setText('')
 

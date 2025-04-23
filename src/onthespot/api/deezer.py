@@ -55,8 +55,8 @@ def deezer_get_album_track_ids(_, album_id):
     logger.info(f"Getting tracks from album: {album_id}")
     album_data = make_call(f"{BASE_URL}/album/{album_id}?limit=10000")
     item_ids = []
-    for track in album_data.get("tracks", {}).get("data", ''):
-        item_ids.append(track['id'])
+    for track in album_data.get("tracks", {}).get("data", []):
+        item_ids.append(track.get('id'))
     return item_ids
 
 
@@ -64,8 +64,8 @@ def deezer_get_artist_album_ids(_, artist_id):
     logger.info(f"Getting album ids for artist: '{artist_id}'")
     album_data = make_call(f"{BASE_URL}/artist/{artist_id}/albums?limit=10000")
     item_ids = []
-    for album in album_data.get("data", ''):
-        item_ids.append(album.get("id", ''))
+    for album in album_data.get("data", []):
+        item_ids.append(album.get("id"))
     return item_ids
 
 
@@ -74,10 +74,10 @@ def deezer_get_playlist_data(_, playlist_id):
     playlist_data = make_call(f"{BASE_URL}/playlist/{playlist_id}?limit=10000")
 
     playlist_name = playlist_data.get("title", '')
-    playlist_by = playlist_data.get("creator", {}).get("name", '')
+    playlist_by = playlist_data.get("creator", {}).get("name")
 
     track_ids = []
-    for track in playlist_data.get("tracks", {}).get("data", ''):
+    for track in playlist_data.get("tracks", {}).get("data", []):
         track_ids.append(track.get('id'))
     return playlist_name, playlist_by, track_ids
 

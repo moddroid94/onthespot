@@ -8,22 +8,24 @@ from ..utils import make_call, conv_list_format
 
 logger = get_logger("api.soundcloud")
 BASE_URL = 'https://api-v2.soundcloud.com'
+headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
 
 
 def soundcloud_parse_url(url, token):
-        headers = {}
-        headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
+    params = {}
+    params["client_id"] = token['client_id']
+    params["app_version"] = token['app_version']
+    params["app_locale"] = token['app_locale']
 
-        params = {}
-        params["client_id"] = token['client_id']
-        params["app_version"] = token['app_version']
-        params["app_locale"] = token['app_locale']
+    resp = make_call(f"{BASE_URL}/resolve?url={url}", headers=headers, params=params)
 
-        resp = make_call(f"{BASE_URL}/resolve?url={url}", headers=headers, params=params)
-
-        item_id = str(resp["id"])
-        item_type = resp["kind"]
-        return item_type, item_id
+    item_id = str(resp["id"])
+    item_type = resp["kind"]
+    if item_type == 'user':
+        item_type = 'artist'
+    elif item_type == 'playlist' and resp.get("is_album"):
+        item_type = 'album'
+    return item_type, item_id
 
 
 def soundcloud_login_user(account):
@@ -60,7 +62,6 @@ def soundcloud_login_user(account):
                 oauth_token = account['login'].get('oauth_token')
                 if oauth_token:
                     # Check OAuth Token Validity
-                    headers = {}
                     headers['Content-Type'] = 'application/json'
                     headers['Authorization'] = f'OAuth {oauth_token}'
 
@@ -134,22 +135,17 @@ def soundcloud_get_token(parsing_index):
 
 
 def soundcloud_get_search_results(token, search_term, content_types):
-    headers = {}
-    headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
-
     params = {}
     params["client_id"] = token['client_id']
     params["app_version"] = token['app_version']
     params["app_locale"] = token['app_locale']
     params["q"] = search_term
-
-    track_url = f"{BASE_URL}/search/tracks"
-    playlist_url = f"{BASE_URL}/search/playlists"
+    params["limit"] = config.get("max_search_results")
 
     search_results = []
 
     if 'track' in content_types:
-        track_search = requests.get(track_url, headers=headers, params=params).json()
+        track_search = requests.get(f"{BASE_URL}/search/tracks", headers=headers, params=params).json()
         for track in track_search['collection']:
             search_results.append({
                 'item_id': track['id'],
@@ -161,8 +157,34 @@ def soundcloud_get_search_results(token, search_term, content_types):
                 'item_thumbnail_url': track["artwork_url"]
             })
 
+    if 'album' in content_types:
+        playlist_search = requests.get(f"{BASE_URL}/search/albums", headers=headers, params=params).json()
+        for playlist in playlist_search['collection']:
+            search_results.append({
+                'item_id': playlist['id'],
+                'item_name': playlist['title'],
+                'item_by': playlist['user']['username'],
+                'item_type': "album",
+                'item_service': "soundcloud",
+                'item_url': playlist['permalink_url'],
+                'item_thumbnail_url': playlist["artwork_url"]
+            })
+
+    if 'artist' in content_types:
+        playlist_search = requests.get(f"{BASE_URL}/search/users", headers=headers, params=params).json()
+        for playlist in playlist_search['collection']:
+            search_results.append({
+                'item_id': playlist['id'],
+                'item_name': playlist['username'],
+                'item_by': playlist['username'],
+                'item_type': "artist",
+                'item_service': "soundcloud",
+                'item_url': playlist['permalink_url'],
+                'item_thumbnail_url': playlist["avatar_url"]
+            })
+
     if 'playlist' in content_types:
-        playlist_search = requests.get(playlist_url, headers=headers, params=params).json()
+        playlist_search = requests.get(f"{BASE_URL}/search/playlists_without_albums", headers=headers, params=params).json()
         for playlist in playlist_search['collection']:
             search_results.append({
                 'item_id': playlist['id'],
@@ -178,27 +200,58 @@ def soundcloud_get_search_results(token, search_term, content_types):
     return search_results
 
 
-def soundcloud_get_set_items(token, url):
-    logger.info(f"Getting set items for {url}")
-    headers = {}
-    headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
-
+def soundcloud_get_artist_album_ids(token, item_id):
+    logger.info(f"Getting albums for {item_id}")
     params = {}
     params["client_id"] = token['client_id']
     params["app_version"] = token['app_version']
     params["app_locale"] = token['app_locale']
+    params["limit"] = 10000
 
-    try:
-        set_data = make_call(f"{BASE_URL}/resolve?url={url}", headers=headers, params=params, skip_cache=True)
-        return set_data
-    except (TypeError, KeyError):
-        logger.info(f"Failed to parse tracks for set: {url}")
+    artist_data = make_call(f"{BASE_URL}/users/{item_id}/albums", headers=headers, params=params)
+
+    album_ids = []
+    for album in artist_data.get("collection", []):
+        album_ids.append(album.get('id'))
+    return album_ids
+
+
+def soundcloud_get_album_track_ids(token, item_id):
+    logger.info(f"Getting tracks for {item_id}")
+    params = {}
+    params["client_id"] = token['client_id']
+    params["app_version"] = token['app_version']
+    params["app_locale"] = token['app_locale']
+    params["limit"] = 10000
+
+    album_data = make_call(f"{BASE_URL}/playlists/{item_id}", headers=headers, params=params)
+
+    track_ids = []
+    for track in album_data.get("tracks", []):
+        track_ids.append(track.get('id'))
+    return track_ids
+
+
+def soundcloud_get_playlist_data(token, item_id):
+    logger.info(f"Getting playlist data for {item_id}")
+    params = {}
+    params["client_id"] = token['client_id']
+    params["app_version"] = token['app_version']
+    params["app_locale"] = token['app_locale']
+    params["limit"] = 10000
+
+    playlist_data = make_call(f"{BASE_URL}/playlists/{item_id}", headers=headers, params=params)
+
+    playlist_name = playlist_data.get("title", '')
+    playlist_by = playlist_data.get("user", {}).get("username")
+
+    track_ids = []
+    for track in playlist_data.get("tracks", []):
+        track_ids.append(track.get('id'))
+    return playlist_name, playlist_by, track_ids
 
 
 def soundcloud_get_track_metadata(token, item_id):
-    headers = {}
-    headers["user-agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
-
     params = {}
     params["client_id"] = token['client_id']
     params["app_version"] = token['app_version']
@@ -207,7 +260,7 @@ def soundcloud_get_track_metadata(token, item_id):
     track_data = make_call(f"{BASE_URL}/tracks/{item_id}", headers=headers, params=params)
     # Some tracks fail with a drm error, disabling this in favour of yt-dlp's file parser
     #track_file = requests.get(track_data["media"]["transcodings"][0]["url"], headers=headers, params=params).json()
-    track_webpage = make_call(f"{track_data['permalink_url']}/albums", text=True)
+    track_webpage = make_call(f"{track_data.get('permalink_url')}/albums", text=True)
     # Parse album webpage
     start_index = track_webpage.find('<h2>Appears in albums</h2>')
     if start_index != -1:
