@@ -3,11 +3,10 @@
 echo "========= OnTheSpot Linux Build Script ========="
 
 
-echo " => Cleaning up previous builds!"
-rm -f ./dist/onthespot_linux ./dist/onthespot_linux_ffm
-
-
-echo " => Creating and activating virtual environment..."
+echo " => Cleaning up previous builds and preparing the environment..."
+rm -f ./dist/OnTheSpot.tar.gz
+mkdir build
+mkdir dist
 python3 -m venv venv
 source ./venv/bin/activate
 
@@ -16,16 +15,22 @@ echo " => Upgrading pip and installing necessary dependencies..."
 venv/bin/pip install --upgrade pip wheel pyinstaller
 venv/bin/pip install -r requirements.txt
 
-FFBIN=""
-NAME="onthespot-gui"
-if [ -f "ffbin_nix/ffmpeg" ]; then
-    echo " => Found 'ffbin_nix' directory and ffmpeg binary. Including FFmpeg in the build."
-    FFBIN="--add-binary=ffbin_nix/*:onthespot/bin/ffmpeg"
-    NAME="onthespot-gui-ffm"
-fi
+
+#echo " => Build FFMPEG (Optional)"
+#FFBIN="--add-binary=dist/ffmpeg:onthespot/bin/ffmpeg"
+#if ! [ -f "dist/ffmpeg" ]; then
+#    cd build
+#    curl https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz -o ffmpeg.tar.xz
+#    tar xf ffmpeg.tar.xz
+#    cd ffmpeg-*
+#    ./configure --enable-small --disable-ffplay --disable-ffprobe --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages
+#    make
+#    cp ffmpeg ../../dist
+#    cd ../..
+#fi
 
 
-echo " => Running PyInstaller to create executable..."
+echo " => Running PyInstaller to create binary..."
 pyinstaller --onefile \
     --hidden-import="zeroconf._utils.ipaddress" \
     --hidden-import="zeroconf._handlers.answers" \
@@ -34,13 +39,14 @@ pyinstaller --onefile \
     --add-data="src/onthespot/resources/translations/*.qm:onthespot/resources/translations" \
     $FFBIN \
     --paths="src/onthespot" \
-    --name=$NAME \
+    --name=onthespot-gui \
     --icon="src/onthespot/resources/icons/onthespot.png" \
     src/portable.py
 
+
 echo " => Packaging executable as tar.gz archive..."
 cd dist
-tar -czvf OnTheSpot.tar.gz $NAME
+tar -czvf OnTheSpot.tar.gz onthespot-gui
 cd ..
 
 
@@ -49,3 +55,4 @@ rm -rf __pycache__ build venv *.spec
 
 
 echo " => Done! Packaged tar.gz is available in 'dist/OnTheSpot.tar.gz'."
+

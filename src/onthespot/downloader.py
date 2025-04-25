@@ -513,7 +513,7 @@ class DownloadWorker(QObject):
                         video_files = []
                         subtitle_formats = []
                         for version in item_metadata['versions']:
-                            if version['audio_locale'] in config.get('preferred_audio_language').split(',') or config.get('download_all_available_audio'):
+                            if version['audio_locale'] in config.get('preferred_audio_language').replace(' ', '').split(',') or config.get('download_all_available_audio'):
                                 try:
                                     mpd_url, stream_token, audio_locale, headers, versions, additional_subtitle_formats = crunchyroll_get_mpd_info(token, version['guid'])
                                     subtitle_formats += additional_subtitle_formats

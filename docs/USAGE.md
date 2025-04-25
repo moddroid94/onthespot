@@ -117,7 +117,7 @@ If a file path is provided the app will parse each line in the file for urls beg
 | [**Movie/Episode Path**](#media-path-format) | Customize the file naming pattern for movies and episodes using variables like `{artist}`, `{album}`, etc. |
 | **Preferred Video Resolution** | If available, videos downloaded  will use the resolution specified. |
 | **Download Subtitles** | Specify whether you would like to download subtitles if available. |
-| **Preferred Audio/Subtitle Language** | Preferred download language for the specified media format, formatted as en-US. |
+| **Preferred Audio/Subtitle Language** | Preferred download language for the specified media format, formatted as en-US. Multiple languages can be added if seperated by a comma, (en-US, jp-JP)|
 | **Download All Available Audio/Subtitles** | Download all available audio or subtitles for a given video. |
 
 ### Media Path Format
@@ -129,7 +129,7 @@ If a file path is provided the app will parse each line in the file for urls beg
    | **Variable**      | **Description**                                     |
    | ----------------- | --------------------------------------------------- |
    | `{service}`       | The music service used to download your file.       |
-   | `{service_id}`    | The tracks native id on the selected music service. |
+   | `{service_id}`    | The track's native id on the selected music service.|
    | `{name}`          | Name of the track.                                  |
    | `{year}`          | Release year of the track.                          |
    | `{explicit}`      | Displays 'Explicit Label' if the song is marked explicit (default: 🅴). |
