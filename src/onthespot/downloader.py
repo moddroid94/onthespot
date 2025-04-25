@@ -172,6 +172,18 @@ class DownloadWorker(QObject):
                         dl_root = temp_download_path[0]
                     file_path = os.path.join(dl_root, item_path)
                     directory, file_name = os.path.split(file_path)
+
+                    # Additional verification of path length limits, see https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation in case the file_name + directory exceeds the path limit 
+                    # and for UNIX systems it's the same https://serverfault.com/questions/9546/filename-length-limits-on-linux
+                    name, ext = os.path.splitext(file_name)
+                    MAX_PATH_LENGTH = 260
+                    available_length = MAX_PATH_LENGTH - len(os.path.join(directory, ''))
+                    if len(file_name) > available_length:
+                        trim_length = available_length - len(ext)
+                        name = name[:trim_length]
+                        file_name = name + ext
+                        file_path = os.path.join(directory, file_name)
+                    
                     temp_file_path = os.path.join(directory, '~' + file_name)
 
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
