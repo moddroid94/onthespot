@@ -1,8 +1,8 @@
 FROM debian:latest
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
-RUN apt update
-RUN apt upgrade
+RUN apt update -y
+RUN apt upgrade -y
 RUN apt install -y python3 python3-pip python3.11-venv ffmpeg git libegl1
 WORKDIR /app
 RUN python3 -m venv venv
