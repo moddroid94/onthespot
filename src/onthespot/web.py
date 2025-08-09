@@ -200,6 +200,10 @@ def clear_items():
 @app.route('/api/cancel_items', methods=['POST'])
 @login_required
 def cancel_items():
+    with parsing_lock:
+        parsing.clear()
+    with pending_lock:
+        pending.clear()
     for local_id, item in download_queue.items():
         if item["item_status"] == "Waiting":
             with download_queue_lock:

@@ -21,7 +21,7 @@ from ..api.generic import generic_add_account, generic_get_track_metadata, gener
 from ..api.crunchyroll import crunchyroll_add_account, crunchyroll_get_episode_metadata
 from ..downloader import DownloadWorker, RetryWorker
 from ..otsconfig import config, cache_dir
-from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, pending, pending_lock, get_logger, temp_download_path
+from ..runtimedata import account_pool, download_queue, download_queue_lock, get_init_tray, parsing, parsing_lock, pending, pending_lock, get_logger, temp_download_path
 from .dl_progressbtn import DownloadActionsButtons
 from .settings import load_config, save_config
 from .thumb_listitem import LabelWithThumb
@@ -544,6 +544,10 @@ class MainWindow(QMainWindow):
 
 
     def cancel_all_downloads(self):
+        with parsing_lock:
+            parsing.clear()
+        with pending_lock:
+            pending.clear()
         with download_queue_lock:
             row_count = self.tbl_dl_progress.rowCount()
             while row_count > 0:
