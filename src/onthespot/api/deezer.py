@@ -398,3 +398,9 @@ def deezer_get_search_results(_, search_term, content_types):
 
     logger.info(search_results)
     return search_results
+
+def deezer_parse_url(url):
+    # Fix Circular Dependency
+    from ..parse_item import parse_url
+    redirect_url = requests.get(url).url
+    parse_url(redirect_url)

@@ -4,7 +4,7 @@ import traceback
 from .accounts import get_account_token
 from .api.apple_music import apple_music_get_album_track_ids, apple_music_get_artist_album_ids, apple_music_get_playlist_data
 from .api.bandcamp import bandcamp_get_album_track_ids, bandcamp_get_artist_album_ids
-from .api.deezer import deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_data
+from .api.deezer import deezer_parse_url, deezer_get_album_track_ids, deezer_get_artist_album_ids, deezer_get_playlist_data
 from .api.qobuz import qobuz_get_album_track_ids, qobuz_get_artist_album_ids, qobuz_get_label_album_ids, qobuz_get_playlist_data
 from .api.soundcloud import soundcloud_parse_url,  soundcloud_get_artist_album_ids, soundcloud_get_album_track_ids, soundcloud_get_playlist_data
 from .api.spotify import spotify_get_album_track_ids, spotify_get_artist_album_ids, spotify_get_playlist_items, spotify_get_playlist_data, spotify_get_liked_songs, spotify_get_your_episodes, spotify_get_podcast_episode_ids
@@ -21,6 +21,7 @@ logger = get_logger('parse_item')
 APPLE_MUSIC_URL_REGEX = re.compile(r'https?://music.apple.com/([a-z]{2})/(?P<type>album|playlist|artist)(?:/(?P<title>[-a-z0-9]+))?/(?P<id>[\w.-]+)(?:\?i=(?P<track_id>\d+))?(?:&.*)?$')
 BANDCAMP_URL_REGEX = re.compile(r'https?://[a-z0-9-]+.bandcamp.com(?:/(?P<type>track|album|music)/[a-z0-9-]+)?')
 DEEZER_URL_REGEX = re.compile(r'https?://www.deezer.com/(?:[a-z]{2}/)?(?P<type>album|playlist|track|artist)/(?P<id>\d+)')
+DEEZER_SHARE_URL_REGEX = re.compile(r'https?://link.deezer.com/s/([-a-z0-9]+)')
 QOBUZ_URL_REGEX = re.compile(r"https?://(www.|play.|open.)?qobuz.com/(?:[a-z]{2}-[a-z]{2}/)?(?P<type>album|playlist|artist|track|label|interpreter)(?:/[^/]+)?(?:/[^/]+)?/(?P<id>[-a-z0-9]+)")
 SOUNDCLOUD_URL_REGEX = re.compile(r"https?://(m.)?soundcloud.com/[-\w:/]+")
 SPOTIFY_URL_REGEX = re.compile(r"https?://open.spotify.com/(intl-([a-zA-Z]+)/|)(?P<type>track|album|artist|playlist|episode|show)/(?P<id>[0-9a-zA-Z]{22})(\?si=.+?)?$")
@@ -55,6 +56,10 @@ def parse_url(url):
         item_id = match.group("id")
         item_type = match.group("type")
         item_service = 'deezer'
+
+    elif re.match(DEEZER_SHARE_URL_REGEX, url):
+        deezer_parse_url(url)
+        return True
 
     elif re.match(QOBUZ_URL_REGEX, url):
         match = re.search(QOBUZ_URL_REGEX, url)

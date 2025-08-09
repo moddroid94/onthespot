@@ -216,7 +216,7 @@ def tidal_get_track_metadata(token, item_id):
     if not track_data:
         return
 
-    params["include"] = "items"
+    params["include"] = "coverArt"
     album_data = make_call(f"{BASEV2_URL}/albums/{track_data['album']['id']}", headers=headers, params=params)
 
     # Artists
@@ -253,7 +253,7 @@ def tidal_get_track_metadata(token, item_id):
     info['total_discs'] = album_data.get('data', {}).get('attributes', {}).get('numberOfVolumes')
     info['release_year'] = album_data.get('data', {}).get('attributes', {}).get('releaseDate').split("-")[0]
     info['upc'] = album_data.get('data', {}).get('attributes', {}).get('barcodeId')
-    info['image_url'] = tidal_get_album_cover(token=token, album_id=track_data['album']['id'])
+    info['image_url'] = album_data.get('included', [])[0].get('attributes', {}).get('files', [])[0].get('href', '')
     info['album_type'] = album_data.get('data', {}).get('attributes', {}).get('type').lower()
     info['is_playable'] = track_data.get('streamReady')
 
@@ -422,24 +422,3 @@ def tidal_get_mix_data(token, mix_id):
     for track in mix_data['rows'][1]['modules'][0]['pagedList']['items']:
         track_ids.append(track['id'])
     return playlist_name, playlist_by, track_ids
-
-def tidal_get_album_cover(token, album_id):
-    logger.info(f"Get cover for album: {album_id}")
-    headers = {}
-    headers["Authorization"] = f"Bearer {token['access_token']}"
-    params = {}
-    params["countryCode"] = token['country_code']
-
-    try:
-        cover_art_data = make_call(f"{BASEV2_URL}/albums/{album_id}/relationships/coverArt", headers=headers, params=params)
-        cover_id = cover_art_data.get('data', {})[0].get('id')
-
-        cover_art_link = make_call(f"{BASEV2_URL}/artworks/{cover_id}", headers=headers, params=params)
-        cover_art = cover_art_link.get('data', {}).get('attributes', {}).get('files', {})[0].get('href')
-
-        return cover_art
-    
-    except:
-        logger.error(f"Cover not found for album: {album_id}")
-        return None
-
