@@ -255,7 +255,7 @@ def crunchyroll_get_episode_metadata(token, item_id):
     # Not accurate
     #info['release_year'] = info_dict.get('release_year') if info_dict.get('release_year') else info_dict.get('upload_date')[:4]
     info['item_id'] = item_id.split('/')[0]
-    info['explicit'] = True if int(info_dict.get('episode_metadata', {}).get('extended_maturity_rating', {}).get('rating')) >= 17 else False
+    info['explicit'] = True if int(info_dict.get('episode_metadata', {}).get('extended_maturity_rating', {}).get('rating')) != 'PG' else False
     info['is_playable'] = True
 
     return info
