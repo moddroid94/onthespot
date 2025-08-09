@@ -44,7 +44,7 @@ export TCL_LIBRARY="${APPDIR}/usr/share/tcltk/tcl8.6"
 export TK_LIBRARY="${APPDIR}/usr/share/tcltk/tk8.6"
 export TKPATH="${TK_LIBRARY}"
 export SSL_CERT_FILE="${APPDIR}/opt/_internal/certs.pem"
-"$HERE/opt/python3.12/bin/python3.12" "-m" "onthespot.gui" "$@"' > AppRun
+"$HERE/opt/python3.14/bin/python3.14" "-m" "onthespot.gui" "$@"' > AppRun
 
 chmod -R 0755 ../OnTheSpot.AppDir
 chmod +x AppRun

@@ -2,11 +2,10 @@ import linecache
 import logging
 import os
 import sys
-import threading
 import tracemalloc
 from functools import wraps
 from logging.handlers import RotatingFileHandler
-from multiprocessing import Manager, Lock
+from threading import Lock
 from .otsconfig import config
 
 log_formatter = logging.Formatter(
@@ -24,16 +23,12 @@ stdout_handler.setFormatter(log_formatter)
 
 account_pool = []
 temp_download_path = []
-
-manager = Manager()
-parsing = manager.dict()
-pending = manager.dict()
-# QT Widgets do not support pickling
+parsing = {}
+pending = {}
 download_queue = {}
-
 parsing_lock = Lock()
 pending_lock = Lock()
-download_queue_lock = threading.Lock()
+download_queue_lock = Lock()
 
 init_tray = False
 
