@@ -115,7 +115,6 @@ def bandcamp_get_track_metadata(_, url):
     matches = re.findall(r'data-(\w+)="(.*?)"', track_webpage)
     for match in matches:
         attribute_name, attribute_value = match
-
         # Decode HTML entities (like &quot; to " and &amp; to &)
         decoded_value = unescape(attribute_value)
         try:
@@ -123,15 +122,6 @@ def bandcamp_get_track_metadata(_, url):
             track_data[attribute_name] = decoded_value_json
         except json.JSONDecodeError:
             track_data[attribute_name] = decoded_value
-    try:
-        album_webpage = make_call(track_data['embed']['album_embed_data']['linkback'], text=True, use_ssl=True)
-    except Exception:
-        pass
-    matches = re.findall(r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>', album_webpage, re.DOTALL)
-    for match in matches:
-        json_data_str = match
-        json_data_str = re.sub(r',\s*}', '}', json_data_str)  # Remove trailing commas
-        album_data = json.loads(json_data_str)
 
     # Year
     year = ''
@@ -146,7 +136,6 @@ def bandcamp_get_track_metadata(_, url):
         key = match.group(1)
         thumbnail_url = f'https://f4.bcbits.com/img/{key}_0.jpg'
 
-    # Output the resulting dictionary
     info = {}
     info['title'] = track_data.get('tralbum', {}).get('current', {}).get('title')
     info['artists'] = track_data.get('embed', {}).get('artist')
@@ -155,23 +144,34 @@ def bandcamp_get_track_metadata(_, url):
     info['album_name'] = track_data.get('embed', {}).get('album_embed_data', {}).get('album_title')
     info['release_year'] = year
     info['track_number'] = track_data.get('tralbum', {}).get('current', {}).get('track_number')
-    info['total_tracks'] = album_data.get('numTracks')
-    info['description'] = album_data.get('description')
-    info['copyright'] = album_data.get('creditText')
     isrc = track_data.get('tralbum', {}).get('current', {}).get('isrc')
     info['isrc'] = isrc if isrc else ''
     info['is_playable'] = True
-
     try:
         info['file_url'] = track_data.get('tralbum', {}).get('trackinfo', [{}])[0].get('file', {}).get('mp3-128')
     except AttributeError:
         info['is_playable'] = False
-
     info['item_id'] = track_data.get('tralbum', {}).get('current', {}).get('id')
     lyrics = track_data.get('tralbum', {}).get('current', {}).get('lyrics')
     info['lyrics'] = lyrics if lyrics and not config.get('only_download_synced_lyrics') else ''
     info['genre'] = conv_list_format(album_data.get('keywords', []))
     info['image_url'] = thumbnail_url
+
+    try:
+        album_webpage = make_call(track_data['embed']['album_embed_data']['linkback'], text=True, use_ssl=True)
+        matches = re.findall(r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>', album_webpage, re.DOTALL)
+        for match in matches:
+            json_data_str = match
+            json_data_str = re.sub(r',\s*}', '}', json_data_str)  # Remove trailing commas
+            album_data = json.loads(json_data_str)
+        info['total_tracks'] = album_data.get('numTracks')
+        info['description'] = album_data.get('description')
+        info['copyright'] = album_data.get('creditText')
+    except Exception:
+        info['track_number'] = 1
+        info['total_tracks'] = 1
+        info['album_name'] = info['title']
+        album_data = {}
 
     return info
 
