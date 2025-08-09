@@ -14,7 +14,7 @@ cd build
 curl -L -o appimagetool-x86_64.AppImage https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
 chmod +x appimagetool-x86_64.AppImage
 
-curl -L -o python.AppImage https://github.com/niess/python-appimage/releases/download/python3.14/python3.14.0rc1-cp314-cp314-manylinux2014_x86_64.AppImage
+curl -L -o python.AppImage https://github.com/niess/python-appimage/releases/download/python3.12/python3.12.11-cp312-cp312-manylinux2014_x86_64.AppImage
 chmod +x python.AppImage
 
 ./python.AppImage --appimage-extract
@@ -44,7 +44,7 @@ export TCL_LIBRARY="${APPDIR}/usr/share/tcltk/tcl8.6"
 export TK_LIBRARY="${APPDIR}/usr/share/tcltk/tk8.6"
 export TKPATH="${TK_LIBRARY}"
 export SSL_CERT_FILE="${APPDIR}/opt/_internal/certs.pem"
-"$HERE/opt/python3.14/bin/python3.14" "-m" "onthespot.gui" "$@"' > AppRun
+"$HERE/opt/python3.12/bin/python3.12" "-m" "onthespot.gui" "$@"' > AppRun
 
 chmod -R 0755 ../OnTheSpot.AppDir
 chmod +x AppRun
