@@ -253,7 +253,19 @@ def tidal_get_track_metadata(token, item_id):
     info['total_discs'] = album_data.get('data', {}).get('attributes', {}).get('numberOfVolumes')
     info['release_year'] = album_data.get('data', {}).get('attributes', {}).get('releaseDate').split("-")[0]
     info['upc'] = album_data.get('data', {}).get('attributes', {}).get('barcodeId')
-    info['image_url'] = album_data.get('included', [])[0].get('attributes', {}).get('files', [])[0].get('href', '')
+    try:
+        info['image_url'] = album_data.get('included', [])[0].get('attributes', {}).get('files', [])[0].get('href', '')
+    except IndexError:
+        #shim for https://github.com/justin025/onthespot/issues/176#issuecomment-3178727926, probably a regional api/account difference
+        try:
+            album_id = track_data.get('album', {}).get('id', '')
+            logger.info(f"Included cover art failed, fetching cover url for album: {album_id}")
+            cover_art_data = make_call(f"{BASEV2_URL}/albums/{album_id}/relationships/coverArt", headers=headers, params=params)
+            cover_id = cover_art_data.get('data', {})[0].get('id')
+            cover_art_link = make_call(f"{BASEV2_URL}/artworks/{cover_id}", headers=headers, params=params)
+            info['image_url'] = cover_art_link.get('data', {}).get('attributes', {}).get('files', {})[0].get('href')
+        except Exception:
+            logger.info("Failed to fetch cover art for album: {album_id}")
     info['album_type'] = album_data.get('data', {}).get('attributes', {}).get('type').lower()
     info['is_playable'] = track_data.get('streamReady')
 
