@@ -23,6 +23,7 @@ class MirrorSpotifyPlayback(QObject):
         super().__init__()
         self.thread = None
         self.is_running = False
+        self.reinit = False
 
     def start(self):
         if self.thread is None:
@@ -48,12 +49,17 @@ class MirrorSpotifyPlayback(QObject):
         while self.is_running:
             time.sleep(5)
             try:
-                token = get_account_token('spotify').tokens()
+                token = get_account_token('spotify', self.reinit).tokens()
             except (AttributeError, IndexError):
                 # Account pool hasn't been filled yet
                 continue
             url = f"{BASE_URL}/me/player/currently-playing"
-            resp = requests.get(url, headers={"Authorization": f"Bearer {token.get('user-read-currently-playing')}"})
+            try:
+                resp = requests.get(url, headers={"Authorization": f"Bearer {token.get('user-read-currently-playing')}"})
+            except:
+                logger.info("Session Expired, reinitializing...")
+                self.reinit = True
+                continue
             if resp.status_code == 200:
                 data = resp.json()
                 if data['currently_playing_type'] == 'track':
@@ -234,13 +240,17 @@ def spotify_re_init_session(account):
         logger.error('Failed to re init session !')
 
 
-def spotify_get_token(parsing_index):
-    try:
-        token = account_pool[parsing_index]['login']['session']
-    except (OSError, AttributeError):
-        logger.info(f'Failed to retreive token for {account_pool[parsing_index]["username"]}, attempting to reinit session.')
+def spotify_get_token(parsing_index, reinit):
+    if reinit:
         spotify_re_init_session(account_pool[parsing_index])
         token = account_pool[parsing_index]['login']['session']
+    else:
+        try:
+            token = account_pool[parsing_index]['login']['session']
+        except (OSError, AttributeError):
+            logger.info(f'Failed to retreive token for {account_pool[parsing_index]["username"]}, attempting to reinit session.')
+            spotify_re_init_session(account_pool[parsing_index])
+            token = account_pool[parsing_index]['login']['session']
     return token
 
 
