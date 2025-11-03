@@ -53,7 +53,14 @@ class MirrorSpotifyPlayback(QObject):
                 # Account pool hasn't been filled yet
                 continue
             url = f"{BASE_URL}/me/player/currently-playing"
-            resp = requests.get(url, headers={"Authorization": f"Bearer {token.get('user-read-currently-playing')}"})
+            try:
+                resp = requests.get(url, headers={"Authorization": f"Bearer {token.get('user-read-currently-playing')}"})
+            except:
+                logger.info("Session Expired, reinitializing...")
+                parsing_index = config.get('active_account_number')
+                spotify_re_init_session(account_pool[parsing_index])
+                token = account_pool[parsing_index]['login']['session']
+                continue
             if resp.status_code == 200:
                 data = resp.json()
                 if data['currently_playing_type'] == 'track':
@@ -70,7 +77,7 @@ class MirrorSpotifyPlayback(QObject):
                                 else:
                                     continue
                                 token = get_account_token('spotify')
-                                playlist_name, playlist_by = spotify_get_playlist_data(token.get("user-read-email"), playlist_id)
+                                playlist_name, playlist_by = spotify_get_playlist_data(token, playlist_id)
                                 parent_category = 'playlist'
                             elif data['context'].get('type') == 'collection':
                                 playlist_name = 'Liked Songs'
