@@ -16,7 +16,7 @@ from .api.deezer import deezer_get_track_metadata, get_song_info_from_deezer_web
 from .api.qobuz import qobuz_get_track_metadata, qobuz_get_file_url
 from .api.soundcloud import soundcloud_get_track_metadata
 from .api.spotify import spotify_get_track_metadata, spotify_get_podcast_episode_metadata, spotify_get_lyrics
-from .api.tidal import tidal_get_track_metadata, tidal_get_lyrics, tidal_get_file_url
+from .api.tidal import tidal_get_track_metadata, tidal_get_lyrics, tidal_get_mpd_data
 from .api.youtube_music import youtube_music_get_track_metadata
 from .api.crunchyroll import crunchyroll_get_episode_metadata, crunchyroll_get_decryption_key, crunchyroll_get_mpd_info, crunchyroll_close_stream
 from .api.generic import generic_get_track_metadata
@@ -386,9 +386,11 @@ class DownloadWorker(QObject):
                                 self.progress.emit(item, self.tr("Failed"), 0)
                             self.readd_item_to_download_queue(item)
 
-                    elif item_service in ("soundcloud", "youtube_music"):
+                    elif item_service in ("soundcloud", "tidal", "youtube_music"):
                         item_url = item_metadata['item_url']
                         ydl_opts = {}
+                        # Necessary for tidal
+                        mpd_file_path = temp_file_path + "mpd"
                         if item_service == "soundcloud":
                             if token['oauth_token']:
                                 # Bitrate and format extracted later in the function as not all soundcloud songs have m4a available
@@ -399,6 +401,19 @@ class DownloadWorker(QObject):
                                 default_format = ".mp3"
                                 bitrate = "128k"
                                 ydl_opts['format'] = 'bestaudio[ext=mp3]'
+                        elif item_service == "tidal":
+                            default_format = '.flac'
+                            bitrate = "1411k"
+                            mpd_data = tidal_get_mpd_data(token, item_id)
+                            with open(mpd_file_path, 'wb') as file:
+                                file.write(mpd_data.encode('utf-8'))
+                            if os.name == 'nt':
+                                item_url = f"file:///{mpd_file_path}"
+                            else:
+                                item_url = f"file://{mpd_file_path}"
+                            ydl_opts['enable_file_urls'] = True
+                            ydl_opts['fixup'] = 'never'
+                            ydl_opts['allowed_extractors'] = ['generic']
                         elif item_service == "youtube_music":
                             default_format = '.m4a'
                             bitrate = "128k"
@@ -416,9 +431,11 @@ class DownloadWorker(QObject):
                                 bitrate = f"{info_dict.get('abr')}k"
                                 default_format = f".{info_dict.get('audio_ext')}"
                             video.download(item_url)
+                        if os.path.exists(mpd_file_path):
+                            os.remove(mpd_file_path)
 
-                    elif item_service in ("bandcamp", "qobuz", "tidal"):
-                        if item_service in ("qobuz", "tidal"):
+                    elif item_service in ("bandcamp", "qobuz"):
+                        if item_service == "qobuz":
                             default_format = '.flac'
                             bitrate = "1411k"
                             file_url = globals()[f"{item_service}_get_file_url"](token, item_id)

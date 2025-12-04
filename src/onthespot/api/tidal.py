@@ -8,8 +8,8 @@ from ..runtimedata import get_logger, account_pool
 from ..utils import make_call, conv_list_format
 
 logger = get_logger("api.tidal")
-CLIENT_ID = b64decode("elU0WEhWVmtjMnREUG80dA==").decode("iso-8859-1")
-CLIENT_SECRET = b64decode("VkpLaERGcUpQcXZzUFZOQlY2dWtYVEptd2x2YnR0UDd3bE1scmM3MnNlND0=").decode("iso-8859-1")
+CLIENT_ID = b64decode("N203QXAwSkM5ajFjT00zbg==").decode("iso-8859-1")
+CLIENT_SECRET = b64decode("dlJBZEExMDh0bHZrSnBUc0daUzhyR1o3eFRsYkowcWFaMks5c2FFenNnWT0=").decode("iso-8859-1")
 AUTH = (CLIENT_ID, CLIENT_SECRET)
 AUTH_URL = "https://auth.tidal.com/v1/oauth2"
 BASE_URL = "https://api.tidal.com/v1"
@@ -18,7 +18,6 @@ BASEV2_URL = "https://openapi.tidal.com/v2"
 
 def tidal_add_account_pt1():
     data = {}
-
     data["client_id"] = CLIENT_ID
     data["scope"] = "r_usr+w_usr+w_sub"
     response = requests.post(f"{AUTH_URL}/device_authorization", data=data)
@@ -342,7 +341,7 @@ def tidal_get_lyrics(token, item_id, item_type, metadata, filepath):
         return False
 
 
-def tidal_get_file_url(token, item_id):
+def tidal_get_mpd_data(token, item_id):
     headers = {}
     headers["Authorization"] = f"Bearer {token['access_token']}"
 
@@ -351,11 +350,8 @@ def tidal_get_file_url(token, item_id):
     params["playbackmode"] = "STREAM"
     params["assetpresentation"] = "FULL"
 
-    playback_info = make_call(f"{BASE_URL}/tracks/{item_id}/playbackinfopostpaywall", params=params, headers=headers, skip_cache=True)
-
-    manifest = json.loads(b64decode(playback_info["manifest"]).decode("utf-8"))
-    flac_url = manifest["urls"][0]
-    return flac_url
+    playback_info = make_call(f"{BASE_URL}/tracks/{item_id}/playbackinfopostpaywall", params=params, headers=headers, skip_cache=False)
+    return b64decode(playback_info["manifest"]).decode("utf-8")
 
 
 def tidal_get_artist_album_ids(token, artist_id):
