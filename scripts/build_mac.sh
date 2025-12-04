@@ -17,20 +17,24 @@ venv/bin/pip install -r requirements.txt
 
 
 echo " => Build FFMPEG (Optional)"
-FFBIN="--add-binary=dist/ffmpeg:onthespot/bin/ffmpeg"
-if ! [ -f "dist/ffmpeg" ]; then
-    curl -L -o build/ffmpeg.zip https://evermeet.cx/ffmpeg/ffmpeg-7.1.zip
-    unzip build/ffmpeg.zip -d dist
-#    cd build
-#    curl https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz -o ffmpeg.tar.xz
-#    tar xf ffmpeg.tar.xz
-#    cd ffmpeg-*
-#    ./configure --enable-small --disable-ffplay --disable-ffprobe --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages
-#    make
-#    cp ffmpeg ../../dist
-#    cd ../..
+# Only building with ffmpeg binary for x86_64 macs, this
+# script will likely need to be revised to compile ffmpeg
+# from src to support both.
+if uname -m | grep -q x86_64; then
+	FFBIN="--add-binary=dist/ffmpeg:onthespot/bin/ffmpeg"
+	if ! [ -f "dist/ffmpeg" ]; then
+    	curl -L -o build/ffmpeg.zip https://evermeet.cx/ffmpeg/ffmpeg-7.1.zip
+    	unzip build/ffmpeg.zip -d dist
+	#    cd build
+	#    curl https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz -o ffmpeg.tar.xz
+	#    tar xf ffmpeg.tar.xz
+	#    cd ffmpeg-*
+	#    ./configure --enable-small --disable-ffplay --disable-ffprobe --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages
+	#    make
+	#    cp ffmpeg ../../dist
+	#    cd ../..
+	fi
 fi
-
 
 echo " => Running PyInstaller to create .app package..."
 pyinstaller --windowed \
