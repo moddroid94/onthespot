@@ -169,6 +169,7 @@ class MainWindow(QMainWindow):
         self.btn_search.clicked.connect(self.fill_search_table)
 
         self.login_service.currentIndexChanged.connect(self.set_login_fields)
+        self.language.currentIndexChanged.connect(self.language_change)
 
         self.btn_save_config.clicked.connect(self.update_config)
         self.btn_reset_config.clicked.connect(self.reset_app_config)
@@ -253,6 +254,11 @@ class MainWindow(QMainWindow):
             self.tbl_dl_progress.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
 
         return True
+
+
+    def language_change(self):
+        config.save()
+        self.show_popup_dialog(self.tr("The application's language has been changed, please restart the app."))
 
 
     def reset_app_config(self):

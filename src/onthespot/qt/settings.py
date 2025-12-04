@@ -36,7 +36,8 @@ def load_config(self):
 
     self.language.insertItem(0, self.get_icon('en_US'), "English")
     self.language.insertItem(1, self.get_icon('de_DE'), "Deutsch")
-    self.language.insertItem(2, self.get_icon('pt_PT'), "Português")
+    self.language.insertItem(2, self.get_icon('ja_JP'), "日本語")
+    self.language.insertItem(3, self.get_icon('pt_PT'), "Português")
 
     self.login_service.insertItem(0, "Audio")
     self.login_service.insertItem(1, self.get_icon('apple_music'), "Apple Music")
@@ -227,7 +228,7 @@ def load_config(self):
 
 def save_config(self):
     # General Settings
-    config.set('language', self.language.currentText())
+    config.set('language_index', self.language.currentIndex())
     config.set('explicit_label', self.explicit_label.text())
     config.set('download_copy_btn', self.download_copy_btn.isChecked())
     config.set('download_open_btn', self.download_open_btn.isChecked())

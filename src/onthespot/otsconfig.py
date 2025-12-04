@@ -368,6 +368,8 @@ class Config:
         elif self.get("language_index") == 1:
             self.set("language", "de_DE")
         elif self.get("language_index") == 2:
+            self.set("language", "ja_JP")
+        elif self.get("language_index") == 3:
             self.set("language", "pt_PT")
         else:
             print(f'Unknown language index: {self.get("language_index")}')
