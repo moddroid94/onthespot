@@ -20,7 +20,7 @@ echo " => Build FFMPEG (Optional)"
 
 FFBIN="--add-binary=dist/ffmpeg:onthespot/bin/ffmpeg"
 if ! [ -f "dist/ffmpeg" ]; then
-	curl -s https://raw.githubusercontent.com/markus-perl/ffmpeg-build-script/master/web-install.sh?v1
+	bash <(curl -s "https://raw.githubusercontent.com/markus-perl/ffmpeg-build-script/master/web-install.sh?v1")
 	mv ffmpeg-build/app/workspace/bin/ffmpeg dist/ffmpeg
 #    cd build
 #    curl https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz -o ffmpeg.tar.xz
