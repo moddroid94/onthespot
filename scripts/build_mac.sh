@@ -19,24 +19,16 @@ venv/bin/pip install -r requirements.txt
 
 echo " => Build FFMPEG (Optional)"
 
-FFBIN="--add-binary=dist/ffmpeg:onthespot/bin/ffmpeg"
-if ! [ -f "dist/ffmpeg" ]; then
-	curl -L -o build/ffmpeg.zip https://github.com/markus-perl/ffmpeg-build-script/archive/refs/heads/master.zip
-    unzip build/ffmpeg.zip -d builder
-	cd builder/ffmpeg-build-script
-	./build-ffmpeg --build
+curl -L -o build/ffmpeg.zip https://github.com/markus-perl/ffmpeg-build-script/archive/refs/heads/master.zip
+unzip build/ffmpeg.zip -d builder
+cd builder/ffmpeg-build-script-master
+./build-ffmpeg --build --skip-install
 
-	mv app/workspace/bin/ffmpeg dist/ffmpeg
-	
-#    cd build
-#    curl https://ffmpeg.org/releases/ffmpeg-7.1.1.tar.xz -o ffmpeg.tar.xz
-#    tar xf ffmpeg.tar.xz
-#    cd ffmpeg-*
-#    ./configure --enable-small --disable-ffplay --disable-ffprobe --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages
-#    make
-#    cp ffmpeg ../../dist
-#    cd ../..
-fi
+mv app/workspace/bin/ffmpeg ../../dist/ffmpeg
+
+FFBIN="--add-binary=dist/ffmpeg:onthespot/bin/ffmpeg"
+
+
 
 echo " => Running PyInstaller to create .app package..."
 pyinstaller --windowed \
