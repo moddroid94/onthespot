@@ -38,7 +38,7 @@ else
     cd builder/ffmpeg-build-script-master
     ./build-ffmpeg --build --skip-install
     
-    cp app/workspace/bin/ffmpeg ../../dist/ffmpeg
+    cp /workspace/bin/ffmpeg ../../dist/ffmpeg
 
     cd ../..
 fi
